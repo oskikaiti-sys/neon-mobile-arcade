@@ -153,12 +153,12 @@ class ArcadeAudio {
 window.ArcadeAudio=ArcadeAudio;
 })();
 
-</script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-songbook.js"></script><script>
+</script><script src="breakout-skill-vfx.js"></script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-songbook.js"></script><script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),C=$('field'),g=C.getContext('2d'),W=360,H=540;
 const colors=['#f27aaf','#ffb272','#ffe17b','#5ee8b9','#6dd4ff','#aa91ff','#da8aff'];
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),rnd=(a,b)=>a+Math.random()*(b-a);
-const fx=new ArcadeAudio('breakout');
+const fx=new ArcadeAudio('breakout'),vfx=new ArcadeSkillVFX();
 const gates={x:180,y:275,r:23};
 const bumpers=[{x:73,y:371,r:18},{x:287,y:371,r:18}];
 const COLS=8,ROWS=6,MARGIN=11,GAP=4,BW=(W-MARGIN*2-GAP*(COLS-1))/COLS,BH=18;
@@ -182,12 +182,28 @@ function spell(kind){
  const a=names[kind];return a?trans(a[0],a[1],a[2]):'';
 }
 function applyTheme(){document.body.classList.toggle('touhou-mode',isTouhouMode())}
-function resetSong(){songbook?.reset();melodyPulse=0;drops.length=0}
+function resetSong(){songbook?.reset();melodyPulse=0;drops.length=0;vfx.clear()}
 function melodyMiss(d){songbook?.miss(d);melodyPulse=.1}
-function sonicBurst(){const x=paddle.x,y=paddle.y-32;laser=Math.max(laser,8);laserClock=0;shield=Math.min(3,shield+1);energy=Math.min(100,energy+22);for(let i=0;i<16;i++){const a=Math.PI*(.9+i/15*1.2);if(shards.length<MAX_SHARDS)shards.push({x,y,vx:Math.cos(a)*110,vy:-Math.abs(Math.sin(a)*130),trail:[],life:4})}for(const a of [-.42,.42])if(balls.length<11)spawnBall(x,y,Math.sin(a)*270,-Math.cos(a)*320);ring(x,y,'#ffe9b5',22);ring(W/2,250,'#8de8ff',26);burst(x,y,'#f3bbff',58);shake=10;flash=.36;text(W/2,308,trans('♪ SONIC SYMPHONY!','♪ 星河奏鸣！','♪ 星のシンフォニー！'),'#ffe7ad',22)}
+function sonicBurst(){const x=paddle.x,y=paddle.y-32;castSkill(isTouhouMode()?'heaven':'sonic',W/2,252);laser=Math.max(laser,8);laserClock=0;shield=Math.min(3,shield+1);energy=Math.min(100,energy+22);for(let i=0;i<16;i++){const a=Math.PI*(.9+i/15*1.2);if(shards.length<MAX_SHARDS)shards.push({x,y,vx:Math.cos(a)*110,vy:-Math.abs(Math.sin(a)*130),trail:[],life:4})}for(const a of [-.42,.42])if(balls.length<11)spawnBall(x,y,Math.sin(a)*270,-Math.cos(a)*320);ring(x,y,'#ffe9b5',22);ring(W/2,250,'#8de8ff',26);burst(x,y,'#f3bbff',58);shake=10;flash=.36;}
 function text(x,y,t,c='#c5f8ff',size=17){notices.push({x,y,t,c,size,age:0});if(notices.length>12)notices.shift()}
 function burst(x,y,c,n=12){for(let i=0;i<n;i++){let a=rnd(0,Math.PI*2),v=rnd(35,160);particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,age:0,life:rnd(.25,.75),c})}if(particles.length>MAX_PARTICLES)particles.splice(0,particles.length-MAX_PARTICLES)}
 function ring(x,y,color,r=4){rings.push({x,y,color,r,age:0,life:.48});if(rings.length>25)rings.shift()}
+function castSkill(kind,x=W/2,y=258){
+ const touhou=isTouhouMode();
+ const words={
+  seal:['MEASURE PERFECT','小节完成','小節クリア'],
+  barrier:['PORTAL BURST','时空轰炸','ポータルバースト'],
+  binding:['ORBITAL CANNON','轨道炮扫射','軌道砲掃射'],
+  heaven:['SONG COMPLETE','全曲完成','全曲完成'],
+  sonic:['SONIC SYMPHONY','星河奏鸣','星のシンフォニー'],
+  fever:['FEVER MODE','自动 FEVER','フィーバー'],
+  orb:['WINGMEN DEPLOYED','僚机出击','僚機出撃']
+ };
+ const map={seal:'seal',barrier:'barrier',binding:'binding',heaven:'heaven',sonic:'heaven',fever:'heaven',orb:'orb'};
+ const label=kind==='bomb'?'':touhou?spell(map[kind]||'seal'):trans(...(words[kind]||words.sonic));
+ vfx.cast(kind,x,y,touhou,label);
+ if(kind!=='bomb'){ring(x,y,touhou?'#ffb4d7':'#8ae8ff',17);burst(x,y,touhou?'#ffd9ec':'#a8edff',kind==='heaven'?17:8)}
+}
 function setOverlay(title,desc,label){$('overlayTitle').textContent=title;$('overlayDesc').innerHTML=desc;$('start').textContent=label;$('overlay').hidden=false}
 function updateUI(){
  $('kills').textContent=kills;$('fleet').textContent=fleet;$('balls').textContent=balls.length||'·';$('lives').textContent='♥'.repeat(lives)||'—';
@@ -219,13 +235,13 @@ function pause(){if(state==='paused'){state=resumeState;$('overlay').hidden=true
 function over(){state='over';fx.setActive(false);audio('lose');setOverlay('暂时休整',`累计击碎 <b style="color:#76ecff">${kills}</b> 块砖<br>舰队进化至 LV.${fleet}`,'↻ 再次出击');updateUI()}
 function unlock(){
  const names=['','🛸 侦察僚机入队！','🛸 双舰护航！','🚀 追踪导弹解锁！','☄️ 轨道主炮已上线！'];
- while(fleet<4&&kills>=thresholds[fleet+1]){fleet++;text(W/2,300,isTouhouMode()?'☯ '+spell('orb')+' ×'+Math.min(fleet,2):names[fleet],'#c6faff',isTouhouMode()?16:21);ring(paddle.x,paddle.y-27,'#9deeff',25);burst(paddle.x,paddle.y-24,'#75dfff',26);shake=6;flash=.15;audio('wave');if(fleet===4)orbitalClock=1.5}
+ while(fleet<4&&kills>=thresholds[fleet+1]){fleet++;castSkill('orb',paddle.x,paddle.y-27);ring(paddle.x,paddle.y-27,'#9deeff',25);burst(paddle.x,paddle.y-24,'#75dfff',26);shake=6;flash=.15;audio('wave');if(fleet===4)orbitalClock=1.5}
 }
 function destroy(b,chain=false){
  if(!b.alive)return;b.alive=false;kills++;combo++;energy=clamp(energy+(rage>0?1:3.1),0,100);
  const x=b.x+b.w/2,y=b.y+b.h/2;burst(x,y,b.color,b.type==='bomb'?17:7);ring(x,y,b.color,3);shake=Math.min(7,shake+.42);
  if(b.type==='bomb'){
-   text(x,y,'✹','#ffadce',18);audio('bomb');
+   castSkill('bomb',x,y);audio('bomb');
    for(const q of bricks)if(q.alive&&Math.hypot(q.x+q.w/2-x,q.y+q.h/2-y)<52){q.alive=false;kills++;burst(q.x+q.w/2,q.y+q.h/2,q.color,5)}
  }else if(!chain)audio('brick');
  unlock();
@@ -236,9 +252,9 @@ function collect(d){
 }
 function portalEnter(ball){
  if(portalClock>0||ball.gateLock>0)return;
- portalClock=1.0;portalFx=.75;flash=.13;shake=8;
+ portalClock=1.0;portalFx=.75;flash=.13;shake=8;castSkill('barrier',gates.x,gates.y);
  ring(gates.x,gates.y,'#b7a1ff',20);burst(gates.x,gates.y,'#bda2ff',28);
-  text(W/2,315,isTouhouMode()?spell('barrier'):'🌀 时空门：全域轰炸！','#ffd8ff',isTouhouMode()?14:19);audio('fever');
+  audio('fever');
  // Ball is transported to the upper brick zone; preserve continuous gameplay.
  ball.x=clamp(gates.x+rnd(-70,70),20,W-20);ball.y=61;
  ball.vx=rnd(-220,220);ball.vy=320;ball.gateLock=1.8;
@@ -265,9 +281,9 @@ function fleetFire(dt){
  if(fleet>=4){orbitalClock-=dt;if(orbitalClock<=0){orbitalClock=6.2;
   const grouped=new Map();for(const b of bricks)if(b.alive)grouped.set(b.r,(grouped.get(b.r)||0)+1);
   let row=null,amount=0;for(const [r,n] of grouped)if(n>amount){row=r;amount=n}
-  if(row!==null){orbitalY=65+row*26+BH/2;orbitalFx=.5;
+  if(row!==null){orbitalY=65+row*26+BH/2;orbitalFx=.5;castSkill('binding',W/2,orbitalY);
    for(const b of bricks)if(b.alive&&b.r===row)destroy(b,true);
-   text(W/2,orbitalY+31,isTouhouMode()?spell('binding'):'☄️ 轨道主炮扫射！','#ffd8fb',isTouhouMode()?14:21);burst(W/2,orbitalY,'#ffd4f9',22);shake=10;flash=.3;audio('bomb');
+   burst(W/2,orbitalY,'#ffd4f9',22);shake=10;flash=.3;audio('bomb');
   }
  }}
 }
@@ -307,10 +323,11 @@ function tick(dt){
  for(let i=notices.length-1;i>=0;i--){notices[i].age+=dt;notices[i].y-=28*dt;if(notices[i].age>1.15)notices.splice(i,1)}
  shake=Math.max(0,shake-18*dt);flash=Math.max(0,flash-.7*dt);portalFx=Math.max(0,portalFx-dt);orbitalFx=Math.max(0,orbitalFx-dt);
  if(state!=='playing')return;
+ vfx.update(dt);
  // Music notes arrive at exact score beats, regardless of destroyed bricks.
  songbook?.update(dt,entry=>{const x=isTouhouMode()?clamp(entry.laneX??W/2,34,W-34):clamp(W/2+Math.sin(entry.seq*1.35)*110,30,W-30);drops.push({...entry,x,y:90,age:0})});
  portalClock=Math.max(0,portalClock-dt);
- if(rage>0)rage=Math.max(0,rage-dt);if(energy>=100&&rage<=0){energy=0;rage=8;laserClock=0;text(W/2,332,isTouhouMode()?spell('heaven'):'⚡ 自动 FEVER！','#ffa8db',19);audio('fever')}
+ if(rage>0)rage=Math.max(0,rage-dt);if(energy>=100&&rage<=0){energy=0;rage=8;laserClock=0;castSkill('fever',W/2,252);audio('fever')}
  if(wide>0){wide-=dt;if(wide<=0)paddle.w=88}
  if(laser>0)laser-=dt;
  paddle.target=clamp(paddle.target,paddle.w/2+4,W-paddle.w/2-4);paddle.x=paddle.target;
@@ -426,6 +443,7 @@ function draw(){
   g.fillStyle='#0d0d2a';g.beginPath();g.arc(0,0,11,0,Math.PI*2);g.fill();g.restore();
   g.fillStyle='#d1bfff';g.font='bold 11px system-ui';g.textAlign='center';g.fillText('🌀 时空门',gates.x,gates.y+47);
  }
+ vfx.draw(g);
  for(const b of bumpers){g.save();g.shadowColor='#ffba79';g.shadowBlur=16;g.fillStyle='#583c48';g.beginPath();g.arc(b.x,b.y,b.r+4,0,Math.PI*2);g.fill();g.strokeStyle='#ffc987';g.lineWidth=4;g.beginPath();g.arc(b.x,b.y,b.r,0,Math.PI*2);g.stroke();g.fillStyle='#ffecb0';g.beginPath();g.arc(b.x,b.y,6,0,Math.PI*2);g.fill();g.restore()}
  for(const d of drops){const note=d,col=d.color||'#79eaff';g.save();g.shadowColor=col;g.shadowBlur=18;g.translate(d.x,d.y);g.rotate(Math.sin(d.age*7)*.08);g.fillStyle=col;g.beginPath();g.arc(0,0,14,0,Math.PI*2);g.fill();g.strokeStyle='#ffffffb5';g.lineWidth=1.5;g.beginPath();g.arc(0,0,17+Math.sin(d.age*8)*2,0,Math.PI*2);g.stroke();g.shadowBlur=0;g.fillStyle='#101733';g.font='900 17px system-ui';g.textAlign='center';g.fillText('♪',0,6);g.fillStyle='#fff';g.font='900 10px system-ui';g.fillText(note.label||'C4',0,29);g.restore()}
  if(melodyPulse>0){g.save();g.globalAlpha=melodyPulse*.8;g.strokeStyle='#fff0c1';g.shadowColor='#e5b0ff';g.shadowBlur=17;g.lineWidth=3;g.beginPath();g.arc(paddle.x,paddle.y,18+(1-melodyPulse)*38,0,Math.PI*2);g.stroke();g.restore()}
@@ -436,9 +454,11 @@ function draw(){
  for(const r of rings){let k=r.age/r.life;g.save();g.globalAlpha=.7*(1-k);g.strokeStyle=r.color;g.lineWidth=2.5*(1-k);g.shadowColor=r.color;g.shadowBlur=12;g.beginPath();g.arc(r.x,r.y,r.r+29*k,0,Math.PI*2);g.stroke();g.restore()}
  for(const pa of particles){g.globalAlpha=Math.max(0,1-pa.age/pa.life);g.fillStyle=pa.c;g.fillRect(pa.x,pa.y,3,3)}g.globalAlpha=1;
  if(shield>0){g.save();g.strokeStyle='#ffdc8b';g.lineWidth=3;g.shadowColor='#ffbf6b';g.shadowBlur=15;g.beginPath();g.moveTo(10,H-18);g.lineTo(W-10,H-18);g.stroke();g.restore()}
+ if(rage>0||laser>0){g.save();g.globalAlpha=.30+.1*Math.sin(clock*12);g.strokeStyle=touhou?'#ffb4d4':'#8aeaff';g.lineWidth=2.5;g.shadowColor=g.strokeStyle;g.shadowBlur=13;g.beginPath();g.ellipse(paddle.x,paddle.y+7,paddle.w*.62,16,0,0,Math.PI*2);g.stroke();g.restore()}
  g.save();g.shadowColor=rage>0?'#ff89d1':'#76efff';g.shadowBlur=20;let grad=g.createLinearGradient(0,paddle.y,0,paddle.y+14);grad.addColorStop(0,'#eaffff');grad.addColorStop(1,rage>0?'#ff70b9':'#49cef2');rounded(paddle.x-paddle.w/2,paddle.y,paddle.w,13,7,grad);g.restore();
  for(const [i,s] of fleetPositions().entries()){if(touhou){drawYinYang(s,i);continue}g.save();g.translate(s.x,s.y+Math.sin(clock*8+i)*2);g.shadowColor='#7af6ff';g.shadowBlur=15;g.fillStyle='#69dfff';g.beginPath();g.moveTo(0,-13);g.lineTo(11,6);g.lineTo(3,3);g.lineTo(0,9);g.lineTo(-3,3);g.lineTo(-11,6);g.closePath();g.fill();g.shadowBlur=0;g.fillStyle='#fff';g.fillRect(-2,-3,4,5);g.fillStyle='#ffac77';g.fillRect(-5,7,3,5);g.fillRect(2,7,3,5);g.restore()}
  for(const n of notices){g.save();g.globalAlpha=Math.min(1,(1-n.age)*1.5);g.fillStyle=n.c;g.shadowColor=n.c;g.shadowBlur=13;g.font=`900 ${n.size}px system-ui`;g.textAlign='center';g.fillText(n.t,n.x,n.y);g.restore()}
+ vfx.drawBanners(g);
  if(flash>0){g.fillStyle=`rgba(255,185,230,${flash*.4})`;g.fillRect(0,35,W,H-35)}g.restore();
 }
 let last=0,raf;
@@ -451,6 +471,6 @@ wrap.addEventListener('pointerup',e=>{if(e.pointerId===active)active=null});wrap
 $('start').addEventListener('click',()=>state==='paused'?pause():reset());$('pause').addEventListener('click',pause);$('reset').addEventListener('click',reset);
 $('sound').addEventListener('click',()=>{const m=fx.toggle();$('sound').textContent=['♫ 关','♫ 音乐','♪ 音效'][m];$('sound').classList.toggle('active',m>0);if(m)audio('power')});
 document.addEventListener('keydown',e=>{if(e.target?.tagName==='BUTTON')return;if(e.code==='ArrowLeft'||e.code==='KeyA'){paddle.target-=26;e.preventDefault()}else if(e.code==='ArrowRight'||e.code==='KeyD'){paddle.target+=26;e.preventDefault()}else if(e.code==='Space'){pause();e.preventDefault()}});
-songbook=window.NeonSongbook.create(fx,{onBar(){energy=Math.min(100,energy+12);shield=Math.min(3,shield+1);ring(W/2,240,'#aaf6ff',25);burst(W/2,260,'#9bd6ff',25);for(let i=0;i<5;i++){if(shards.length<MAX_SHARDS)shards.push({x:paddle.x,y:paddle.y-40,vx:(i-2)*40,vy:-160,trail:[],life:4})}text(W/2,335,isTouhouMode()?spell('seal'):trans('♪ BAR COMPLETE!','♪ 小节完成！','♪ 小節クリア！'),'#e2faff',isTouhouMode()?15:18);},onSong(){sonicBurst();text(W/2,300,isTouhouMode()?spell('heaven'):trans('♪ SONG COMPLETE!','♪ 全曲完成！','♪ 全曲完成！'),'#ffe9a0',isTouhouMode()?20:23)},onChange(){drops=[];fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;fx.touhouScore=isTouhouMode();fx.update();applyTheme();updateUI();}});fx.touhouScore=isTouhouMode();fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause()});applyTheme();updateUI();raf=requestAnimationFrame(frame);
+songbook=window.NeonSongbook.create(fx,{onBar(){energy=Math.min(100,energy+12);shield=Math.min(3,shield+1);castSkill('seal',W/2,251);ring(W/2,240,'#aaf6ff',25);burst(W/2,260,'#9bd6ff',13);for(let i=0;i<5;i++){if(shards.length<MAX_SHARDS)shards.push({x:paddle.x,y:paddle.y-40,vx:(i-2)*40,vy:-160,trail:[],life:4})}},onSong(){sonicBurst()},onChange(){drops=[];vfx.clear();fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;fx.touhouScore=isTouhouMode();fx.update();applyTheme();updateUI();}});fx.touhouScore=isTouhouMode();fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause()});applyTheme();updateUI();raf=requestAnimationFrame(frame);
 })();
 </script><script src="locale.js"></script><script src="breakout-language.js"></script></body></html>
