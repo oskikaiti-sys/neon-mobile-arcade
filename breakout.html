@@ -331,14 +331,34 @@ function draw(){
  g.fillStyle='#9fcce0';g.font='bold 10px system-ui';g.fillText('∞ CONTINUOUS ARENA',11,22);g.textAlign='right';g.fillStyle='#ffe0aa';g.fillText('FLEET LV.'+fleet,W-11,22);g.textAlign='left';
  g.save();if(shake)g.translate(rnd(-shake,shake),rnd(-shake,shake));
  for(const b of bricks)if(b.alive){if(touhou){drawKedama(b);continue}g.save();g.shadowBlur=6;g.shadowColor=b.color;rounded(b.x,b.y,b.w,b.h,5,b.type==='bomb'?'#ff579b':b.type==='armor'?'#adb6f3':b.color);g.shadowBlur=0;rounded(b.x+3,b.y+2,b.w-6,3,2,'#ffffff55');if(b.type==='bomb'||b.type==='power'){g.fillStyle='#fff';g.font='bold 12px system-ui';g.textAlign='center';g.fillText(b.type==='bomb'?'✸':'✦',b.x+b.w/2,b.y+13)}else if(b.type==='armor'){g.strokeStyle='#eff2ff';g.strokeRect(b.x+4,b.y+5,b.w-8,b.h-10)}g.restore()}
- // Pinball gate: visibly open and pulsating, with a labelled entry zone.
- const p=Math.sin(clock*4),R=gates.r+3+p*2;
- g.save();g.translate(gates.x,gates.y);g.shadowColor='#af8aff';g.shadowBlur=22;
- g.fillStyle='#2e195f';g.beginPath();g.arc(0,0,R+7,0,Math.PI*2);g.fill();
- g.lineWidth=5;g.strokeStyle=portalClock>0?'#ffc5fa':'#8dfaff';g.beginPath();g.arc(0,0,R,clock*1.8,clock*1.8+Math.PI*1.7);g.stroke();
- g.lineWidth=2.5;g.strokeStyle='#d8b9ff';g.beginPath();g.arc(0,0,15,-clock*3,-clock*3+Math.PI*1.4);g.stroke();
- g.fillStyle='#0d0d2a';g.beginPath();g.arc(0,0,11,0,Math.PI*2);g.fill();g.restore();
- g.fillStyle='#d1bfff';g.font='bold 11px system-ui';g.textAlign='center';g.fillText('🌀 时空门',gates.x,gates.y+47);
+ // Portal geometry is unchanged; Touhou mode shows an animated dimensional Sukima.
+ if(touhou){
+  const pulse=Math.sin(clock*3)*1.3,flare=portalClock>0?'#ffe9bb':'#bd80d8';
+  g.save();g.translate(gates.x,gates.y);g.shadowColor='#b56bd6';g.shadowBlur=15;
+  // Original Canvas artwork: layered purple folds, a dark fissure and moving eyes.
+  g.fillStyle='#663467';g.beginPath();g.moveTo(-44,-3);g.bezierCurveTo(-26,-27,25,-24,45,0);g.bezierCurveTo(25,-7,-22,-8,-44,-3);g.fill();
+  g.fillStyle='#4c285f';g.beginPath();g.moveTo(-44,4);g.bezierCurveTo(-23,28,28,29,45,0);g.bezierCurveTo(23,9,-25,13,-44,4);g.fill();
+  g.shadowBlur=7;g.fillStyle='#08050f';g.beginPath();g.moveTo(-39,0);g.bezierCurveTo(-20,-12-pulse,17,-14-pulse,39,0);g.bezierCurveTo(17,16+pulse,-20,14+pulse,-39,0);g.closePath();g.fill();
+  g.strokeStyle=flare;g.lineWidth=2;g.beginPath();g.moveTo(-39,0);g.bezierCurveTo(-19,-13-pulse,19,-13-pulse,39,0);g.stroke();
+  g.strokeStyle='#e9add9';g.lineWidth=1.5;g.beginPath();g.moveTo(-37,4);g.bezierCurveTo(-18,16+pulse,18,15+pulse,37,2);g.stroke();
+  for(let i=0;i<4;i++){
+   const x=-24+i*16,y=Math.sin(clock*1.7+i*.9)*2+(i%2?4:-2);
+   g.save();g.translate(x,y);g.rotate(Math.sin(clock+i)*.11);
+   g.fillStyle='#fff0c0';g.beginPath();g.ellipse(0,0,6.1,3.5,0,0,Math.PI*2);g.fill();
+   g.fillStyle='#b73a64';g.beginPath();g.ellipse(Math.sin(clock*.7+i)*.8,0,1.5,2.7,0,0,Math.PI*2);g.fill();g.restore();
+  }
+  g.shadowBlur=0;g.strokeStyle='#c888c7';g.lineWidth=1;g.beginPath();g.moveTo(-30,-19);g.lineTo(-35,-26);g.moveTo(28,18);g.lineTo(34,25);g.stroke();
+  g.restore();g.textAlign='center';g.fillStyle='#ffd6e9';g.font='bold 12px system-ui';
+  g.fillText(trans('GAP · SUKIMA','隙间','スキマ'),gates.x,gates.y+48);
+ }else{
+  const p=Math.sin(clock*4),R=gates.r+3+p*2;
+  g.save();g.translate(gates.x,gates.y);g.shadowColor='#af8aff';g.shadowBlur=22;
+  g.fillStyle='#2e195f';g.beginPath();g.arc(0,0,R+7,0,Math.PI*2);g.fill();
+  g.lineWidth=5;g.strokeStyle=portalClock>0?'#ffc5fa':'#8dfaff';g.beginPath();g.arc(0,0,R,clock*1.8,clock*1.8+Math.PI*1.7);g.stroke();
+  g.lineWidth=2.5;g.strokeStyle='#d8b9ff';g.beginPath();g.arc(0,0,15,-clock*3,-clock*3+Math.PI*1.4);g.stroke();
+  g.fillStyle='#0d0d2a';g.beginPath();g.arc(0,0,11,0,Math.PI*2);g.fill();g.restore();
+  g.fillStyle='#d1bfff';g.font='bold 11px system-ui';g.textAlign='center';g.fillText('🌀 时空门',gates.x,gates.y+47);
+ }
  for(const b of bumpers){g.save();g.shadowColor='#ffba79';g.shadowBlur=16;g.fillStyle='#583c48';g.beginPath();g.arc(b.x,b.y,b.r+4,0,Math.PI*2);g.fill();g.strokeStyle='#ffc987';g.lineWidth=4;g.beginPath();g.arc(b.x,b.y,b.r,0,Math.PI*2);g.stroke();g.fillStyle='#ffecb0';g.beginPath();g.arc(b.x,b.y,6,0,Math.PI*2);g.fill();g.restore()}
  for(const d of drops){const note=d,col=d.color||'#79eaff';g.save();g.shadowColor=col;g.shadowBlur=18;g.translate(d.x,d.y);g.rotate(Math.sin(d.age*7)*.08);g.fillStyle=col;g.beginPath();g.arc(0,0,14,0,Math.PI*2);g.fill();g.strokeStyle='#ffffffb5';g.lineWidth=1.5;g.beginPath();g.arc(0,0,17+Math.sin(d.age*8)*2,0,Math.PI*2);g.stroke();g.shadowBlur=0;g.fillStyle='#101733';g.font='900 17px system-ui';g.textAlign='center';g.fillText('♪',0,6);g.fillStyle='#fff';g.font='900 10px system-ui';g.fillText(note.label||'C4',0,29);g.restore()}
  if(melodyPulse>0){g.save();g.globalAlpha=melodyPulse*.8;g.strokeStyle='#fff0c1';g.shadowColor='#e5b0ff';g.shadowBlur=17;g.lineWidth=3;g.beginPath();g.arc(paddle.x,paddle.y,18+(1-melodyPulse)*38,0,Math.PI*2);g.stroke();g.restore()}
