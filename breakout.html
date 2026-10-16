@@ -18,7 +18,16 @@
 #sound.active{color:#ffe4f4;background:linear-gradient(110deg,#4d305b,#28496c);border-color:#a36ba1;box-shadow:0 0 17px #e35ba83f}
 #field-wrap{box-shadow:0 0 36px #2abdeb29,inset 0 0 22px #19bdeb11}.next{white-space:nowrap;font-size:11px;color:#d7f3ff;font-weight:800}.btn:focus-visible,.minor:focus-visible{outline:2px solid #7ff1ff;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.btn.ready{animation:none}.meter>div{transition:none}}
- .songbook{flex:none;display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,1.4fr) auto;gap:5px;align-items:center;color:#aeefff;font-size:10px}.songbook #songName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.songbook select{min-width:0;max-width:100%;background:#162942;color:#e8faff;border:1px solid #427394;border-radius:7px;padding:6px 3px;font-size:11px}.songbook small{grid-column:1/-1;text-align:center;color:#a0b9d3;font-size:10px}@media(max-height:680px){.songbook #songName,.songbook small{display:none}.songbook{grid-template-columns:1fr auto}}</style>
+ .songbook{flex:none;display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,1.4fr) auto;gap:5px;align-items:center;color:#aeefff;font-size:10px}.songbook #songName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.songbook select{min-width:0;max-width:100%;background:#162942;color:#e8faff;border:1px solid #427394;border-radius:7px;padding:6px 3px;font-size:11px}.songbook small{grid-column:1/-1;text-align:center;color:#a0b9d3;font-size:10px}@media(max-height:680px){.songbook #songName,.songbook small{display:none}.songbook{grid-template-columns:1fr auto}}
+.songbook #touhouNotice{grid-column:1/-1;text-align:center;font-size:9px;line-height:1.3;color:#ffe3e7;background:#3b1a34;border:1px solid #a14c73;border-radius:7px;padding:4px}
+.songbook #touhouNotice[hidden]{display:none}
+body.touhou-mode #app{background:radial-gradient(ellipse 100% 55% at 50% -8%,#67364f 0%,#31172e 43%,#120c22 96%)}
+body.touhou-mode #field-wrap{border-color:#be7293;box-shadow:0 0 29px #e65b8f30,inset 0 0 23px #bf6a8a1a}
+body.touhou-mode .songbook select{background:#3e1e36;border-color:#a96683}
+body.touhou-mode .charge .meter>div{background:linear-gradient(90deg,#ffebdc,#fb849f,#d54f74)}
+body.touhou-mode #rage{background:linear-gradient(100deg,#703353,#ac5067);font-size:clamp(9px,2.7vw,12px)}
+body.touhou-mode #fleetBadge{font-size:clamp(9px,2.75vw,11px);color:#ffe6ed}
+</style>
 </head>
 <body><main id="app">
 <header class="header"><div><div class="micro">MOBILE ARCADE · INFINITY</div><div class="title">BREAKOUT <em>INFINITY</em></div></div><button id="pause" class="minor">Ⅱ 暂停</button></header>
@@ -27,7 +36,7 @@
 <section class="charge"><strong id="fleetBadge">🛸 飞船尚未解锁</strong><div class="meter"><div id="meterFill"></div></div><span id="meterPct" class="pct">0/12</span></section>
 <nav class="controls"><div id="rage" class="btn rage" style="display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none">♪ LIVE MELODY</div><button id="sound" class="btn">♫ 关</button><button id="reset" class="btn">↻ 重开</button></nav>
 <div class="help">📱 在场地任意高度左右滑动 · 小球自动发射<br>♪ 接音符实时演奏 · 漏接即静音 · 完整小节奖励</div>
-<section class="songbook" aria-label="Song playlist"><span id="songName">Twinkle, Twinkle, Little Star</span><select id="songSelect" aria-label="Choose a song"><option value="twinkle">Twinkle, Twinkle, Little Star</option><option value="frere">Frère Jacques</option><option value="ode">Ode to Joy (Theme)</option></select><span id="songProgress">1/12</span><small id="songHint">♪ Collect notes in order</small></section></main>
+<section class="songbook" aria-label="Song playlist"><span id="songName">Twinkle, Twinkle, Little Star</span><select id="songSelect" aria-label="Choose a song"><option value="twinkle">Twinkle, Twinkle, Little Star</option><option value="frere">Frère Jacques</option><option value="ode">Ode to Joy (Theme)</option><option value="septette">Septette for the Dead Princess (Fan Arrangement)</option></select><span id="songProgress">1/12</span><small id="songHint">♪ Collect notes in order</small><div id="touhouNotice" role="note" hidden>Touhou Project fan work · Original music: ZUN / Team Shanghai Alice · Unofficial free game</div></section></main>
 <script>
 /* NEON ARCADE — lightweight original synthesized soundtrack and SFX.
    No external requests. Audio is opt-in to respect mobile autoplay rules. */
@@ -94,6 +103,8 @@ const thresholds=[0,12,28,52,80];
 const MAX_PARTICLES=210,MAX_SHOTS=70,MAX_SHARDS=28;
 function audio(k){fx.sound(k)}
 function trans(en,zh,ja){const v=window.ArcadeLang?.get?.()||'en';return v==='zh-CN'?zh:v==='ja'?ja:en}
+function isTouhouMode(){return songbook?.getState().song==='septette'}
+function applyTheme(){document.body.classList.toggle('touhou-mode',isTouhouMode())}
 function resetSong(){songbook?.reset();melodyPulse=0;drops.length=0}
 function melodyMiss(d){songbook?.miss(d);melodyPulse=.1}
 function sonicBurst(){const x=paddle.x,y=paddle.y-32;laser=Math.max(laser,8);laserClock=0;shield=Math.min(3,shield+1);energy=Math.min(100,energy+22);for(let i=0;i<16;i++){const a=Math.PI*(.9+i/15*1.2);if(shards.length<MAX_SHARDS)shards.push({x,y,vx:Math.cos(a)*110,vy:-Math.abs(Math.sin(a)*130),trail:[],life:4})}for(const a of [-.42,.42])if(balls.length<11)spawnBall(x,y,Math.sin(a)*270,-Math.cos(a)*320);ring(x,y,'#ffe9b5',22);ring(W/2,250,'#8de8ff',26);burst(x,y,'#f3bbff',58);shake=10;flash=.36;text(W/2,308,trans('♪ SONIC SYMPHONY!','♪ 星河奏鸣！','♪ 星のシンフォニー！'),'#ffe7ad',22)}
@@ -278,14 +289,38 @@ function tick(dt){
  updateUI();
 }
 function rounded(x,y,w,h,r,c){g.beginPath();g.roundRect(x,y,w,h,r);g.fillStyle=c;g.fill()}
+function drawKedama(b){
+ const x=b.x+b.w/2,y=b.y+b.h/2+1,r=Math.min(10,b.h*.54),phase=Math.sin(clock*2.5+b.r*1.8+b.c*.7)*.85;
+ g.save();g.translate(x,y+phase);g.shadowBlur=5;g.shadowColor=b.type==='bomb'?'#e66a98':'#dedcff';
+ // hand-drawn tufted round kedama enemies, fitted inside each brick's hitbox
+ g.fillStyle=b.type==='bomb'?'#f6c6d8':b.type==='armor'?'#dcd7ed':'#fbf7f3';
+ g.beginPath();for(let i=0;i<20;i++){const t=i*Math.PI/10,rr=i%2? r*.84:r*1.06;const px=Math.cos(t)*rr,py=Math.sin(t)*rr;if(i===0)g.moveTo(px,py);else g.lineTo(px,py)}g.closePath();g.fill();
+ g.shadowBlur=0;g.strokeStyle='#beb1c5';g.lineWidth=.65;g.stroke();
+ g.fillStyle='#513b5c';g.beginPath();g.arc(-3,-1,1.5,0,Math.PI*2);g.arc(3,-1,1.5,0,Math.PI*2);g.fill();
+ g.strokeStyle='#7c5677';g.lineWidth=1;g.beginPath();g.arc(0,1,2.0,.2,Math.PI-.2);g.stroke();
+ if(b.type==='bomb'){g.fillStyle='#d94e7b';g.beginPath();g.arc(0,-r*.76,2.4,0,Math.PI*2);g.fill()}
+ else if(b.type==='power'){g.fillStyle='#b274d4';g.fillRect(-1,-r*.8,2,3)}
+ if(b.type==='armor'){g.strokeStyle='#a27eae';g.lineWidth=1.4;g.beginPath();g.arc(0,0,r*.87,0,Math.PI*2);g.stroke()}
+ g.restore();
+}
+function drawYinYang(s,i){
+ const x=s.x,y=s.y+Math.sin(clock*6+i*1.8)*2,spin=clock*1.9+(i*Math.PI);
+ g.save();g.translate(x,y);g.rotate(spin);g.shadowColor='#ffb2c8';g.shadowBlur=14;
+ g.fillStyle='#fff9f4';g.beginPath();g.arc(0,0,13,0,Math.PI*2);g.fill();g.shadowBlur=0;
+ g.fillStyle='#d83b63';g.beginPath();g.arc(0,0,12,Math.PI/2,Math.PI*1.5);g.arc(0,-6,6,Math.PI*1.5,Math.PI*.5,true);g.arc(0,6,6,Math.PI*1.5,Math.PI*.5,false);g.closePath();g.fill();
+ g.fillStyle='#d83b63';g.beginPath();g.arc(0,-6,2.4,0,Math.PI*2);g.fill();
+ g.fillStyle='#fff9f4';g.beginPath();g.arc(0,6,2.4,0,Math.PI*2);g.fill();
+ g.strokeStyle='#fff1e9';g.lineWidth=1.4;g.beginPath();g.arc(0,0,15,0,Math.PI*2);g.stroke();
+ g.restore();
+}
 function draw(){
- g.clearRect(0,0,W,H);const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,rage>0?'#25112e':'#0f1e38');bg.addColorStop(1,'#081829');g.fillStyle=bg;g.fillRect(0,0,W,H);
+ const touhou=isTouhouMode();g.clearRect(0,0,W,H);const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,touhou?(rage>0?'#531e3d':'#35172f'):(rage>0?'#25112e':'#0f1e38'));bg.addColorStop(1,touhou?'#140d26':'#081829');g.fillStyle=bg;g.fillRect(0,0,W,H);
  for(let i=0;i<36;i++){let x=(i*101+13)%W,y=(i*157+clock*(12+i%5*3))%H;g.globalAlpha=.13+.18*Math.sin(clock*1.3+i);g.fillStyle=i%3?'#b9e7ff':'#f9a2de';g.fillRect(x,y,1.5,1.5)}g.globalAlpha=1;
  g.strokeStyle='#ffffff09';g.lineWidth=1;for(let x=0;x<W;x+=24){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}
  for(let y=0;y<H;y+=24){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}
  g.fillStyle='#9fcce0';g.font='bold 10px system-ui';g.fillText('∞ CONTINUOUS ARENA',11,22);g.textAlign='right';g.fillStyle='#ffe0aa';g.fillText('FLEET LV.'+fleet,W-11,22);g.textAlign='left';
  g.save();if(shake)g.translate(rnd(-shake,shake),rnd(-shake,shake));
- for(const b of bricks)if(b.alive){g.save();g.shadowBlur=6;g.shadowColor=b.color;rounded(b.x,b.y,b.w,b.h,5,b.type==='bomb'?'#ff579b':b.type==='armor'?'#adb6f3':b.color);g.shadowBlur=0;rounded(b.x+3,b.y+2,b.w-6,3,2,'#ffffff55');if(b.type==='bomb'||b.type==='power'){g.fillStyle='#fff';g.font='bold 12px system-ui';g.textAlign='center';g.fillText(b.type==='bomb'?'✸':'✦',b.x+b.w/2,b.y+13)}else if(b.type==='armor'){g.strokeStyle='#eff2ff';g.strokeRect(b.x+4,b.y+5,b.w-8,b.h-10)}g.restore()}
+ for(const b of bricks)if(b.alive){if(touhou){drawKedama(b);continue}g.save();g.shadowBlur=6;g.shadowColor=b.color;rounded(b.x,b.y,b.w,b.h,5,b.type==='bomb'?'#ff579b':b.type==='armor'?'#adb6f3':b.color);g.shadowBlur=0;rounded(b.x+3,b.y+2,b.w-6,3,2,'#ffffff55');if(b.type==='bomb'||b.type==='power'){g.fillStyle='#fff';g.font='bold 12px system-ui';g.textAlign='center';g.fillText(b.type==='bomb'?'✸':'✦',b.x+b.w/2,b.y+13)}else if(b.type==='armor'){g.strokeStyle='#eff2ff';g.strokeRect(b.x+4,b.y+5,b.w-8,b.h-10)}g.restore()}
  // Pinball gate: visibly open and pulsating, with a labelled entry zone.
  const p=Math.sin(clock*4),R=gates.r+3+p*2;
  g.save();g.translate(gates.x,gates.y);g.shadowColor='#af8aff';g.shadowBlur=22;
@@ -297,7 +332,7 @@ function draw(){
  for(const b of bumpers){g.save();g.shadowColor='#ffba79';g.shadowBlur=16;g.fillStyle='#583c48';g.beginPath();g.arc(b.x,b.y,b.r+4,0,Math.PI*2);g.fill();g.strokeStyle='#ffc987';g.lineWidth=4;g.beginPath();g.arc(b.x,b.y,b.r,0,Math.PI*2);g.stroke();g.fillStyle='#ffecb0';g.beginPath();g.arc(b.x,b.y,6,0,Math.PI*2);g.fill();g.restore()}
  for(const d of drops){const note=d,col=d.color||'#79eaff';g.save();g.shadowColor=col;g.shadowBlur=18;g.translate(d.x,d.y);g.rotate(Math.sin(d.age*7)*.08);g.fillStyle=col;g.beginPath();g.arc(0,0,14,0,Math.PI*2);g.fill();g.strokeStyle='#ffffffb5';g.lineWidth=1.5;g.beginPath();g.arc(0,0,17+Math.sin(d.age*8)*2,0,Math.PI*2);g.stroke();g.shadowBlur=0;g.fillStyle='#101733';g.font='900 17px system-ui';g.textAlign='center';g.fillText('♪',0,6);g.fillStyle='#fff';g.font='900 10px system-ui';g.fillText(note.label||'C4',0,29);g.restore()}
  if(melodyPulse>0){g.save();g.globalAlpha=melodyPulse*.8;g.strokeStyle='#fff0c1';g.shadowColor='#e5b0ff';g.shadowBlur=17;g.lineWidth=3;g.beginPath();g.arc(paddle.x,paddle.y,18+(1-melodyPulse)*38,0,Math.PI*2);g.stroke();g.restore()}
- for(const s of shots){g.save();g.shadowBlur=12;g.shadowColor='#81f5ff';rounded(s.x-2,s.y-14,4,16,2,'#9fffff');g.restore()}
+ for(const s of shots){g.save();g.shadowBlur=12;g.shadowColor=touhou?'#ff97bd':'#81f5ff';rounded(s.x-(touhou?3:2),s.y-14,touhou?6:4,16,2,touhou?'#fff4f0':'#9fffff');if(touhou){g.shadowBlur=0;g.fillStyle='#d74168';g.fillRect(s.x-1,s.y-11,2,9)}g.restore()}
  for(const [arr,col] of [[missiles,'#ffd9a8'],[shards,'#c8a5ff']])for(const m of arr){g.save();for(let j=0;j<m.trail.length;j++){g.globalAlpha=(j+1)/m.trail.length*.42;g.fillStyle=col;g.beginPath();g.arc(m.trail[j].x,m.trail[j].y,3,0,Math.PI*2);g.fill()}g.globalAlpha=1;g.shadowColor=col;g.shadowBlur=14;g.fillStyle=col;g.beginPath();g.arc(m.x,m.y,arr===missiles?5:4,0,Math.PI*2);g.fill();g.restore()}
  if(orbitalFx>0){g.save();g.globalAlpha=clamp(orbitalFx*2,0,1);g.shadowColor='#ffc1ff';g.shadowBlur=28;g.fillStyle='#ff64c6';g.fillRect(0,orbitalY-9,W,18);g.fillStyle='#fff5ff';g.fillRect(0,orbitalY-3,W,6);g.restore()}
  for(const b of balls){for(let j=0;j<b.trail.length;j++){let t=b.trail[j];g.globalAlpha=(j+1)/b.trail.length*.40;g.fillStyle=rage>0?'#ff98d7':'#77f1ff';g.beginPath();g.arc(t.x,t.y,2+j*.38,0,Math.PI*2);g.fill()}g.globalAlpha=1;g.save();g.shadowColor='#9fffff';g.shadowBlur=20;g.fillStyle='#efffff';g.beginPath();g.arc(b.x,b.y,b.r,0,Math.PI*2);g.fill();g.restore()}
@@ -305,7 +340,7 @@ function draw(){
  for(const pa of particles){g.globalAlpha=Math.max(0,1-pa.age/pa.life);g.fillStyle=pa.c;g.fillRect(pa.x,pa.y,3,3)}g.globalAlpha=1;
  if(shield>0){g.save();g.strokeStyle='#ffdc8b';g.lineWidth=3;g.shadowColor='#ffbf6b';g.shadowBlur=15;g.beginPath();g.moveTo(10,H-18);g.lineTo(W-10,H-18);g.stroke();g.restore()}
  g.save();g.shadowColor=rage>0?'#ff89d1':'#76efff';g.shadowBlur=20;let grad=g.createLinearGradient(0,paddle.y,0,paddle.y+14);grad.addColorStop(0,'#eaffff');grad.addColorStop(1,rage>0?'#ff70b9':'#49cef2');rounded(paddle.x-paddle.w/2,paddle.y,paddle.w,13,7,grad);g.restore();
- for(const [i,s] of fleetPositions().entries()){g.save();g.translate(s.x,s.y+Math.sin(clock*8+i)*2);g.shadowColor='#7af6ff';g.shadowBlur=15;g.fillStyle='#69dfff';g.beginPath();g.moveTo(0,-13);g.lineTo(11,6);g.lineTo(3,3);g.lineTo(0,9);g.lineTo(-3,3);g.lineTo(-11,6);g.closePath();g.fill();g.shadowBlur=0;g.fillStyle='#fff';g.fillRect(-2,-3,4,5);g.fillStyle='#ffac77';g.fillRect(-5,7,3,5);g.fillRect(2,7,3,5);g.restore()}
+ for(const [i,s] of fleetPositions().entries()){if(touhou){drawYinYang(s,i);continue}g.save();g.translate(s.x,s.y+Math.sin(clock*8+i)*2);g.shadowColor='#7af6ff';g.shadowBlur=15;g.fillStyle='#69dfff';g.beginPath();g.moveTo(0,-13);g.lineTo(11,6);g.lineTo(3,3);g.lineTo(0,9);g.lineTo(-3,3);g.lineTo(-11,6);g.closePath();g.fill();g.shadowBlur=0;g.fillStyle='#fff';g.fillRect(-2,-3,4,5);g.fillStyle='#ffac77';g.fillRect(-5,7,3,5);g.fillRect(2,7,3,5);g.restore()}
  for(const n of notices){g.save();g.globalAlpha=Math.min(1,(1-n.age)*1.5);g.fillStyle=n.c;g.shadowColor=n.c;g.shadowBlur=13;g.font=`900 ${n.size}px system-ui`;g.textAlign='center';g.fillText(n.t,n.x,n.y);g.restore()}
  if(flash>0){g.fillStyle=`rgba(255,185,230,${flash*.4})`;g.fillRect(0,35,W,H-35)}g.restore();
 }
