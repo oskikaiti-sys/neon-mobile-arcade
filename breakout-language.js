@@ -53,6 +53,7 @@ function queueRender(){
  if(scheduled)return;scheduled=true;
  requestAnimationFrame(()=>{scheduled=false;render(false)});
 }
+const mobileCss=document.createElement('style');mobileCss.textContent='#app .header{gap:5px}#app .header>div:first-child{min-width:0;flex:1}#app .header .title{font-size:clamp(14px,4.1vw,22px);letter-spacing:.2px;white-space:nowrap}#app .header #pause{flex-shrink:0;min-width:48px;padding:7px 6px;font-size:10px}';document.head.appendChild(mobileCss);
 const header=document.querySelector('.header');
 if(header){
  const sel=document.createElement('select');sel.id='arcade-language';sel.setAttribute('aria-label','Language');
