@@ -22,7 +22,7 @@
 Original composition: **ZUN / Team Shanghai Alice**. MML fan arrangement and
 transcription: **Yoji Suzuki / SUZUKI PLAN**. The playable Septette track is a
 ~49-second verified **theme excerpt loop**, not the full original.
-The soft drum beat and score-aligned background harmony play automatically. Adjacent two-beat MML chord snapshots are smoothed into four-beat pads with overlapping fade-in/out, ahead-of-time audio scheduling, and a held chord bridging the loop boundary; all 136 melody notes remain player-triggered. Every pitched melody event from the excerpt is playable (136 notes); only true score rests are silent. Rapid passages are grouped into close horizontal landing lanes.
+Each original non-lead MML track (Ch0 bass, Ch1 counterline, Ch3 and Ch4 harmony, Ch5 percussion) is played note by note with its original timing and durations. Synthetic chord pads and the generic arcade drum loop are disabled in this mode. Browser audio approximates timbres but does not replace the written notes; all 136 lead notes are player-triggered. Every pitched melody event from the excerpt is playable (136 notes); only true score rests are silent. Rapid passages are grouped into close horizontal landing lanes.
 
 - Original usage terms: https://github.com/suzukiplan/Touhou-VGS-MML-data
 - User's required fork: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data
