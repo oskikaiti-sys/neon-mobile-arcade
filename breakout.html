@@ -78,10 +78,10 @@ class ArcadeAudio {
    else this.noise(.024,.016,start,5200);
    return;
   }
-  const vol0=channel===0?.086:channel===1?.055:channel===3?.056:.05;
+  const vol0=channel===0?.086:channel===2?.040:channel===3?.056:.05;
   const volume=vol0*Math.max(.25,Math.min(1.3,velocity/13));
   const duration=Math.min(2.9,Math.max(.045,beats*60/bpm*.975));
-  const type=channel===0?'triangle':channel===1?'square':channel===3?'sawtooth':'triangle';
+  const type=channel===0?'triangle':channel===2?'square':channel===3?'sawtooth':'triangle';
   const notes=[{midi:pitch,vol:volume,type}];
   // Bass fundamental is preserved; quiet octave harmonic helps phone speakers.
   if(channel===0&&pitch<47)notes.push({midi:pitch+12,vol:volume*.21,type:'sine'});

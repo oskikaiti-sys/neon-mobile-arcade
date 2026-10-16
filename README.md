@@ -22,10 +22,14 @@
 Original composition: **ZUN / Team Shanghai Alice**. MML fan arrangement and
 transcription: **Yoji Suzuki / SUZUKI PLAN**. The playable Septette track is a
 ~49-second verified **theme excerpt loop**, not the full original.
-Each original non-lead MML track (Ch0 bass, Ch1 counterline, Ch3 and Ch4 harmony, Ch5 percussion) is played note by note with its original timing and durations. Synthetic chord pads and the generic arcade drum loop are disabled in this mode. Browser audio approximates timbres but does not replace the written notes; all 136 lead notes are player-triggered. Every pitched melody event from the excerpt is playable (136 notes); only true score rests are silent. Rapid passages are grouped into close horizontal landing lanes.
+Each original non-lead MML track (Ch0 bass, Ch2 lower counterline, Ch3 and Ch4 harmony, Ch5 percussion) is played note by note with its original timing and durations. Synthetic chord pads and the generic arcade drum loop are disabled in this mode. Browser audio approximates timbres but does not replace the written notes; all 136 lead notes are player-triggered. Every pitched melody event from the excerpt is playable (136 notes); only true score rests are silent. Rapid passages are grouped into close horizontal landing lanes.
 
 - Original usage terms: https://github.com/suzukiplan/Touhou-VGS-MML-data
 - User's required fork: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data
 - Referenced source score: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT012.mml
 
 No original game audio or sprites are redistributed.
+
+## Lead-channel correction
+
+The source MML Ch1 is the main high melodic voice, while Ch2 supplies a lower counterline for two of the three excerpts. The playable notes now come from Ch1 in full, with Ch2 moved to the score-derived accompaniment. The first excerpt starts at beat 32.0 (rather than 32.25) to preserve Ch1's proper first-note onset; the selected passages total 120 beats. The prior Ch2-based lead was pitch-accurate to that channel but was the wrong voice.
