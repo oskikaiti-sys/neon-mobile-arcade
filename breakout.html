@@ -114,7 +114,7 @@ function spawnBall(x=paddle.x,y=paddle.y-15,vx=rnd(-145,145),vy=-rnd(265,315)){
  if(Math.abs(vx)<55)vx=vx<0?-95:95;if(balls.length<12)balls.push({x,y,vx,vy,r:5.5,trail:[],gateLock:0,bumperLock:0});
 }
 function reset(){
- state='playing';kills=0;fleet=0;lives=5;combo=0;energy=0;rage=0;wide=0;laser=0;shield=1;regenClock=1.2;wingClock=.3;missileClock=0;orbitalClock=0;orbitalFx=0;portalClock=0;portalFx=0;autoServe=0;laserClock=0;clock=0;shake=0;flash=0;
+ state='playing';kills=0;fleet=0;lives=5;combo=0;energy=0;rage=0;wide=0;laser=0;shield=1;regenClock=.35;wingClock=.3;missileClock=0;orbitalClock=0;orbitalFx=0;portalClock=0;portalFx=0;autoServe=0;laserClock=0;clock=0;shake=0;flash=0;
  paddle={x:W/2,target:W/2,y:493,w:88};balls=[];shots=[];missiles=[];shards=[];drops=[];particles=[];rings=[];notices=[];seedBricks();spawnBall();$('overlay').hidden=true;fx.setFever(false);fx.setActive(true);audio('power');updateUI();
 }
 function pause(){if(state==='paused'){state=resumeState;$('overlay').hidden=true;fx.setActive(true);updateUI();return}if(state!=='playing')return;resumeState=state;state='paused';fx.setActive(false);setOverlay('游戏暂停','你的舰队、砖墙与弹球位置都保留。','▶ 继续');updateUI()}
@@ -221,10 +221,10 @@ function tick(dt){
  if(wide>0){wide-=dt;if(wide<=0)paddle.w=88}
  if(laser>0)laser-=dt;
  paddle.target=clamp(paddle.target,paddle.w/2+4,W-paddle.w/2-4);paddle.x=paddle.target;
- regenClock-=dt;if(regenClock<=0){regenClock=1.5;
+ regenClock-=dt;if(regenClock<=0){regenClock=.42;
   // Continuous replenishment without clearing the ball or changing the stage.
   const count=bricks.filter(b=>b.alive).length;
-  addMissing(count<8?14:count<26?8:fleet>=3?5:3);
+  addMissing(count<18?24:count<32?15:count<42?9:5);
   if(count<8){ring(W/2,150,'#7df2c9',28);text(W/2,218,'砖墙自动再生','#8bfbe0',16)}
  }
  fleetFire(dt);
