@@ -69,6 +69,19 @@ class ArcadeAudio {
   this.tone(midi,dur,'sine',.11,at);
   this.tone(midi+12,.13,'triangle',.023,at+.021);
  }
+ playAutoFlourish(midi,beats=1,bpm=146){
+  if(this.mode!==1||!this.active||!this.prepare())return;
+  const at=this.ctx.currentTime+.008,dur=Math.max(.07,Math.min(.21,beats*60/bpm*.65));
+  this.tone(midi,dur,'sine',.047,at);
+ }
+ playBacking(bpm=146,barIndex=0){
+  if(this.mode!==1||!this.active||!this.prepare())return;
+  const chords=[[39,51,54,58],[37,49,53,56],[35,47,51,54],[34,46,50,53]];
+  const notes=chords[Math.floor(barIndex/2)%chords.length],start=this.ctx.currentTime+.008,beat=60/bpm;
+  this.tone(notes[0],Math.min(1.35,beat*3.55),'triangle',.105,start);
+  for(let j=1;j<=3;j++)this.tone(notes[j],Math.min(1.65,beat*3.85),'sine',.045+(j===1?.016:0),start);
+  for(let i=0;i<4;i++)this.tone(notes[1+i%3]+12,beat*.34,'triangle',.034,start+i*beat);
+ }
  pickupNote(midi,beats=1,bpm=98){if(!this.mode||!this.prepare())return;const at=this.ctx.currentTime+.008,dur=Math.min(1.15,beats*60/bpm*.88);this.tone(midi,dur,'triangle',.25,at);this.tone(midi+12,Math.min(.7,dur*.65),'sine',.045,at+.018)}
  playBar(row,bpm,root){if(!this.mode||!this.prepare())return;const step=60/bpm,start=this.ctx.currentTime+.035;let offset=0;for(const [m,b] of row){this.tone(m,step*b*.92,'triangle',.15,start+offset);this.tone(m+12,step*b*.64,'sine',.034,start+offset+.015);offset+=step*b}for(const m of [root-12,root-5,root])this.tone(m,Math.min(2.6,offset*.85),'sine',.024,start);this.duckUntil=start+offset+.1}
  playFullSong(song){if(!this.mode||!this.prepare())return;const step=60/song.bpm,start=this.ctx.currentTime+.04;let offset=0;for(const row of song.bars)for(const [m,b] of row){this.tone(m,step*b*.88,'triangle',.09,start+offset);offset+=step*b}this.duckUntil=start+offset+.1}
@@ -253,7 +266,7 @@ function tick(dt){
  shake=Math.max(0,shake-18*dt);flash=Math.max(0,flash-.7*dt);portalFx=Math.max(0,portalFx-dt);orbitalFx=Math.max(0,orbitalFx-dt);
  if(state!=='playing')return;
  // Music notes arrive at exact score beats, regardless of destroyed bricks.
- songbook?.update(dt,entry=>{const x=clamp(W/2+Math.sin(entry.seq*1.35)*110,30,W-30);drops.push({...entry,x,y:90,age:0})});
+ songbook?.update(dt,entry=>{const x=isTouhouMode()?clamp(W/2+Math.sin(entry.seq*.88)*72,34,W-34):clamp(W/2+Math.sin(entry.seq*1.35)*110,30,W-30);drops.push({...entry,x,y:90,age:0})});
  portalClock=Math.max(0,portalClock-dt);
  if(rage>0)rage=Math.max(0,rage-dt);if(energy>=100&&rage<=0){energy=0;rage=8;laserClock=0;text(W/2,332,isTouhouMode()?spell('heaven'):'⚡ 自动 FEVER！','#ffa8db',19);audio('fever')}
  if(wide>0){wide-=dt;if(wide<=0)paddle.w=88}

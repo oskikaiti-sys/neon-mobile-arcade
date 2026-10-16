@@ -22,7 +22,7 @@
 Original composition: **ZUN / Team Shanghai Alice**. MML fan arrangement and
 transcription: **Yoji Suzuki / SUZUKI PLAN**. The playable Septette track is a
 ~49-second verified **theme excerpt loop**, not the full original.
-The lead plays automatically; catchable notes add optional ornaments.
+The backing harmony and fast connecting flourishes play automatically; catchable notes perform the principal melody.
 
 - Original usage terms: https://github.com/suzukiplan/Touhou-VGS-MML-data
 - User's required fork: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data
