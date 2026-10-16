@@ -41,13 +41,13 @@ No original game audio or sprites are distributed.
 
 Original composition: **ZUN / Team Shanghai Alice**. MML transcription and arrangement: **Yoji Suzuki / SUZUKI PLAN**. This game uses the full original **314-beat** MML source at **155 BPM** (approximately 2 minutes 2 seconds), from the [required fork of BSLOT014.mml](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT014.mml). The **506** sounding Ch1 notes are catchable by the player; rests stay silent. The **2,249** original Ch0/2/3/4/5 note and drum events play automatically. WebAudio synthesizes approximately similar timbres, not the original game recordings.
 
-Flandre mode has rainbow crystal bricks, prismatic-wing support units and its own spell-card labels/effects. The other Touhou modes now have separate character art and titles; the three public-domain tracks retain their usual gameplay.
+Flandre mode has rainbow crystal bricks, prismatic-wing support units, a central faceted **prismatic heart core** (彩晶心核), and its own spell-card labels/effects. The other Touhou modes now have separate character art and titles; the three public-domain tracks retain their usual gameplay.
 
 ## Reimu Hakurei — 少女綺想曲 ～ Dream Battle
 
 Original composition: **ZUN / Team Shanghai Alice**. Full-score MML arrangement/transcription: **Yoji Suzuki / SUZUKI PLAN**, from [BSLOT046.mml in the required user fork](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT046.mml). The playable Ch1 contains **518 pitched melody notes** over **400 beats**. The other MML channels supply **4,487** automated note/percussion events. The original tempo progression **160 → 159 → 152 → 146 → 139 → 160 BPM** is reflected in both the catchable notes and the backing-sound schedule, including the transition segment at beats 64–79. The browser synthesizer adapts instruments but preserves notes and timing.
 
-Reimu mode uses the original **Kedama brick enemies**, **Yin-Yang Orb wingmen**, **red-white ofuda bullets**, **Sukima**, and the **Fantasy Seal / Evil-Sealing Circle** spell visuals.
+Reimu mode uses the original **Kedama brick enemies**, **Yin-Yang Orb wingmen**, **red-white ofuda bullets**, a central **shrine offering box** (赛钱箱 / 賽銭箱), and the **Fantasy Seal / Evil-Sealing Circle** spell visuals.
 
 ## Remilia Scarlet — 亡き王女の為のセプテット
 
@@ -62,3 +62,17 @@ Added the full Touhou Project fan MML transcription [BSLOT010.mml](https://githu
 The playable Ch1 lead includes **420** pitched notes, exactly as scored, across **192 beats at 148 BPM** (about **77.84 seconds**). The other five source voices (Ch0,2,3,4,5) contain **2,239** synchronized auto-play notes and drum events. The 501 events from Ch5 are synthesized percussion. All original pitches, rests and note-on times are preserved; browser synthesis adapts instrument timbres, not original recordings.
 
 Sakuya's exclusive visuals: silver-blue gothic clockwork backdrop, small pocket-watch wingmen, visible silver knife projectiles (not Reimu's ofuda), gear-etched bricks, clock portal and silver spell-card effects/names. All character themes share physics and do not alter note hitboxes. This is an unofficial, noncommercial fan work.
+
+## 八雲紫 — ネクロファンタジア / Necrofantasia
+
+Original music: **ZUN / Team Shanghai Alice**. Full MML transcription/arrangement: **Yoji Suzuki / SUZUKI PLAN**, using **BSLOT034.mml** from [the owner's fork](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT034.mml).
+
+- **Complete 453.25-beat cycle at 164 BPM** (approximately **2 min 46 sec**), without cutting or simplifying the lead.
+- **Ch1:** 378 audible player-catchable lead notes, with silent notes/rests and tied durations kept on the original timeline.
+- **Ch0, Ch2, Ch3, Ch4, Ch5:** 5,921 individually timed automatic backing and percussion events. Playback retains every sounding note's beat onset, duration, pitch/percussion group, channel and dynamic level. Sound synthesis approximates MML instrument timbres rather than distributing original game recordings.
+- Dedicated purple-and-gold **Boundary Gap**, engraved **boundary bricks**, small **butterfly familiars**, golden-violet projectiles, and boundary/butterfly-themed spell cards.
+- Reimu's Dream Battle displays a shrine offering box (赛钱箱), while Flandre's U.N. Owen displays a prismatic crystal heart core (彩晶心核). Both retain the original central teleportation collision behavior.
+- Changing songs clears pending melody notes, resets the score and backing index, and promptly silences already-scheduled score voices so the old theme does not keep playing over the new one.
+- **Regression checks:** all eight titles remain in the playlist, the six Necrofantasia tracks retain their source beat timeline, and existing Remilia/Sakuya/other score assets are unmodified.
+
+The browser game is a free, unofficial fan work. No original game recording or sprite is hosted. Varying the musical timbres and visual style is not a claim that the arrangement or original composition is public domain.
