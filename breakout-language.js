@@ -12,6 +12,7 @@ const watchKeys=Object.fromEntries(Object.entries(maps).map(([code,entries])=>[c
 let scheduled=false;
 function translated(value){
  const original=String(value),lang=L.get();
+ if(!/[\u3400-\u9fff]/.test(original))return original;
  const cacheKey=lang+'|'+original;
  if(perLanguageCache.has(cacheKey))return perLanguageCache.get(cacheKey);
  let output=original;
