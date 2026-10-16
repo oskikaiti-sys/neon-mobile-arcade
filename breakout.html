@@ -69,6 +69,22 @@ class ArcadeAudio {
   this.tone(midi,dur,'sine',.11,at);
   this.tone(midi+12,.13,'triangle',.023,at+.021);
  }
+ playHarmony(midiVoices,beats=2,bpm=146){
+  if(this.mode!==1||!this.active||!this.prepare()||!Array.isArray(midiVoices))return;
+  const at=this.ctx.currentTime+.008,dur=beats*60/bpm*.99;
+  for(let i=0;i<midiVoices.length;i++){
+   const midi=midiVoices[i],osc=this.ctx.createOscillator(),gain=this.ctx.createGain();
+   const attack=Math.min(.19,dur*.26),release=Math.min(.24,dur*.31),end=at+dur;
+   osc.type=i===0?'triangle':'sine';osc.frequency.value=440*Math.pow(2,(midi-69)/12);
+   const vol=i===0?.028:.021;
+   gain.gain.setValueAtTime(.0001,at);
+   gain.gain.linearRampToValueAtTime(vol,at+attack);
+   gain.gain.setValueAtTime(vol*.83,end-release);
+   gain.gain.linearRampToValueAtTime(.0001,end);
+   osc.connect(gain);gain.connect(this.master);
+   osc.start(at);osc.stop(end+.025);
+  }
+ }
  playAutoFlourish(midi,beats=1,bpm=146){
   if(this.mode!==1||!this.active||!this.prepare())return;
   const at=this.ctx.currentTime+.008,dur=Math.max(.07,Math.min(.21,beats*60/bpm*.65));

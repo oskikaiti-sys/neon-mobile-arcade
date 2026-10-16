@@ -49,6 +49,9 @@ if(touhouSong?.lead){
  touhouSong.bars=Array.from({length:Math.ceil(offset/4)},()=>[]);
  for(const event of primary){event.note=touhouSong.bars[event.bar].length;touhouSong.bars[event.bar].push([event.midi,event.beats])}
 }
+// Soft background harmonies: sampled from aligned source MML Ch0/Ch3/Ch4.
+// Omit adjacent semitone clashes when sustaining instantaneous notes.
+if(touhouSong)touhouSong.harmony=[{"beat":0,"tones":[51,66]},{"beat":2,"tones":[49,66]},{"beat":4,"tones":[47,66]},{"beat":6,"tones":[47,66]},{"beat":8,"tones":[51,58]},{"beat":10,"tones":[49,58,65]},{"beat":12,"tones":[48,68,65]},{"beat":14,"tones":[48,66]},{"beat":16,"tones":[44,63]},{"beat":18,"tones":[44,61]},{"beat":20,"tones":[54,72]},{"beat":22,"tones":[54,61]},{"beat":24,"tones":[47,63]},{"beat":26,"tones":[50,65,70]},{"beat":28,"tones":[51,66]},{"beat":30,"tones":[53,68]},{"beat":32,"tones":[58,63]},{"beat":34,"tones":[56,61]},{"beat":36,"tones":[66,59]},{"beat":38,"tones":[66,59]},{"beat":40,"tones":[58,63]},{"beat":42,"tones":[58,61]},{"beat":44,"tones":[56,60]},{"beat":46,"tones":[56,60]},{"beat":48,"tones":[63,68]},{"beat":50,"tones":[63,68]},{"beat":52,"tones":[61,66]},{"beat":54,"tones":[61,66]},{"beat":56,"tones":[63,68]},{"beat":58,"tones":[65,70]},{"beat":60,"tones":[66,59]},{"beat":62,"tones":[56,61]},{"beat":64,"tones":[63,58]},{"beat":66,"tones":[58,65]},{"beat":68,"tones":[59,66]},{"beat":70,"tones":[59,66]},{"beat":72,"tones":[63,58]},{"beat":74,"tones":[61,68]},{"beat":76,"tones":[66,60]},{"beat":78,"tones":[60,67]},{"beat":80,"tones":[68,63]},{"beat":82,"tones":[68,63]},{"beat":84,"tones":[61,66]},{"beat":86,"tones":[63,66]},{"beat":88,"tones":[66,70]},{"beat":90,"tones":[65,68]},{"beat":92,"tones":[62,68]},{"beat":94,"tones":[62,69]},{"beat":96,"tones":[61,64]},{"beat":98,"tones":[61,68]},{"beat":100,"tones":[57,65]},{"beat":102,"tones":[65,61]},{"beat":104,"tones":[57,66]},{"beat":106,"tones":[57,66]},{"beat":108,"tones":[62,69]},{"beat":110,"tones":[62,69]},{"beat":112,"tones":[59,66]},{"beat":114,"tones":[61,68]},{"beat":116,"tones":[65,60]},{"beat":118,"tones":[66,61]}];
 const color=['#76efff','#c0a3ff','#ffe08c','#ff9fcd','#8ef5c3','#f4ab87'];
 function lang(){return window.ArcadeLang?.get?.()||'en'}
 function loc(en,zh,ja){return lang()==='zh-CN'?zh:lang()==='ja'?ja:en}
@@ -61,7 +64,7 @@ function create(audio,callbacks={}){
  const touhouNotice=document.getElementById('touhouNotice');
  const LEAD=1.5,INTRO=2.3;
  let selected=0,clock=0,nextDue=INTRO,planned=0,resolved=0,perfectBars=0,barHits=0,barMisses=0,completed=0;
- let pending=new Map(),generation=0,melodyDue=INTRO,melodyIndex=0;
+ let pending=new Map(),generation=0,melodyDue=INTRO,melodyIndex=0,harmonyIndex=0;
  try{const v=localStorage.getItem('neon-song-id');const at=songs.findIndex(s=>s.id===v);if(at>=0)selected=at}catch(_){}
  function pitch(midi){const a=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];return a[midi%12]+(Math.floor(midi/12)-1)}
  function entries(){const song=songs[selected];return song.playable||song.bars.flatMap((row,bar)=>row.map(([midi,beats],note)=>({bar,note,midi,beats})))}
@@ -81,7 +84,7 @@ function create(audio,callbacks={}){
    '東方二次創作 · 原曲：ZUN／上海アリス幻樂団 · MML編曲：Yoji Suzuki／SUZUKI PLAN · 非公式');}
  }
  function resetTiming(){
-  clock=0;nextDue=INTRO;melodyDue=INTRO;melodyIndex=0;planned=0;resolved=0;perfectBars=0;barHits=0;barMisses=0;pending.clear();generation++;
+  clock=0;nextDue=INTRO;melodyDue=INTRO;melodyIndex=0;harmonyIndex=0;planned=0;resolved=0;perfectBars=0;barHits=0;barMisses=0;pending.clear();generation++;
   notes=entries();render();
  }
  function choose(id){
@@ -100,7 +103,19 @@ function create(audio,callbacks={}){
  function update(dt,spawn){
   clock+=dt;const song=songs[selected];
   if(song.playable){
-   // The separately scheduled drum loop supplies the beat. No artificial bass/chord accents.
+   // Background chords built from source-aligned accompaniment; soft entrances.
+   if(song.harmony){
+    let count=0;
+    while(count++<8){
+     const cycle=Math.floor(harmonyIndex/song.harmony.length);
+     const chord=song.harmony[harmonyIndex%song.harmony.length];
+     const due=INTRO+cycle*(song.totalBeats*60/song.bpm+1.3)+chord.beat*60/song.bpm;
+     if(due>clock+.02)break;
+     audio.playHarmony?.(chord.tones,2,song.bpm);
+     harmonyIndex++;
+    }
+   }
+   // Drums remain soft; no artificial bass stabs.
    // Rapid notes copied from the source melody add quiet automatic flourishes.
    let flourishes=0;
    while(melodyDue<=clock+.015&&flourishes++<15){
