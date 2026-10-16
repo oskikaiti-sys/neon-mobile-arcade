@@ -34,7 +34,7 @@ if(touhouSong?.lead){
  for(let i=0;i<touhouSong.lead.length;i++){
   const [midi,duration]=touhouSong.lead[i],start=offset;offset+=duration;
   if(midi===null)continue;
-  if(start-last>=.95||(duration>=1.45&&start-last>=.65)){
+  if(start-last>=1||(start-last>=.5&&i%4!==1)){
    primary.push({midi,beats:duration,start,bar:Math.floor(start/4),leadIndex:i});
    last=start;
   }
@@ -57,7 +57,7 @@ function create(audio,callbacks={}){
  const touhouNotice=document.getElementById('touhouNotice');
  const LEAD=1.5,INTRO=2.3;
  let selected=0,clock=0,nextDue=INTRO,planned=0,resolved=0,perfectBars=0,barHits=0,barMisses=0,completed=0;
- let pending=new Map(),generation=0,melodyDue=INTRO,melodyIndex=0,backingDue=INTRO,backingBar=0;
+ let pending=new Map(),generation=0,melodyDue=INTRO,melodyIndex=0;
  try{const v=localStorage.getItem('neon-song-id');const at=songs.findIndex(s=>s.id===v);if(at>=0)selected=at}catch(_){}
  function pitch(midi){const a=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];return a[midi%12]+(Math.floor(midi/12)-1)}
  function entries(){const song=songs[selected];return song.playable||song.bars.flatMap((row,bar)=>row.map(([midi,beats],note)=>({bar,note,midi,beats})))}
@@ -69,7 +69,7 @@ function create(audio,callbacks={}){
   if(progress)progress.textContent=(notes[index].bar+1)+'/'+song.bars.length;
   if(track)track.textContent=name(song);
   if(hint)hint.textContent=song.playable?
-   loc('♪ Catch lead notes to perform the melody · backing and flourishes play automatically','♪ 接主旋律音符演奏 · 伴奏与装饰音自动播放','♪ 主旋律をキャッチして演奏 · 伴奏と装飾音は自動'):
+   loc('♪ Catch more lead notes · light drums and flourishes play automatically','♪ 接更多主旋律音符 · 轻鼓点与装饰音自动播放','♪ 主旋律の音符を増量 · 軽いドラムと装飾音は自動'):
    loc('♪ Catch notes to play the melody · missed notes stay silent','♪ 用挡板接音符来弹奏旋律 · 漏接就会缺音','♪ 音符をキャッチして演奏 · 逃すと無音');
   if(touhouNotice){touhouNotice.hidden=song.id!=='septette';touhouNotice.textContent=loc(
    'Touhou fan work · Original: ZUN / Team Shanghai Alice · MML: Yoji Suzuki / SUZUKI PLAN · unofficial',
@@ -77,7 +77,7 @@ function create(audio,callbacks={}){
    '東方二次創作 · 原曲：ZUN／上海アリス幻樂団 · MML編曲：Yoji Suzuki／SUZUKI PLAN · 非公式');}
  }
  function resetTiming(){
-  clock=0;nextDue=INTRO;melodyDue=INTRO;melodyIndex=0;backingDue=INTRO;backingBar=0;planned=0;resolved=0;perfectBars=0;barHits=0;barMisses=0;pending.clear();generation++;
+  clock=0;nextDue=INTRO;melodyDue=INTRO;melodyIndex=0;planned=0;resolved=0;perfectBars=0;barHits=0;barMisses=0;pending.clear();generation++;
   notes=entries();render();
  }
  function choose(id){
@@ -96,14 +96,8 @@ function create(audio,callbacks={}){
  function update(dt,spawn){
   clock+=dt;const song=songs[selected];
   if(song.playable){
-   // Automatic chord backing, never automatic principal melody notes.
-   let chords=0;
-   while(backingDue<=clock+.015&&chords++<8){
-    audio.playBacking?.(song.bpm,backingBar++);
-    backingDue+=4*60/song.bpm;
-    if(backingBar%song.bars.length===0)backingDue+=1.3;
-   }
-   // Rapid source-derived embellishments keep the 8-bit arrangement flowing.
+   // The separately scheduled drum loop supplies the beat. No artificial bass/chord accents.
+   // Rapid notes copied from the source melody add quiet automatic flourishes.
    let flourishes=0;
    while(melodyDue<=clock+.015&&flourishes++<15){
     const [midi,duration]=song.lead[melodyIndex];
