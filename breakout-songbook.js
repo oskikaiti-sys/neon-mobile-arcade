@@ -30,14 +30,18 @@ const songs=[
 // Accurately sourced MML: significant melody tones are playable, rapid ornaments automatic.
 const touhouSong=songs.find(s=>s.id==='septette');
 if(touhouSong?.lead){
- let offset=0,last=-Infinity;const primary=[];
+ let offset=0;const primary=[];
  for(let i=0;i<touhouSong.lead.length;i++){
   const [midi,duration]=touhouSong.lead[i],start=offset;offset+=duration;
   if(midi===null)continue;
-  if(start-last>=1||(start-last>=.5&&i%4!==1)){
-   primary.push({midi,beats:duration,start,bar:Math.floor(start/4),leadIndex:i});
-   last=start;
-  }
+  primary.push({midi,beats:duration,start,bar:Math.floor(start/4),leadIndex:i});
+ }
+ // Tightly spaced notes share a landing lane; move lanes only between phrases.
+ let group=0,lastStart=-Infinity;
+ for(const event of primary){
+  if(event.start-lastStart>1.25)group++;
+  event.laneX=180+Math.round(Math.sin(group*1.45)*64);
+  lastStart=event.start;
  }
  touhouSong.playable=primary;
  touhouSong.playableIndices=new Set(primary.map(x=>x.leadIndex));
@@ -69,7 +73,7 @@ function create(audio,callbacks={}){
   if(progress)progress.textContent=(notes[index].bar+1)+'/'+song.bars.length;
   if(track)track.textContent=name(song);
   if(hint)hint.textContent=song.playable?
-   loc('♪ Catch more lead notes · light drums and flourishes play automatically','♪ 接更多主旋律音符 · 轻鼓点与装饰音自动播放','♪ 主旋律の音符を増量 · 軽いドラムと装飾音は自動'):
+   loc('♪ Play every melody note · rapid notes share the same landing lane','♪ 主旋律音符全部保留 · 连续音符会落在相近的位置','♪ 主旋律は全音符を演奏 · 速い連続音は同じ場所に落下'):
    loc('♪ Catch notes to play the melody · missed notes stay silent','♪ 用挡板接音符来弹奏旋律 · 漏接就会缺音','♪ 音符をキャッチして演奏 · 逃すと無音');
   if(touhouNotice){touhouNotice.hidden=song.id!=='septette';touhouNotice.textContent=loc(
    'Touhou fan work · Original: ZUN / Team Shanghai Alice · MML: Yoji Suzuki / SUZUKI PLAN · unofficial',
@@ -91,7 +95,7 @@ function create(audio,callbacks={}){
  function makeEntry(seq,when){
   const entry=notes[seq%notes.length],song=songs[selected];
   return {song:song.id,generation,seq,when,bar:entry.bar,note:entry.note,midi:entry.midi,beats:entry.beats,
-   bpm:song.bpm,label:pitch(entry.midi),color:color[(entry.bar+entry.note)%color.length]};
+   bpm:song.bpm,label:pitch(entry.midi),color:color[(entry.bar+entry.note)%color.length],laneX:entry.laneX};
  }
  function update(dt,spawn){
   clock+=dt;const song=songs[selected];
