@@ -117,7 +117,7 @@ class ArcadeAudio {
   if(channel===5){
    if(pitch===0){this.tone(38,.11,'sine',.065,start,-10);this.tone(50,.055,'triangle',.023,start,-5)}
    else if(pitch===1)this.noise(.075,.036,start,900);
-   else this.noise(.024,.016,start,5200);
+   else this.noise(pitch===3?.018:.024,pitch===3?.013:.016,start,pitch===3?7200:5200);
    return;
   }
   // The opening Ch4 is a very fast countermelody (103 events in 32 beats).
