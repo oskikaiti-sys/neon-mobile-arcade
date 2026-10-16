@@ -54,3 +54,11 @@ Reimu mode uses the original **Kedama brick enemies**, **Yin-Yang Orb wingmen**,
 The existing [BSLOT012.mml](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT012.mml) melody and tuned score-aligned multi-channel music remain unchanged. Remilia now has her own **crimson blood-moon sky**, **bat-emblem gothic red bricks**, **small vampire-bat wingmen**, **scarlet spear bullets**, **Scarlet Gate**, and red vampire-themed spell cards. These replace the earlier Reimu imagery that had been shared with Septette.
 
 All Touhou tracks remain unofficial fan adaptations. Original music: **ZUN / Team Shanghai Alice**; MML fan transcriptions: **Yoji Suzuki / SUZUKI PLAN**.
+
+## 月時計 ～ ルナ・ダイアル (Sakuya Izayoi / Lunar Clock)
+
+Added the full Touhou Project fan MML transcription [BSLOT010.mml](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT010.mml) from the user's fork of **Yoji Suzuki / SUZUKI PLAN**. Original composition **ZUN / Team Shanghai Alice**, soundtrack **東方紅魔郷 / Embodiment of Scarlet Devil**.
+
+The playable Ch1 lead includes **420** pitched notes, exactly as scored, across **192 beats at 148 BPM** (about **77.84 seconds**). The other five source voices (Ch0,2,3,4,5) contain **2,239** synchronized auto-play notes and drum events. The 501 events from Ch5 are synthesized percussion. All original pitches, rests and note-on times are preserved; browser synthesis adapts instrument timbres, not original recordings.
+
+Sakuya's exclusive visuals: silver-blue gothic clockwork backdrop, small pocket-watch wingmen, visible silver knife projectiles (not Reimu's ofuda), gear-etched bricks, clock portal and silver spell-card effects/names. All character themes share physics and do not alter note hitboxes. This is an unofficial, noncommercial fan work.
