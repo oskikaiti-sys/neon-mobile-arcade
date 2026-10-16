@@ -66,15 +66,16 @@ class ArcadeSkillVFX{
  drawBanners(c){
   for(const e of this.effects){
    if(!e.label||e.age>.91)continue;
-   // The usable ribbon sits between the HUD (y≈30) and first bricks (y=65).
-   // Keep every spell title here, rather than over the central Sukima / playfield.
-   const opacity=lim(e.age*11,0,1)*Math.max(0,1-e.age/.91),y=55;
+   // Truly fixed HUD strip: first bricks y=65, Sukima center y=275.
+   const opacity=lim(e.age*11,0,1)*Math.max(0,1-e.age/.91);
+   const bannerTop=33,bannerHeight=26,textY=51;
    c.save();c.globalAlpha=opacity*.95;c.textAlign='center';c.font='900 12px system-ui';
-   const width=lim(c.measureText(e.label).width+28,140,316);
-   c.fillStyle=e.touhou?'#270b31d6':'#0b2941d6';
-   c.beginPath();c.roundRect(180-width/2,38,width,25,7);c.fill();
+   const width=lim(c.measureText(e.label).width+30,140,316);
+   c.fillStyle=e.touhou?'#270b31e8':'#0b2941e8';
+   c.beginPath();c.roundRect(180-width/2,bannerTop,width,bannerHeight,7);c.fill();
    c.lineWidth=1.25;c.strokeStyle=e.colors[0];c.stroke();
-   c.shadowColor=e.colors[0];c.shadowBlur=6;c.fillStyle=e.colors[1];c.fillText(e.label,180,y);
+   c.shadowColor=e.colors[0];c.shadowBlur=5;c.fillStyle=e.colors[1];
+   c.fillText(e.label,180,textY,width-16);
    c.restore();
   }
  }
