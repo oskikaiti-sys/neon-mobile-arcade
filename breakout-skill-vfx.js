@@ -6,9 +6,9 @@ const palettes={seal:['#ff779a','#fff7dc'],barrier:['#ac83ff','#ffe3ff'],binding
 class ArcadeSkillVFX{
  constructor(){this.effects=[]}
  clear(){this.effects.length=0}
- cast(kind,x,y,touhou,label='',flandre=false,remilia=false,sakuya=false){
+ cast(kind,x,y,touhou,label='',flandre=false,remilia=false,sakuya=false,yukari=false){
   const life=kind==='heaven'||kind==='sonic'?1.38:kind==='bomb'?.56:kind==='orb'?.83:1.04;
-  this.effects.push({kind,x,y,touhou,label,age:0,life,colors:sakuya?['#c1dfff','#f2d5a9']:remilia?['#f74d74','#ffd5b2']:flandre?['#ff80c4','#ffe4a0']:(palettes[kind]||palettes.sonic),flandre,remilia,sakuya});
+  this.effects.push({kind,x,y,touhou,label,age:0,life,colors:yukari?['#c69aef','#f4d39b']:sakuya?['#c1dfff','#f2d5a9']:remilia?['#f74d74','#ffd5b2']:flandre?['#ff80c4','#ffe4a0']:(palettes[kind]||palettes.sonic),flandre,remilia,sakuya,yukari});
   if(this.effects.length>6)this.effects.splice(0,this.effects.length-6);
  }
  update(dt){for(let i=this.effects.length-1;i>=0;i--){const e=this.effects[i];e.age+=dt;if(e.age>=e.life)this.effects.splice(i,1)}}
@@ -24,7 +24,18 @@ class ArcadeSkillVFX{
     c.strokeStyle=e.colors[i%2];c.lineWidth=i%3===0?2.3:1.1;
     c.beginPath();c.moveTo(Math.cos(ang)*inner,Math.sin(ang)*inner);c.lineTo(Math.cos(ang)*outer,Math.sin(ang)*outer);c.stroke();
    }
-   if(['seal','sonic','heaven','fever'].includes(type)){
+   if(e.yukari&&type!=='bomb'){
+    // Yukari's original boundary-butterfly spell visuals stay separate from shrine ofuda.
+    const n=type==='heaven'||type==='sonic'?18:12;
+    for(let i=0;i<n;i++){
+     const angle=i*tau/n+p*(i%2?-.5:.5),dist=(r*.53+p*31)*(i%2?1:.86);
+     const x=Math.cos(angle)*dist,y=Math.sin(angle)*dist*.72;
+     if(i%3===0&&window.YukariArt?.butterfly)window.YukariArt.butterfly(c,x,y,.33+p*.13,p*14+i);
+     else{c.fillStyle=e.colors[i%2];c.beginPath();c.ellipse(x,y,2.8,5.5,angle,0,tau);c.fill()}
+    }
+    c.strokeStyle=e.colors[1];c.lineWidth=2;
+    c.beginPath();c.ellipse(0,0,r*.75+p*12,r*.34+p*6,p*1.6,0,tau);c.stroke();
+   }else if(['seal','sonic','heaven','fever'].includes(type)){
     const n=type==='heaven'||type==='sonic'?30:18;
     for(let i=0;i<n;i++){
      const ang=i*tau/n+p*(i%2?-.27:.27),dist=15+p*(r+31)+(i%3)*5;
