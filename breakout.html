@@ -170,7 +170,7 @@ class ArcadeAudio {
 window.ArcadeAudio=ArcadeAudio;
 })();
 
-</script><script src="breakout-skill-vfx.js?v=20261016-topstrip"></script><script src="breakout-remilia-art.js?v=20261016-scarlet"></script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-flandre-score.js"></script><script src="breakout-dreambattle-score.js"></script><script src="breakout-songbook.js?v=20261016-dreambattle"></script><script>
+</script><script src="breakout-skill-vfx.js?v=20261016-scarlet"></script><script src="breakout-remilia-art.js?v=20261016-scarlet"></script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-flandre-score.js"></script><script src="breakout-dreambattle-score.js"></script><script src="breakout-songbook.js?v=20261016-dreambattle"></script><script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),C=$('field'),g=C.getContext('2d'),W=360,H=540;
 const colors=['#f27aaf','#ffb272','#ffe17b','#5ee8b9','#6dd4ff','#aa91ff','#da8aff'];
@@ -243,8 +243,9 @@ function updateUI(){
  const next=fleet<4?thresholds[fleet+1]:thresholds[4],prev=thresholds[fleet];
  const ratio=fleet<4?clamp((kills-prev)/(next-prev),0,1):1;
  $('meterFill').style.width=String(ratio*100)+'%';$('meterPct').textContent=fleet<4?`${kills}/${next}`:'MAX';
- $('fleetBadge').textContent=isTouhouMode()?(['☯ '+spell('orb')+' · 0','☯ '+spell('orb')+' · 1','☯ '+spell('orb')+' · 2','✦ '+spell('seal'),'✦ '+spell('binding')][fleet]):(['🛸 下一解锁：侦察机','🛸 单僚机 · 即将双机','🚀 双僚机 · 即将导弹','☄️ 导弹 · 即将轨道炮','🌌 舰队满编！'][fleet]);
- $('rage').textContent=isTouhouMode()?(rage>0?'☯ '+spell('heaven'):'♪ '+spell('seal')):(trans('♪ LIVE MELODY','♪ 即时演奏','♪ 生演奏')+(rage>0?' ⚡':''));
+ const familiarIcon=isRemiliaMode()?'🦇':isFlandreMode()?'◆':'☯';
+ $('fleetBadge').textContent=isTouhouMode()?([familiarIcon+' '+spell('orb')+' · 0',familiarIcon+' '+spell('orb')+' · 1',familiarIcon+' '+spell('orb')+' · 2','✦ '+spell('seal'),'✦ '+spell('binding')][fleet]):(['🛸 下一解锁：侦察机','🛸 单僚机 · 即将双机','🚀 双僚机 · 即将导弹','☄️ 导弹 · 即将轨道炮','🌌 舰队满编！'][fleet]);
+ $('rage').textContent=isTouhouMode()?(rage>0?'✦ '+spell('heaven'):'♪ '+spell('seal')):(trans('♪ LIVE MELODY','♪ 即时演奏','♪ 生演奏')+(rage>0?' ⚡':''));
 }
 function cellBrick(row,col){let d=Math.random();return {r:row,c:col,x:MARGIN+col*(BW+GAP),y:65+row*26,w:BW,h:BH,alive:true,type:d<.09?'bomb':d<.17?'power':d<.23?'armor':'normal',hp:d>=.17&&d<.23?2:1,color:colors[row]}}
 function addMissing(n){
