@@ -170,7 +170,7 @@ class ArcadeAudio {
 window.ArcadeAudio=ArcadeAudio;
 })();
 
-</script><script src="breakout-skill-vfx.js?v=20261016-topstrip"></script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-flandre-score.js"></script><script src="breakout-dreambattle-score.js"></script><script src="breakout-songbook.js?v=20261016-dreambattle"></script><script>
+</script><script src="breakout-skill-vfx.js?v=20261016-topstrip"></script><script src="breakout-remilia-art.js?v=20261016-scarlet"></script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-flandre-score.js"></script><script src="breakout-dreambattle-score.js"></script><script src="breakout-songbook.js?v=20261016-dreambattle"></script><script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),C=$('field'),g=C.getContext('2d'),W=360,H=540;
 const colors=['#f27aaf','#ffb272','#ffe17b','#5ee8b9','#6dd4ff','#aa91ff','#da8aff'];
@@ -491,15 +491,17 @@ function drawYinYang(s,i){
  g.restore();
 }
 function draw(){
- const touhou=isTouhouMode(),flandre=isFlandreMode();g.clearRect(0,0,W,H);const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,flandre?(rage>0?'#612849':'#361b42'):touhou?(rage>0?'#531e3d':'#35172f'):(rage>0?'#25112e':'#0f1e38'));bg.addColorStop(1,flandre?'#190c2b':touhou?'#140d26':'#081829');g.fillStyle=bg;g.fillRect(0,0,W,H);
+ const touhou=isTouhouMode(),flandre=isFlandreMode(),remilia=isRemiliaMode();g.clearRect(0,0,W,H);const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,remilia?(rage>0?'#751330':'#390d27'):flandre?(rage>0?'#612849':'#361b42'):touhou?(rage>0?'#531e3d':'#35172f'):(rage>0?'#25112e':'#0f1e38'));bg.addColorStop(1,remilia?'#110819':flandre?'#190c2b':touhou?'#140d26':'#081829');g.fillStyle=bg;g.fillRect(0,0,W,H);
+ if(remilia)window.RemiliaArt.moon(g);
  for(let i=0;i<36;i++){let x=(i*101+13)%W,y=(i*157+clock*(12+i%5*3))%H;g.globalAlpha=.13+.18*Math.sin(clock*1.3+i);g.fillStyle=i%3?'#b9e7ff':'#f9a2de';g.fillRect(x,y,1.5,1.5)}g.globalAlpha=1;
  g.strokeStyle='#ffffff09';g.lineWidth=1;for(let x=0;x<W;x+=24){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}
  for(let y=0;y<H;y+=24){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}
  g.fillStyle='#9fcce0';g.font='bold 10px system-ui';g.fillText('∞ CONTINUOUS ARENA',11,22);g.textAlign='right';g.fillStyle='#ffe0aa';g.fillText('FLEET LV.'+fleet,W-11,22);g.textAlign='left';
  g.save();if(shake)g.translate(rnd(-shake,shake),rnd(-shake,shake));
- for(const b of bricks)if(b.alive){if(touhou){if(flandre)drawCrystalBrick(b);else drawKedama(b);continue}g.save();g.shadowBlur=6;g.shadowColor=b.color;rounded(b.x,b.y,b.w,b.h,5,b.type==='bomb'?'#ff579b':b.type==='armor'?'#adb6f3':b.color);g.shadowBlur=0;rounded(b.x+3,b.y+2,b.w-6,3,2,'#ffffff55');if(b.type==='bomb'||b.type==='power'){g.fillStyle='#fff';g.font='bold 12px system-ui';g.textAlign='center';g.fillText(b.type==='bomb'?'✸':'✦',b.x+b.w/2,b.y+13)}else if(b.type==='armor'){g.strokeStyle='#eff2ff';g.strokeRect(b.x+4,b.y+5,b.w-8,b.h-10)}g.restore()}
+ for(const b of bricks)if(b.alive){if(touhou){if(flandre)drawCrystalBrick(b);else if(remilia)window.RemiliaArt.brick(g,b);else drawKedama(b);continue}g.save();g.shadowBlur=6;g.shadowColor=b.color;rounded(b.x,b.y,b.w,b.h,5,b.type==='bomb'?'#ff579b':b.type==='armor'?'#adb6f3':b.color);g.shadowBlur=0;rounded(b.x+3,b.y+2,b.w-6,3,2,'#ffffff55');if(b.type==='bomb'||b.type==='power'){g.fillStyle='#fff';g.font='bold 12px system-ui';g.textAlign='center';g.fillText(b.type==='bomb'?'✸':'✦',b.x+b.w/2,b.y+13)}else if(b.type==='armor'){g.strokeStyle='#eff2ff';g.strokeRect(b.x+4,b.y+5,b.w-8,b.h-10)}g.restore()}
  // Portal geometry is unchanged; Touhou mode shows an animated dimensional Sukima.
- if(touhou){
+ if(remilia)window.RemiliaArt.gate(g,gates,clock,portalClock,trans('SCARLET GATE','绯红之门','紅い門'));
+ else if(touhou){
   const pulse=Math.sin(clock*3)*1.3,flare=portalClock>0?'#ffe9bb':'#bd80d8';
   g.save();g.translate(gates.x,gates.y);g.shadowColor='#b56bd6';g.shadowBlur=15;
   // Original Canvas artwork: layered purple folds, a dark fissure and moving eyes.
@@ -530,7 +532,7 @@ function draw(){
  for(const b of bumpers){g.save();g.shadowColor='#ffba79';g.shadowBlur=16;g.fillStyle='#583c48';g.beginPath();g.arc(b.x,b.y,b.r+4,0,Math.PI*2);g.fill();g.strokeStyle='#ffc987';g.lineWidth=4;g.beginPath();g.arc(b.x,b.y,b.r,0,Math.PI*2);g.stroke();g.fillStyle='#ffecb0';g.beginPath();g.arc(b.x,b.y,6,0,Math.PI*2);g.fill();g.restore()}
  for(const d of drops){const note=d,col=d.color||'#79eaff';g.save();g.shadowColor=col;g.shadowBlur=18;g.translate(d.x,d.y);g.rotate(Math.sin(d.age*7)*.08);g.fillStyle=col;g.beginPath();g.arc(0,0,14,0,Math.PI*2);g.fill();g.strokeStyle='#ffffffb5';g.lineWidth=1.5;g.beginPath();g.arc(0,0,17+Math.sin(d.age*8)*2,0,Math.PI*2);g.stroke();g.shadowBlur=0;g.fillStyle='#101733';g.font='900 17px system-ui';g.textAlign='center';g.fillText('♪',0,6);g.fillStyle='#fff';g.font='900 10px system-ui';g.fillText(note.label||'C4',0,29);g.restore()}
  if(melodyPulse>0){g.save();g.globalAlpha=melodyPulse*.8;g.strokeStyle='#fff0c1';g.shadowColor='#e5b0ff';g.shadowBlur=17;g.lineWidth=3;g.beginPath();g.arc(paddle.x,paddle.y,18+(1-melodyPulse)*38,0,Math.PI*2);g.stroke();g.restore()}
- for(const [i,s] of shots.entries()){if(flandre){drawCrystalShot(s,i);continue}g.save();g.shadowBlur=12;g.shadowColor=touhou?'#ff97bd':'#81f5ff';rounded(s.x-(touhou?3:2),s.y-14,touhou?6:4,16,2,touhou?'#fff4f0':'#9fffff');if(touhou){g.shadowBlur=0;g.fillStyle='#d74168';g.fillRect(s.x-1,s.y-11,2,9)}g.restore()}
+ for(const [i,s] of shots.entries()){if(flandre){drawCrystalShot(s,i);continue}if(remilia){window.RemiliaArt.shot(g,s);continue}g.save();g.shadowBlur=12;g.shadowColor=touhou?'#ff97bd':'#81f5ff';rounded(s.x-(touhou?3:2),s.y-14,touhou?6:4,16,2,touhou?'#fff4f0':'#9fffff');if(touhou){g.shadowBlur=0;g.fillStyle='#d74168';g.fillRect(s.x-1,s.y-11,2,9)}g.restore()}
  for(const [arr,col] of [[missiles,'#ffd9a8'],[shards,'#c8a5ff']])for(const m of arr){g.save();for(let j=0;j<m.trail.length;j++){g.globalAlpha=(j+1)/m.trail.length*.42;g.fillStyle=col;g.beginPath();g.arc(m.trail[j].x,m.trail[j].y,3,0,Math.PI*2);g.fill()}g.globalAlpha=1;g.shadowColor=col;g.shadowBlur=14;g.fillStyle=col;g.beginPath();g.arc(m.x,m.y,arr===missiles?5:4,0,Math.PI*2);g.fill();g.restore()}
  if(orbitalFx>0){g.save();g.globalAlpha=clamp(orbitalFx*2,0,1);g.shadowColor='#ffc1ff';g.shadowBlur=28;g.fillStyle='#ff64c6';g.fillRect(0,orbitalY-9,W,18);g.fillStyle='#fff5ff';g.fillRect(0,orbitalY-3,W,6);g.restore()}
  for(const b of balls){for(let j=0;j<b.trail.length;j++){let t=b.trail[j];g.globalAlpha=(j+1)/b.trail.length*.40;g.fillStyle=rage>0?'#ff98d7':'#77f1ff';g.beginPath();g.arc(t.x,t.y,2+j*.38,0,Math.PI*2);g.fill()}g.globalAlpha=1;g.save();g.shadowColor='#9fffff';g.shadowBlur=20;g.fillStyle='#efffff';g.beginPath();g.arc(b.x,b.y,b.r,0,Math.PI*2);g.fill();g.restore()}
@@ -539,7 +541,7 @@ function draw(){
  if(shield>0){g.save();g.strokeStyle='#ffdc8b';g.lineWidth=3;g.shadowColor='#ffbf6b';g.shadowBlur=15;g.beginPath();g.moveTo(10,H-18);g.lineTo(W-10,H-18);g.stroke();g.restore()}
  if(rage>0||laser>0){g.save();g.globalAlpha=.30+.1*Math.sin(clock*12);g.strokeStyle=touhou?'#ffb4d4':'#8aeaff';g.lineWidth=2.5;g.shadowColor=g.strokeStyle;g.shadowBlur=13;g.beginPath();g.ellipse(paddle.x,paddle.y+7,paddle.w*.62,16,0,0,Math.PI*2);g.stroke();g.restore()}
  g.save();g.shadowColor=rage>0?'#ff89d1':'#76efff';g.shadowBlur=20;let grad=g.createLinearGradient(0,paddle.y,0,paddle.y+14);grad.addColorStop(0,'#eaffff');grad.addColorStop(1,rage>0?'#ff70b9':'#49cef2');rounded(paddle.x-paddle.w/2,paddle.y,paddle.w,13,7,grad);g.restore();
- for(const [i,s] of fleetPositions().entries()){if(touhou){if(flandre)drawCrystalWing(s,i);else drawYinYang(s,i);continue}g.save();g.translate(s.x,s.y+Math.sin(clock*8+i)*2);g.shadowColor='#7af6ff';g.shadowBlur=15;g.fillStyle='#69dfff';g.beginPath();g.moveTo(0,-13);g.lineTo(11,6);g.lineTo(3,3);g.lineTo(0,9);g.lineTo(-3,3);g.lineTo(-11,6);g.closePath();g.fill();g.shadowBlur=0;g.fillStyle='#fff';g.fillRect(-2,-3,4,5);g.fillStyle='#ffac77';g.fillRect(-5,7,3,5);g.fillRect(2,7,3,5);g.restore()}
+ for(const [i,s] of fleetPositions().entries()){if(touhou){if(flandre)drawCrystalWing(s,i);else if(remilia)window.RemiliaArt.bat(g,s,i,clock);else drawYinYang(s,i);continue}g.save();g.translate(s.x,s.y+Math.sin(clock*8+i)*2);g.shadowColor='#7af6ff';g.shadowBlur=15;g.fillStyle='#69dfff';g.beginPath();g.moveTo(0,-13);g.lineTo(11,6);g.lineTo(3,3);g.lineTo(0,9);g.lineTo(-3,3);g.lineTo(-11,6);g.closePath();g.fill();g.shadowBlur=0;g.fillStyle='#fff';g.fillRect(-2,-3,4,5);g.fillStyle='#ffac77';g.fillRect(-5,7,3,5);g.fillRect(2,7,3,5);g.restore()}
  for(const n of notices){g.save();g.globalAlpha=Math.min(1,(1-n.age)*1.5);g.fillStyle=n.c;g.shadowColor=n.c;g.shadowBlur=13;g.font=`900 ${n.size}px system-ui`;g.textAlign='center';g.fillText(n.t,n.x,n.y);g.restore()}
  // The shaking game world ends here; titles use fixed screen coordinates.
  g.restore();
