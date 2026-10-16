@@ -23,10 +23,10 @@
 <body><main id="app">
 <header class="header"><div><div class="micro">MOBILE ARCADE · INFINITY</div><div class="title">BREAKOUT <em>INFINITY</em></div></div><button id="pause" class="minor">Ⅱ 暂停</button></header>
 <section class="stats"><div class="stat"><span>已击碎</span><b id="kills" style="color:#69eaf5">0</b></div><div class="stat"><span>护航等级</span><b id="fleet" style="color:#ffda76">0</b></div><div class="stat"><span>小球</span><b id="balls" style="color:#a3bfff">1</b></div><div class="stat"><span>生命</span><b id="lives" style="color:#ff87bd">♥♥♥♥♥</b></div></section>
-<section class="stage"><div id="field-wrap"><canvas id="field" width="360" height="540" aria-label="连续弹球打砖块战场，横向拖动控制挡板。中央时空门可传送弹球并发射追踪轰炸。"></canvas><div class="overlay" id="overlay"><div class="panel"><div class="sig">✦</div><h2 id="overlayTitle">星际弹球战场</h2><p id="overlayDesc">没有分离关卡，砖块会持续再生。<br>接住音符完成小节，奏出整首歌曲<br>击碎砖块，逐级解锁护航飞船！</p><button id="start" class="play">▶ 开始无限狂欢</button></div></div></div></section>
+<section class="stage"><div id="field-wrap"><canvas id="field" width="360" height="540" aria-label="连续弹球打砖块战场，横向拖动控制挡板。中央时空门可传送弹球并发射追踪轰炸。"></canvas><div class="overlay" id="overlay"><div class="panel"><div class="sig">✦</div><h2 id="overlayTitle">星际弹球战场</h2><p id="overlayDesc">没有分离关卡，砖块会持续再生。<br>音符按乐谱落下，接住就演奏；漏接就静音。<br>完整接住一个小节，可获得特殊火力！</p><button id="start" class="play">▶ 开始无限狂欢</button></div></div></div></section>
 <section class="charge"><strong id="fleetBadge">🛸 飞船尚未解锁</strong><div class="meter"><div id="meterFill"></div></div><span id="meterPct" class="pct">0/12</span></section>
-<nav class="controls"><div id="rage" class="btn rage" style="display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none">♪ MELODY 0/5</div><button id="sound" class="btn">♫ 关</button><button id="reset" class="btn">↻ 重开</button></nav>
-<div class="help">📱 在场地任意高度左右滑动 · 小球自动发射<br>接住音符完成小节，奏出整首歌曲</div>
+<nav class="controls"><div id="rage" class="btn rage" style="display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none">♪ LIVE MELODY</div><button id="sound" class="btn">♫ 关</button><button id="reset" class="btn">↻ 重开</button></nav>
+<div class="help">📱 在场地任意高度左右滑动 · 小球自动发射<br>♪ 接音符实时演奏 · 漏接即静音 · 完整小节奖励</div>
 <section class="songbook" aria-label="Song playlist"><span id="songName">Twinkle, Twinkle, Little Star</span><select id="songSelect" aria-label="Choose a song"><option value="twinkle">Twinkle, Twinkle, Little Star</option><option value="frere">Frère Jacques</option><option value="ode">Ode to Joy (Theme)</option></select><span id="songProgress">1/12</span><small id="songHint">♪ Collect notes in order</small></section></main>
 <script>
 /* NEON ARCADE — lightweight original synthesized soundtrack and SFX.
@@ -34,25 +34,25 @@
 (function(){'use strict';
 class ArcadeAudio {
  constructor(game){this.game=game;this.ctx=null;this.master=null;this.mode=0;this.active=false;this.fever=false;this.tick=0;this.next=0;this.timer=null;this.last={};
-  this.tempo=game==='tetris'?118:128;this.duckUntil=0;
+  this.tempo=game==='tetris'?118:98;this.duckUntil=0;this.sfxActive=false;
   this.lead=game==='tetris'?[69,null,72,76,79,76,72,74,76,null,74,72,69,67,69,null,72,null,74,77,81,77,74,72,76,74,72,69,67,69,72,null]:[74,null,77,81,79,77,74,null,74,77,81,84,81,79,77,null,74,72,74,77,79,81,79,77,72,74,77,79,81,77,74,null];
   this.bass=game==='tetris'?[45,45,48,48,41,41,43,43]:[38,38,41,41,43,43,36,36];
  }
  prepare(){try{if(!this.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return false;this.ctx=new A();this.master=this.ctx.createGain();this.master.gain.value=.21;const limiter=this.ctx.createDynamicsCompressor();limiter.threshold.value=-18;limiter.knee.value=14;limiter.ratio.value=8;limiter.attack.value=.008;limiter.release.value=.18;this.master.connect(limiter);limiter.connect(this.ctx.destination)}if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});return true}catch(_){return false}}
- tone(midi,dur=.12,type='triangle',vol=.13,when,slide=0){if(!this.ctx)return;try{const c=this.ctx,at=Math.max(c.currentTime,when??c.currentTime),freq=440*Math.pow(2,(midi-69)/12),o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,at);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*Math.pow(2,slide/12)),at+dur);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(Math.max(.0002,vol),at+.009);g.gain.exponentialRampToValueAtTime(.0001,at+Math.max(.04,dur));o.connect(g);g.connect(this.master);o.start(at);o.stop(at+Math.max(.05,dur)+.025)}catch(_){}}
- noise(dur=.085,vol=.07,when,highpass=3000){if(!this.ctx)return;try{const c=this.ctx,at=Math.max(c.currentTime,when??c.currentTime);const buffer=c.createBuffer(1,Math.ceil(c.sampleRate*.23),c.sampleRate),d=buffer.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const src=c.createBufferSource(),hp=c.createBiquadFilter(),g=c.createGain();src.buffer=buffer;hp.type='highpass';hp.frequency.value=highpass;g.gain.setValueAtTime(vol,at);g.gain.exponentialRampToValueAtTime(.0001,at+dur);src.connect(hp);hp.connect(g);g.connect(this.master);src.start(at);src.stop(at+dur+.015)}catch(_){}}
- beat(at){const i=this.tick++;if(this.game==='breakout'){const step=i%8;if(step%2===0){this.tone(36,.12,'sine',.27,at,-15);this.noise(.04,.018,at,750)}if(step%4===2)this.noise(.11,.075,at,1300);this.noise(.025,.026,at,4600);return}if(at<this.duckUntil)return;const step=i%32,bar=Math.floor(i/16)%2,fast=60/this.tempo/2;if(step%4===0){this.tone(this.game==='tetris'?37:35,.15,'sine',.32,at,-18);this.noise(.035,.018,at,1100)}if(step%8===4)this.noise(.13,.12,at,1000);if(step%2===0)this.noise(.034,step%4===2?.054:.032,at,4500);if(step%4===0)this.tone(this.bass[Math.floor(step/4)%8],fast*2.65,'sawtooth',.055,at);let note=this.lead[step];if(this.fever&&note!==null&&step%4===0)note+=12;if(note!==null)this.tone(note,fast*(this.fever?.9:.73),'square',this.fever?.073:.052,at);if(step%8===0){const root=this.bass[Math.floor(step/4)%8]+12;this.tone(root+7,fast*5,'triangle',.029,at);this.tone(root+12,fast*5,'triangle',.025,at)}if(bar===1&&step%8===6)this.tone(this.bass[Math.floor(step/4)%8]+24,.11,'sine',.05,at)}
+ tone(midi,dur=.12,type='triangle',vol=.13,when,slide=0){if(!this.ctx)return;try{const c=this.ctx,at=Math.max(c.currentTime,when??c.currentTime),freq=440*Math.pow(2,(midi-69)/12),o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,at);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*Math.pow(2,slide/12)),at+dur);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(Math.max(.0002,vol*(this.game==='breakout'&&this.sfxActive?.27:1)),at+.009);g.gain.exponentialRampToValueAtTime(.0001,at+Math.max(.04,dur));o.connect(g);g.connect(this.master);o.start(at);o.stop(at+Math.max(.05,dur)+.025)}catch(_){}}
+ noise(dur=.085,vol=.07,when,highpass=3000){if(!this.ctx)return;try{const c=this.ctx,at=Math.max(c.currentTime,when??c.currentTime);const buffer=c.createBuffer(1,Math.ceil(c.sampleRate*.23),c.sampleRate),d=buffer.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const src=c.createBufferSource(),hp=c.createBiquadFilter(),g=c.createGain();src.buffer=buffer;hp.type='highpass';hp.frequency.value=highpass;g.gain.setValueAtTime(vol*(this.game==='breakout'&&this.sfxActive?.27:1),at);g.gain.exponentialRampToValueAtTime(.0001,at+dur);src.connect(hp);hp.connect(g);g.connect(this.master);src.start(at);src.stop(at+dur+.015)}catch(_){}}
+ beat(at){const i=this.tick++;if(this.game==='breakout'){const step=i%8;if(step%2===0){this.tone(36,.12,'sine',.095,at,-15);this.noise(.04,.008,at,750)}if(step%4===2)this.noise(.11,.026,at,1300);this.noise(.025,.009,at,4600);return}if(at<this.duckUntil)return;const step=i%32,bar=Math.floor(i/16)%2,fast=60/this.tempo/2;if(step%4===0){this.tone(this.game==='tetris'?37:35,.15,'sine',.32,at,-18);this.noise(.035,.018,at,1100)}if(step%8===4)this.noise(.13,.12,at,1000);if(step%2===0)this.noise(.034,step%4===2?.054:.032,at,4500);if(step%4===0)this.tone(this.bass[Math.floor(step/4)%8],fast*2.65,'sawtooth',.055,at);let note=this.lead[step];if(this.fever&&note!==null&&step%4===0)note+=12;if(note!==null)this.tone(note,fast*(this.fever?.9:.73),'square',this.fever?.073:.052,at);if(step%8===0){const root=this.bass[Math.floor(step/4)%8]+12;this.tone(root+7,fast*5,'triangle',.029,at);this.tone(root+12,fast*5,'triangle',.025,at)}if(bar===1&&step%8===6)this.tone(this.bass[Math.floor(step/4)%8]+24,.11,'sine',.05,at)}
  schedule(){if(!this.ctx||this.mode!==1||!this.active||document.hidden)return;const now=this.ctx.currentTime;this.next=Math.max(this.next,now);let steps=0;while(this.next<now+.125&&steps<3){this.beat(this.next);this.next+=60/this.tempo/2;steps++}}
  update(){this.stop();if(this.mode!==1||!this.active||!this.prepare()||document.hidden)return;this.next=this.ctx.currentTime+.026;this.schedule();this.timer=setInterval(()=>this.schedule(),50)}
  stop(){if(this.timer!==null){clearInterval(this.timer);this.timer=null}}
  setActive(active){if(this.active===active)return;this.active=active;this.update()}
  setFever(v){this.fever=Boolean(v)}
  toggle(){this.mode=(this.mode+1)%3;if(this.mode)this.prepare();this.update();return this.mode}
- pickupNote(midi){if(!this.mode||!this.prepare())return;const at=this.ctx.currentTime+.012;this.tone(midi,.26,'triangle',.15,at);this.tone(midi+12,.14,'sine',.042,at+.02)}
+ pickupNote(midi,beats=1,bpm=98){if(!this.mode||!this.prepare())return;const at=this.ctx.currentTime+.008,dur=Math.min(1.15,beats*60/bpm*.88);this.tone(midi,dur,'triangle',.25,at);this.tone(midi+12,Math.min(.7,dur*.65),'sine',.045,at+.018)}
  playBar(row,bpm,root){if(!this.mode||!this.prepare())return;const step=60/bpm,start=this.ctx.currentTime+.035;let offset=0;for(const [m,b] of row){this.tone(m,step*b*.92,'triangle',.15,start+offset);this.tone(m+12,step*b*.64,'sine',.034,start+offset+.015);offset+=step*b}for(const m of [root-12,root-5,root])this.tone(m,Math.min(2.6,offset*.85),'sine',.024,start);this.duckUntil=start+offset+.1}
  playFullSong(song){if(!this.mode||!this.prepare())return;const step=60/song.bpm,start=this.ctx.currentTime+.04;let offset=0;for(const row of song.bars)for(const [m,b] of row){this.tone(m,step*b*.88,'triangle',.09,start+offset);offset+=step*b}this.duckUntil=start+offset+.1}
  playTune(){if(!this.mode||!this.prepare())return;const start=this.ctx.currentTime+.035,step=.215,melody=[74,77,81,84,86,84,81,79,77,74,81,86];this.duckUntil=start+step*melody.length+.45;for(let i=0;i<melody.length;i++){const at=start+i*step,dur=i===melody.length-1?.63:step*.94;this.tone(melody[i],dur,'triangle',.15,at);this.tone(melody[i]+12,dur*.72,'sine',.043,at+.02);if(i===0||i===4||i===8)for(const pitch of [62,65,69])this.tone(pitch,step*3.4,'sine',.036,at)}this.tone(38,.36,'sine',.19,start,-7)}
- sound(name){if(!this.mode||!this.prepare())return;const now=performance.now();const limits={move:65,rotate:65,paddle:45,wall:90,brick:46,laser:130,drop:95};if(now-(this.last[name]||0)<(limits[name]??120))return;this.last[name]=now;const at=this.ctx.currentTime+.005;
+ sound(name){if(!this.mode||!this.prepare())return;const now=performance.now();const limits={move:65,rotate:65,paddle:45,wall:90,brick:46,laser:130,drop:95};if(now-(this.last[name]||0)<(limits[name]??120))return;this.last[name]=now;this.sfxActive=true;const at=this.ctx.currentTime+.005;
   switch(name){case'move':this.tone(76,.045,'sine',.035,at);break;
   case'rotate':this.tone(82,.075,'triangle',.080,at,3);break;
   case'hold':this.tone(72,.10,'triangle',.1,at,-4);this.tone(79,.14,'sine',.065,at+.07);break;
@@ -71,6 +71,7 @@ class ArcadeAudio {
   case'lose':this.tone(57,.26,'triangle',.12,at,-4);this.tone(48,.40,'triangle',.09,at+.18,-8);break;
   default:this.tone(74,.08,'sine',.055,at);
   }
+  this.sfxActive=false;
  }
 }
 window.ArcadeAudio=ArcadeAudio;
@@ -86,15 +87,15 @@ const gates={x:180,y:275,r:23};
 const bumpers=[{x:73,y:371,r:18},{x:287,y:371,r:18}];
 const COLS=8,ROWS=6,MARGIN=11,GAP=4,BW=(W-MARGIN*2-GAP*(COLS-1))/COLS,BH=18;
 let bricks=[],balls=[],shots=[],missiles=[],shards=[],drops=[],particles=[],rings=[],notices=[];
-let songbook=null,lastMusicDropKill=-10,melodyPulse=0;
+let songbook=null,melodyPulse=0;
 let paddle={x:W/2,target:W/2,y:493,w:88};
 let state='ready',resumeState='playing',kills=0,fleet=0,lives=5,combo=0,energy=0,rage=0,wide=0,laser=0,shield=1,regenClock=0,wingClock=0,missileClock=0,orbitalClock=0,orbitalFx=0,orbitalY=0,portalClock=0,portalFx=0,autoServe=0,laserClock=0,clock=0,shake=0,flash=0;
 const thresholds=[0,12,28,52,80];
 const MAX_PARTICLES=210,MAX_SHOTS=70,MAX_SHARDS=28;
 function audio(k){fx.sound(k)}
 function trans(en,zh,ja){const v=window.ArcadeLang?.get?.()||'en';return v==='zh-CN'?zh:v==='ja'?ja:en}
-function resetSong(){songbook?.reset();melodyPulse=0;lastMusicDropKill=-10}
-function melodyMiss(x){songbook?.miss();melodyPulse=.1}
+function resetSong(){songbook?.reset();melodyPulse=0;drops.length=0}
+function melodyMiss(d){songbook?.miss(d);melodyPulse=.1}
 function sonicBurst(){const x=paddle.x,y=paddle.y-32;laser=Math.max(laser,8);laserClock=0;shield=Math.min(3,shield+1);energy=Math.min(100,energy+22);for(let i=0;i<16;i++){const a=Math.PI*(.9+i/15*1.2);if(shards.length<MAX_SHARDS)shards.push({x,y,vx:Math.cos(a)*110,vy:-Math.abs(Math.sin(a)*130),trail:[],life:4})}for(const a of [-.42,.42])if(balls.length<11)spawnBall(x,y,Math.sin(a)*270,-Math.cos(a)*320);ring(x,y,'#ffe9b5',22);ring(W/2,250,'#8de8ff',26);burst(x,y,'#f3bbff',58);shake=10;flash=.36;text(W/2,308,trans('♪ SONIC SYMPHONY!','♪ 星河奏鸣！','♪ 星のシンフォニー！'),'#ffe7ad',22)}
 function text(x,y,t,c='#c5f8ff',size=17){notices.push({x,y,t,c,size,age:0});if(notices.length>12)notices.shift()}
 function burst(x,y,c,n=12){for(let i=0;i<n;i++){let a=rnd(0,Math.PI*2),v=rnd(35,160);particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,age:0,life:rnd(.25,.75),c})}if(particles.length>MAX_PARTICLES)particles.splice(0,particles.length-MAX_PARTICLES)}
@@ -107,7 +108,7 @@ function updateUI(){
  const ratio=fleet<4?clamp((kills-prev)/(next-prev),0,1):1;
  $('meterFill').style.width=String(ratio*100)+'%';$('meterPct').textContent=fleet<4?`${kills}/${next}`:'MAX';
  $('fleetBadge').textContent=['🛸 下一解锁：侦察机','🛸 单僚机 · 即将双机','🚀 双僚机 · 即将导弹','☄️ 导弹 · 即将轨道炮','🌌 舰队满编！'][fleet];
- $('rage').textContent=trans('♪ MELODY','♪ 旋律','♪ メロディー')+' '+(songbook?.getState().note??0)+' ♪'+(rage>0?' ⚡':'');
+ $('rage').textContent=trans('♪ LIVE MELODY','♪ 即时演奏','♪ 生演奏')+(rage>0?' ⚡':'');
 }
 function cellBrick(row,col){let d=Math.random();return {r:row,c:col,x:MARGIN+col*(BW+GAP),y:65+row*26,w:BW,h:BH,alive:true,type:d<.09?'bomb':d<.17?'power':d<.23?'armor':'normal',hp:d>=.17&&d<.23?2:1,color:colors[row]}}
 function addMissing(n){
@@ -132,11 +133,9 @@ function unlock(){
  const names=['','🛸 侦察僚机入队！','🛸 双舰护航！','🚀 追踪导弹解锁！','☄️ 轨道主炮已上线！'];
  while(fleet<4&&kills>=thresholds[fleet+1]){fleet++;text(W/2,300,names[fleet],'#c6faff',21);ring(paddle.x,paddle.y-27,'#9deeff',25);burst(paddle.x,paddle.y-24,'#75dfff',26);shake=6;flash=.15;audio('wave');if(fleet===4)orbitalClock=1.5}
 }
-function drop(x,y){if(drops.length||kills-lastMusicDropKill<4)return;lastMusicDropKill=kills;drops.push({...songbook.current(),x,y,vy:158,age:0})}
 function destroy(b,chain=false){
  if(!b.alive)return;b.alive=false;kills++;combo++;energy=clamp(energy+(rage>0?1:3.1),0,100);
  const x=b.x+b.w/2,y=b.y+b.h/2;burst(x,y,b.color,b.type==='bomb'?17:7);ring(x,y,b.color,3);shake=Math.min(7,shake+.42);
- if(kills-lastMusicDropKill>=4)drop(x,y);
  if(b.type==='bomb'){
    text(x,y,'✹','#ffadce',18);audio('bomb');
    for(const q of bricks)if(q.alive&&Math.hypot(q.x+q.w/2-x,q.y+q.h/2-y)<52){q.alive=false;kills++;burst(q.x+q.w/2,q.y+q.h/2,q.color,5)}
@@ -220,6 +219,8 @@ function tick(dt){
  for(let i=notices.length-1;i>=0;i--){notices[i].age+=dt;notices[i].y-=28*dt;if(notices[i].age>1.15)notices.splice(i,1)}
  shake=Math.max(0,shake-18*dt);flash=Math.max(0,flash-.7*dt);portalFx=Math.max(0,portalFx-dt);orbitalFx=Math.max(0,orbitalFx-dt);
  if(state!=='playing')return;
+ // Music notes arrive at exact score beats, regardless of destroyed bricks.
+ songbook?.update(dt,entry=>{const x=clamp(paddle.x+Math.sin(entry.seq*1.77)*57,30,W-30);drops.push({...entry,x,y:90,age:0})});
  portalClock=Math.max(0,portalClock-dt);
  if(rage>0)rage=Math.max(0,rage-dt);if(energy>=100&&rage<=0){energy=0;rage=8;laserClock=0;text(W/2,332,'⚡ 自动 FEVER！','#ffa8db',19);audio('fever')}
  if(wide>0){wide-=dt;if(wide<=0)paddle.w=88}
@@ -241,9 +242,10 @@ function tick(dt){
  }
  updateHoming(missiles,dt,true);updateHoming(shards,dt,false);
  melodyPulse=Math.max(0,melodyPulse-dt*1.4);
- for(let i=drops.length-1;i>=0;i--){const d=drops[i];d.y+=d.vy*dt;d.age+=dt;
-  if(d.y>paddle.y-12&&d.y<paddle.y+19&&Math.abs(d.x-paddle.x)<paddle.w/2+15){collect(d);drops.splice(i,1)}
-  else if(d.y>paddle.y+25){drops.splice(i,1);melodyMiss(d.x)}
+ for(let i=drops.length-1;i>=0;i--){const d=drops[i];d.age+=dt;
+  const left=d.when-songbook.getTime();d.y=90+(paddle.y-90)*(1-left/1.5);
+  if(d.y>=paddle.y-12&&d.y<=paddle.y+19&&Math.abs(d.x-paddle.x)<paddle.w/2+14){collect(d);drops.splice(i,1)}
+  else if(d.y>paddle.y+25){drops.splice(i,1);melodyMiss(d)}
  }
  for(let i=balls.length-1;i>=0;i--){let b=balls[i],ox=b.x,oy=b.y;b.gateLock=Math.max(0,b.gateLock-dt);b.bumperLock=Math.max(0,b.bumperLock-dt);
   b.trail.push({x:b.x,y:b.y});if(b.trail.length>8)b.trail.shift();
@@ -317,6 +319,6 @@ wrap.addEventListener('pointerup',e=>{if(e.pointerId===active)active=null});wrap
 $('start').addEventListener('click',()=>state==='paused'?pause():reset());$('pause').addEventListener('click',pause);$('reset').addEventListener('click',reset);
 $('sound').addEventListener('click',()=>{const m=fx.toggle();$('sound').textContent=['♫ 关','♫ 音乐','♪ 音效'][m];$('sound').classList.toggle('active',m>0);if(m)audio('power')});
 document.addEventListener('keydown',e=>{if(e.target?.tagName==='BUTTON')return;if(e.code==='ArrowLeft'||e.code==='KeyA'){paddle.target-=26;e.preventDefault()}else if(e.code==='ArrowRight'||e.code==='KeyD'){paddle.target+=26;e.preventDefault()}else if(e.code==='Space'){pause();e.preventDefault()}});
-songbook=window.NeonSongbook.create(fx,{onBar(){energy=Math.min(100,energy+12);shield=Math.min(3,shield+1);ring(W/2,240,'#aaf6ff',25);burst(W/2,260,'#9bd6ff',25);for(let i=0;i<5;i++){if(shards.length<MAX_SHARDS)shards.push({x:paddle.x,y:paddle.y-40,vx:(i-2)*40,vy:-160,trail:[],life:4})}text(W/2,335,trans('♪ BAR COMPLETE!','♪ 小节完成！','♪ 小節クリア！'),'#e2faff',18);},onSong(){sonicBurst();text(W/2,300,trans('♪ SONG COMPLETE!','♪ 全曲完成！','♪ 全曲完成！'),'#ffe9a0',23)},onChange(){drops=[];lastMusicDropKill=kills-5;}});document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause()});updateUI();raf=requestAnimationFrame(frame);
+songbook=window.NeonSongbook.create(fx,{onBar(){energy=Math.min(100,energy+12);shield=Math.min(3,shield+1);ring(W/2,240,'#aaf6ff',25);burst(W/2,260,'#9bd6ff',25);for(let i=0;i<5;i++){if(shards.length<MAX_SHARDS)shards.push({x:paddle.x,y:paddle.y-40,vx:(i-2)*40,vy:-160,trail:[],life:4})}text(W/2,335,trans('♪ BAR COMPLETE!','♪ 小节完成！','♪ 小節クリア！'),'#e2faff',18);},onSong(){sonicBurst();text(W/2,300,trans('♪ SONG COMPLETE!','♪ 全曲完成！','♪ 全曲完成！'),'#ffe9a0',23)},onChange(){drops=[];fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;fx.update();}});fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause()});updateUI();raf=requestAnimationFrame(frame);
 })();
 </script><script src="locale.js"></script><script src="breakout-language.js"></script></body></html>
