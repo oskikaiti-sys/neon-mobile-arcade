@@ -6,9 +6,9 @@ const palettes={seal:['#ff779a','#fff7dc'],barrier:['#ac83ff','#ffe3ff'],binding
 class ArcadeSkillVFX{
  constructor(){this.effects=[]}
  clear(){this.effects.length=0}
- cast(kind,x,y,touhou,label='',flandre=false){
+ cast(kind,x,y,touhou,label='',flandre=false,remilia=false){
   const life=kind==='heaven'||kind==='sonic'?1.38:kind==='bomb'?.56:kind==='orb'?.83:1.04;
-  this.effects.push({kind,x,y,touhou,label,age:0,life,colors:flandre?['#ff80c4','#ffe4a0']:(palettes[kind]||palettes.sonic),flandre});
+  this.effects.push({kind,x,y,touhou,label,age:0,life,colors:remilia?['#f74d74','#ffd5b2']:flandre?['#ff80c4','#ffe4a0']:(palettes[kind]||palettes.sonic),flandre,remilia});
   if(this.effects.length>6)this.effects.splice(0,this.effects.length-6);
  }
  update(dt){for(let i=this.effects.length-1;i>=0;i--){const e=this.effects[i];e.age+=dt;if(e.age>=e.life)this.effects.splice(i,1)}}
