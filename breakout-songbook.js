@@ -57,7 +57,7 @@ function create(audio,callbacks={}){
  window.addEventListener('arcade-language-change',render);
  function current(){
   const song=songs[selected],row=song.bars[bar],entry=row[note];
-  return {id:song.id,bar,note,midi:entry[0],beats:entry[1],label:pitch(entry[0]),color:color[(bar+note)%color.length]};
+  return {song:song.id,bar,note,midi:entry[0],beats:entry[1],label:pitch(entry[0]),color:color[(bar+note)%color.length]};
  }
  function pitch(midi){const a=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];return a[midi%12]+(Math.floor(midi/12)-1)}
  function catchNote(drop){
