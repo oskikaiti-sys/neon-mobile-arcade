@@ -71,18 +71,32 @@ class ArcadeAudio {
  }
  playHarmony(midiVoices,beats=2,bpm=146){
   if(this.mode!==1||!this.active||!this.prepare()||!Array.isArray(midiVoices))return;
-  const at=this.ctx.currentTime+.008,dur=beats*60/bpm*.99;
-  for(let i=0;i<midiVoices.length;i++){
-   const midi=midiVoices[i],osc=this.ctx.createOscillator(),gain=this.ctx.createGain();
-   const attack=Math.min(.19,dur*.26),release=Math.min(.24,dur*.31),end=at+dur;
-   osc.type=i===0?'triangle':'sine';osc.frequency.value=440*Math.pow(2,(midi-69)/12);
-   const vol=i===0?.028:.021;
-   gain.gain.setValueAtTime(.0001,at);
-   gain.gain.linearRampToValueAtTime(vol,at+attack);
-   gain.gain.setValueAtTime(vol*.83,end-release);
-   gain.gain.linearRampToValueAtTime(.0001,end);
-   osc.connect(gain);gain.connect(this.master);
-   osc.start(at);osc.stop(end+.025);
+  const ctx=this.ctx,start=ctx.currentTime+.010,duration=Math.max(.22,beats*60/bpm*.98);
+  // Mobile speakers tend to lose fundamentals below 200 Hz. Reinforce the bass an
+  // octave higher while keeping the original MML harmony and its pitch classes.
+  const voices=[];
+  midiVoices.forEach((midi,i)=>{
+   if(!Number.isFinite(midi))return;
+   if(i===0){
+    voices.push({midi,volume:.042,type:'triangle'});
+    voices.push({midi:midi<57?midi+12:midi,volume:.105,type:'triangle'});
+   }else{
+    voices.push({midi:midi>72?midi-12:midi,volume:i===1?.080:.058,type:'sine'});
+   }
+  });
+  for(const {midi,volume,type} of voices){
+   try{
+    const osc=ctx.createOscillator(),amp=ctx.createGain(),end=start+duration;
+    const attack=Math.min(.090,duration*.18),release=Math.min(.20,duration*.29);
+    osc.type=type;
+    osc.frequency.setValueAtTime(440*Math.pow(2,(midi-69)/12),start);
+    amp.gain.setValueAtTime(.0001,start);
+    amp.gain.linearRampToValueAtTime(volume,start+attack);
+    amp.gain.setValueAtTime(volume*.87,Math.max(start+attack,end-release));
+    amp.gain.linearRampToValueAtTime(.0001,end);
+    osc.connect(amp);amp.connect(this.master);
+    osc.start(start);osc.stop(end+.030);
+   }catch(_){}
   }
  }
  playAutoFlourish(midi,beats=1,bpm=146){
