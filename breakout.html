@@ -23,10 +23,10 @@
 <body><main id="app">
 <header class="header"><div><div class="micro">MOBILE ARCADE · INFINITY</div><div class="title">BREAKOUT <em>INFINITY</em></div></div><button id="pause" class="minor">Ⅱ 暂停</button></header>
 <section class="stats"><div class="stat"><span>已击碎</span><b id="kills" style="color:#69eaf5">0</b></div><div class="stat"><span>护航等级</span><b id="fleet" style="color:#ffda76">0</b></div><div class="stat"><span>小球</span><b id="balls" style="color:#a3bfff">1</b></div><div class="stat"><span>生命</span><b id="lives" style="color:#ff87bd">♥♥♥♥♥</b></div></section>
-<section class="stage"><div id="field-wrap"><canvas id="field" width="360" height="540" aria-label="连续弹球打砖块战场，横向拖动控制挡板。中央时空门可传送弹球并发射追踪轰炸。"></canvas><div class="overlay" id="overlay"><div class="panel"><div class="sig">✦</div><h2 id="overlayTitle">星际弹球战场</h2><p id="overlayDesc">没有分离关卡，砖块会持续再生。<br>瞄准中央时空门：传送弹球 + 导弹轰炸。<br>击碎砖块后，逐级解锁护航飞船！</p><button id="start" class="play">▶ 开始无限狂欢</button></div></div></div></section>
+<section class="stage"><div id="field-wrap"><canvas id="field" width="360" height="540" aria-label="连续弹球打砖块战场，横向拖动控制挡板。中央时空门可传送弹球并发射追踪轰炸。"></canvas><div class="overlay" id="overlay"><div class="panel"><div class="sig">✦</div><h2 id="overlayTitle">星际弹球战场</h2><p id="overlayDesc">没有分离关卡，砖块会持续再生。<br>接住依次掉落的音符，奏出旋律召唤音波轰炸！<br>击碎砖块，逐级解锁护航飞船！</p><button id="start" class="play">▶ 开始无限狂欢</button></div></div></div></section>
 <section class="charge"><strong id="fleetBadge">🛸 飞船尚未解锁</strong><div class="meter"><div id="meterFill"></div></div><span id="meterPct" class="pct">0/12</span></section>
-<nav class="controls"><div id="rage" class="btn rage" style="display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none">🌀 入门自动轰炸</div><button id="sound" class="btn">♫ 关</button><button id="reset" class="btn">↻ 重开</button></nav>
-<div class="help">📱 在场地任意高度左右滑动 · 小球自动发射<br>12 / 28 / 52 / 80 块升级：单僚机 → 双机 → 导弹 → 轨道炮</div>
+<nav class="controls"><div id="rage" class="btn rage" style="display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none">♪ MELODY 0/5</div><button id="sound" class="btn">♫ 关</button><button id="reset" class="btn">↻ 重开</button></nav>
+<div class="help">📱 在场地任意高度左右滑动 · 小球自动发射<br>接住 ♪ D → F → A → C → D↑ 可召唤音波轰炸</div>
 </main>
 <script>
 /* NEON ARCADE — lightweight original synthesized soundtrack and SFX.
@@ -34,20 +34,22 @@
 (function(){'use strict';
 class ArcadeAudio {
  constructor(game){this.game=game;this.ctx=null;this.master=null;this.mode=0;this.active=false;this.fever=false;this.tick=0;this.next=0;this.timer=null;this.last={};
-  this.tempo=game==='tetris'?118:137;
-  this.lead=game==='tetris'?[69,null,72,76,79,76,72,74,76,null,74,72,69,67,69,null,72,null,74,77,81,77,74,72,76,74,72,69,67,69,72,null]:[74,null,77,81,84,null,81,77,74,77,null,81,86,84,81,null,74,null,77,81,86,84,81,77,79,null,81,79,77,74,72,null];
+  this.tempo=game==='tetris'?118:128;this.duckUntil=0;
+  this.lead=game==='tetris'?[69,null,72,76,79,76,72,74,76,null,74,72,69,67,69,null,72,null,74,77,81,77,74,72,76,74,72,69,67,69,72,null]:[74,null,77,81,79,77,74,null,74,77,81,84,81,79,77,null,74,72,74,77,79,81,79,77,72,74,77,79,81,77,74,null];
   this.bass=game==='tetris'?[45,45,48,48,41,41,43,43]:[38,38,41,41,43,43,36,36];
  }
  prepare(){try{if(!this.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return false;this.ctx=new A();this.master=this.ctx.createGain();this.master.gain.value=.21;const limiter=this.ctx.createDynamicsCompressor();limiter.threshold.value=-18;limiter.knee.value=14;limiter.ratio.value=8;limiter.attack.value=.008;limiter.release.value=.18;this.master.connect(limiter);limiter.connect(this.ctx.destination)}if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});return true}catch(_){return false}}
  tone(midi,dur=.12,type='triangle',vol=.13,when,slide=0){if(!this.ctx)return;try{const c=this.ctx,at=Math.max(c.currentTime,when??c.currentTime),freq=440*Math.pow(2,(midi-69)/12),o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,at);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*Math.pow(2,slide/12)),at+dur);g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(Math.max(.0002,vol),at+.009);g.gain.exponentialRampToValueAtTime(.0001,at+Math.max(.04,dur));o.connect(g);g.connect(this.master);o.start(at);o.stop(at+Math.max(.05,dur)+.025)}catch(_){}}
  noise(dur=.085,vol=.07,when,highpass=3000){if(!this.ctx)return;try{const c=this.ctx,at=Math.max(c.currentTime,when??c.currentTime);const buffer=c.createBuffer(1,Math.ceil(c.sampleRate*.23),c.sampleRate),d=buffer.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const src=c.createBufferSource(),hp=c.createBiquadFilter(),g=c.createGain();src.buffer=buffer;hp.type='highpass';hp.frequency.value=highpass;g.gain.setValueAtTime(vol,at);g.gain.exponentialRampToValueAtTime(.0001,at+dur);src.connect(hp);hp.connect(g);g.connect(this.master);src.start(at);src.stop(at+dur+.015)}catch(_){}}
- beat(at){const i=this.tick++,step=i%32,bar=Math.floor(i/16)%2,fast=60/this.tempo/2;if(step%4===0){this.tone(this.game==='tetris'?37:35,.15,'sine',.32,at,-18);this.noise(.035,.018,at,1100)}if(step%8===4)this.noise(.13,.12,at,1000);if(step%2===0)this.noise(.034,step%4===2?.054:.032,at,4500);if(step%4===0)this.tone(this.bass[Math.floor(step/4)%8],fast*2.65,'sawtooth',.055,at);let note=this.lead[step];if(this.fever&&note!==null&&step%4===0)note+=12;if(note!==null)this.tone(note,fast*(this.fever?.9:.73),'square',this.fever?.073:.052,at);if(step%8===0){const root=this.bass[Math.floor(step/4)%8]+12;this.tone(root+7,fast*5,'triangle',.029,at);this.tone(root+12,fast*5,'triangle',.025,at)}if(bar===1&&step%8===6)this.tone(this.bass[Math.floor(step/4)%8]+24,.11,'sine',.05,at)}
+ beat(at){const i=this.tick++;if(at<this.duckUntil)return;const step=i%32,bar=Math.floor(i/16)%2,fast=60/this.tempo/2;if(step%4===0){this.tone(this.game==='tetris'?37:35,.15,'sine',.32,at,-18);this.noise(.035,.018,at,1100)}if(step%8===4)this.noise(.13,.12,at,1000);if(step%2===0)this.noise(.034,step%4===2?.054:.032,at,4500);if(step%4===0)this.tone(this.bass[Math.floor(step/4)%8],fast*2.65,'sawtooth',.055,at);let note=this.lead[step];if(this.fever&&note!==null&&step%4===0)note+=12;if(note!==null)this.tone(note,fast*(this.fever?.9:.73),'square',this.fever?.073:.052,at);if(step%8===0){const root=this.bass[Math.floor(step/4)%8]+12;this.tone(root+7,fast*5,'triangle',.029,at);this.tone(root+12,fast*5,'triangle',.025,at)}if(bar===1&&step%8===6)this.tone(this.bass[Math.floor(step/4)%8]+24,.11,'sine',.05,at)}
  schedule(){if(!this.ctx||this.mode!==1||!this.active||document.hidden)return;const now=this.ctx.currentTime;this.next=Math.max(this.next,now);let steps=0;while(this.next<now+.125&&steps<3){this.beat(this.next);this.next+=60/this.tempo/2;steps++}}
  update(){this.stop();if(this.mode!==1||!this.active||!this.prepare()||document.hidden)return;this.next=this.ctx.currentTime+.026;this.schedule();this.timer=setInterval(()=>this.schedule(),50)}
  stop(){if(this.timer!==null){clearInterval(this.timer);this.timer=null}}
  setActive(active){if(this.active===active)return;this.active=active;this.update()}
  setFever(v){this.fever=Boolean(v)}
  toggle(){this.mode=(this.mode+1)%3;if(this.mode)this.prepare();this.update();return this.mode}
+ pickupNote(index){if(!this.mode||!this.prepare())return;const notes=[74,77,81,84,86],at=this.ctx.currentTime+.015;this.tone(notes[Math.min(4,index)],.33,'triangle',.115,at);this.tone(notes[Math.min(4,index)]+12,.19,'sine',.04,at+.025)}
+ playTune(){if(!this.mode||!this.prepare())return;const start=this.ctx.currentTime+.035,step=.215,melody=[74,77,81,84,86,84,81,79,77,74,81,86];this.duckUntil=start+step*melody.length+.45;for(let i=0;i<melody.length;i++){const at=start+i*step,dur=i===melody.length-1?.63:step*.94;this.tone(melody[i],dur,'triangle',.15,at);this.tone(melody[i]+12,dur*.72,'sine',.043,at+.02);if(i===0||i===4||i===8)for(const pitch of [62,65,69])this.tone(pitch,step*3.4,'sine',.036,at)}this.tone(38,.36,'sine',.19,start,-7)}
  sound(name){if(!this.mode||!this.prepare())return;const now=performance.now();const limits={move:65,rotate:65,paddle:45,wall:90,brick:46,laser:130,drop:95};if(now-(this.last[name]||0)<(limits[name]??120))return;this.last[name]=now;const at=this.ctx.currentTime+.005;
   switch(name){case'move':this.tone(76,.045,'sine',.035,at);break;
   case'rotate':this.tone(82,.075,'triangle',.080,at,3);break;
@@ -82,11 +84,16 @@ const gates={x:180,y:275,r:23};
 const bumpers=[{x:73,y:371,r:18},{x:287,y:371,r:18}];
 const COLS=8,ROWS=6,MARGIN=11,GAP=4,BW=(W-MARGIN*2-GAP*(COLS-1))/COLS,BH=18;
 let bricks=[],balls=[],shots=[],missiles=[],shards=[],drops=[],particles=[],rings=[],notices=[];
+const SONG_NOTES=[{name:'D',midi:74,color:'#79eaff'},{name:'F',midi:77,color:'#b99fff'},{name:'A',midi:81,color:'#ffcf7d'},{name:'C',midi:84,color:'#ff8fc6'},{name:'D↑',midi:86,color:'#85f8c4'}];let melodyStep=0,lastMusicDropKill=-10,melodyPulse=0;
 let paddle={x:W/2,target:W/2,y:493,w:88};
 let state='ready',resumeState='playing',kills=0,fleet=0,lives=5,combo=0,energy=0,rage=0,wide=0,laser=0,shield=1,regenClock=0,wingClock=0,missileClock=0,orbitalClock=0,orbitalFx=0,orbitalY=0,portalClock=0,portalFx=0,autoServe=0,laserClock=0,clock=0,shake=0,flash=0;
 const thresholds=[0,12,28,52,80];
 const MAX_PARTICLES=210,MAX_SHOTS=70,MAX_SHARDS=28;
 function audio(k){fx.sound(k)}
+function trans(en,zh,ja){const v=window.ArcadeLang?.get?.()||'en';return v==='zh-CN'?zh:v==='ja'?ja:en}
+function resetSong(){melodyStep=0;melodyPulse=0;lastMusicDropKill=-10}
+function melodyMiss(x){if(melodyStep>0)text(x,475,trans('MELODY LOST','旋律中断','メロディー失敗'),'#bbacff',14);melodyStep=0;melodyPulse=.1}
+function sonicBurst(){fx.playTune();const x=paddle.x,y=paddle.y-32;laser=Math.max(laser,8);laserClock=0;shield=Math.min(3,shield+1);energy=Math.min(100,energy+22);for(let i=0;i<16;i++){const a=Math.PI*(.9+i/15*1.2);if(shards.length<MAX_SHARDS)shards.push({x,y,vx:Math.cos(a)*110,vy:-Math.abs(Math.sin(a)*130),trail:[],life:4})}for(const a of [-.42,.42])if(balls.length<11)spawnBall(x,y,Math.sin(a)*270,-Math.cos(a)*320);ring(x,y,'#ffe9b5',22);ring(W/2,250,'#8de8ff',26);burst(x,y,'#f3bbff',58);shake=10;flash=.36;text(W/2,308,trans('♪ SONIC SYMPHONY!','♪ 星河奏鸣！','♪ 星のシンフォニー！'),'#ffe7ad',22)}
 function text(x,y,t,c='#c5f8ff',size=17){notices.push({x,y,t,c,size,age:0});if(notices.length>12)notices.shift()}
 function burst(x,y,c,n=12){for(let i=0;i<n;i++){let a=rnd(0,Math.PI*2),v=rnd(35,160);particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,age:0,life:rnd(.25,.75),c})}if(particles.length>MAX_PARTICLES)particles.splice(0,particles.length-MAX_PARTICLES)}
 function ring(x,y,color,r=4){rings.push({x,y,color,r,age:0,life:.48});if(rings.length>25)rings.shift()}
@@ -98,7 +105,7 @@ function updateUI(){
  const ratio=fleet<4?clamp((kills-prev)/(next-prev),0,1):1;
  $('meterFill').style.width=String(ratio*100)+'%';$('meterPct').textContent=fleet<4?`${kills}/${next}`:'MAX';
  $('fleetBadge').textContent=['🛸 下一解锁：侦察机','🛸 单僚机 · 即将双机','🚀 双僚机 · 即将导弹','☄️ 导弹 · 即将轨道炮','🌌 舰队满编！'][fleet];
- $('rage').textContent=rage>0?`⚡ 自动狂暴 ${Math.ceil(rage)}s`:'🌀 入门自动轰炸';
+ $('rage').textContent=trans('♪ MELODY','♪ 旋律','♪ メロディー')+' '+melodyStep+'/'+SONG_NOTES.length+(rage>0?' ⚡':'');
 }
 function cellBrick(row,col){let d=Math.random();return {r:row,c:col,x:MARGIN+col*(BW+GAP),y:65+row*26,w:BW,h:BH,alive:true,type:d<.09?'bomb':d<.17?'power':d<.23?'armor':'normal',hp:d>=.17&&d<.23?2:1,color:colors[row]}}
 function addMissing(n){
@@ -114,7 +121,7 @@ function spawnBall(x=paddle.x,y=paddle.y-15,vx=rnd(-145,145),vy=-rnd(265,315)){
  if(Math.abs(vx)<55)vx=vx<0?-95:95;if(balls.length<12)balls.push({x,y,vx,vy,r:5.5,trail:[],gateLock:0,bumperLock:0});
 }
 function reset(){
- state='playing';kills=0;fleet=0;lives=5;combo=0;energy=0;rage=0;wide=0;laser=0;shield=1;regenClock=.35;wingClock=.3;missileClock=0;orbitalClock=0;orbitalFx=0;portalClock=0;portalFx=0;autoServe=0;laserClock=0;clock=0;shake=0;flash=0;
+ resetSong();state='playing';kills=0;fleet=0;lives=5;combo=0;energy=0;rage=0;wide=0;laser=0;shield=1;regenClock=.35;wingClock=.3;missileClock=0;orbitalClock=0;orbitalFx=0;portalClock=0;portalFx=0;autoServe=0;laserClock=0;clock=0;shake=0;flash=0;
  paddle={x:W/2,target:W/2,y:493,w:88};balls=[];shots=[];missiles=[];shards=[];drops=[];particles=[];rings=[];notices=[];seedBricks();spawnBall();$('overlay').hidden=true;fx.setFever(false);fx.setActive(true);audio('power');updateUI();
 }
 function pause(){if(state==='paused'){state=resumeState;$('overlay').hidden=true;fx.setActive(true);updateUI();return}if(state!=='playing')return;resumeState=state;state='paused';fx.setActive(false);setOverlay('游戏暂停','你的舰队、砖墙与弹球位置都保留。','▶ 继续');updateUI()}
@@ -123,7 +130,7 @@ function unlock(){
  const names=['','🛸 侦察僚机入队！','🛸 双舰护航！','🚀 追踪导弹解锁！','☄️ 轨道主炮已上线！'];
  while(fleet<4&&kills>=thresholds[fleet+1]){fleet++;text(W/2,300,names[fleet],'#c6faff',21);ring(paddle.x,paddle.y-27,'#9deeff',25);burst(paddle.x,paddle.y-24,'#75dfff',26);shake=6;flash=.15;audio('wave');if(fleet===4)orbitalClock=1.5}
 }
-function drop(x,y){if(drops.length>12)return;const types=['multi','wide','laser','shield'];drops.push({x,y,type:types[Math.floor(Math.random()*types.length)],vy:95})}
+function drop(x,y){if(drops.length||kills-lastMusicDropKill<3)return;lastMusicDropKill=kills;drops.push({x,y,noteIndex:melodyStep,vy:158,age:0})}
 function destroy(b,chain=false){
  if(!b.alive)return;b.alive=false;kills++;combo++;energy=clamp(energy+(rage>0?1:3.1),0,100);
  const x=b.x+b.w/2,y=b.y+b.h/2;burst(x,y,b.color,b.type==='bomb'?17:7);ring(x,y,b.color,3);shake=Math.min(7,shake+.42);
@@ -136,12 +143,10 @@ function destroy(b,chain=false){
 }
 function hitBrick(b){if(!b.alive)return;if(b.hp>1){b.hp--;burst(b.x+b.w/2,b.y+b.h/2,'#c3dfff',4);audio('brick')}else destroy(b)}
 function collect(d){
- if(d.type==='multi'){
-  let originals=[...balls].slice(0,2);for(const b of originals)for(const ang of [-.5,.5]){if(balls.length>=9)break;let sp=Math.max(270,Math.hypot(b.vx,b.vy));let a=Math.atan2(b.vy,b.vx)+ang;spawnBall(b.x,b.y,Math.cos(a)*sp,Math.sin(a)*sp)}
- }else if(d.type==='wide'){paddle.w=142;wide=14}
- else if(d.type==='laser'){laser=14;laserClock=0}
- else shield=Math.min(3,shield+1);
- burst(d.x,d.y,'#ffffff',17);text(d.x,d.y,{multi:'多球分裂!',wide:'超级挡板!',laser:'激光炮!',shield:'护盾补给!'}[d.type],'#baf5ff',18);audio('power')
+ if(d.noteIndex!==melodyStep){melodyMiss(d.x);return}
+ const note=SONG_NOTES[melodyStep];fx.pickupNote(melodyStep);burst(d.x,d.y,note.color,13);ring(d.x,d.y,note.color,8);
+ text(d.x,Math.min(470,d.y-20),'♪ '+note.name,note.color,18);melodyStep++;melodyPulse=.8;
+ if(melodyStep>=SONG_NOTES.length){melodyStep=0;sonicBurst()}
 }
 function portalEnter(ball){
  if(portalClock>0||ball.gateLock>0)return;
@@ -236,9 +241,10 @@ function tick(dt){
   if(target){hitBrick(target);shots.splice(i,1)}else if(s.y<35||s.x<0||s.x>W)shots.splice(i,1);
  }
  updateHoming(missiles,dt,true);updateHoming(shards,dt,false);
- for(let i=drops.length-1;i>=0;i--){const d=drops[i];d.y+=d.vy*dt;
-  if(d.y>paddle.y-9&&d.y<paddle.y+18&&Math.abs(d.x-paddle.x)<paddle.w/2+12){collect(d);drops.splice(i,1)}
-  else if(d.y>H+15)drops.splice(i,1);
+ melodyPulse=Math.max(0,melodyPulse-dt*1.4);
+ for(let i=drops.length-1;i>=0;i--){const d=drops[i];d.y+=d.vy*dt;d.age+=dt;
+  if(d.y>paddle.y-12&&d.y<paddle.y+19&&Math.abs(d.x-paddle.x)<paddle.w/2+15){collect(d);drops.splice(i,1)}
+  else if(d.y>paddle.y+25){drops.splice(i,1);melodyMiss(d.x)}
  }
  for(let i=balls.length-1;i>=0;i--){let b=balls[i],ox=b.x,oy=b.y;b.gateLock=Math.max(0,b.gateLock-dt);b.bumperLock=Math.max(0,b.bumperLock-dt);
   b.trail.push({x:b.x,y:b.y});if(b.trail.length>8)b.trail.shift();
@@ -288,7 +294,8 @@ function draw(){
  g.fillStyle='#0d0d2a';g.beginPath();g.arc(0,0,11,0,Math.PI*2);g.fill();g.restore();
  g.fillStyle='#d1bfff';g.font='bold 11px system-ui';g.textAlign='center';g.fillText('🌀 时空门',gates.x,gates.y+47);
  for(const b of bumpers){g.save();g.shadowColor='#ffba79';g.shadowBlur=16;g.fillStyle='#583c48';g.beginPath();g.arc(b.x,b.y,b.r+4,0,Math.PI*2);g.fill();g.strokeStyle='#ffc987';g.lineWidth=4;g.beginPath();g.arc(b.x,b.y,b.r,0,Math.PI*2);g.stroke();g.fillStyle='#ffecb0';g.beginPath();g.arc(b.x,b.y,6,0,Math.PI*2);g.fill();g.restore()}
- for(const d of drops){const col={multi:'#67c6ff',wide:'#76eebe',laser:'#dba6ff',shield:'#ffdc7f'}[d.type];g.save();g.shadowColor=col;g.shadowBlur=12;rounded(d.x-11,d.y-11,22,22,6,col);g.fillStyle='#102337';g.font='bold 13px system-ui';g.textAlign='center';g.fillText({multi:'M',wide:'W',laser:'L',shield:'S'}[d.type],d.x,d.y+4);g.restore()}
+ for(const d of drops){const note=SONG_NOTES[d.noteIndex],col=note?.color||'#79eaff';g.save();g.shadowColor=col;g.shadowBlur=18;g.translate(d.x,d.y);g.rotate(Math.sin(d.age*7)*.08);g.fillStyle=col;g.beginPath();g.arc(0,0,14,0,Math.PI*2);g.fill();g.strokeStyle='#ffffffb5';g.lineWidth=1.5;g.beginPath();g.arc(0,0,17+Math.sin(d.age*8)*2,0,Math.PI*2);g.stroke();g.shadowBlur=0;g.fillStyle='#101733';g.font='900 17px system-ui';g.textAlign='center';g.fillText('♪',0,6);g.fillStyle='#fff';g.font='900 10px system-ui';g.fillText(note?.name||'D',0,29);g.restore()}
+ if(melodyPulse>0){g.save();g.globalAlpha=melodyPulse*.8;g.strokeStyle='#fff0c1';g.shadowColor='#e5b0ff';g.shadowBlur=17;g.lineWidth=3;g.beginPath();g.arc(paddle.x,paddle.y,18+(1-melodyPulse)*38,0,Math.PI*2);g.stroke();g.restore()}
  for(const s of shots){g.save();g.shadowBlur=12;g.shadowColor='#81f5ff';rounded(s.x-2,s.y-14,4,16,2,'#9fffff');g.restore()}
  for(const [arr,col] of [[missiles,'#ffd9a8'],[shards,'#c8a5ff']])for(const m of arr){g.save();for(let j=0;j<m.trail.length;j++){g.globalAlpha=(j+1)/m.trail.length*.42;g.fillStyle=col;g.beginPath();g.arc(m.trail[j].x,m.trail[j].y,3,0,Math.PI*2);g.fill()}g.globalAlpha=1;g.shadowColor=col;g.shadowBlur=14;g.fillStyle=col;g.beginPath();g.arc(m.x,m.y,arr===missiles?5:4,0,Math.PI*2);g.fill();g.restore()}
  if(orbitalFx>0){g.save();g.globalAlpha=clamp(orbitalFx*2,0,1);g.shadowColor='#ffc1ff';g.shadowBlur=28;g.fillStyle='#ff64c6';g.fillRect(0,orbitalY-9,W,18);g.fillStyle='#fff5ff';g.fillRect(0,orbitalY-3,W,6);g.restore()}
