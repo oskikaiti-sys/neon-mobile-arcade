@@ -62,7 +62,7 @@ function create(audio,callbacks={}){
  function pitch(midi){const a=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];return a[midi%12]+(Math.floor(midi/12)-1)}
  function catchNote(drop){
   const now=current();
-  if(!drop||drop.song!==now.id||drop.bar!==now.bar||drop.note!==now.note){miss();return {ok:false}}
+  if(!drop||drop.song!==now.song||drop.bar!==now.bar||drop.note!==now.note){miss();return {ok:false}}
   audio.pickupNote?.(now.midi);
   const finishedRow=songs[selected].bars[bar];
   note++;
