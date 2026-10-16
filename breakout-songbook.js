@@ -112,7 +112,7 @@ function create(audio,callbacks={}){
   const entry=notes[seq%notes.length],song=songs[selected];
   return {song:song.id,generation,seq,when,bar:entry.bar,note:entry.note,midi:entry.midi,beats:entry.beats,
    bpm:song.timeAt?entry.beats*60/Math.max(.001,song.timeAt(entry.start+entry.beats)-song.timeAt(entry.start)):song.bpm,
-   label:pitch(entry.midi),color:song.id==='necrofantasia'?['#f5d69c','#cfaff6','#f7dfb0','#b691dc']:song.id==='lunadial'?['#e8f4ff','#c2e2ff','#fce6d7','#c6c4f6'][(entry.bar+entry.note)%4]:song.id==='dreambattle'?['#ffe5dd','#ff7f96','#f8f3df','#f6c2d1'][(entry.bar+entry.note)%4]:color[(entry.bar+entry.note)%color.length],laneX:entry.laneX};
+   label:pitch(entry.midi),color:song.id==='necrofantasia'?['#f5d69c','#cfaff6','#f7dfb0','#b691dc'][(entry.bar+entry.note)%4]:song.id==='lunadial'?['#e8f4ff','#c2e2ff','#fce6d7','#c6c4f6'][(entry.bar+entry.note)%4]:song.id==='dreambattle'?['#ffe5dd','#ff7f96','#f8f3df','#f6c2d1'][(entry.bar+entry.note)%4]:color[(entry.bar+entry.note)%color.length],laneX:entry.laneX};
  }
  function update(dt,spawn){
   clock+=dt;const song=songs[selected];
