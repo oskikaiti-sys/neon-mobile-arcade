@@ -25,7 +25,7 @@ const songs=[
  [n(74),n(76,.5),n(77,.5),n(76),n(74)],[n(72),n(74),n(67,2)],
  [n(76),n(76),n(77),n(79)],[n(79),n(77),n(76),n(74)],
  [n(72),n(72),n(74),n(76)],[n(74,2),n(72,2)]]},
- {"id":"septette","names":["Septette for the Dead Princess (Fan Arrangement)","亡き王女の為のセプテット（同人编配）","亡き王女の為のセプテット（同人アレンジ）"],"composer":"ZUN / Team Shanghai Alice · Touhou Project fan arrangement","bpm":114,"root":63,"bars":[[[55,1],[67,1],[75,1],[74,1]],[[67,1],[75,1],[74,1],[65,1]],[[55,1],[67,1],[75,1],[74,1]],[[68,1],[74,1],[75,1],[79,1]],[[75,1],[74,1],[72,1],[74,1]],[[75,1],[77,1],[74,1],[75,1]],[[72,1],[74,1],[75,1],[77,1]],[[74,1],[82,1],[79,2]],[[79,1],[82,1],[84,1],[77,1]],[[77,2],[80,1],[82,1]],[[75,1],[75,1],[72,0.5],[72,0.5],[74,1]],[[75,1],[77,1],[74,2]],[[72,1],[74,1],[75,1],[77,1]],[[74,1],[75,1],[72,1],[79,1]],[[75,1],[74,1],[72,1],[74,1]],[[75,2],[79,2]],[[75,1],[77,1],[74,1],[72,1]],[[82,1],[79,1],[77,1],[75,1]],[[79,1],[82,1],[84,1],[86,1]],[[84,1],[82,1],[79,2]],[[72,1],[72,1],[74,1],[75,1]],[[77,1],[74,1],[75,2]],[[75,1],[77,1],[79,1],[82,1]],[[84,1],[82,1],[79,2]],[[75,1],[72,1],[74,1],[75,1]],[[77,1],[79,1],[82,2]],[[84,1],[82,1],[79,1],[77,1]],[[75,1],[74,1],[72,2]],[[75,1],[77,1],[74,1],[72,1]],[[74,1],[75,1],[79,1],[82,1]],[[79,1],[77,1],[75,1],[74,1]],[[75,4]]]}
+ {"id":"septette","names":["Septette for the Dead Princess (Verified Theme Excerpt)","亡き王女の為のセプテット（准确乐谱节选）","亡き王女の為のセプテット（採譜抜粋）"],"composer":"ZUN (original) · Yoji Suzuki / SUZUKI PLAN (MML arrangement)","bpm":146,"root":63,"bars":[[[78,2],[72,2]],[[75,2],[70,2]],[[78,2],[72,2]],[[82,2],[80,2]],[[80,2],[77,2]],[[78,2],[70,2]],[[78,2],[72,2]],[[75,2],[72,2]],[[89,2],[77,2]],[[78,2],[75,2]],[[85,2],[80,2]],[[84,2],[85,2]],[[83,2],[84,2]],[[82,2],[75,2]],[[85,2],[72,2]],[[78,2],[75,2]],[[89,2],[77,2]],[[78,2],[75,2]],[[85,2],[80,2]],[[84,2],[85,2]],[[83,2],[84,2]],[[82,2],[75,2]],[[85,2],[72,2]],[[76,2],[75,2]],[[76,2],[78,2]],[[78,2],[66,2]],[[73,2],[71,2]],[[76,2],[75,2]],[[76,2],[78,2]],[[78,2],[78,2]]],"lead":[[66,1.5],[68,0.5],[65,1.5],[66,0.5],[63,2],[null,0.5],[58,0.5],[63,0.5],[65,0.5],[66,1.5],[68,0.5],[65,1.5],[73,0.5],[70,2],[null,0.5],[70,0.5],[73,0.5],[75,0.5],[68,1],[68,1],[null,0.5],[68,0.5],[70,0.5],[73,0.5],[66,1],[66,1],[null,0.5],[63,0.5],[63,0.5],[65,0.5],[66,1.5],[68,0.5],[65,1.5],[62,0.5],[63,2],[65,1.75],[70,1.5],[77,0.5],[68,1.5],[70,0.5],[66,2],[null,0.5],[66,1],[68,0.5],[70,1.5],[73,1],[75,0.5],[73,1],[72,2],[null,0.5],[75,0.5],[77,0.5],[78,0.5],[71,1],[71,1],[null,0.5],[71,0.5],[73,0.5],[77,0.5],[70,1],[70,1],[null,0.5],[66,0.5],[66,0.5],[68,0.5],[70,1.5],[73,0.5],[68,1.5],[65,0.5],[66,2.5],[66,1],[68,0.5],[70,1.5],[77,0.5],[68,1.5],[70,0.5],[66,2],[null,0.5],[66,1],[68,0.5],[70,1.5],[73,1],[75,0.5],[73,1],[72,2],[null,0.5],[75,0.5],[77,0.5],[78,0.5],[71,1],[71,1],[null,0.5],[71,0.5],[73,0.5],[77,0.5],[70,1],[70,1],[null,0.5],[66,0.5],[66,0.5],[68,0.5],[70,1.5],[73,0.5],[68,1.5],[65,0.5],[66,0.5],[64,0.5],[66,0.5],[64,0.5],[66,0.75],[69,0.75],[68,0.5],[66,0.5],[64,0.5],[66,0.5],[64,0.5],[66,0.75],[73,0.75],[71,0.5],[69,0.75],[68,0.75],[66,0.5],[65,0.75],[61,0.75],[59,0.5],[61,3],[61,0.5],[64,0.5],[66,0.5],[64,0.5],[66,0.5],[64,0.5],[66,0.75],[69,0.75],[68,0.5],[66,0.5],[64,0.5],[66,0.5],[64,0.5],[66,0.75],[73,0.75],[71,0.5],[69,0.75],[68,0.75],[66,0.5],[68,0.75],[69,0.75],[71,0.5],[null,0.25]],"source":"https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT012.mml"}
 ];
 const color=['#76efff','#c0a3ff','#ffe08c','#ff9fcd','#8ef5c3','#f4ab87'];
 function lang(){return window.ArcadeLang?.get?.()||'en'}
@@ -39,7 +39,7 @@ function create(audio,callbacks={}){
  const touhouNotice=document.getElementById('touhouNotice');
  const LEAD=1.5,INTRO=2.3;
  let selected=0,clock=0,nextDue=INTRO,planned=0,resolved=0,perfectBars=0,barHits=0,barMisses=0,completed=0;
- let pending=new Map(),generation=0;
+ let pending=new Map(),generation=0,melodyDue=INTRO,melodyIndex=0;
  try{const v=localStorage.getItem('neon-song-id');const at=songs.findIndex(s=>s.id===v);if(at>=0)selected=at}catch(_){}
  function pitch(midi){const a=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];return a[midi%12]+(Math.floor(midi/12)-1)}
  function entries(){return songs[selected].bars.flatMap((row,bar)=>row.map(([midi,beats],note)=>({bar,note,midi,beats})))}
@@ -50,11 +50,16 @@ function create(audio,callbacks={}){
   const index=resolved%notes.length;
   if(progress)progress.textContent=(notes[index].bar+1)+'/'+song.bars.length;
   if(track)track.textContent=name(song);
-  if(hint)hint.textContent=loc('♪ Catch notes to play the melody · missed notes stay silent','♪ 用挡板接音符来弹奏旋律 · 漏接就会缺音','♪ 音符をキャッチして演奏 · 逃すと無音');
-  if(touhouNotice){touhouNotice.hidden=song.id!=='septette';touhouNotice.textContent=loc('Touhou Project fan work · Original music: ZUN / Team Shanghai Alice · Unofficial free game','东方 Project 同人二创 · 原曲：ZUN／上海爱丽丝幻乐团 · 非官方免费游戏','東方Project 二次創作 · 原曲：ZUN／上海アリス幻樂団 · 非公式無料ゲーム');}
+  if(hint)hint.textContent=song.lead?
+   loc('♪ Verified melody plays automatically · catch ornaments for spell cards','♪ 原曲主旋律自动播放 · 接装饰音触发符卡','♪ 原曲メロディー自動演奏 · 装飾音でスペル発動'):
+   loc('♪ Catch notes to play the melody · missed notes stay silent','♪ 用挡板接音符来弹奏旋律 · 漏接就会缺音','♪ 音符をキャッチして演奏 · 逃すと無音');
+  if(touhouNotice){touhouNotice.hidden=song.id!=='septette';touhouNotice.textContent=loc(
+   'Touhou fan work · Original: ZUN / Team Shanghai Alice · MML: Yoji Suzuki / SUZUKI PLAN · unofficial',
+   '东方同人二创 · 原曲：ZUN／上海爱丽丝幻乐团 · MML 编配：Yoji Suzuki／SUZUKI PLAN · 非官方',
+   '東方二次創作 · 原曲：ZUN／上海アリス幻樂団 · MML編曲：Yoji Suzuki／SUZUKI PLAN · 非公式');}
  }
  function resetTiming(){
-  clock=0;nextDue=INTRO;planned=0;resolved=0;perfectBars=0;barHits=0;barMisses=0;pending.clear();generation++;
+  clock=0;nextDue=INTRO;melodyDue=INTRO;melodyIndex=0;planned=0;resolved=0;perfectBars=0;barHits=0;barMisses=0;pending.clear();generation++;
   notes=entries();render();
  }
  function choose(id){
@@ -71,20 +76,28 @@ function create(audio,callbacks={}){
    bpm:song.bpm,label:pitch(entry.midi),color:color[(entry.bar+entry.note)%color.length]};
  }
  function update(dt,spawn){
-  clock+=dt;
+  clock+=dt;const song=songs[selected];
+  // Source-grounded main melody, played automatically; no note-catching required.
+  if(song.lead){
+   let steps=0;
+   while(melodyDue<=clock+.015&&steps++<12){
+    const [midi,beats]=song.lead[melodyIndex];
+    if(midi!==null)audio.playLeadNote?.(midi,beats,song.bpm);
+    melodyDue+=beats*60/song.bpm;melodyIndex++;
+    if(melodyIndex>=song.lead.length){melodyIndex=0;melodyDue+=1.3}
+   }
+  }
   let count=0;
   while(nextDue<=clock+LEAD&&count++<9){
-   const entry=makeEntry(planned,nextDue);
-   spawn(entry);
-   planned++;
-   nextDue+=entry.beats*(60/songs[selected].bpm);
+   const entry=makeEntry(planned,nextDue);spawn(entry);planned++;
+   nextDue+=entry.beats*(60/song.bpm);
    if(planned%notes.length===0)nextDue+=1.3;
   }
  }
  function resolve(drop,hit){
   if(!drop||drop.song!==songs[selected].id||drop.generation!==generation||drop.seq<resolved||pending.has(drop.seq))return {ok:false};
   pending.set(drop.seq,hit);
-  if(hit)audio.pickupNote?.(drop.midi,drop.beats,drop.bpm);
+  if(hit){if(songs[selected].lead)audio.playOrnament?.(drop.midi,drop.beats,drop.bpm);else audio.pickupNote?.(drop.midi,drop.beats,drop.bpm)}
   let measure=false,finale=false;
   while(pending.has(resolved)){
    const success=pending.get(resolved);pending.delete(resolved);

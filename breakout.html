@@ -57,6 +57,18 @@ class ArcadeAudio {
  setActive(active){if(this.active===active)return;this.active=active;this.update()}
  setFever(v){this.fever=Boolean(v)}
  toggle(){this.mode=(this.mode+1)%3;if(this.mode)this.prepare();this.update();return this.mode}
+ playLeadNote(midi,beats=1,bpm=146){
+  if(this.mode!==1||!this.active||!this.prepare())return;
+  const at=this.ctx.currentTime+.008,dur=Math.max(.075,Math.min(1.8,beats*60/bpm*.92));
+  this.tone(midi,dur,'triangle',.29,at);
+  this.tone(midi+12,Math.min(.55,dur*.6),'sine',.036,at+.015);
+ }
+ playOrnament(midi,beats=2,bpm=146){
+  if(!this.mode||!this.active||!this.prepare())return;
+  const at=this.ctx.currentTime+.008,dur=Math.min(.32,beats*60/bpm*.6);
+  this.tone(midi,dur,'sine',.11,at);
+  this.tone(midi+12,.13,'triangle',.023,at+.021);
+ }
  pickupNote(midi,beats=1,bpm=98){if(!this.mode||!this.prepare())return;const at=this.ctx.currentTime+.008,dur=Math.min(1.15,beats*60/bpm*.88);this.tone(midi,dur,'triangle',.25,at);this.tone(midi+12,Math.min(.7,dur*.65),'sine',.045,at+.018)}
  playBar(row,bpm,root){if(!this.mode||!this.prepare())return;const step=60/bpm,start=this.ctx.currentTime+.035;let offset=0;for(const [m,b] of row){this.tone(m,step*b*.92,'triangle',.15,start+offset);this.tone(m+12,step*b*.64,'sine',.034,start+offset+.015);offset+=step*b}for(const m of [root-12,root-5,root])this.tone(m,Math.min(2.6,offset*.85),'sine',.024,start);this.duckUntil=start+offset+.1}
  playFullSong(song){if(!this.mode||!this.prepare())return;const step=60/song.bpm,start=this.ctx.currentTime+.04;let offset=0;for(const row of song.bars)for(const [m,b] of row){this.tone(m,step*b*.88,'triangle',.09,start+offset);offset+=step*b}this.duckUntil=start+offset+.1}

@@ -16,3 +16,16 @@
 4. 等 GitHub Pages 完成发布后，访问 `https://<用户名>.github.io/neon-arcade/`。
 
 使用 Safari 打开这个 HTTPS 页面；不要在 iOS 文件 App 的 HTML 预览中运行。
+
+## Touhou fan arrangement / music credits
+
+Original composition: **ZUN / Team Shanghai Alice**. MML fan arrangement and
+transcription: **Yoji Suzuki / SUZUKI PLAN**. The playable Septette track is a
+~49-second verified **theme excerpt loop**, not the full original.
+The lead plays automatically; catchable notes add optional ornaments.
+
+- Original usage terms: https://github.com/suzukiplan/Touhou-VGS-MML-data
+- User's required fork: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data
+- Referenced source score: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT012.mml
+
+No original game audio or sprites are redistributed.
