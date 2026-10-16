@@ -220,7 +220,7 @@ function tick(dt){
  shake=Math.max(0,shake-18*dt);flash=Math.max(0,flash-.7*dt);portalFx=Math.max(0,portalFx-dt);orbitalFx=Math.max(0,orbitalFx-dt);
  if(state!=='playing')return;
  // Music notes arrive at exact score beats, regardless of destroyed bricks.
- songbook?.update(dt,entry=>{const x=clamp(paddle.x+Math.sin(entry.seq*1.77)*57,30,W-30);drops.push({...entry,x,y:90,age:0})});
+ songbook?.update(dt,entry=>{const x=clamp(W/2+Math.sin(entry.seq*1.35)*110,30,W-30);drops.push({...entry,x,y:90,age:0})});
  portalClock=Math.max(0,portalClock-dt);
  if(rage>0)rage=Math.max(0,rage-dt);if(energy>=100&&rage<=0){energy=0;rage=8;laserClock=0;text(W/2,332,'⚡ 自动 FEVER！','#ffa8db',19);audio('fever')}
  if(wide>0){wide-=dt;if(wide<=0)paddle.w=88}
