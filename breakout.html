@@ -104,6 +104,16 @@ const MAX_PARTICLES=210,MAX_SHOTS=70,MAX_SHARDS=28;
 function audio(k){fx.sound(k)}
 function trans(en,zh,ja){const v=window.ArcadeLang?.get?.()||'en';return v==='zh-CN'?zh:v==='ja'?ja:en}
 function isTouhouMode(){return songbook?.getState().song==='septette'}
+function spell(kind){
+ const names={
+  seal:['Spirit Sign · Fantasy Seal','灵符「梦想封印」','霊符「夢想封印」'],
+  barrier:['Dream Sign · Evil-Sealing Circle','梦符「封魔阵」','夢符「封魔陣」'],
+  binding:['Divine Art · Eight-Way Binding','神技「八方鬼缚阵」','神技「八方鬼縛陣」'],
+  heaven:['Fantasy Heaven','梦想天生','夢想天生'],
+  orb:['Yin-Yang Orbs','阴阳玉','陰陽玉']
+ };
+ const a=names[kind];return a?trans(a[0],a[1],a[2]):'';
+}
 function applyTheme(){document.body.classList.toggle('touhou-mode',isTouhouMode())}
 function resetSong(){songbook?.reset();melodyPulse=0;drops.length=0}
 function melodyMiss(d){songbook?.miss(d);melodyPulse=.1}
@@ -118,8 +128,8 @@ function updateUI(){
  const next=fleet<4?thresholds[fleet+1]:thresholds[4],prev=thresholds[fleet];
  const ratio=fleet<4?clamp((kills-prev)/(next-prev),0,1):1;
  $('meterFill').style.width=String(ratio*100)+'%';$('meterPct').textContent=fleet<4?`${kills}/${next}`:'MAX';
- $('fleetBadge').textContent=['🛸 下一解锁：侦察机','🛸 单僚机 · 即将双机','🚀 双僚机 · 即将导弹','☄️ 导弹 · 即将轨道炮','🌌 舰队满编！'][fleet];
- $('rage').textContent=trans('♪ LIVE MELODY','♪ 即时演奏','♪ 生演奏')+(rage>0?' ⚡':'');
+ $('fleetBadge').textContent=isTouhouMode()?(['☯ '+spell('orb')+' · 0','☯ '+spell('orb')+' · 1','☯ '+spell('orb')+' · 2','✦ '+spell('seal'),'✦ '+spell('binding')][fleet]):(['🛸 下一解锁：侦察机','🛸 单僚机 · 即将双机','🚀 双僚机 · 即将导弹','☄️ 导弹 · 即将轨道炮','🌌 舰队满编！'][fleet]);
+ $('rage').textContent=isTouhouMode()?(rage>0?'☯ '+spell('heaven'):'♪ '+spell('seal')):(trans('♪ LIVE MELODY','♪ 即时演奏','♪ 生演奏')+(rage>0?' ⚡':''));
 }
 function cellBrick(row,col){let d=Math.random();return {r:row,c:col,x:MARGIN+col*(BW+GAP),y:65+row*26,w:BW,h:BH,alive:true,type:d<.09?'bomb':d<.17?'power':d<.23?'armor':'normal',hp:d>=.17&&d<.23?2:1,color:colors[row]}}
 function addMissing(n){
@@ -142,7 +152,7 @@ function pause(){if(state==='paused'){state=resumeState;$('overlay').hidden=true
 function over(){state='over';fx.setActive(false);audio('lose');setOverlay('暂时休整',`累计击碎 <b style="color:#76ecff">${kills}</b> 块砖<br>舰队进化至 LV.${fleet}`,'↻ 再次出击');updateUI()}
 function unlock(){
  const names=['','🛸 侦察僚机入队！','🛸 双舰护航！','🚀 追踪导弹解锁！','☄️ 轨道主炮已上线！'];
- while(fleet<4&&kills>=thresholds[fleet+1]){fleet++;text(W/2,300,names[fleet],'#c6faff',21);ring(paddle.x,paddle.y-27,'#9deeff',25);burst(paddle.x,paddle.y-24,'#75dfff',26);shake=6;flash=.15;audio('wave');if(fleet===4)orbitalClock=1.5}
+ while(fleet<4&&kills>=thresholds[fleet+1]){fleet++;text(W/2,300,isTouhouMode()?'☯ '+spell('orb')+' ×'+Math.min(fleet,2):names[fleet],'#c6faff',isTouhouMode()?16:21);ring(paddle.x,paddle.y-27,'#9deeff',25);burst(paddle.x,paddle.y-24,'#75dfff',26);shake=6;flash=.15;audio('wave');if(fleet===4)orbitalClock=1.5}
 }
 function destroy(b,chain=false){
  if(!b.alive)return;b.alive=false;kills++;combo++;energy=clamp(energy+(rage>0?1:3.1),0,100);
@@ -161,7 +171,7 @@ function portalEnter(ball){
  if(portalClock>0||ball.gateLock>0)return;
  portalClock=1.0;portalFx=.75;flash=.13;shake=8;
  ring(gates.x,gates.y,'#b7a1ff',20);burst(gates.x,gates.y,'#bda2ff',28);
- text(W/2,315,'🌀 时空门：全域轰炸！','#ffd8ff',19);audio('fever');
+  text(W/2,315,isTouhouMode()?spell('barrier'):'🌀 时空门：全域轰炸！','#ffd8ff',isTouhouMode()?14:19);audio('fever');
  // Ball is transported to the upper brick zone; preserve continuous gameplay.
  ball.x=clamp(gates.x+rnd(-70,70),20,W-20);ball.y=61;
  ball.vx=rnd(-220,220);ball.vy=320;ball.gateLock=1.8;
@@ -190,7 +200,7 @@ function fleetFire(dt){
   let row=null,amount=0;for(const [r,n] of grouped)if(n>amount){row=r;amount=n}
   if(row!==null){orbitalY=65+row*26+BH/2;orbitalFx=.5;
    for(const b of bricks)if(b.alive&&b.r===row)destroy(b,true);
-   text(W/2,orbitalY+31,'☄️ 轨道主炮扫射！','#ffd8fb',21);burst(W/2,orbitalY,'#ffd4f9',22);shake=10;flash=.3;audio('bomb');
+   text(W/2,orbitalY+31,isTouhouMode()?spell('binding'):'☄️ 轨道主炮扫射！','#ffd8fb',isTouhouMode()?14:21);burst(W/2,orbitalY,'#ffd4f9',22);shake=10;flash=.3;audio('bomb');
   }
  }}
 }
@@ -233,7 +243,7 @@ function tick(dt){
  // Music notes arrive at exact score beats, regardless of destroyed bricks.
  songbook?.update(dt,entry=>{const x=clamp(W/2+Math.sin(entry.seq*1.35)*110,30,W-30);drops.push({...entry,x,y:90,age:0})});
  portalClock=Math.max(0,portalClock-dt);
- if(rage>0)rage=Math.max(0,rage-dt);if(energy>=100&&rage<=0){energy=0;rage=8;laserClock=0;text(W/2,332,'⚡ 自动 FEVER！','#ffa8db',19);audio('fever')}
+ if(rage>0)rage=Math.max(0,rage-dt);if(energy>=100&&rage<=0){energy=0;rage=8;laserClock=0;text(W/2,332,isTouhouMode()?spell('heaven'):'⚡ 自动 FEVER！','#ffa8db',19);audio('fever')}
  if(wide>0){wide-=dt;if(wide<=0)paddle.w=88}
  if(laser>0)laser-=dt;
  paddle.target=clamp(paddle.target,paddle.w/2+4,W-paddle.w/2-4);paddle.x=paddle.target;
@@ -354,6 +364,6 @@ wrap.addEventListener('pointerup',e=>{if(e.pointerId===active)active=null});wrap
 $('start').addEventListener('click',()=>state==='paused'?pause():reset());$('pause').addEventListener('click',pause);$('reset').addEventListener('click',reset);
 $('sound').addEventListener('click',()=>{const m=fx.toggle();$('sound').textContent=['♫ 关','♫ 音乐','♪ 音效'][m];$('sound').classList.toggle('active',m>0);if(m)audio('power')});
 document.addEventListener('keydown',e=>{if(e.target?.tagName==='BUTTON')return;if(e.code==='ArrowLeft'||e.code==='KeyA'){paddle.target-=26;e.preventDefault()}else if(e.code==='ArrowRight'||e.code==='KeyD'){paddle.target+=26;e.preventDefault()}else if(e.code==='Space'){pause();e.preventDefault()}});
-songbook=window.NeonSongbook.create(fx,{onBar(){energy=Math.min(100,energy+12);shield=Math.min(3,shield+1);ring(W/2,240,'#aaf6ff',25);burst(W/2,260,'#9bd6ff',25);for(let i=0;i<5;i++){if(shards.length<MAX_SHARDS)shards.push({x:paddle.x,y:paddle.y-40,vx:(i-2)*40,vy:-160,trail:[],life:4})}text(W/2,335,trans('♪ BAR COMPLETE!','♪ 小节完成！','♪ 小節クリア！'),'#e2faff',18);},onSong(){sonicBurst();text(W/2,300,trans('♪ SONG COMPLETE!','♪ 全曲完成！','♪ 全曲完成！'),'#ffe9a0',23)},onChange(){drops=[];fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;fx.update();}});fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause()});updateUI();raf=requestAnimationFrame(frame);
+songbook=window.NeonSongbook.create(fx,{onBar(){energy=Math.min(100,energy+12);shield=Math.min(3,shield+1);ring(W/2,240,'#aaf6ff',25);burst(W/2,260,'#9bd6ff',25);for(let i=0;i<5;i++){if(shards.length<MAX_SHARDS)shards.push({x:paddle.x,y:paddle.y-40,vx:(i-2)*40,vy:-160,trail:[],life:4})}text(W/2,335,isTouhouMode()?spell('seal'):trans('♪ BAR COMPLETE!','♪ 小节完成！','♪ 小節クリア！'),'#e2faff',isTouhouMode()?15:18);},onSong(){sonicBurst();text(W/2,300,isTouhouMode()?spell('heaven'):trans('♪ SONG COMPLETE!','♪ 全曲完成！','♪ 全曲完成！'),'#ffe9a0',isTouhouMode()?20:23)},onChange(){drops=[];fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;fx.update();applyTheme();updateUI();}});fx.tempo=window.NeonSongbook.songs.find(s=>s.id===$('songSelect').value)?.bpm||98;document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause()});applyTheme();updateUI();raf=requestAnimationFrame(frame);
 })();
 </script><script src="locale.js"></script><script src="breakout-language.js"></script></body></html>
