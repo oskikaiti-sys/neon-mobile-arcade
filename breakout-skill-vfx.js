@@ -66,13 +66,15 @@ class ArcadeSkillVFX{
  drawBanners(c){
   for(const e of this.effects){
    if(!e.label||e.age>.91)continue;
-   const opacity=lim(e.age*11,0,1)*Math.max(0,1-e.age/.91),y=e.kind==='orb'?360:318;
-   c.save();c.globalAlpha=opacity*.95;c.textAlign='center';c.font='900 '+(e.touhou?14:15)+'px system-ui';
-   const width=lim(c.measureText(e.label).width+42,154,315);
-   c.fillStyle=e.touhou?'#270b31e6':'#0b2941e6';
-   c.beginPath();c.roundRect(180-width/2,y-23,width,37,9);c.fill();
-   c.lineWidth=1.5;c.strokeStyle=e.colors[0];c.stroke();
-   c.shadowColor=e.colors[0];c.shadowBlur=12;c.fillStyle=e.colors[1];c.fillText(e.label,180,y);
+   // The usable ribbon sits between the HUD (y≈30) and first bricks (y=65).
+   // Keep every spell title here, rather than over the central Sukima / playfield.
+   const opacity=lim(e.age*11,0,1)*Math.max(0,1-e.age/.91),y=55;
+   c.save();c.globalAlpha=opacity*.95;c.textAlign='center';c.font='900 12px system-ui';
+   const width=lim(c.measureText(e.label).width+28,140,316);
+   c.fillStyle=e.touhou?'#270b31d6':'#0b2941d6';
+   c.beginPath();c.roundRect(180-width/2,38,width,25,7);c.fill();
+   c.lineWidth=1.25;c.strokeStyle=e.colors[0];c.stroke();
+   c.shadowColor=e.colors[0];c.shadowBlur=6;c.fillStyle=e.colors[1];c.fillText(e.label,180,y);
    c.restore();
   }
  }
