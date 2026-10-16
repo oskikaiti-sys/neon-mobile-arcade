@@ -312,7 +312,5 @@ $('start').addEventListener('click',()=>state==='paused'?pause():reset());$('pau
 $('sound').addEventListener('click',()=>{const m=fx.toggle();$('sound').textContent=['♫ 关','♫ 音乐','♪ 音效'][m];$('sound').classList.toggle('active',m>0);if(m)audio('power')});
 document.addEventListener('keydown',e=>{if(e.target?.tagName==='BUTTON')return;if(e.code==='ArrowLeft'||e.code==='KeyA'){paddle.target-=26;e.preventDefault()}else if(e.code==='ArrowRight'||e.code==='KeyD'){paddle.target+=26;e.preventDefault()}else if(e.code==='Space'){pause();e.preventDefault()}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause()});updateUI();raf=requestAnimationFrame(frame);
-// Expose read-only diagnostic snapshot to local browser tests.
-window.__neonTestState=()=>({state,kills,fleet,bricksAlive:bricks.filter(b=>b.alive).length,balls:balls.length,shards:shards.length,missiles:missiles.length,portalClock,portalFx,regenClock});
 })();
 </script><script src="locale.js"></script><script src="breakout-language.js"></script></body></html>
