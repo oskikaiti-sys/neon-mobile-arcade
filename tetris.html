@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#110b24"><title>霓虹超载方块 · NEON TETRIS OVERDRIVE</title>
+<meta name="theme-color" content="#110b24"><title>霓虹超载方块 · 自动外挂版</title>
 <style>
 :root{color-scheme:dark;--ink:#f4eaff;--dim:#a8a0cd;--gold:#ffd870;--hot:#ff63c6;--cyan:#7befff}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:#080915;overscroll-behavior:none}body{font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;color:var(--ink);overflow:hidden;-webkit-tap-highlight-color:transparent}
@@ -13,7 +13,7 @@ button{font:inherit;touch-action:manipulation;-webkit-user-select:none;user-sele
 .arena{flex:1 1 0;min-height:0;display:flex;align-items:stretch;justify-content:center;gap:7px;overflow:hidden;position:relative}.board-frame{height:100%;max-width:calc(100% - 86px);aspect-ratio:1/2;border:2px solid #a4519c;border-radius:10px;position:relative;overflow:hidden;box-shadow:0 0 29px #ad40bb3f,inset 0 0 18px #ba64dd17;touch-action:none;flex-shrink:1}.board-frame canvas{display:block;width:100%;height:100%;touch-action:none}
 .side{width:76px;flex:none;display:flex;flex-direction:column;gap:4px;overflow:hidden;min-height:0}.side-label{font-size:10px;font-weight:950;color:#d8b0ee}.preview{display:block;width:100%;aspect-ratio:1.2;background:#1c1934;border:1px solid #513e70;border-radius:9px}.nextbox{display:flex;flex-direction:column;gap:4px;min-height:0;overflow:hidden}.combo{color:#ffda73;font-size:11px;font-weight:900;margin-top:auto;line-height:1.3;min-height:14px;overflow-wrap:anywhere}
 .cheat-head{display:flex;justify-content:space-between;align-items:center;gap:6px;flex:none}.cheat-head span:first-child{font-size:10px;font-weight:950;letter-spacing:1px;color:#ffd57d}.cheat-head span:last-child{color:#a9a4d0;font-size:10px;white-space:nowrap}
-.cheats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;flex:none}.cheat{position:relative;min-width:0;min-height:51px;padding:7px 2px 6px;border-radius:12px;color:#fff;border:1px solid #9d5c92;background:linear-gradient(160deg,#592b5f,#322343);box-shadow:0 3px 0 #160f28,0 0 15px #f5609524;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px}.cheat strong{font-weight:950;font-size:clamp(11px,3.1vw,14px);line-height:1.15;white-space:nowrap}.cheat small{font-size:10px;color:#ffdbb6;font-weight:800}.cheat.available{animation:shine 2s ease-in-out infinite alternate}.cheat:disabled{opacity:.48;filter:saturate(.55);animation:none;box-shadow:none}.cheat:active:not(:disabled){transform:translateY(2px)}@keyframes shine{to{box-shadow:0 0 22px #ff7bb466,0 3px 0 #160f28}}
+.cheats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;flex:none}.cheat{position:relative;min-width:0;min-height:51px;padding:7px 2px 6px;border-radius:12px;color:#fff;border:1px solid #9d5c92;background:linear-gradient(160deg,#592b5f,#322343);box-shadow:0 3px 0 #160f28,0 0 15px #f5609524;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px}.cheat strong{font-weight:950;font-size:clamp(11px,3.1vw,14px);line-height:1.15;white-space:nowrap}.cheat small{font-size:10px;color:#ffdbb6;font-weight:800}.cheat.available{animation:shine 2s ease-in-out infinite alternate}.cheat:disabled{opacity:.48;filter:saturate(.55);animation:none;box-shadow:none}.cheat.passive{background:linear-gradient(150deg,#32204f,#1a2f46);border-color:#7260a9;box-shadow:0 0 16px #9183ff21;pointer-events:none}.cheat.passive small{color:#b5e5ff}.cheat:active:not(:disabled){transform:translateY(2px)}@keyframes shine{to{box-shadow:0 0 22px #ff7bb466,0 3px 0 #160f28}}
 .controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,48px);gap:6px;flex:none}.btn{background:linear-gradient(#2a3657,#1b213b);border:1px solid #53658c;border-radius:12px;color:#eafbff;font-size:14px;font-weight:950;min-width:0;box-shadow:0 3px 0 #0c1024;touch-action:none}.btn:active,.btn.holding{background:#465c84;transform:translateY(2px)}.btn.pink{background:linear-gradient(#603163,#3a294f);border-color:#ab62a5;color:#ffddf4}.btn.gold{background:linear-gradient(#80542c,#4b3022);border-color:#c39144;color:#ffe7a6}.btn.cyan{background:linear-gradient(#235a68,#1b374a);border-color:#4194a6;color:#b0f6ff}
 .footer{flex:none;color:#9892b7;font-size:10px;text-align:center;line-height:1.3;white-space:nowrap}.footer b{color:#f6b4db}
 .overlay{position:absolute;inset:0;z-index:5;background:#080919d8;backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;text-align:center;padding:9px}.overlay[hidden]{display:none}.overlay-card{border:1px solid #9d5fa1;background:linear-gradient(160deg,#342040,#14162f);border-radius:16px;max-width:270px;padding:17px 13px;box-shadow:0 0 37px #c151b455}.overlay-title{font-size:24px;font-weight:950;color:#ffdc82;text-shadow:0 0 13px #fbc6557d;margin:5px 0}.overlay-desc{font-size:12px;line-height:1.6;color:#d0c3e4;margin:7px 0 14px}.start{background:linear-gradient(95deg,#ffbe62,#ff6ac1);border:0;border-radius:12px;color:#240f28;font-weight:950;padding:11px 18px;font-size:14px}
@@ -24,15 +24,15 @@ button{font:inherit;touch-action:manipulation;-webkit-user-select:none;user-sele
 @media(prefers-reduced-motion:reduce){.cheat.available{animation:none}#toast.active{animation:none}}
 </style></head><body>
 <main id="game">
-<header class="header"><div><div class="tag">✦ NEON OVERDRIVE · 能力全开</div><div class="brand">超载<b>方块</b> <span style="font-size:12px;color:#ffd571">∞</span></div></div><div class="header-tools"><button class="tiny" id="music" aria-label="音乐切换">♫ 关</button><button class="tiny" id="pause">Ⅱ 暂停</button></div></header>
-<section class="stats"><div class="stat"><div class="k">超载积分</div><div id="score" class="v gold">0</div></div><div class="stat"><div class="k">最高纪录</div><div id="best" class="v">0</div></div><div class="stat"><div class="k">等级</div><div id="level" class="v pink">999</div></div><div class="stat"><div class="k">累计清行</div><div id="lines" class="v cyan">0</div></div></section>
+<header class="header"><div><div class="tag">✦ NEON OVERDRIVE · 自动辅助系统</div><div class="brand">超载<b>方块</b> <span style="font-size:12px;color:#ffd571">∞</span></div></div><div class="header-tools"><button class="tiny" id="music" aria-label="音乐切换">♫ 关</button><button class="tiny" id="pause">Ⅱ 暂停</button></div></header>
+<section class="stats"><div class="stat"><div class="k">落块数量</div><div id="score" class="v gold">0</div></div><div class="stat"><div class="k">自动出手</div><div id="best" class="v">0</div></div><div class="stat"><div class="k">等级</div><div id="level" class="v pink">1</div></div><div class="stat"><div class="k">清除行数</div><div id="lines" class="v cyan">0</div></div></section>
 <section class="aura"><span class="label">⚡ OVERDRIVE</span><div class="bar"><div id="feverFill" class="fill"></div></div><span class="pct" id="feverPercent">0%</span></section>
-<section class="arena"><div class="board-frame" id="boardFrame"><canvas id="board" width="300" height="600" aria-label="触摸棋盘左右滑动移动方块，轻点旋转，下滑硬降"></canvas><div id="toast"></div><div class="overlay" id="overlay"><div class="overlay-card"><div style="font-size:38px">👑</div><div id="overlayTitle" class="overlay-title">欢迎进入超载模式</div><p id="overlayDescription" class="overlay-desc">一键清屏 · 横扫四行 · 直条增援<br>落块触发自动补刀，堆到顶自动救场！<br>技能开局即可使用，落块冷却。</p><button id="start" class="start">⚡ 开始超载</button></div></div></div>
+<section class="arena"><div class="board-frame" id="boardFrame"><canvas id="board" width="300" height="600" aria-label="触摸棋盘左右滑动移动方块，轻点旋转，下滑硬降"></canvas><div id="toast"></div><div class="overlay" id="overlay"><div class="overlay-card"><div style="font-size:38px">👑</div><div id="overlayTitle" class="overlay-title">欢迎进入超载模式</div><p id="overlayDescription" class="overlay-desc">无需手动释放技能。<br>磁力补线、银河直条雨、轨道激光、核爆清屏会自动发动。<br>你负责堆，系统负责开挂！</p><button id="start" class="start">⚡ 开始超载</button></div></div></div>
 <aside class="side"><div class="side-label">HOLD</div><canvas id="holdPreview" class="preview" width="96" height="96"></canvas><div class="side-label">NEXT</div><div class="nextbox"><canvas class="preview" id="next0" width="96" height="78"></canvas><canvas class="preview" id="next1" width="96" height="78"></canvas><canvas class="preview" id="next2" width="96" height="78"></canvas></div><div class="combo" id="combo">×10 超载倍率</div></aside></section>
-<div class="cheat-head"><span>⚡ 超载技能 · 点一下就释放</span><span id="cheatNote">落块即可刷新技能</span></div>
-<nav class="cheats" aria-label="外挂技能"><button class="cheat available" id="nuke"><strong>💥 核爆清屏</strong><small>开局可用</small></button><button class="cheat available" id="sweep"><strong>⚔️ 横扫四行</strong><small>强制清除</small></button><button class="cheat available" id="stick"><strong>✨ 直条增援</strong><small>连送直条</small></button></nav>
+<div class="cheat-head"><span>⚡ 自动外挂系统</span><span id="cheatNote">开局自动运行 · 不用按技能</span></div>
+<nav class="cheats" aria-label="自动辅助状态"><div class="cheat passive"><strong>🧲 磁力补线</strong><small>每 2 次落块</small></div><div class="cheat passive"><strong>🛰️ 轨道激光</strong><small>每 5 次落块</small></div><div class="cheat passive"><strong>☄️ 银河核爆</strong><small>周期自动触发</small></div></nav>
 <nav class="controls" aria-label="触摸操控按钮"><button class="btn pink" id="hold">暂存 HOLD</button><button class="btn cyan" id="rotate">↻ 旋转</button><button class="btn gold" id="hard">⇓ 砸下去</button><button class="btn" id="left">◀ 左移</button><button class="btn" id="down">▼ 加速</button><button class="btn" id="right">右移 ▶</button></nav>
-<div class="footer">手指<b>左右滑动</b> · 轻点旋转 · 下滑硬降 · <b>快乐不设上限</b></div>
+<div class="footer">手指<b>左右滑动</b> · 轻点旋转 · 下滑硬降 · <b>外挂自动工作</b></div>
 </main>
 <script>
 /* NEON ARCADE — lightweight original synthesized soundtrack and SFX.
@@ -85,8 +85,8 @@ const $=id=>document.getElementById(id),canvas=$('board'),ctx=canvas.getContext(
 const W=10,H=20,S=30,fx=new ArcadeAudio('tetris');
 const colors={I:'#69eaff',O:'#ffe285',T:'#bc89ff',S:'#8affa4',Z:'#ff73b2',J:'#89a8ff',L:'#ffad78'};
 const shapes={I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],O:[[1,1],[1,1]],T:[[0,1,0],[1,1,1],[0,0,0]],S:[[0,1,1],[1,1,0],[0,0,0]],Z:[[1,1,0],[0,1,1],[0,0,0]],J:[[1,0,0],[1,1,1],[0,0,0]],L:[[0,0,1],[1,1,1],[0,0,0]]};
-let board=[],bag=[],queue=[],current=null,held=null,holdUsed=false,state='ready',score=0,best=0,lines=0,level=999,combo=0,fever=0,feverRemaining=0,dropElapsed=0,lockElapsed=0,clock=0,particles=[],notices=[],ribbons=[],clearFlash=0,shake=0,placed=0,rescues=0;
-let cooldown={nuke:0,sweep:0,stick:0},toastTime=0,streak=0;
+let board=[],bag=[],queue=[],current=null,held=null,holdUsed=false,state='ready',score=0,best=0,lines=0,level=1,combo=0,fever=0,feverRemaining=0,dropElapsed=0,lockElapsed=0,clock=0,particles=[],notices=[],ribbons=[],clearFlash=0,shake=0,placed=0,rescues=0;
+let assists=0,toastTime=0,streak=0;
 try{best=Number(localStorage.getItem('neonOverdriveBestV1'))||0}catch(_){}
 const clone=m=>m.map(r=>r.slice());
 function saveBest(){if(score>best){best=score;try{localStorage.setItem('neonOverdriveBestV1',String(best))}catch(_){}}}
@@ -99,25 +99,45 @@ function banner(msg,color='#ffdd80',size=22){$('toast').textContent=msg;$('toast
 function sparkle(yy=300,count=28){for(let i=0;i<count;i++){const col=Object.values(colors)[Math.floor(Math.random()*7)];particles.push({x:Math.random()*300,y:yy+(Math.random()-.5)*25,vx:(Math.random()-.5)*350,vy:(Math.random()-.5)*390,life:.45+Math.random()*.7,t:0,col,size:2+Math.random()*3})}if(particles.length>260)particles.splice(0,particles.length-260)}
 function ribbon(y,col='#ffd473'){ribbons.push({y,col,t:0,life:.65});if(ribbons.length>12)ribbons.shift()}
 function impact(amount=6){shake=Math.min(13,shake+amount);clearFlash=Math.max(clearFlash,.18)}
-function saveScore(amount){score+=Math.round(amount);saveBest()}
+function saveScore(amount){score+=Math.max(0,Math.min(2500,Math.round(amount)));saveBest()}
 function clearRows(indices,{reason='暴击消除',power=1}={}){
  indices=[...new Set(indices)].filter(y=>Number.isInteger(y)&&y>=0&&y<H).sort((a,b)=>b-a);
  if(!indices.length)return 0;
  for(const y of indices){sparkle(y*S+S/2,18);ribbon(y*S+15,indices.length>=4?'#ffe37f':'#ff81de');board.splice(y,1)}
  for(let j=0;j<indices.length;j++)board.unshift(Array(W).fill(''))
- const n=indices.length;lines+=n;level=999+Math.floor(lines/8);combo++;streak++;
- let mult=feverRemaining>0?999:10+Math.min(combo*10,200);let gain=(n*n*400+1000)*mult*power;saveScore(gain);
- fever=Math.min(100,fever+n*21+7);impact(3+n*2);fx.sound(n>=4?'tetris':'line');banner(`${reason} ×${mult}`,n>=4?'#ffe17c':'#ffa7e4',n>=4?24:19);
- if(board.every(row=>row.every(v=>!v))){saveScore(999999);fx.sound('perfect');banner('👑 PERFECT CLEAR！','#fff2aa',23)}
- if(fever>=100 && feverRemaining<=0){fever=0;feverRemaining=12;fx.setFever(true);fx.sound('fever');banner('⚡ 超载暴走 ×999','#ff98d5',23);sparkle(260,120)}
+ const n=indices.length;lines+=n;level=1+Math.floor(lines/10);combo++;streak++;
+ let mult=1+Math.min(combo,6);saveScore((n*n*40+100)*mult*power);
+ fever=Math.min(100,fever+n*21+7);impact(3+n*2);fx.sound(n>=4?'tetris':'line');banner(reason,n>=4?'#ffe17c':'#ffa7e4',n>=4?24:19);
+ if(board.every(row=>row.every(v=>!v))){fx.sound('perfect');banner('👑 完美清屏！','#fff2aa',23)}
+ if(fever>=100 && feverRemaining<=0){fever=0;feverRemaining=12;fx.setFever(true);fx.sound('fever');banner('⚡ 自动超载暴走！','#ff98d5',23);sparkle(260,120)}
  return n;
 }
 function filledRows(){let a=[];for(let y=0;y<H;y++)if(board[y].every(Boolean))a.push(y);return a}
 function autoAssist(){
- // Every third landed piece receives an absurdly generous automatic clear.
- if(placed%3!==0)return;
- const choices=board.map((row,y)=>({y,c:row.filter(Boolean).length})).filter(x=>x.c>0).sort((a,b)=>b.c-a.c||b.y-a.y);
- if(choices.length){clearRows([choices[0].y],{reason:'🤖 自动连锁补刀',power:1.5});fx.sound('power');sparkle(choices[0].y*S+15,50)}
+ // Abilities are passive and deterministic by placements, not score-based.
+ const crowded=()=>board.map((r,y)=>({y,c:r.filter(Boolean).length})).filter(v=>v.c>0).sort((a,b)=>b.c-a.c||b.y-a.y);
+ const activate=(message,color)=>{assists++;impact(5);fx.sound('power');banner(message,color,21)};
+ if(placed%2===0){
+  const target=crowded()[0];
+  if(target){
+   const y=target.y;for(let x=0;x<W;x++)if(!board[y][x])board[y][x]='I';
+   sparkle(y*S+15,24);clearRows([y],{reason:'🧲 磁力补齐 · 自动消行'});assists++;
+  }
+ }
+ if(placed%5===0){
+  const targets=crowded().slice(0,Math.min(3,1+Math.floor(placed/15))).map(v=>v.y);
+  if(targets.length){clearRows(targets,{reason:'🛰️ 轨道激光横扫'});assists++;sparkle(300,48);fx.sound('laser')}
+ }
+ if(placed%7===0){
+  queue.unshift('I','I','I');queue=queue.slice(0,6);replenish();
+  activate('🌠 银河直条雨 · 三连直条','#a3faff');sparkle(95,60);
+ }
+ if(placed%12===0){
+  const count=board.filter(r=>r.some(Boolean)).length;
+  if(count){for(const row of board)row.fill('');lines+=count;level=1+Math.floor(lines/10);assists++;impact(13);sparkle(300,115);ribbon(260,'#fff2aa');fx.sound('bomb');banner('☄️ 全屏星际核爆！','#fff0a2',24)}
+  else activate('☄️ 星际核爆 · 星尘扫荡','#fff0a2');
+ }
+ if(placed%3===0 && board.slice(0,7).some(r=>r.some(Boolean))){rescue();assists++;}
 }
 function spawn(){replenish();current=piece(queue.shift());replenish();holdUsed=false;dropElapsed=0;lockElapsed=0;
  if(intersects(current)){rescue();current=piece(current.type);if(intersects(current)){board=Array.from({length:H},()=>Array(W).fill(''));saveScore(888888);banner('🛡️ 自动救场 · 满血复活！');impact(12)}}
@@ -129,14 +149,14 @@ function rescue(){
  for(let y=0;y<7;y++){board.splice(0,1);board.push(Array(W).fill(''))}
  saveScore(777777*rescues);fx.sound('fever');banner('🛡️ 超载自动救场！','#ffdc80',22);impact(12);
 }
-function reset(){board=Array.from({length:H},()=>Array(W).fill(''));bag=[];queue=[];current=null;held=null;holdUsed=false;score=0;lines=0;level=999;combo=0;fever=0;feverRemaining=0;dropElapsed=0;lockElapsed=0;placed=0;rescues=0;streak=0;clock=0;particles=[];notices=[];ribbons=[];clearFlash=0;cooldown={nuke:0,sweep:0,stick:0};state='playing';$('overlay').hidden=true;fx.setActive(true);fx.sound('fever');spawn();banner('💥 三大技能全部解锁！');refresh()}
+function reset(){board=Array.from({length:H},()=>Array(W).fill(''));bag=[];queue=[];current=null;held=null;holdUsed=false;score=0;lines=0;level=1;combo=0;fever=0;feverRemaining=0;dropElapsed=0;lockElapsed=0;placed=0;rescues=0;streak=0;clock=0;particles=[];notices=[];ribbons=[];clearFlash=0;assists=0;state='playing';$('overlay').hidden=true;fx.setActive(true);fx.sound('fever');spawn();banner('✨ 自动外挂已启动！');refresh()}
 function start(){if(state==='paused')return resume();reset()}
 function showOverlay(title,desc,button){$('overlayTitle').textContent=title;$('overlayDescription').innerHTML=desc;$('start').textContent=button;$('overlay').hidden=false}
-function pause(){if(state==='paused')return resume();if(state!=='playing')return;state='paused';fx.setActive(false);showOverlay('超载暂停','技能冷却保留，随时继续。','▶ 继续超载');refresh()}
+function pause(){if(state==='paused')return resume();if(state!=='playing')return;state='paused';fx.setActive(false);showOverlay('超载暂停','自动辅助已暂停，继续后恢复。','▶ 继续超载');refresh()}
 function resume(){if(state!=='paused')return;state='playing';$('overlay').hidden=true;fx.setActive(true);refresh()}
 function fmtScore(n){return n>=1000000?(n/1000000).toFixed(n>=10000000?1:2).replace(/\.0+$/,'')+'M':n>=10000?(n/1000).toFixed(1)+'K':n.toLocaleString('en-US')}
-function refresh(){saveBest();$('score').textContent=fmtScore(score);$('score').title=score.toLocaleString('en-US');$('best').textContent=fmtScore(best);$('best').title=best.toLocaleString('en-US');$('level').textContent=level;$('lines').textContent=lines;$('feverFill').style.width=(feverRemaining>0?100:fever)+'%';$('feverPercent').textContent=feverRemaining>0?Math.ceil(feverRemaining)+'s':Math.floor(fever)+'%';$('combo').textContent=feverRemaining>0?'×999 FEVER':`×${10+Math.min(combo*10,200)} 超载倍率`;$('pause').textContent=state==='paused'?'▶ 继续':'Ⅱ 暂停';
- for(const [id,name] of Object.entries({nuke:'核爆清屏',sweep:'横扫四行',stick:'直条增援'})){let b=$(id),cd=cooldown[id];b.disabled=state!=='playing'||cd>0;b.classList.toggle('available',!cd&&state==='playing');b.querySelector('small').textContent=cd?`剩余 ${cd} 块`:'可释放'}
+function refresh(){saveBest();$('score').textContent=placed;$('best').textContent=assists;$('level').textContent=level;$('lines').textContent=lines;$('feverFill').style.width=(feverRemaining>0?100:fever)+'%';$('feverPercent').textContent=feverRemaining>0?Math.ceil(feverRemaining)+'s':Math.floor(fever)+'%';$('combo').textContent=feverRemaining>0?'⚡ 自动 FEVER':`✨ 已发动 ${assists} 次辅助`;$('pause').textContent=state==='paused'?'▶ 继续':'Ⅱ 暂停';
+
 }
 function move(dx){if(state!=='playing'||!current)return;if(!intersects(current,dx,0)){current.x+=dx;lockElapsed=0;fx.sound('move')}}
 function rotate(){if(state!=='playing'||!current)return;const m=current.m,N=m.length,rot=Array.from({length:N},()=>Array(N).fill(0));
@@ -148,28 +168,9 @@ function hold(){if(state!=='playing'||!current||holdUsed)return;const type=curre
 function lock(){if(!current||state!=='playing')return;let above=false;for(let y=0;y<current.m.length;y++)for(let x=0;x<current.m[y].length;x++)if(current.m[y][x]){const yy=current.y+y,xx=current.x+x;if(yy<0)above=true;else if(yy<H)board[yy][xx]=current.type}
  if(above){rescue()}
  placed++;
- const rows=filledRows();if(rows.length)clearRows(rows,{reason:rows.length===4?'🌟 天降四消':'🔥 四连清行'});
- else autoAssist();
- for(const k of Object.keys(cooldown))if(cooldown[k]>0)cooldown[k]--;
- if(placed%8===0){saveScore(88888);banner('🎁 每8块白送 88888 分','#ffd474',19);sparkle(380,65);fx.sound('wave')}
+ const rows=filledRows();if(rows.length)clearRows(rows,{reason:rows.length===4?'🌟 天降四消':'🔥 连锁清行'});
+ autoAssist();
  spawn();refresh();
-}
-function skill(name){if(state!=='playing'||cooldown[name]>0)return;
- if(name==='nuke'){
-  let n=board.filter(row=>row.some(Boolean)).length;
-  board=Array.from({length:H},()=>Array(W).fill(''));clearFlash=.42;impact(13);sparkle(315,150);
-  saveScore(999999+n*30000);fx.sound('bomb');fx.sound('perfect');banner('☄️ 核爆清屏 +999999','#fff1a1',23);cooldown.nuke=10;
- }else if(name==='sweep'){
-  let picks=board.map((row,y)=>({y,c:row.filter(Boolean).length})).filter(x=>x.c>0).sort((a,b)=>b.c-a.c||b.y-a.y).slice(0,4).map(x=>x.y);
-  if(picks.length){clearRows(picks,{reason:'⚔️ 横扫千军',power:3});sparkle(300,95)}
-  else{saveScore(666666);banner('⚔️ 空场也斩！+666666','#ffe394');sparkle(300,80)}
-  fx.sound('tetris');cooldown.sweep=6;
- }else if(name==='stick'){
-  current=piece('I');queue.splice(0,0,'I','I','I','I','I');queue=queue.slice(0,6);dropElapsed=0;lockElapsed=0;
-  if(intersects(current)){rescue();current=piece('I')}
-  saveScore(55555);fx.sound('fever');banner('✨ 天降连送直条！','#a1f9ff',22);sparkle(100,55);cooldown.stick=5;
- }
- refresh();
 }
 function cell(x,y,type,alpha=1,ghost=false){if(y<0)return;const xx=x*S,yy=y*S;ctx.save();ctx.globalAlpha=alpha;const col=colors[type]||colors.I;ctx.fillStyle=col;if(!ghost){ctx.shadowColor=col;ctx.shadowBlur=9}ctx.beginPath();ctx.roundRect(xx+1.5,yy+1.5,S-3,S-3,5);ctx.fill();ctx.shadowBlur=0;if(!ghost){ctx.fillStyle='#ffffff65';ctx.fillRect(xx+5,yy+4,S-10,3);ctx.fillStyle='#230e2b55';ctx.fillRect(xx+5,yy+S-7,S-10,3)}ctx.restore()}
 function paint(){ctx.save();ctx.clearRect(0,0,300,600);if(shake>.1)ctx.translate((Math.random()-.5)*shake*2,(Math.random()-.5)*shake*2);
@@ -192,11 +193,11 @@ function frame(t){if(!document.body.contains(canvas)){cancelAnimationFrame(raf);
  paint();preview('holdPreview',held);for(let i=0;i<3;i++)preview('next'+i,queue[i]);raf=requestAnimationFrame(frame)}
 $('music').addEventListener('click',()=>{let mode=fx.toggle();$('music').textContent=['♫ 关','♫ 音乐','♪ 音效'][mode];fx.sound('power')});
 $('start').addEventListener('click',start);$('pause').addEventListener('click',pause);$('rotate').addEventListener('click',rotate);$('hard').addEventListener('click',hardDrop);$('hold').addEventListener('click',hold);
-for(const key of ['nuke','sweep','stick'])$(key).addEventListener('click',()=>skill(key));
+// All abilities are automatic; only movement, rotation and Hold require player input.
 function repeating(id,action,delay=105){const b=$(id);let timer=null,repeat=null;function clear(){clearTimeout(timer);clearInterval(repeat);timer=null;repeat=null;b.classList.remove('holding')}b.addEventListener('pointerdown',e=>{e.preventDefault();clear();b.setPointerCapture(e.pointerId);b.classList.add('holding');action();timer=setTimeout(()=>{repeat=setInterval(action,delay)},230)});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,clear)}
 repeating('left',()=>move(-1));repeating('right',()=>move(1));repeating('down',()=>descend(true),60);
 let gesture=null;const bf=$('boardFrame');bf.addEventListener('pointerdown',e=>{if(state!=='playing')return;e.preventDefault();bf.setPointerCapture(e.pointerId);gesture={id:e.pointerId,startX:e.clientX,startY:e.clientY,lastX:e.clientX,hard:false}});bf.addEventListener('pointermove',e=>{if(!gesture||e.pointerId!==gesture.id||state!=='playing')return;e.preventDefault();let dx=e.clientX-gesture.lastX,step=Math.max(12,bf.getBoundingClientRect().width/10*.80);while(dx>step){move(1);gesture.lastX+=step;dx-=step}while(dx<-step){move(-1);gesture.lastX-=step;dx+=step}const dy=e.clientY-gesture.startY;if(dy>70&&!gesture.hard&&Math.abs(e.clientX-gesture.startX)<75){gesture.hard=true;hardDrop()}});bf.addEventListener('pointerup',e=>{if(!gesture||gesture.id!==e.pointerId)return;if(!gesture.hard&&Math.abs(e.clientX-gesture.startX)<11&&Math.abs(e.clientY-gesture.startY)<11)rotate();gesture=null});bf.addEventListener('pointercancel',()=>gesture=null);
-document.addEventListener('keydown',e=>{if(e.target?.tagName==='BUTTON')return;let did=true;switch(e.code){case'ArrowLeft':case'KeyA':move(-1);break;case'ArrowRight':case'KeyD':move(1);break;case'ArrowDown':case'KeyS':descend(true);break;case'ArrowUp':case'KeyX':rotate();break;case'Space':hardDrop();break;case'KeyC':hold();break;case'KeyP':pause();break;case'Digit1':skill('nuke');break;case'Digit2':skill('sweep');break;case'Digit3':skill('stick');break;case'Enter':if(state!=='playing')start();break;default:did=false}if(did)e.preventDefault()});
+document.addEventListener('keydown',e=>{if(e.target?.tagName==='BUTTON')return;let did=true;switch(e.code){case'ArrowLeft':case'KeyA':move(-1);break;case'ArrowRight':case'KeyD':move(1);break;case'ArrowDown':case'KeyS':descend(true);break;case'ArrowUp':case'KeyX':rotate();break;case'Space':hardDrop();break;case'KeyC':hold();break;case'KeyP':pause();break;case'Enter':if(state!=='playing')start();break;default:did=false}if(did)e.preventDefault()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause()});
 board=Array.from({length:H},()=>Array(W).fill(''));replenish();refresh();raf=requestAnimationFrame(frame);
 })();
