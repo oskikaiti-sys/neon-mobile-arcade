@@ -41,4 +41,16 @@ No original game audio or sprites are distributed.
 
 Original composition: **ZUN / Team Shanghai Alice**. MML transcription and arrangement: **Yoji Suzuki / SUZUKI PLAN**. This game uses the full original **314-beat** MML source at **155 BPM** (approximately 2 minutes 2 seconds), from the [required fork of BSLOT014.mml](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT014.mml). The **506** sounding Ch1 notes are catchable by the player; rests stay silent. The **2,249** original Ch0/2/3/4/5 note and drum events play automatically. WebAudio synthesizes approximately similar timbres, not the original game recordings.
 
-Flandre mode has rainbow crystal bricks, prismatic-wing support units and its own spell-card labels/effects. Choosing Septette still restores Reimu's Yin-Yang Orbs, Kedama bricks, and the previously tuned mixing for the Scarlet Devil theme. The three public-domain tracks retain their usual gameplay.
+Flandre mode has rainbow crystal bricks, prismatic-wing support units and its own spell-card labels/effects. The other Touhou modes now have separate character art and titles; the three public-domain tracks retain their usual gameplay.
+
+## Reimu Hakurei — 少女綺想曲 ～ Dream Battle
+
+Original composition: **ZUN / Team Shanghai Alice**. Full-score MML arrangement/transcription: **Yoji Suzuki / SUZUKI PLAN**, from [BSLOT046.mml in the required user fork](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT046.mml). The playable Ch1 contains **518 pitched melody notes** over **400 beats**. The other MML channels supply **4,487** automated note/percussion events. The original tempo progression **160 → 159 → 152 → 146 → 139 → 160 BPM** is reflected in both the catchable notes and the backing-sound schedule, including the transition segment at beats 64–79. The browser synthesizer adapts instruments but preserves notes and timing.
+
+Reimu mode uses the original **Kedama brick enemies**, **Yin-Yang Orb wingmen**, **red-white ofuda bullets**, **Sukima**, and the **Fantasy Seal / Evil-Sealing Circle** spell visuals.
+
+## Remilia Scarlet — 亡き王女の為のセプテット
+
+The existing [BSLOT012.mml](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT012.mml) melody and tuned score-aligned multi-channel music remain unchanged. Remilia now has her own **crimson blood-moon sky**, **bat-emblem gothic red bricks**, **small vampire-bat wingmen**, **scarlet spear bullets**, **Scarlet Gate**, and red vampire-themed spell cards. These replace the earlier Reimu imagery that had been shared with Septette.
+
+All Touhou tracks remain unofficial fan adaptations. Original music: **ZUN / Team Shanghai Alice**; MML fan transcriptions: **Yoji Suzuki / SUZUKI PLAN**.
