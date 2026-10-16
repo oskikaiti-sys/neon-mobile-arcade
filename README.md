@@ -36,3 +36,9 @@ Browser Web Audio synthesizer timbres approximate the instruments and are not th
 - Transcription: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT012.mml
 
 No original game audio or sprites are distributed.
+
+## U.N. Owen Was Her? — Flandre Scarlet fan-game mode
+
+Original composition: **ZUN / Team Shanghai Alice**. MML transcription and arrangement: **Yoji Suzuki / SUZUKI PLAN**. This game uses the full original **314-beat** MML source at **155 BPM** (approximately 2 minutes 2 seconds), from the [required fork of BSLOT014.mml](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT014.mml). The **506** sounding Ch1 notes are catchable by the player; rests stay silent. The **2,249** original Ch0/2/3/4/5 note and drum events play automatically. WebAudio synthesizes approximately similar timbres, not the original game recordings.
+
+Flandre mode has rainbow crystal bricks, prismatic-wing support units and its own spell-card labels/effects. Choosing Septette still restores Reimu's Yin-Yang Orbs, Kedama bricks, and the previously tuned mixing for the Scarlet Devil theme. The three public-domain tracks retain their usual gameplay.
