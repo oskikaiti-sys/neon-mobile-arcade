@@ -22,7 +22,7 @@
 Original composition: **ZUN / Team Shanghai Alice**. MML fan arrangement and
 transcription: **Yoji Suzuki / SUZUKI PLAN**. The playable Septette track is a
 ~49-second verified **theme excerpt loop**, not the full original.
-Each original non-lead MML track (Ch0 bass, Ch2 lower counterline, Ch3 and Ch4 harmony, Ch5 percussion) is played note by note with its original timing and durations. Synthetic chord pads and the generic arcade drum loop are disabled in this mode. Browser audio approximates timbres but does not replace the written notes; all 136 lead notes are player-triggered. Every pitched melody event from the excerpt is playable (136 notes); only true score rests are silent. Rapid passages are grouped into close horizontal landing lanes.
+Each original non-lead MML track (Ch0 bass, Ch2 lower counterline, Ch3 and Ch4 harmony, Ch5 percussion) is played note by note with its original timing and durations. Synthetic chord pads and the generic arcade drum loop are disabled in this mode. Browser audio approximates timbres but does not replace the written notes; all 140 lead notes are player-triggered. Every pitched melody event from the excerpt is playable (140 notes); only true score rests are silent. Rapid passages are grouped into close horizontal landing lanes.
 
 - Original usage terms: https://github.com/suzukiplan/Touhou-VGS-MML-data
 - User's required fork: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data
@@ -33,3 +33,7 @@ No original game audio or sprites are redistributed.
 ## Lead-channel correction
 
 The source MML Ch1 is the main high melodic voice, while Ch2 supplies a lower counterline for two of the three excerpts. The playable notes now come from Ch1 in full, with Ch2 moved to the score-derived accompaniment. The first excerpt starts at beat 32.0 (rather than 32.25) to preserve Ch1's proper first-note onset; the selected passages total 120 beats. The prior Ch2-based lead was pitch-accurate to that channel but was the wrong voice.
+
+## Opening countermelody balance
+
+The original opening Ch4's 103 high-register notes are preserved with exact pitches, note lengths, and onsets. They use a soft sine timbre at reduced gain (with further attenuation at the highest notes), to avoid overpowering the playable Ch1 lead. The 0.25-beat Ch2 doubling is retained for a fuller sound. Ch4 after beat 32 uses the original synthesizer settings.

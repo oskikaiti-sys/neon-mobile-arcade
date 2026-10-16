@@ -111,7 +111,7 @@ function create(audio,callbacks={}){
      const due=INTRO+cycle*(song.totalBeats*60/song.bpm+1.3)+note[0]*60/song.bpm;
      const ahead=due-clock;
      if(ahead>.35)break;
-     audio.playScoreBacking?.(note[1],note[2],song.bpm,note[3],note[4],Math.max(0,ahead));
+     audio.playScoreBacking?.(note[1],note[2],song.bpm,note[3],note[4],Math.max(0,ahead),note[0]);
      backingIndex++;
     }
    }
