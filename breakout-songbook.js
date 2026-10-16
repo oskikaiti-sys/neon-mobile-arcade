@@ -24,7 +24,8 @@ const songs=[
  [n(74),n(74),n(76),n(72)],[n(74),n(76,.5),n(77,.5),n(76),n(72)],
  [n(74),n(76,.5),n(77,.5),n(76),n(74)],[n(72),n(74),n(67,2)],
  [n(76),n(76),n(77),n(79)],[n(79),n(77),n(76),n(74)],
- [n(72),n(72),n(74),n(76)],[n(74,2),n(72,2)]]}
+ [n(72),n(72),n(74),n(76)],[n(74,2),n(72,2)]]},
+ {"id":"septette","names":["Septette for the Dead Princess (Fan Arrangement)","亡き王女の為のセプテット（同人编配）","亡き王女の為のセプテット（同人アレンジ）"],"composer":"ZUN / Team Shanghai Alice · Touhou Project fan arrangement","bpm":114,"root":63,"bars":[[[55,1],[67,1],[75,1],[74,1]],[[67,1],[75,1],[74,1],[65,1]],[[55,1],[67,1],[75,1],[74,1]],[[68,1],[74,1],[75,1],[79,1]],[[75,1],[74,1],[72,1],[74,1]],[[75,1],[77,1],[74,1],[75,1]],[[72,1],[74,1],[75,1],[77,1]],[[74,1],[82,1],[79,2]],[[79,1],[82,1],[84,1],[77,1]],[[77,2],[80,1],[82,1]],[[75,1],[75,1],[72,0.5],[72,0.5],[74,1]],[[75,1],[77,1],[74,2]],[[72,1],[74,1],[75,1],[77,1]],[[74,1],[75,1],[72,1],[79,1]],[[75,1],[74,1],[72,1],[74,1]],[[75,2],[79,2]],[[75,1],[77,1],[74,1],[72,1]],[[82,1],[79,1],[77,1],[75,1]],[[79,1],[82,1],[84,1],[86,1]],[[84,1],[82,1],[79,2]],[[72,1],[72,1],[74,1],[75,1]],[[77,1],[74,1],[75,2]],[[75,1],[77,1],[79,1],[82,1]],[[84,1],[82,1],[79,2]],[[75,1],[72,1],[74,1],[75,1]],[[77,1],[79,1],[82,2]],[[84,1],[82,1],[79,1],[77,1]],[[75,1],[74,1],[72,2]],[[75,1],[77,1],[74,1],[72,1]],[[74,1],[75,1],[79,1],[82,1]],[[79,1],[77,1],[75,1],[74,1]],[[75,4]]]}
 ];
 const color=['#76efff','#c0a3ff','#ffe08c','#ff9fcd','#8ef5c3','#f4ab87'];
 function lang(){return window.ArcadeLang?.get?.()||'en'}
@@ -35,6 +36,7 @@ function create(audio,callbacks={}){
  const progress=document.getElementById('songProgress');
  const track=document.getElementById('songName');
  const hint=document.getElementById('songHint');
+ const touhouNotice=document.getElementById('touhouNotice');
  const LEAD=1.5,INTRO=2.3;
  let selected=0,clock=0,nextDue=INTRO,planned=0,resolved=0,perfectBars=0,barHits=0,barMisses=0,completed=0;
  let pending=new Map(),generation=0;
@@ -49,6 +51,7 @@ function create(audio,callbacks={}){
   if(progress)progress.textContent=(notes[index].bar+1)+'/'+song.bars.length;
   if(track)track.textContent=name(song);
   if(hint)hint.textContent=loc('♪ Catch notes to play the melody · missed notes stay silent','♪ 用挡板接音符来弹奏旋律 · 漏接就会缺音','♪ 音符をキャッチして演奏 · 逃すと無音');
+  if(touhouNotice){touhouNotice.hidden=song.id!=='septette';touhouNotice.textContent=loc('Touhou Project fan work · Original music: ZUN / Team Shanghai Alice · Unofficial free game','东方 Project 同人二创 · 原曲：ZUN／上海爱丽丝幻乐团 · 非官方免费游戏','東方Project 二次創作 · 原曲：ZUN／上海アリス幻樂団 · 非公式無料ゲーム');}
  }
  function resetTiming(){
   clock=0;nextDue=INTRO;planned=0;resolved=0;perfectBars=0;barHits=0;barMisses=0;pending.clear();generation++;
