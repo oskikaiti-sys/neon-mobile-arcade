@@ -132,11 +132,11 @@ function unlock(){
  const names=['','🛸 侦察僚机入队！','🛸 双舰护航！','🚀 追踪导弹解锁！','☄️ 轨道主炮已上线！'];
  while(fleet<4&&kills>=thresholds[fleet+1]){fleet++;text(W/2,300,names[fleet],'#c6faff',21);ring(paddle.x,paddle.y-27,'#9deeff',25);burst(paddle.x,paddle.y-24,'#75dfff',26);shake=6;flash=.15;audio('wave');if(fleet===4)orbitalClock=1.5}
 }
-function drop(x,y){if(drops.length||kills-lastMusicDropKill<3)return;lastMusicDropKill=kills;drops.push({...songbook.current(),x,y,vy:158,age:0})}
+function drop(x,y){if(drops.length||kills-lastMusicDropKill<4)return;lastMusicDropKill=kills;drops.push({...songbook.current(),x,y,vy:158,age:0})}
 function destroy(b,chain=false){
  if(!b.alive)return;b.alive=false;kills++;combo++;energy=clamp(energy+(rage>0?1:3.1),0,100);
  const x=b.x+b.w/2,y=b.y+b.h/2;burst(x,y,b.color,b.type==='bomb'?17:7);ring(x,y,b.color,3);shake=Math.min(7,shake+.42);
- if(b.type==='power'||Math.random()<.055)drop(x,y);
+ if(kills-lastMusicDropKill>=4)drop(x,y);
  if(b.type==='bomb'){
    text(x,y,'✹','#ffadce',18);audio('bomb');
    for(const q of bricks)if(q.alive&&Math.hypot(q.x+q.w/2-x,q.y+q.h/2-y)<52){q.alive=false;kills++;burst(q.x+q.w/2,q.y+q.h/2,q.color,5)}
