@@ -117,22 +117,22 @@ function autoAssist(){
  // Abilities are passive and deterministic by placements, not score-based.
  const crowded=()=>board.map((r,y)=>({y,c:r.filter(Boolean).length})).filter(v=>v.c>0).sort((a,b)=>b.c-a.c||b.y-a.y);
  const activate=(message,color)=>{assists++;impact(5);fx.sound('power');banner(message,color,21)};
- if(placed%2===0){
+ if(placed%4===0){
   const target=crowded()[0];
   if(target){
    const y=target.y;for(let x=0;x<W;x++)if(!board[y][x])board[y][x]='I';
    sparkle(y*S+15,24);clearRows([y],{reason:'🧲 磁力补齐 · 自动消行'});assists++;
   }
  }
- if(placed%5===0){
+ if(placed%11===0){
   const targets=crowded().slice(0,Math.min(3,1+Math.floor(placed/15))).map(v=>v.y);
   if(targets.length){clearRows(targets,{reason:'🛰️ 轨道激光横扫'});assists++;sparkle(300,48);fx.sound('laser')}
  }
- if(placed%7===0){
+ if(placed%13===0){
   queue.unshift('I','I','I');queue=queue.slice(0,6);replenish();
   activate('🌠 银河直条雨 · 三连直条','#a3faff');sparkle(95,60);
  }
- if(placed%12===0){
+ if(placed%32===0){
   const count=board.filter(r=>r.some(Boolean)).length;
   if(count){for(const row of board)row.fill('');lines+=count;level=1+Math.floor(lines/10);assists++;impact(13);sparkle(300,115);ribbon(260,'#fff2aa');fx.sound('bomb');banner('☄️ 全屏星际核爆！','#fff0a2',24)}
   else activate('☄️ 星际核爆 · 星尘扫荡','#fff0a2');
@@ -186,7 +186,7 @@ function paint(){ctx.save();ctx.clearRect(0,0,300,600);if(shake>.1)ctx.translate
 function preview(id,type){const c=$(id),g=c.getContext('2d'),w=c.width,h=c.height;g.clearRect(0,0,w,h);if(!type)return;const m=shapes[type];const sz=Math.min(20,Math.floor((w-12)/m.length),Math.floor((h-10)/m.length)),x0=(w-m.length*sz)/2,y0=(h-m.length*sz)/2;for(let y=0;y<m.length;y++)for(let x=0;x<m[y].length;x++)if(m[y][x]){g.fillStyle=colors[type];g.shadowColor=colors[type];g.shadowBlur=7;g.beginPath();g.roundRect(x0+x*sz+1,y0+y*sz+1,sz-2,sz-2,3);g.fill();g.shadowBlur=0;g.fillStyle='#ffffff66';g.fillRect(x0+x*sz+3,y0+y*sz+3,sz-6,2)}}
 let previous=0,raf;
 function frame(t){if(!document.body.contains(canvas)){cancelAnimationFrame(raf);return}const dt=Math.min(.045,(t-previous)/1000||.016);previous=t;clock+=dt;
- if(state==='playing'){dropElapsed+=dt;const interval=Math.max(.18,.90*Math.pow(.95,Math.floor(lines/10)))*(feverRemaining>0?.70:1);if(dropElapsed>=interval){dropElapsed=0;if(!intersects(current,0,1)){current.y++;lockElapsed=0}else lockElapsed+=interval}if(intersects(current,0,1))lockElapsed+=dt;else lockElapsed=0;if(lockElapsed>.53)lock();if(feverRemaining>0)feverRemaining=Math.max(0,feverRemaining-dt)}
+ if(state==='playing'){dropElapsed+=dt;const interval=Math.max(.10,.30*Math.pow(.955,Math.floor(lines/10)))*(feverRemaining>0?.78:1);if(dropElapsed>=interval){dropElapsed=0;if(!intersects(current,0,1)){current.y++;lockElapsed=0}else lockElapsed+=interval}if(intersects(current,0,1))lockElapsed+=dt;else lockElapsed=0;if(lockElapsed>.34)lock();if(feverRemaining>0)feverRemaining=Math.max(0,feverRemaining-dt)}
  if(shake>0)shake=Math.max(0,shake-dt*19);if(clearFlash>0)clearFlash=Math.max(0,clearFlash-dt*1.5);if(toastTime>0){toastTime-=dt;if(toastTime<=0)$('toast').classList.remove('active')}
  fx.setFever(feverRemaining>0);
  for(let i=ribbons.length-1;i>=0;i--){ribbons[i].t+=dt;if(ribbons[i].t>=ribbons[i].life)ribbons.splice(i,1)}for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=170*dt;if(p.t>p.life)particles.splice(i,1)}
