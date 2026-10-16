@@ -118,7 +118,7 @@ const ASSIST_COOLDOWN=10; // Prevent consecutive auto-clears when the field is c
 let lastAutoAssistPlaced=-ASSIST_COOLDOWN;
 function settledCells(){return board.reduce((sum,row)=>sum+row.reduce((count,cell)=>count+(cell?1:0),0),0)}
 function autoAssist(){
- // Emergency rescue is always available, even if the board has fewer than four rows of blocks.
+ // Space Fold is an emergency passive, available regardless of the 40-cell assist threshold.
  if(placed%3===0 && board.slice(0,7).some(r=>r.some(Boolean))){rescue();assists++;}
  if(settledCells()<MIN_ASSIST_CELLS || placed-lastAutoAssistPlaced<ASSIST_COOLDOWN)return;
  const crowded=()=>board.map((r,y)=>({y,c:r.filter(Boolean).length})).filter(v=>v.c>0).sort((a,b)=>b.c-a.c||b.y-a.y);
@@ -146,14 +146,20 @@ function autoAssist(){
  }
 }
 function spawn(){replenish();current=piece(queue.shift());replenish();holdUsed=false;dropElapsed=0;lockElapsed=0;
- if(intersects(current)){rescue();current=piece(current.type);if(intersects(current)){board=Array.from({length:H},()=>Array(W).fill(''));saveScore(888888);banner('🛡️ 自动救场 · 满血复活！');impact(12)}}
+ if(intersects(current)){rescue();current=piece(current.type)}
 }
 function rescue(){
+ // Space Fold: remove the UPPER half of occupied rows, preserve the lower half.
+ // Pack surviving rows at the bottom so spawning remains safe; never wipe the board.
+ const occupied=board.filter(row=>row.some(Boolean));
+ if(!occupied.length)return false;
+ const removed=Math.ceil(occupied.length/2);
+ const retained=occupied.slice(removed).map(row=>row.slice());
+ board=Array.from({length:H-retained.length},()=>Array(W).fill('')).concat(retained);
  rescues++;
- for(let y=0;y<7;y++){if(board[y].some(Boolean)){sparkle(y*S+15,7);board[y]=Array(W).fill('')}}
- // Shift lower stacks downward-free by clearing rows; this guarantees room to spawn.
- for(let y=0;y<7;y++){board.splice(0,1);board.push(Array(W).fill(''))}
- saveScore(777777*rescues);fx.sound('fever');banner('🛡️ 超载自动救场！','#ffdc80',22);impact(12);
+ sparkle(190,Math.min(100,removed*9));ribbon(240,'#8feeff');
+ fx.sound('fever');banner('🪐 空间折叠 · 半场重整！','#8feeff',22);impact(10);
+ return true;
 }
 function reset(){lastAutoAssistPlaced=-ASSIST_COOLDOWN;board=Array.from({length:H},()=>Array(W).fill(''));bag=[];queue=[];current=null;held=null;holdUsed=false;score=0;lines=0;level=1;combo=0;fever=0;feverRemaining=0;dropElapsed=0;lockElapsed=0;placed=0;rescues=0;streak=0;clock=0;particles=[];notices=[];ribbons=[];clearFlash=0;assists=0;state='playing';$('overlay').hidden=true;fx.setActive(true);fx.sound('fever');spawn();banner('✨ 自动外挂已启动！');refresh()}
 function start(){if(state==='paused')return resume();reset()}
