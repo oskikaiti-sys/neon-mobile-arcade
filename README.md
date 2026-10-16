@@ -17,23 +17,22 @@
 
 使用 Safari 打开这个 HTTPS 页面；不要在 iOS 文件 App 的 HTML 预览中运行。
 
-## Touhou fan arrangement / music credits
+## Touhou Project fan arrangement / credits
 
-Original composition: **ZUN / Team Shanghai Alice**. MML fan arrangement and
-transcription: **Yoji Suzuki / SUZUKI PLAN**. The playable Septette track is a
-~49-second verified **theme excerpt loop**, not the full original.
-Each original non-lead MML track (Ch0 bass, Ch2 lower counterline, Ch3 and Ch4 harmony, Ch5 percussion) is played note by note with its original timing and durations. Synthetic chord pads and the generic arcade drum loop are disabled in this mode. Browser audio approximates timbres but does not replace the written notes; all 140 lead notes are player-triggered. Every pitched melody event from the excerpt is playable (140 notes); only true score rests are silent. Rapid passages are grouped into close horizontal landing lanes.
+**Original composition:** ZUN / Team Shanghai Alice. **MML transcription and arrangement:** Yoji Suzuki / SUZUKI PLAN. This is an unofficial fan work.
 
-- Original usage terms: https://github.com/suzukiplan/Touhou-VGS-MML-data
-- User's required fork: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data
-- Referenced source score: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT012.mml
+This update uses the **full 322-beat MML score**, about **2 minutes 12 seconds** at 146 BPM, rather than a selected excerpt. All six original MML voice channels have their note pitches, note-on timing, note lengths, and rests represented in the game:
 
-No original game audio or sprites are redistributed.
+- **Ch1:** all 525 pitched melody notes are playable as catchable falling notes; rests stay silent.
+- **Ch0, Ch2, Ch3, Ch4, Ch5:** all 2642 backing instrument and percussion events are played automatically with the original score's timing.
+- **Ch4:** the very busy high-register passage at original MML beats **32–64** retains the previously tuned *soft sine* mix rather than an overpowering high-frequency synthesizer.
+- **Catching lanes:** falling notes drift smoothly left/right with melody pitch and phrase flow. Quickly successive notes remain close together to stay catchable on a mobile paddle.
+- The four Ch1-silent measures count as intended rests, not failed/skipped melody notes. The existing 1.3-second loop turnaround remains.
 
-## Lead-channel correction
+Browser Web Audio synthesizer timbres approximate the instruments and are not the original game audio.
 
-The source MML Ch1 is the main high melodic voice, while Ch2 supplies a lower counterline for two of the three excerpts. The playable notes now come from Ch1 in full, with Ch2 moved to the score-derived accompaniment. The first excerpt starts at beat 32.0 (rather than 32.25) to preserve Ch1's proper first-note onset; the selected passages total 120 beats. The prior Ch2-based lead was pitch-accurate to that channel but was the wrong voice.
+- Original licensing / terms: https://github.com/suzukiplan/Touhou-VGS-MML-data
+- User's fork (required by MML usage terms): https://github.com/oskikaiti-sys/Touhou-VGS-MML-data
+- Transcription: https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT012.mml
 
-## Opening countermelody balance
-
-The original opening Ch4's 103 high-register notes are preserved with exact pitches, note lengths, and onsets. They use a soft sine timbre at reduced gain (with further attenuation at the highest notes), to avoid overpowering the playable Ch1 lead. The 0.25-beat Ch2 doubling is retained for a fuller sound. Ch4 after beat 32 uses the original synthesizer settings.
+No original game audio or sprites are distributed.
