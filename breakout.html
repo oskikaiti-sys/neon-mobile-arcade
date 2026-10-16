@@ -69,33 +69,32 @@ class ArcadeAudio {
   this.tone(midi,dur,'sine',.11,at);
   this.tone(midi+12,.13,'triangle',.023,at+.021);
  }
- playHarmony(midiVoices,beats=2,bpm=146){
+ playHarmony(midiVoices,beats=4,bpm=146,secondsAhead=0){
   if(this.mode!==1||!this.active||!this.prepare()||!Array.isArray(midiVoices))return;
-  const ctx=this.ctx,start=ctx.currentTime+.010,duration=Math.max(.22,beats*60/bpm*.98);
-  // Mobile speakers tend to lose fundamentals below 200 Hz. Reinforce the bass an
-  // octave higher while keeping the original MML harmony and its pitch classes.
+  const ctx=this.ctx,start=ctx.currentTime+Math.max(.008,secondsAhead);
+  const step=60/bpm,duration=Math.max(.4,beats*step+.32);
+  // Quiet sustained pad, with octave reinforcement on small iPhone speakers.
+  // Notes overlap the next bar; there is no per-beat reattack or empty gap.
   const voices=[];
   midiVoices.forEach((midi,i)=>{
    if(!Number.isFinite(midi))return;
    if(i===0){
-    voices.push({midi,volume:.042,type:'triangle'});
-    voices.push({midi:midi<57?midi+12:midi,volume:.105,type:'triangle'});
-   }else{
-    voices.push({midi:midi>72?midi-12:midi,volume:i===1?.080:.058,type:'sine'});
-   }
+    voices.push({midi,volume:.025,type:'sine'});
+    voices.push({midi:midi<57?midi+12:midi,volume:.080,type:'triangle'});
+   }else voices.push({midi:midi>72?midi-12:midi,volume:.064,type:'sine'});
   });
   for(const {midi,volume,type} of voices){
    try{
     const osc=ctx.createOscillator(),amp=ctx.createGain(),end=start+duration;
-    const attack=Math.min(.090,duration*.18),release=Math.min(.20,duration*.29);
-    osc.type=type;
-    osc.frequency.setValueAtTime(440*Math.pow(2,(midi-69)/12),start);
+    const attack=Math.min(.19,duration*.2),release=Math.min(.50,duration*.26);
+    const freq=440*Math.pow(2,(midi-69)/12);
+    osc.type=type;osc.frequency.setValueAtTime(freq,start);
     amp.gain.setValueAtTime(.0001,start);
     amp.gain.linearRampToValueAtTime(volume,start+attack);
-    amp.gain.setValueAtTime(volume*.87,Math.max(start+attack,end-release));
+    amp.gain.setValueAtTime(volume*.88,Math.max(start+attack,end-release));
     amp.gain.linearRampToValueAtTime(.0001,end);
     osc.connect(amp);amp.connect(this.master);
-    osc.start(start);osc.stop(end+.030);
+    osc.start(start);osc.stop(end+.04);
    }catch(_){}
   }
  }

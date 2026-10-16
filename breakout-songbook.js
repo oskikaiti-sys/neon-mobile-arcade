@@ -52,6 +52,19 @@ if(touhouSong?.lead){
 // Soft background harmonies: sampled from aligned source MML Ch0/Ch3/Ch4.
 // Omit adjacent semitone clashes when sustaining instantaneous notes.
 if(touhouSong)touhouSong.harmony=[{"beat":0,"tones":[51,66]},{"beat":2,"tones":[49,66]},{"beat":4,"tones":[47,66]},{"beat":6,"tones":[47,66]},{"beat":8,"tones":[51,58]},{"beat":10,"tones":[49,58,65]},{"beat":12,"tones":[48,68,65]},{"beat":14,"tones":[48,66]},{"beat":16,"tones":[44,63]},{"beat":18,"tones":[44,61]},{"beat":20,"tones":[54,72]},{"beat":22,"tones":[54,61]},{"beat":24,"tones":[47,63]},{"beat":26,"tones":[50,65,70]},{"beat":28,"tones":[51,66]},{"beat":30,"tones":[53,68]},{"beat":32,"tones":[58,63]},{"beat":34,"tones":[56,61]},{"beat":36,"tones":[66,59]},{"beat":38,"tones":[66,59]},{"beat":40,"tones":[58,63]},{"beat":42,"tones":[58,61]},{"beat":44,"tones":[56,60]},{"beat":46,"tones":[56,60]},{"beat":48,"tones":[63,68]},{"beat":50,"tones":[63,68]},{"beat":52,"tones":[61,66]},{"beat":54,"tones":[61,66]},{"beat":56,"tones":[63,68]},{"beat":58,"tones":[65,70]},{"beat":60,"tones":[66,59]},{"beat":62,"tones":[56,61]},{"beat":64,"tones":[63,58]},{"beat":66,"tones":[58,65]},{"beat":68,"tones":[59,66]},{"beat":70,"tones":[59,66]},{"beat":72,"tones":[63,58]},{"beat":74,"tones":[61,68]},{"beat":76,"tones":[66,60]},{"beat":78,"tones":[60,67]},{"beat":80,"tones":[68,63]},{"beat":82,"tones":[68,63]},{"beat":84,"tones":[61,66]},{"beat":86,"tones":[63,66]},{"beat":88,"tones":[66,70]},{"beat":90,"tones":[65,68]},{"beat":92,"tones":[62,68]},{"beat":94,"tones":[62,69]},{"beat":96,"tones":[61,64]},{"beat":98,"tones":[61,68]},{"beat":100,"tones":[57,65]},{"beat":102,"tones":[65,61]},{"beat":104,"tones":[57,66]},{"beat":106,"tones":[57,66]},{"beat":108,"tones":[62,69]},{"beat":110,"tones":[62,69]},{"beat":112,"tones":[59,66]},{"beat":114,"tones":[61,68]},{"beat":116,"tones":[65,60]},{"beat":118,"tones":[66,61]}];
+// Convert the two-beat chord snapshots into steady one-bar harmonic beds.
+ // Retain source bass pitches, and favor a sustained upper voice shared by both halves.
+ touhouSong.harmonyPads=[];
+ for(let i=0;i<touhouSong.harmony.length;i+=2){
+  const first=touhouSong.harmony[i],second=touhouSong.harmony[i+1]||first;
+  const bass=first.tones[0];
+  const highFirst=first.tones.slice(1),highNext=second.tones.slice(1);
+  let upper=highFirst.find(m=>highNext.some(n=>m%12===n%12));
+  if(upper===undefined)upper=highFirst[0]??highNext[0]??bass+7;
+  let interval=Math.abs((upper%12)-(bass%12));interval=Math.min(interval,12-interval);
+  if(interval<3)upper=bass+7;
+  touhouSong.harmonyPads.push({beat:first.beat,tones:[bass,upper]});
+ }
 const color=['#76efff','#c0a3ff','#ffe08c','#ff9fcd','#8ef5c3','#f4ab87'];
 function lang(){return window.ArcadeLang?.get?.()||'en'}
 function loc(en,zh,ja){return lang()==='zh-CN'?zh:lang()==='ja'?ja:en}
@@ -103,15 +116,20 @@ function create(audio,callbacks={}){
  function update(dt,spawn){
   clock+=dt;const song=songs[selected];
   if(song.playable){
-   // Background chords built from source-aligned accompaniment; soft entrances.
-   if(song.harmony){
+   // Pre-schedule stable four-beat pads against audio-clock lookahead. Overlap their
+   // envelopes instead of stopping and restarting short chords every two beats.
+   if(song.harmonyPads){
     let count=0;
-    while(count++<8){
-     const cycle=Math.floor(harmonyIndex/song.harmony.length);
-     const chord=song.harmony[harmonyIndex%song.harmony.length];
+    while(count++<6){
+     const cycle=Math.floor(harmonyIndex/song.harmonyPads.length);
+     const index=harmonyIndex%song.harmonyPads.length;
+     const chord=song.harmonyPads[index];
      const due=INTRO+cycle*(song.totalBeats*60/song.bpm+1.3)+chord.beat*60/song.bpm;
-     if(due>clock+.02)break;
-     audio.playHarmony?.(chord.tones,2,song.bpm);
+     const ahead=due-clock;
+     if(ahead>.33)break;
+     // Sustain the final chord through the 1.3-second loop turnaround.
+     const beats=4+(index===song.harmonyPads.length-1?1.3*song.bpm/60:0);
+     audio.playHarmony?.(chord.tones,beats,song.bpm,Math.max(0,ahead));
      harmonyIndex++;
     }
    }
