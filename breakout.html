@@ -33,6 +33,16 @@ body.flandre-mode #field-wrap{border-color:#e48bc3;box-shadow:0 0 29px #e65b8f38
 body.flandre-mode .songbook select{background:#42233f;border-color:#d781af}
 body.flandre-mode .charge .meter>div{background:linear-gradient(90deg,#ffeda0,#fb7ab9,#ad88f7)}
 body.flandre-mode #fleetBadge{color:#ffe3f5}
+
+body.remilia-mode #app{background:radial-gradient(ellipse 100% 55% at 50% -8%,#591528 0%,#2c0e1e 51%,#140914 100%)}
+body.remilia-mode #field-wrap{border-color:#c14e68;box-shadow:0 0 32px #ec4d7942,inset 0 0 21px #a33d651d}
+body.remilia-mode .songbook select{background:#451a2d;border-color:#b45b72}
+body.remilia-mode .charge .meter>div{background:linear-gradient(90deg,#51203d,#b43f69,#ffd39b)}
+body.remilia-mode #rage{background:linear-gradient(90deg,#62203a,#b44068)}
+body.remilia-mode #fleetBadge{color:#ffbad0}
+body.reimu-mode #app{background:radial-gradient(ellipse 100% 55% at 50% -8%,#643c4d 0%,#301d33 52%,#150f21 100%)}
+body.reimu-mode #field-wrap{border-color:#f3a8b0;box-shadow:0 0 27px #f9a0ab39,inset 0 0 18px #fff3e11b}
+
 </style>
 </head>
 <body><main id="app">
@@ -42,7 +52,7 @@ body.flandre-mode #fleetBadge{color:#ffe3f5}
 <section class="charge"><strong id="fleetBadge">🛸 飞船尚未解锁</strong><div class="meter"><div id="meterFill"></div></div><span id="meterPct" class="pct">0/12</span></section>
 <nav class="controls"><div id="rage" class="btn rage" style="display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none">♪ LIVE MELODY</div><button id="sound" class="btn">♫ 关</button><button id="reset" class="btn">↻ 重开</button></nav>
 <div class="help">📱 在场地任意高度左右滑动 · 小球自动发射<br>♪ 接音符实时演奏 · 漏接即静音 · 完整小节奖励</div>
-<section class="songbook" aria-label="Song playlist"><span id="songName">Twinkle, Twinkle, Little Star</span><select id="songSelect" aria-label="Choose a song"><option value="twinkle">Twinkle, Twinkle, Little Star</option><option value="frere">Frère Jacques</option><option value="ode">Ode to Joy (Theme)</option><option value="septette">Septette for the Dead Princess (Fan Arrangement)</option><option value="unowen">U.N. Owen Was Her? (Fan Arrangement)</option></select><span id="songProgress">1/12</span><small id="songHint">♪ Collect notes in order</small><div id="touhouNotice" role="note" hidden>Touhou Project fan work · Original music: ZUN / Team Shanghai Alice · Unofficial free game</div></section></main>
+<section class="songbook" aria-label="Song playlist"><span id="songName">Twinkle, Twinkle, Little Star</span><select id="songSelect" aria-label="Choose a song"><option value="twinkle">Twinkle, Twinkle, Little Star</option><option value="frere">Frère Jacques</option><option value="ode">Ode to Joy (Theme)</option><option value="septette">Septette for the Dead Princess (Fan Arrangement)</option><option value="unowen">U.N. Owen Was Her? (Fan Arrangement)</option><option value="dreambattle">少女綺想曲 ～ Dream Battle (Fan Arrangement)</option></select><span id="songProgress">1/12</span><small id="songHint">♪ Collect notes in order</small><div id="touhouNotice" role="note" hidden>Touhou Project fan work · Original music: ZUN / Team Shanghai Alice · Unofficial free game</div></section></main>
 <script>
 /* NEON ARCADE — lightweight original synthesized soundtrack and SFX.
    No external requests. Audio is opt-in to respect mobile autoplay rules. */
@@ -160,7 +170,7 @@ class ArcadeAudio {
 window.ArcadeAudio=ArcadeAudio;
 })();
 
-</script><script src="breakout-skill-vfx.js?v=20261016-topstrip"></script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-flandre-score.js"></script><script src="breakout-songbook.js?v=20261016-unowen"></script><script>
+</script><script src="breakout-skill-vfx.js?v=20261016-topstrip"></script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-flandre-score.js"></script><script src="breakout-dreambattle-score.js"></script><script src="breakout-songbook.js?v=20261016-dreambattle"></script><script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),C=$('field'),g=C.getContext('2d'),W=360,H=540;
 const colors=['#f27aaf','#ffb272','#ffe17b','#5ee8b9','#6dd4ff','#aa91ff','#da8aff'];
@@ -178,7 +188,9 @@ const MAX_PARTICLES=210,MAX_SHOTS=70,MAX_SHARDS=28;
 function audio(k){fx.sound(k)}
 function trans(en,zh,ja){const v=window.ArcadeLang?.get?.()||'en';return v==='zh-CN'?zh:v==='ja'?ja:en}
 function isFlandreMode(){return songbook?.getState().song==='unowen'}
-function isTouhouMode(){return songbook?.getState().song==='septette'||isFlandreMode()}
+function isRemiliaMode(){return songbook?.getState().song==='septette'}
+function isReimuMode(){return songbook?.getState().song==='dreambattle'}
+function isTouhouMode(){return isFlandreMode()||isRemiliaMode()||isReimuMode()}
 function spell(kind){
  const names=isFlandreMode()?{
   seal:['Forbidden Barrage · Starbow Break','禁弹「星弧破碎」','禁弾「スターボウブレイク」'],
@@ -186,6 +198,12 @@ function spell(kind){
   binding:['Taboo · Lævateinn','禁忌「莱瓦汀」','禁忌「レーヴァテイン」'],
   heaven:['Q.E.D. · Ripples of 495 Years','Q.E.D.「495年的波纹」','Q.E.D.「495年の波紋」'],
   orb:['Prismatic Wings','七彩水晶翼','七色のクリスタルウィング']
+ }:isRemiliaMode()?{
+  seal:['Scarlet Sign · Scarlet Shoot','红符「绯红射击」','紅符「スカーレットシュート」'],
+  barrier:['Scarlet Sign · Red the Nightless Castle','红符「红色不夜城」','紅符「不夜城レッド」'],
+  binding:['Scarlet Devil','红魔「绯红之恶魔」','紅魔「スカーレットデビル」'],
+  heaven:['Divine Art · Vampire Illusion','神术「吸血鬼幻想」','神術「ヴァンパイア幻想」'],
+  orb:['Scarlet Bat Familiars','绯红蝙蝠使魔','紅い蝙蝠の使い魔']
  }:{
   seal:['Spirit Sign · Fantasy Seal','灵符「梦想封印」','霊符「夢想封印」'],
   barrier:['Dream Sign · Evil-Sealing Circle','梦符「封魔阵」','夢符「封魔陣」'],
@@ -195,7 +213,7 @@ function spell(kind){
  };
  const v=names[kind];return v?trans(v[0],v[1],v[2]):'';
 }
-function applyTheme(){document.body.classList.toggle('touhou-mode',isTouhouMode());document.body.classList.toggle('flandre-mode',isFlandreMode())}
+function applyTheme(){document.body.classList.toggle('touhou-mode',isTouhouMode());document.body.classList.toggle('flandre-mode',isFlandreMode());document.body.classList.toggle('remilia-mode',isRemiliaMode());document.body.classList.toggle('reimu-mode',isReimuMode())}
 function resetSong(){songbook?.reset();melodyPulse=0;drops.length=0;vfx.clear()}
 function melodyMiss(d){songbook?.miss(d);melodyPulse=.1}
 function sonicBurst(){const x=paddle.x,y=paddle.y-32;castSkill(isTouhouMode()?'heaven':'sonic',W/2,252);laser=Math.max(laser,8);laserClock=0;shield=Math.min(3,shield+1);energy=Math.min(100,energy+22);for(let i=0;i<16;i++){const a=Math.PI*(.9+i/15*1.2);if(shards.length<MAX_SHARDS)shards.push({x,y,vx:Math.cos(a)*110,vy:-Math.abs(Math.sin(a)*130),trail:[],life:4})}for(const a of [-.42,.42])if(balls.length<11)spawnBall(x,y,Math.sin(a)*270,-Math.cos(a)*320);ring(x,y,'#ffe9b5',22);ring(W/2,250,'#8de8ff',26);burst(x,y,'#f3bbff',58);shake=10;flash=.36;}
@@ -215,7 +233,7 @@ function castSkill(kind,x=W/2,y=258){
  };
  const map={seal:'seal',barrier:'barrier',binding:'binding',heaven:'heaven',sonic:'heaven',fever:'heaven',orb:'orb'};
  const label=kind==='bomb'?'':touhou?spell(map[kind]||'seal'):trans(...(words[kind]||words.sonic));
- vfx.cast(kind,x,y,touhou,label,isFlandreMode());
+ vfx.cast(kind,x,y,touhou,label,isFlandreMode(),isRemiliaMode());
  if(kind!=='bomb'){ring(x,y,touhou?'#ffb4d7':'#8ae8ff',17);burst(x,y,touhou?'#ffd9ec':'#a8edff',kind==='heaven'?17:8)}
 }
 function setOverlay(title,desc,label){$('overlayTitle').textContent=title;$('overlayDesc').innerHTML=desc;$('start').textContent=label;$('overlay').hidden=false}
