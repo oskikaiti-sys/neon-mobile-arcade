@@ -74,7 +74,6 @@ window.addEventListener('arcade-language-change',()=>{
  const sel=document.getElementById('arcade-language');if(sel)sel.value=L.get();
  render(true);
 });
-try{delete window.__neonTestState;}catch(_){}
 L.attach();
 render(true);
 })();
