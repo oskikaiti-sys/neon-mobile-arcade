@@ -41,7 +41,7 @@ No original game audio or sprites are distributed.
 
 Original composition: **ZUN / Team Shanghai Alice**. MML transcription and arrangement: **Yoji Suzuki / SUZUKI PLAN**. This game uses the full original **314-beat** MML source at **155 BPM** (approximately 2 minutes 2 seconds), from the [required fork of BSLOT014.mml](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT014.mml). The **506** sounding Ch1 notes are catchable by the player; rests stay silent. The **2,249** original Ch0/2/3/4/5 note and drum events play automatically. WebAudio synthesizes approximately similar timbres, not the original game recordings.
 
-Flandre mode has rainbow crystal bricks, prismatic-wing support units, a central faceted **prismatic heart core** (彩晶心核), and its own spell-card labels/effects. The other Touhou modes now have separate character art and titles; the three public-domain tracks retain their usual gameplay.
+Flandre mode has rainbow crystal bricks, prismatic-wing support units, a central gothic **Forbidden Gate** (禁忌之门) with a black-iron frame, crimson double doors, golden sealing marks and subtle rainbow light, and its own spell-card labels/effects. The other Touhou modes now have separate character art and titles; the three public-domain tracks retain their usual gameplay.
 
 ## Reimu Hakurei — 少女綺想曲 ～ Dream Battle
 
@@ -71,7 +71,7 @@ Original music: **ZUN / Team Shanghai Alice**. Full MML transcription/arrangemen
 - **Ch1:** 378 audible player-catchable lead notes, with silent notes/rests and tied durations kept on the original timeline.
 - **Ch0, Ch2, Ch3, Ch4, Ch5:** 5,921 individually timed automatic backing and percussion events. Playback retains every sounding note's beat onset, duration, pitch/percussion group, channel and dynamic level. Sound synthesis approximates MML instrument timbres rather than distributing original game recordings.
 - Dedicated purple-and-gold **Boundary Gap**, engraved **boundary bricks**, small **butterfly familiars**, golden-violet projectiles, and boundary/butterfly-themed spell cards.
-- Reimu's Dream Battle displays a shrine offering box (赛钱箱), while Flandre's U.N. Owen displays a prismatic crystal heart core (彩晶心核). Both retain the original central teleportation collision behavior.
+- Reimu's Dream Battle displays a shrine offering box (赛钱箱), while Flandre's U.N. Owen displays a gothic sealed basement gate (禁忌之门). Both retain the original central teleportation collision behavior.
 - Changing songs clears pending melody notes, resets the score and backing index, and promptly silences already-scheduled score voices so the old theme does not keep playing over the new one.
 - **Regression checks:** all eight titles remain in the playlist, the six Necrofantasia tracks retain their source beat timeline, and existing Remilia/Sakuya/other score assets are unmodified.
 
