@@ -99,23 +99,88 @@ function reimuDonationBox(g,gate,t,charge,label){
  g.restore();g.textAlign='center';g.fillStyle='#ffe5d6';g.font='bold 11px system-ui';
  g.fillText(label,gate.x,gate.y+47);
 }
-function flandrePrismaticHeart(g,gate,t,charge,label){
- g.save();g.translate(gate.x,gate.y);const spin=t*.75,glow=charge>0?24:12;
- g.shadowColor=charge>0?'#fff1a4':'#ff8add';g.shadowBlur=glow;
- // Colored crystal satellites framing a dark-red faceted heart.
- const gems=['#ff7a9b','#ffd48b','#a6edc4','#9dc9ff','#d6a6ff','#ffabde'];
- for(let i=0;i<6;i++){const a=i*TAU/6+spin,r=31+Math.sin(t*2+i)*2,x=Math.cos(a)*r,y=Math.sin(a)*r*.72;
-  g.save();g.translate(x,y);g.rotate(a);
-  g.fillStyle=gems[i];g.beginPath();g.moveTo(0,-6);g.lineTo(3.2,0);g.lineTo(0,6);g.lineTo(-3.2,0);g.closePath();g.fill();g.restore()}
- g.fillStyle='#7d164b';g.beginPath();g.moveTo(0,20);g.bezierCurveTo(-13,12,-25,-2,-18,-13);
- g.bezierCurveTo(-12,-22,-3,-17,0,-11);g.bezierCurveTo(6,-20,18,-22,22,-10);
- g.bezierCurveTo(27,0,13,13,0,20);g.fill();
- g.shadowBlur=0;g.lineWidth=1.6;g.strokeStyle='#ffe4e7';g.stroke();
- g.fillStyle='#ff88af';g.beginPath();g.moveTo(-15,-13);g.quadraticCurveTo(-2,-22,0,-10);g.lineTo(0,18);g.lineTo(-9,5);g.closePath();g.fill();
- g.fillStyle='#eac3fa';g.beginPath();g.moveTo(0,-10);g.quadraticCurveTo(13,-23,20,-10);g.lineTo(11,2);g.lineTo(0,18);g.closePath();g.fill();
- g.strokeStyle='#fff7e2a8';g.lineWidth=.9;g.beginPath();g.moveTo(0,-10);g.lineTo(0,18);g.moveTo(-14,-10);g.lineTo(11,2);g.moveTo(20,-10);g.lineTo(-9,5);g.stroke();
- g.restore();g.textAlign='center';g.fillStyle='#ffe4f5';g.font='bold 11px system-ui';
- g.fillText(label,gate.x,gate.y+48);
+function forbiddenGate(g,gate,t,charge,label){
+ // Flandre's sealed Scarlet Devil Mansion basement gate.
+ // Pure Canvas skin: no change to the existing portal's physics or hitbox.
+ const active=charge>0,opening=active?Math.min(1,charge*2.3):0;
+ const separation=opening*10,glow=active?21:7;
+ g.save();g.translate(gate.x,gate.y);
+ g.shadowColor=active?'#ff728b':'#8d324b';g.shadowBlur=glow;
+ // Pointed gothic arch, black-iron outer frame and aged gold inner edging.
+ g.fillStyle='#150d17';g.beginPath();
+ g.moveTo(-32,29);g.lineTo(-32,-18);g.quadraticCurveTo(-32,-31,0,-41);
+ g.quadraticCurveTo(32,-31,32,-18);g.lineTo(32,29);g.closePath();g.fill();
+ g.shadowBlur=0;g.strokeStyle='#aa7657';g.lineWidth=3;g.stroke();
+ g.strokeStyle='#4e3540';g.lineWidth=2;g.beginPath();
+ g.moveTo(-27,24);g.lineTo(-27,-17);g.quadraticCurveTo(-27,-27,0,-35);
+ g.quadraticCurveTo(27,-27,27,-17);g.lineTo(27,24);g.stroke();
+ // Magical light lives *behind* the doors; opening the doors reveals it.
+ const light=g.createLinearGradient(-23,-16,23,20);
+ light.addColorStop(0,'#a43963');light.addColorStop(.19,'#f69ab4');
+ light.addColorStop(.37,'#ffd99b');light.addColorStop(.53,'#94e2d1');
+ light.addColorStop(.7,'#9abafa');light.addColorStop(.87,'#e2a5fa');
+ light.addColorStop(1,'#b84781');
+ g.save();g.globalAlpha=active?.94:.34;g.fillStyle=light;
+ g.beginPath();g.moveTo(0,-30);g.lineTo(24,-17);g.lineTo(24,24);
+ g.lineTo(-24,24);g.lineTo(-24,-17);g.closePath();g.fill();g.restore();
+ // Black-red double leaves slide open slightly when the teleport is activated.
+ for(const side of [-1,1]){
+  g.save();g.translate(side*separation,0);
+  const panel=g.createLinearGradient(side*-27,-20,side*1,25);
+  panel.addColorStop(0,'#190f1b');panel.addColorStop(.6,'#481c2b');panel.addColorStop(1,'#741f36');
+  g.fillStyle=panel;g.beginPath();
+  g.moveTo(0,-29);g.quadraticCurveTo(side*18,-27,side*25,-17);
+  g.lineTo(side*25,23);g.lineTo(0,23);g.closePath();g.fill();
+  g.strokeStyle='#b18a60';g.lineWidth=1.55;g.stroke();
+  // A small iron cross-brace and antique brass hinge studs.
+  g.strokeStyle='#683e47';g.lineWidth=2;
+  g.beginPath();g.moveTo(side*6,-14);g.lineTo(side*20,15);
+  g.moveTo(side*20,-13);g.lineTo(side*7,16);g.stroke();
+  g.strokeStyle='#b48a5b';g.lineWidth=1;
+  g.beginPath();g.moveTo(side*4,-22);g.lineTo(side*4,18);g.stroke();
+  for(const y of [-14,12]){
+   g.fillStyle='#ddb57a';g.beginPath();g.arc(side*21,y,1.5,0,TAU);g.fill();
+  }
+  g.fillStyle='#e0b77b';g.beginPath();g.arc(side*5,3,1.7,0,TAU);g.fill();
+  g.restore();
+ }
+ // Broken golden seal suspended at the seam. Its split reveals the taboo.
+ for(const side of [-1,1]){
+  g.save();g.translate(side*separation,0);
+  g.strokeStyle=active?'#ffd5ad':'#c5a16c';g.lineWidth=1.6;
+  g.beginPath();g.arc(0,-6,9,side<0?Math.PI/2:-Math.PI/2,side<0?Math.PI*1.5:Math.PI*.5,side<0);g.stroke();
+  g.strokeStyle='#d2a06c';g.lineWidth=1;
+  g.beginPath();g.moveTo(0,-15);g.lineTo(side*7,-6);g.lineTo(0,3);g.stroke();
+  g.restore();
+ }
+ // Restrained multicolor shine at the seam, rather than a giant crystal core.
+ g.save();g.globalAlpha=active?.91:.38;
+ g.strokeStyle=active?'#ffe9bc':'#bf798f';g.lineWidth=active?2.6:1;
+ g.shadowColor='#ff7fb3';g.shadowBlur=active?16:3;
+ g.beginPath();g.moveTo(0,-23);g.lineTo(0,20);g.stroke();g.restore();
+ // Teleport flare: tiny crimson embers and rainbow motes, no permanent clutter.
+ if(active){
+  const sparks=['#ff658d','#ffc47e','#f3eaa2','#8be7ce','#a7b4ff','#d8a0f2'];
+  for(let i=0;i<12;i++){
+   const ang=i*TAU/12+t*.9,dist=22+(1-opening)*7+(i%3)*4;
+   const x=Math.cos(ang)*dist,y=Math.sin(ang)*dist*.9;
+   g.globalAlpha=.5+.4*opening;g.fillStyle=sparks[i%sparks.length];
+   g.beginPath();g.arc(x,y,i%3===0?2.1:1.3,0,TAU);g.fill();
+  }
+  g.globalAlpha=1;
+ }
+ // Iron keystone + discreet side flourishes frame the gate.
+ g.fillStyle='#d4ae79';g.beginPath();g.moveTo(-5,-39);g.lineTo(5,-39);
+ g.lineTo(4,-31);g.lineTo(0,-28);g.lineTo(-4,-31);g.closePath();g.fill();
+ g.strokeStyle='#9e6d63';g.lineWidth=1.5;
+ for(const side of [-1,1]){
+  g.beginPath();g.moveTo(side*32,-15);g.lineTo(side*37,-20);
+  g.moveTo(side*32,14);g.lineTo(side*37,19);g.stroke();
+ }
+ g.restore();
+ g.save();g.textAlign='center';g.fillStyle='#ffe1d0';
+ g.font='bold 11px system-ui';g.fillText(label,gate.x,gate.y+48);g.restore();
 }
-window.YukariArt={background,brick:boundaryBrick,drone,shot:projectile,gate:boundaryGate,reimuBox:reimuDonationBox,flandreCore:flandrePrismaticHeart,butterfly};
+
+window.YukariArt={background,brick:boundaryBrick,drone,shot:projectile,gate:boundaryGate,reimuBox:reimuDonationBox,forbiddenGate,butterfly};
 })();
