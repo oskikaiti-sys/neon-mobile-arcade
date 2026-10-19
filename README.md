@@ -1,13 +1,5 @@
 # NEON ARCADE
 
-包含手机竖屏小游戏：
-
-- `index.html` — 游戏选择首页
-- `tetris.html` — 俄罗斯方块
-- `breakout.html` — 打砖块
-
-无依赖，纯 HTML/CSS/JS。
-
 **Original composition:** ZUN / Team Shanghai Alice. **MML transcription and arrangement:** Yoji Suzuki / SUZUKI PLAN. This is an unofficial fan work.
 
 This update uses the **full 322-beat MML score**, about **2 minutes 12 seconds** at 146 BPM, rather than a selected excerpt. All six original MML voice channels have their note pitches, note-on timing, note lengths, and rests represented in the game:
