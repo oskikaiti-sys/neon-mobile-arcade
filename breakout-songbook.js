@@ -96,6 +96,8 @@ function create(audio,callbacks={}){
   if(track)track.textContent=name(song);
   if(hint)hint.textContent=song.playable?
    loc('♪ Full MML · catch all lead notes · gently drifting lanes','♪ 完整曲谱 · 接全部主旋律音符 · 落点轻微左右变化','♪ MML全曲 · 主旋律を演奏 · 落点が緩やかに移動'):
+   song.scoreBacking?.length?
+   loc('♪ Backing plays automatically · catch notes for the lead · missed notes stay silent','♪ 伴奏自动演奏 · 接住音符弹奏主旋律 · 漏接则缺音','♪ 伴奏は自動演奏 · キャッチして主旋律を奏でる · ミスは無音'):
    loc('♪ Catch notes to play the melody · missed notes stay silent','♪ 用挡板接音符来弹奏旋律 · 漏接就会缺音','♪ 音符をキャッチして演奏 · 逃すと無音');
   if(touhouNotice){touhouNotice.hidden=!song.playable;touhouNotice.textContent=loc(
    'Touhou fan work · Original: ZUN / Team Shanghai Alice · MML: Yoji Suzuki / SUZUKI PLAN · unofficial',
