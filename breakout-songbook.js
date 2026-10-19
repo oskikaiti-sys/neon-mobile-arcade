@@ -40,7 +40,7 @@ for(const song of songs.filter(s=>['twinkle','frere','ode'].includes(s.id))){
 }
 // Full source-based scores: every sounding Für Elise lead tone, including fast
 // ornaments and three grace notes, remains player-catchable.
-// Additional piano chord tones and the left hand are automatic accompaniment.
+// Piano chord tones are bound to the same catchable drop; only the left hand is automatic.
 for(const song of songs.filter(s=>Array.isArray(s.lead)&&s.lead.length)){
  let offset=0,laneX=180,lastStart=null;
  const clip=(v,min,max)=>Math.max(min,Math.min(max,v));
@@ -70,6 +70,15 @@ for(const song of songs.filter(s=>Array.isArray(s.lead)&&s.lead.length)){
  for(const e of playable){e.note=song.bars[e.bar].length;song.bars[e.bar].push([e.midi,e.beats])}
  const score=({furelise:window.FurEliseScore,septette:window.TouhouScoreAccompaniment,unowen:window.FlandreScore,dreambattle:window.DreamBattleScore,lunadial:window.LunaDialScore,necrofantasia:window.NecrofantasiaScore})[song.id];
  song.scoreBacking=score?.events||[];
+ if(song.id==='furelise'){
+  const chordMap=new Map((score?.leadChords||[]).map(([beat,tones])=>[Math.round(beat*100000),tones]));
+  let assigned=0;
+  for(const note of playable){
+   const chord=chordMap.get(Math.round(note.start*100000));
+   if(chord){note.chordTones=chord;assigned++}
+  }
+  if(assigned!==chordMap.size)throw new Error('Für Elise chord onsets lack matching playable drops');
+ }
  if(song.id==='dreambattle'&&score?.tempo){
   song.timeAt=beat=>{
    let t=score.tempo[0];for(const x of score.tempo){if(x[0]>beat)break;t=x}
@@ -127,7 +136,7 @@ function create(audio,callbacks={}){
  window.addEventListener('arcade-language-change',render);
  function makeEntry(seq,when){
   const entry=notes[seq%notes.length],song=songs[selected];
-  return {song:song.id,generation,seq,when,bar:entry.bar,note:entry.note,midi:entry.midi,beats:entry.beats,
+  return {song:song.id,generation,seq,when,bar:entry.bar,note:entry.note,midi:entry.midi,beats:entry.beats,chordTones:entry.chordTones||[],
    bpm:song.timeAt?entry.beats*60/Math.max(.001,song.timeAt(entry.start+entry.beats)-song.timeAt(entry.start)):song.bpm,
    label:pitch(entry.midi),color:song.id==='necrofantasia'?['#f5d69c','#cfaff6','#f7dfb0','#b691dc'][(entry.bar+entry.note)%4]:song.id==='lunadial'?['#e8f4ff','#c2e2ff','#fce6d7','#c6c4f6'][(entry.bar+entry.note)%4]:song.id==='dreambattle'?['#ffe5dd','#ff7f96','#f8f3df','#f6c2d1'][(entry.bar+entry.note)%4]:color[(entry.bar+entry.note)%color.length],laneX:entry.laneX};
  }
@@ -178,7 +187,7 @@ function create(audio,callbacks={}){
  function resolve(drop,hit){
   if(!drop||drop.song!==songs[selected].id||drop.generation!==generation||drop.seq<resolved||pending.has(drop.seq))return {ok:false};
   pending.set(drop.seq,hit);
-  if(hit){if(songs[selected].playable)audio.playLeadNote?.(drop.midi,drop.beats,drop.bpm);else audio.pickupNote?.(drop.midi,drop.beats,drop.bpm)}
+  if(hit){if(songs[selected].playable)audio.playLeadNote?.(drop.midi,drop.beats,drop.bpm,drop.chordTones);else audio.pickupNote?.(drop.midi,drop.beats,drop.bpm)}
   let measure=false,finale=false;
   while(pending.has(resolved)){
    const success=pending.get(resolved);pending.delete(resolved);
