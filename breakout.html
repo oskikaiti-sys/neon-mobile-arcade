@@ -89,9 +89,10 @@ class ArcadeAudio {
  toggle(){this.mode=(this.mode+1)%3;if(this.mode!==1)this.cancelScoreVoices();if(this.mode)this.prepare();this.update();return this.mode}
  playLeadNote(midi,beats=1,bpm=146){
   if(this.mode!==1||!this.active||!this.prepare())return;
-  const at=this.ctx.currentTime+.008,dur=Math.max(.105,Math.min(1.8,beats*60/bpm*.92));
+  const piano=this.touhouSong==='furelise';
+  const at=this.ctx.currentTime+.008,dur=Math.max(piano?.036:.105,Math.min(1.8,beats*60/bpm*(piano?.9:.92)));
   this.sustainTone(midi,dur,'triangle',.25,at);
-  this.sustainTone(midi+12,Math.min(.62,dur*.8),'sine',.029,at+.006);
+  this.sustainTone(midi+12,Math.min(piano?.3:.62,dur*.8),'sine',piano?.017:.029,at+.006);
  }
  playOrnament(midi,beats=2,bpm=146){
   if(!this.mode||!this.active||!this.prepare())return;
@@ -157,7 +158,7 @@ class ArcadeAudio {
   try{
    const c=this.ctx,at=Math.max(c.currentTime,when??c.currentTime);
    const freq=440*Math.pow(2,(midi-69)/12),osc=c.createOscillator(),gain=c.createGain();
-   const dur=Math.max(.10,duration),attack=Math.min(.014,dur*.12),release=Math.min(.09,dur*.3);
+   const dur=Math.max(this.touhouSong==='furelise'?.034:.10,duration),attack=Math.min(.014,dur*.12),release=Math.min(.09,dur*.3);
    const tail=at+dur,hold=tail-release;
    osc.type=type;osc.frequency.setValueAtTime(freq,at);
    gain.gain.setValueAtTime(.0001,at);
@@ -399,7 +400,7 @@ function tick(dt){
  if(state!=='playing')return;
  vfx.update(dt);
  // Music notes arrive at exact score beats, regardless of destroyed bricks.
- songbook?.update(dt,entry=>{const x=isTouhouMode()?clamp(entry.laneX??W/2,34,W-34):clamp(W/2+Math.sin(entry.seq*1.35)*110,30,W-30);drops.push({...entry,x,y:90,age:0})});
+ songbook?.update(dt,entry=>{const scoreLane=isTouhouMode()||entry.song==='furelise';const x=scoreLane?clamp(entry.laneX??W/2,34,W-34):clamp(W/2+Math.sin(entry.seq*1.35)*110,30,W-30);drops.push({...entry,x,y:90,age:0})});
  portalClock=Math.max(0,portalClock-dt);
  if(rage>0)rage=Math.max(0,rage-dt);if(energy>=100&&rage<=0){energy=0;rage=8;laserClock=0;castSkill('fever',W/2,252);audio('fever')}
  if(wide>0){wide-=dt;if(wide<=0)paddle.w=88}
