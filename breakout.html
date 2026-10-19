@@ -87,12 +87,20 @@ class ArcadeAudio {
  setActive(active){if(this.active===active)return;this.active=active;if(!active)this.cancelScoreVoices();this.update()}
  setFever(v){this.fever=Boolean(v)}
  toggle(){this.mode=(this.mode+1)%3;if(this.mode!==1)this.cancelScoreVoices();if(this.mode)this.prepare();this.update();return this.mode}
- playLeadNote(midi,beats=1,bpm=146){
+ playLeadNote(midi,beats=1,bpm=146,chordTones=[]){
   if(this.mode!==1||!this.active||!this.prepare())return;
   const piano=this.touhouSong==='furelise';
   const at=this.ctx.currentTime+.008,dur=Math.max(piano?.036:.105,Math.min(1.8,beats*60/bpm*(piano?.9:.92)));
   this.sustainTone(midi,dur,'triangle',.25,at);
   this.sustainTone(midi+12,Math.min(piano?.3:.62,dur*.8),'sine',piano?.017:.029,at+.006);
+  // The entire written right-hand chord belongs to this one catch event.
+  // Its other pitches never play on a miss and retain their own score durations.
+  if(piano&&Array.isArray(chordTones)){
+   for(const [pitch,noteBeats] of chordTones){
+    const chordDur=Math.max(.036,Math.min(1.8,noteBeats*60/bpm*.9));
+    this.sustainTone(pitch,chordDur,'triangle',.075,at);
+   }
+  }
  }
  playOrnament(midi,beats=2,bpm=146){
   if(!this.mode||!this.active||!this.prepare())return;
