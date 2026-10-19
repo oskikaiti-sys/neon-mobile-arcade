@@ -38,8 +38,9 @@ for(const song of songs.filter(s=>['twinkle','frere','ode'].includes(s.id))){
  song.totalBeats=song.bars.length*4;
  song.totalSeconds=song.totalBeats*60/song.bpm;
 }
-// Full source-based scores: piano and Touhou lead notes are caught; accompaniment is automatic.
-// Fast piano ornamental notes are retained as separate soft score-aligned backing events.
+// Full source-based scores: every sounding Für Elise lead tone, including fast
+// ornaments and three grace notes, remains player-catchable.
+// Additional piano chord tones and the left hand are automatic accompaniment.
 for(const song of songs.filter(s=>Array.isArray(s.lead)&&s.lead.length)){
  let offset=0,laneX=180,lastStart=null;
  const clip=(v,min,max)=>Math.max(min,Math.min(max,v));
@@ -47,11 +48,16 @@ for(const song of songs.filter(s=>Array.isArray(s.lead)&&s.lead.length)){
  for(let i=0;i<song.lead.length;i++){
   const [midi,duration]=song.lead[i],start=offset;offset+=duration;
   if(midi===null)continue;
-  const gap=lastStart===null?1:Math.max(.125,start-lastStart);
+  const piano=song.id==='furelise';
+  const gap=lastStart===null?1:Math.max(piano?.04:.125,start-lastStart);
   const drift=clip((midi-80)*1.15,-25,25);
-  const target=180+Math.sin(start*.27)*44+Math.sin(start*.09+1.4)*19+drift;
-  const limit=clip(gap*28,3.5,38);
-  laneX=clip(laneX+clip(target-laneX,-limit,limit),115,245);
+  // Keep dense piano runs clustered: no note deletion or automatic lead.
+  // All other songs preserve their existing falling-note lanes.
+  const target=piano
+   ?180+Math.sin(start*.19)*36+Math.sin(start*.06+1.4)*14+clip((midi-75)*.7,-13,13)
+   :180+Math.sin(start*.27)*44+Math.sin(start*.09+1.4)*19+drift;
+  const limit=piano?clip(gap*40,1.2,18):clip(gap*28,3.5,38);
+  laneX=clip(laneX+clip(target-laneX,-limit,limit),piano?143:115,piano?217:245);
   const bar=song.id==='furelise'?(start<.5?0:Math.floor((start-.5+1e-6)/1.5)+1):Math.floor(start/4);
   playable.push({midi,beats:duration,start,bar,leadIndex:i,laneX:Math.round(laneX)});
   lastStart=start;
