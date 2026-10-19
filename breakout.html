@@ -66,7 +66,7 @@ body.yukari-mode #fleetBadge{color:#f5deb7}
 <section class="charge"><strong id="fleetBadge">🛸 飞船尚未解锁</strong><div class="meter"><div id="meterFill"></div></div><span id="meterPct" class="pct">0/12</span></section>
 <nav class="controls"><div id="rage" class="btn rage" style="display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none">♪ LIVE MELODY</div><button id="sound" class="btn">♫ 关</button><button id="reset" class="btn">↻ 重开</button></nav>
 <div class="help">📱 在场地任意高度左右滑动 · 小球自动发射<br>♪ 接音符实时演奏 · 漏接即静音 · 完整小节奖励</div>
-<section class="songbook" aria-label="Song playlist"><span id="songName">Twinkle, Twinkle, Little Star</span><select id="songSelect" aria-label="Choose a song"><option value="twinkle">Twinkle, Twinkle, Little Star</option><option value="frere">Frère Jacques</option><option value="ode">Ode to Joy (Theme)</option><option value="septette">Septette for the Dead Princess (Fan Arrangement)</option><option value="unowen">U.N. Owen Was Her? (Fan Arrangement)</option><option value="dreambattle">少女綺想曲 ～ Dream Battle (Fan Arrangement)</option><option value="lunadial">月時計 ～ ルナ・ダイアル (Fan Arrangement)</option><option value="necrofantasia">ネクロファンタジア (Fan Arrangement)</option></select><span id="songProgress">1/12</span><small id="songHint">♪ Collect notes in order</small><div id="touhouNotice" role="note" hidden>Touhou Project fan work · Original music: ZUN / Team Shanghai Alice · Unofficial free game</div></section></main>
+<section class="songbook" aria-label="Song playlist"><span id="songName">Twinkle, Twinkle, Little Star</span><select id="songSelect" aria-label="Choose a song"><option value="twinkle">Twinkle, Twinkle, Little Star</option><option value="frere">Frère Jacques</option><option value="ode">Ode to Joy (Theme)</option><option value="furelise">Für Elise · Complete Piano Score</option><option value="septette">Septette for the Dead Princess (Fan Arrangement)</option><option value="unowen">U.N. Owen Was Her? (Fan Arrangement)</option><option value="dreambattle">少女綺想曲 ～ Dream Battle (Fan Arrangement)</option><option value="lunadial">月時計 ～ ルナ・ダイアル (Fan Arrangement)</option><option value="necrofantasia">ネクロファンタジア (Fan Arrangement)</option></select><span id="songProgress">1/12</span><small id="songHint">♪ Collect notes in order</small><div id="touhouNotice" role="note" hidden>Touhou Project fan work · Original music: ZUN / Team Shanghai Alice · Unofficial free game</div></section></main>
 <script>
 /* NEON ARCADE — lightweight original synthesized soundtrack and SFX.
    No external requests. Audio is opt-in to respect mobile autoplay rules. */
@@ -124,11 +124,12 @@ class ArcadeAudio {
   // Keep every original note and timing, but prevent it masking the Ch1 lead.
   const quietOpeningCh4=channel===4&&this.touhouSong==='septette'&&beatOffset!==null&&beatOffset>=32&&beatOffset<64;
   const flandreSoft=channel===4&&this.touhouSong==='unowen';
-  const vol0=quietOpeningCh4?.018:flandreSoft?.032:channel===0?.086:channel===2?.040:channel===3?.056:.05;
+  const piano=this.touhouSong==='furelise';
+  const vol0=piano?(channel===0?.075:channel===2?.032:channel===3?.027:.019):quietOpeningCh4?.018:flandreSoft?.032:channel===0?.086:channel===2?.040:channel===3?.056:.05;
   const highPitchFactor=quietOpeningCh4?(pitch>=88?.55:pitch>=82?.73:1):1;
   const volume=vol0*Math.max(.25,Math.min(1.3,velocity/13))*highPitchFactor;
   const duration=Math.min(2.9,Math.max(.045,beats*60/bpm*.975));
-  const type=quietOpeningCh4||flandreSoft?'sine':channel===0?'triangle':channel===2?'square':channel===3?'sawtooth':'triangle';
+  const type=piano?(channel===0?'triangle':channel===2?'sine':'triangle'):quietOpeningCh4||flandreSoft?'sine':channel===0?'triangle':channel===2?'square':channel===3?'sawtooth':'triangle';
   const notes=[{midi:pitch,vol:volume,type}];
   // Bass fundamental is preserved; quiet octave harmonic helps phone speakers.
   if(channel===0&&pitch<47)notes.push({midi:pitch+12,vol:volume*.21,type:'sine'});
@@ -196,7 +197,7 @@ class ArcadeAudio {
 window.ArcadeAudio=ArcadeAudio;
 })();
 
-</script><script src="breakout-skill-vfx.js?v=20261016-scarlet"></script><script src="breakout-remilia-art.js?v=20261016-scarlet"></script><script src="breakout-sakuya-art.js?v=20261016-lunadial"></script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-flandre-score.js"></script><script src="breakout-dreambattle-score.js"></script><script src="breakout-lunadial-score.js"></script><script src="breakout-necrofantasia-score.js?v=20261016-yukari"></script><script src="breakout-yukari-art.js?v=20261016-forbidden-gate"></script><script src="breakout-classic-accompaniment.js?v=20261018-classic"></script><script src="breakout-songbook.js?v=20261018-classic"></script><script>
+</script><script src="breakout-skill-vfx.js?v=20261016-scarlet"></script><script src="breakout-remilia-art.js?v=20261016-scarlet"></script><script src="breakout-sakuya-art.js?v=20261016-lunadial"></script><script src="breakout-touhou-accompaniment.js"></script><script src="breakout-flandre-score.js"></script><script src="breakout-dreambattle-score.js"></script><script src="breakout-lunadial-score.js"></script><script src="breakout-necrofantasia-score.js?v=20261016-yukari"></script><script src="breakout-yukari-art.js?v=20261016-forbidden-gate"></script><script src="breakout-classic-accompaniment.js?v=20261018-classic"></script><script src="breakout-furelise-score.js?v=20261019-piano"></script><script src="breakout-songbook.js?v=20261019-furelise"></script><script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),C=$('field'),g=C.getContext('2d'),W=360,H=540;
 const colors=['#f27aaf','#ffb272','#ffe17b','#5ee8b9','#6dd4ff','#aa91ff','#da8aff'];
