@@ -31,6 +31,12 @@ const songs=[
  {id:'lunadial',names:['Lunar Clock ～ Luna Dial','月时计 ～ Luna Dial','月時計 ～ ルナ・ダイアル'],composer:'ZUN (original) · Yoji Suzuki / SUZUKI PLAN (MML arrangement)',bpm:148,root:61,bars:[],lead:window.LunaDialScore?.lead||[],source:'https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT010.mml'},
  {id:'necrofantasia',names:['Necrofantasia · Yukari Yakumo','妖怪幻想曲 ～ 八云紫','ネクロファンタジア ～ 八雲紫'],composer:'ZUN (original) · Yoji Suzuki / SUZUKI PLAN (MML arrangement)',bpm:164,root:63,bars:[],lead:window.NecrofantasiaScore?.lead||[],source:'https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT034.mml'}
 ];
+// These three traditional/classical melodies have original score-aligned arrangements.
+for(const song of songs.filter(s=>['twinkle','frere','ode'].includes(s.id))){
+ song.scoreBacking=window.ClassicSongAccompaniment?.build?.(song.id,song.bars)||[];
+ song.totalBeats=song.bars.length*4;
+ song.totalSeconds=song.totalBeats*60/song.bpm;
+}
 // Accurately sourced MML: significant melody tones are playable, rapid ornaments automatic.
 // Each Touhou track retains every sounding lead note and real rest from its own MML.
 for(const song of songs.filter(s=>Array.isArray(s.lead)&&s.lead.length)){
@@ -116,9 +122,8 @@ function create(audio,callbacks={}){
  }
  function update(dt,spawn){
   clock+=dt;const song=songs[selected];
-  if(song.playable){
-   // Schedule each written note/rest timeline from the five non-lead MML channels.
-   if(song.scoreBacking?.length){
+  // Always schedule the backing independently of whether the player catches notes.
+  if(song.scoreBacking?.length){
     let n=0;
     while(n++<70){
      const cycle=Math.floor(backingIndex/song.scoreBacking.length);
@@ -130,7 +135,8 @@ function create(audio,callbacks={}){
      audio.playScoreBacking?.(note[1],note[2],note[2]*60/durationSeconds,note[3],note[4],Math.max(0,ahead),note[0]);
      backingIndex++;
     }
-   }
+  }
+  if(song.playable){
    // Drums remain soft; no artificial bass stabs.
    // Rapid notes copied from the source melody add quiet automatic flourishes.
    let flourishes=0;
