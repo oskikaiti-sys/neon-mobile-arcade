@@ -22,13 +22,13 @@ No original game audio or sprites are distributed.
 
 The three original public-domain tunes now have **independent, score-aligned multi-voice accompaniment** while keeping the core mechanic intact: the player catches notes to perform the lead, and missed lead notes remain silent. The backing instruments play automatically. This replaces the generic drum click; it does **not** use a fixed recording that includes the melody.
 
-- **Twinkle, Twinkle, Little Star：12 measures, 48 beats at 98 BPM, 168 accompaniment note events; bass, soft sustained harmonies, and an upper arpeggio.
-- **Frère Jacques： 8 measures, 32 beats at 96 BPM, 122 accompaniment note events; bass, harmony, gently plucked notes and a delayed lower-register canon voice.
-- **Ode to Joy (Theme)：16 measures, 64 beats at 100 BPM, 352 accompaniment note/percussion events; flowing arpeggios, bass, orchestral-style harmony and restrained rhythm.
+- **Twinkle, Twinkle, Little Star:** 12 measures, 48 beats at 98 BPM, 168 accompaniment note events; bass, soft sustained harmonies, and an upper arpeggio.
+- **Frère Jacques:** 8 measures, 32 beats at 96 BPM, 122 accompaniment note events; bass, harmony, gently plucked notes and a delayed lower-register canon voice.
+- **Ode to Joy (Theme)：** 16 measures, 64 beats at 100 BPM, 352 accompaniment note/percussion events; flowing arpeggios, bass, orchestral-style harmony and restrained rhythm.
 
 Implementation: `breakout-classic-accompaniment.js` composes the score events in memory, `breakout-songbook.js` schedules both classic and Touhou backing parts on the matching beat timeline, and `breakout.html` uses its existing WebAudio synthesizer. The classic arrangements here were made for this game from public-domain melodic material; they are **not** licensed copies of third-party recordings or MIDI arrangements. Music and SFX settings, mobile controls, melody drops, song looping, and all five Touhou scores are preserved.
 
-## Für Elise / 致爱丽丝 — public-domain piano score
+## Für Elise — public-domain piano score
 
 **Playlist position:** fourth, after Ode to Joy and before every Touhou arrangement.
 
