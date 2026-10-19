@@ -28,6 +28,19 @@ The three original public-domain tunes now have **independent, score-aligned mul
 
 Implementation: `breakout-classic-accompaniment.js` composes the score events in memory, `breakout-songbook.js` schedules both classic and Touhou backing parts on the matching beat timeline, and `breakout.html` uses its existing WebAudio synthesizer. The classic arrangements here were made for this game from public-domain melodic material; they are **not** licensed copies of third-party recordings or MIDI arrangements. Music and SFX settings, mobile controls, melody drops, song looping, and all five Touhou scores are preserved.
 
+## Für Elise / 致爱丽丝 — public-domain piano score
+
+**Playlist position:** fourth, after Ode to Joy and before every Touhou arrangement.
+
+- Composer: **Ludwig van Beethoven**, WoO 59 (1810).
+- Transcription: [Mutopia Project score #931](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=931), typeset by Stelios Samelis (Mutopia-2015/08/18-931) from Breitkopf & Härtel (1888); marked **Public Domain** in the source LilyPond file ([repository](https://github.com/MutopiaProject/MutopiaProject/blob/master/ftp/BeethovenLv/WoO59/fur_Elise_WoO59/fur_Elise_WoO59.ly)).
+- Full score structure: 187.5 quarter-note beats, 72 quarter notes/minute, about **156.25 seconds** including repeated sections; original **3/8** bar organization with its opening pickup.
+- Right-hand lead: **470 catchable tones** including the familiar opening, with 81 very short ornamental tones and 51 accompanying chord tones assigned to the automatic score for mobile play. Explicit rests remain silent.
+- Automatic piano part: **568 note events** drawn from the score's left hand, extra notes from right-hand chords, and the small ornaments; the existing WebAudio engine renders a soft piano-style mix. The lead **does not** play automatically when a player misses notes.
+- The source score's printed grace-note embellishments are simplified rather than claimed to be a note-perfect MIDI performance. The note sequence, source-based accompaniment, repeat structure, and main timing are retained.
+
+Implementation: `breakout-furelise-score.js`, plus song-selection, score scheduling, and voice-mix integrations in `breakout-songbook.js` and `breakout.html`. Neither a sound recording nor an externally licensed MIDI file is distributed.
+
 ## U.N. Owen Was Her? — Flandre Scarlet fan-game mode
 
 Original composition: **ZUN / Team Shanghai Alice**. MML transcription and arrangement: **Yoji Suzuki / SUZUKI PLAN**. This game uses the full original **314-beat** MML source at **155 BPM** (approximately 2 minutes 2 seconds), from the [required fork of BSLOT014.mml](https://github.com/oskikaiti-sys/Touhou-VGS-MML-data/blob/master/data/BSLOT014.mml). The **506** sounding Ch1 notes are catchable by the player; rests stay silent. The **2,249** original Ch0/2/3/4/5 note and drum events play automatically. WebAudio synthesizes approximately similar timbres, not the original game recordings.
