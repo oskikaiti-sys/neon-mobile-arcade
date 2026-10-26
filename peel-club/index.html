@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#f8f4ed">
+<title>Peel Club · 撕胶带</title>
+<style>
+:root{--ink:#30424e;--muted:#75838b;--bg:#f8f4ed;--paper:#fffdf9;--ring:#e9e2d7;--accent:#426d72;--accent2:#a9d2ca}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);font-family:ui-rounded,"SF Pro Rounded","PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink)}
+body{display:flex;justify-content:center;overflow-x:hidden}
+.game{width:min(100%,510px);min-height:100svh;display:flex;flex-direction:column;position:relative;background:radial-gradient(ellipse 90% 45% at 50% 34%,#fffefc 0%,#f9f6f0 72%,#f7f3ec 100%);box-shadow:0 0 70px #4b493a10;padding:16px 19px max(18px,env(safe-area-inset-bottom));gap:12px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-size:12px;font-weight:900;letter-spacing:3.6px;color:#416b72;display:flex;align-items:center;gap:7px}
+.brand:before{content:"◉";font-size:20px;color:#f1ad72}
+.levelpill{border:1px solid #e8e0d5;background:#fffdfa;padding:8px 13px;border-radius:20px;font-size:12px;font-weight:800;color:#65747b;box-shadow:0 3px 10px #46342108}
+.heading{text-align:center;display:flex;flex-direction:column;gap:5px;margin-top:3px}
+h1{font-size:clamp(25px,6vw,32px);font-weight:900;letter-spacing:1.1px;line-height:1.25;margin:0}
+.subtitle{font-size:12px;line-height:1.5;color:#7a898d}
+.progress{display:flex;gap:5px;height:5px;width:min(100%,300px);margin:6px auto 0}
+.progress i{flex:1;border-radius:5px;background:#e7e2d9;transition:background .25s}
+.progress i.done{background:#9dc7bb}
+.sceneWrap{position:relative;isolation:isolate;flex:0 0 auto;height:clamp(285px,44svh,510px);min-height:270px;max-height:520px;border-radius:27px;background:radial-gradient(ellipse at 50% 47%,#fffefa 0%,#f9f6ef 68%,#f1ece1 100%);border:1px solid #ebe5da;overflow:hidden;touch-action:none;box-shadow:inset 0 5px 18px #b4a68d08}
+.sceneWrap:after{position:absolute;content:"";inset:auto 18px 14px;pointer-events:none;border-top:1px dashed #d8d1c440}
+canvas{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none;cursor:grab;outline:none}
+canvas:active{cursor:grabbing}
+.sceneHint{position:absolute;z-index:1;bottom:23px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.2px;color:#929a96;pointer-events:none}
+.floating{position:absolute;right:13px;top:13px;display:flex;gap:6px}
+.tiny{font-weight:800;font-size:11px;border:1px solid #e6dfd3;color:#7b827d;padding:7px 10px;border-radius:15px;background:#fffcf6cd;cursor:pointer}
+.trayHeader{display:flex;align-items:center;justify-content:space-between;margin:0 1px;gap:5px}
+.trayHeader b{font-size:14px;letter-spacing:.5px}
+.trayHeader span{font-size:11px;color:#8c989a}
+.tray{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;background:#f2ede5;border:1px solid #e7ddce;border-radius:20px;padding:13px;box-shadow:inset 0 3px 6px #9e8d6b0b}
+.slot{height:52px;border-radius:13px;background:#fffaf4;border:1px dashed #d8d1c6;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:inset 0 2px 5px #aea08d0e;transition:transform .18s}
+.slot .coil{width:34px;height:23px;border-radius:8px 8px 7px 7px;position:relative;transform:rotate(-12deg);box-shadow:1px 4px 5px #52524b21,inset 0 -5px 5px #1e384219,inset 0 5px 5px #ffffff59;animation:drop .24s cubic-bezier(.18,.7,.5,1.2) both}
+.slot .coil:before{content:"";width:19px;height:14px;background:#f3f0e8;border:4px solid #ffffffa8;border-radius:50%;position:absolute;top:4px;left:8px;box-shadow:inset 0 1px 3px #746e6233}
+.slot .coil:after{content:"";position:absolute;inset:3px 3px auto;border-top:1px solid #fff9}
+@keyframes drop{from{transform:translateY(-14px) scale(.4) rotate(12deg);opacity:.3}to{transform:translateY(0) scale(1) rotate(-12deg);opacity:1}}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.action{background:#fffcf7;border:1px solid #e7e0d4;color:#5d7275;padding:12px 8px;border-radius:15px;font-family:inherit;font-weight:800;font-size:13px;box-shadow:0 3px 8px #4d48300c;cursor:pointer}
+.action:active,.tiny:active{transform:scale(.96)}
+.action:disabled{opacity:.37;cursor:default}
+.footer{text-align:center;font-size:10px;color:#abb1ab;padding-top:1px}
+.toast{position:absolute;z-index:4;left:50%;top:24%;transform:translate(-50%,-8px);background:#344c57e9;color:#fff;padding:10px 17px;border-radius:20px;box-shadow:0 12px 24px #344c5730;font-weight:800;font-size:12px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;max-width:88%;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal{position:absolute;z-index:6;inset:0;background:#35464c58;display:flex;align-items:center;justify-content:center;padding:25px;backdrop-filter:blur(5px)}
+.modal[hidden]{display:none}
+.modalCard{width:min(100%,355px);background:#fffdf8;padding:32px 24px 25px;border-radius:26px;text-align:center;box-shadow:0 25px 65px #2638393b}
+.celebrate{font-size:54px;line-height:1.4}
+.modalCard h2{margin:7px 0 8px;font-size:25px}
+.modalCard p{color:#788589;font-size:13px;line-height:1.7;margin:0 0 22px}
+.primary{border:0;border-radius:16px;padding:15px 22px;width:100%;font-size:15px;font-weight:900;color:#fff;background:linear-gradient(135deg,#588b8d,#406d74);box-shadow:0 8px 17px #557f7e44;cursor:pointer}
+.secondary{background:transparent;border:0;color:#889393;font-size:12px;margin-top:14px;cursor:pointer;padding:6px}
+@media(min-height:790px){.game{gap:15px;padding-top:24px}.sceneWrap{min-height:350px}.slot{height:56px}}
+@media(max-height:670px){.game{gap:8px;padding-top:10px}.sceneWrap{height:252px;min-height:245px}.heading{gap:2px}.sceneHint{bottom:12px}.slot{height:43px}.tray{padding:10px}.action{padding:9px 4px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<main class="game" id="game">
+  <header><div class="brand">PEEL CLUB</div><div class="levelpill" id="levelPill">LEVEL 01</div></header>
+  <div class="heading"><h1>拆开这份小惊喜</h1><div class="subtitle" id="subtitle">从最上层开始撕 · 同色三卷自动消除</div><div class="progress" id="progress"></div></div>
+  <section class="sceneWrap" id="sceneWrap" aria-label="可旋转纸盒与彩色胶带"><canvas id="scene" aria-label="触摸胶带撕开，拖动旋转纸盒"></canvas><div class="floating"><button class="tiny" id="soundBtn" title="切换音效">♫ 开</button></div><div class="sceneHint">轻点胶带撕开　·　拖动纸盒旋转视角</div><div class="toast" id="toast"></div></section>
+  <div class="trayHeader"><b>胶带收纳盒 <span id="counter">0 / 5</span></b><span>凑齐 3 个同色即可腾出位置</span></div>
+  <div class="tray" id="tray" aria-label="五格胶带收纳槽"></div>
+  <div class="actions"><button id="hintBtn" class="action">✦ 提示</button><button id="undoBtn" class="action">↶ 撤销</button><button id="resetBtn" class="action">⟲ 重玩</button></div>
+  <div class="footer">一个无需下载、可离线游玩的原创小游戏</div>
+  <div class="modal" id="modal" hidden><div class="modalCard"><div class="celebrate" id="modalIcon">🎉</div><h2 id="modalTitle">拆包成功！</h2><p id="modalDesc"></p><button id="nextBtn" class="primary">下一盒 →</button><button id="modalReset" class="secondary">再玩一次</button></div></div>
+</main>
+<script>
+(() => {
+ 'use strict';
+ const $=id=>document.getElementById(id), canvas=$('scene'), wrap=$('sceneWrap'), ctx=canvas.getContext('2d');
+ const PALETTE=['#f47e87','#64b7bb','#f6bd63','#8ca9e8','#a68bc8','#80bd9d','#ea9b68','#c887b3'];
+ const FACE=[{axis:2,sgn:-1},{axis:0,sgn:-1},{axis:1,sgn:-1},{axis:0,sgn:1},{axis:1,sgn:1},{axis:2,sgn:1}];
+ const RGB=(hex)=>[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];
+ function tint(hex,amt){const a=RGB(hex).map(v=>Math.max(0,Math.min(255,Math.round(v+(amt>0?255-v:-v)*Math.abs(amt)))));return `rgb(${a.join(',')})`}
+ let W=400,H=400,DPR=1,boxScale=110, yaw=-.57,pitch=.36, level=1, strips=[], tray=[], hist=[], anim=null, overlays=false, hits=[], hintId=null,hintUntil=0, sparkle=[],now=0,drag=null,sound=true,audio=null,toastTimer=0;
+ try{level=Math.max(1,Math.min(99,Number(localStorage.getItem('peelclub_level')||1)||1))}catch(e){}
+ function notify(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1500)}
+ function save(){try{localStorage.setItem('peelclub_level',String(level))}catch(e){}}
+ function spawn(sx,sy,c,n=12){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,sp=.55+Math.random()*2.6;sparkle.push({x:sx,y:sy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.0,life:1,col:c,r:2+Math.random()*3})}}
+ function makeLevel(n){
+  const groups=Math.min(7,3+Math.floor((n-1)/2));
+  const ci=Array.from({length:groups},(_,i)=>(i+Math.max(0,n-1)*2)%PALETTE.length);
+  let pairs=[];
+  if(n===1){for(let i=0;i<groups;i++)pairs.push([ci[i],ci[i],ci[i]])}
+  else {for(let i=0;i<groups;i+=2){if(i+1<groups) pairs.push([ci[i],ci[i],ci[i+1]],[ci[i],ci[i+1],ci[i+1]]);else pairs.push([ci[i],ci[i],ci[i]])}}
+  strips=[];let idx=0;
+  for(let g=0;g<groups;g++){
+   const axis=(g+(n%3))%3, colors=pairs[g], order=[0,1,2];
+   if(n%2===0)order.reverse();
+   for(let j=0;j<3;j++){
+    const pos=[-.63,0,.63][order[j]];
+    strips.push({id:idx++,axis,pos,width:.31,layer:(groups-g)*10+j,color:PALETTE[colors[j]],ci:colors[j],removed:false});
+   }
+  }
+  tray=[];hist=[];anim=null;hintId=null;sparkle=[];overlays=false;
+  $('modal').hidden=true;
+  yaw=-.56;pitch=.37;
+  $('levelPill').textContent='LEVEL '+String(n).padStart(2,'0');
+  $('subtitle').textContent=n===1?'从最上层开始撕 · 同色三卷自动消除':'换个角度观察交叠关系，别让收纳盒装满';
+  updateUI();
+ }
+ function updateUI(){
+  const slots=$('tray');slots.replaceChildren();
+  for(let i=0;i<5;i++){
+   const slot=document.createElement('div');slot.className='slot';
+   if(tray[i]!=null){const r=document.createElement('div');r.className='coil';r.style.background=PALETTE[tray[i]];slot.appendChild(r)}
+   slots.appendChild(slot);
+  }
+  $('counter').textContent=`${tray.length} / 5`;
+  $('undoBtn').disabled=!hist.length||!!anim;
+  $('hintBtn').disabled=!!anim;
+  const p=$('progress');p.replaceChildren();
+  for(let i=0;i<strips.length;i++){const e=document.createElement('i');if(i<strips.filter(s=>s.removed).length)e.className='done';p.appendChild(e)}
+ }
+ function blocked(s){return strips.some(other=>!other.removed&&other.id!==s.id&&other.layer>s.layer&&(other.axis!==s.axis||Math.abs(other.pos-s.pos)<(other.width+s.width)*.5))}
+ function localPoint(p){const c=Math.cos(yaw),s=Math.sin(yaw),a=Math.cos(pitch),b=Math.sin(pitch);const x=p[0]*c+p[2]*s,z=-p[0]*s+p[2]*c;return [x,p[1]*a-z*b,p[1]*b+z*a]}
+ function project(p){let [x,y,z]=localPoint(p);const per=5.7/(5.7-z);return {x:W*.5+x*boxScale*per,y:H*.49-y*boxScale*per,z}}
+ function polyPath(points){ctx.beginPath();for(let i=0;i<points.length;i++)ctx[i===0?'moveTo':'lineTo'](points[i].x,points[i].y);ctx.closePath()}
+ function normalVis(f){const q=[0,0,0];q[f.axis]=f.sgn;return localPoint(q)[2]}
+ function makeFacePoints(f,off=1){const ids=[0,1,2].filter(a=>a!==f.axis),pts=[];for(const [u,v] of [[-1,-1],[1,-1],[1,1],[-1,1]]){let p=[0,0,0];p[f.axis]=f.sgn*off;p[ids[0]]=u;p[ids[1]]=v;pts.push(p)}return pts}
+ function panelCoords(t,f,progress=0){
+  const free=3-t.axis-f.axis;
+  const low=t.pos-t.width/2,high=t.pos+t.width/2;
+  const reverse=(t.id%2)===1;
+  let start=reverse?-1:Math.min(1,-1+2*progress),end=reverse?Math.max(-1,1-2*progress):1;
+  if(reverse){start=-1;end=Math.max(-1,1-2*progress)}
+  if(start>=end-0.001)return null;
+  const off=1.009+t.layer*.00009;
+  const pts=[];
+  for(const [a,b] of [[low,start],[high,start],[high,end],[low,end]]){const p=[0,0,0];p[f.axis]=f.sgn*off;p[t.axis]=a;p[free]=b;pts.push(p)}
+  return {pts,free,edge:reverse?end:start,reverse};
+ }
+ function inside(p,poly){let ins=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if(((a.y>p.y)!==(b.y>p.y))&&(p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y+1e-9)+a.x))ins=!ins}return ins}
+ function drawTape(t,f,peel=0){const panel=panelCoords(t,f,peel);if(!panel)return;
+  const ps=panel.pts.map(project),av=ps.reduce((a,p)=>({x:a.x+p.x/4,y:a.y+p.y/4}),{x:0,y:0});
+  ctx.save();ctx.shadowColor='#3e342632';ctx.shadowBlur=7;ctx.shadowOffsetY=4;polyPath(ps);
+  const grad=ctx.createLinearGradient(ps[0].x,ps[0].y,ps[1].x,ps[1].y);grad.addColorStop(0,tint(t.color,-.19));grad.addColorStop(.22,tint(t.color,.13));grad.addColorStop(.65,t.color);grad.addColorStop(1,tint(t.color,-.12));ctx.fillStyle=grad;ctx.fill();ctx.restore();
+  ctx.save();polyPath(ps);ctx.clip();ctx.strokeStyle='#fff';ctx.globalAlpha=.10;ctx.lineWidth=1;
+  for(let k=-H;k<W+H;k+=15){ctx.beginPath();ctx.moveTo(k,-25);ctx.lineTo(k+H,H+25);ctx.stroke()}
+  ctx.restore();ctx.beginPath();ctx.moveTo(ps[0].x,ps[0].y);ctx.lineTo(ps[3].x,ps[3].y);ctx.strokeStyle='#fff8';ctx.lineWidth=1.35;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ps[1].x,ps[1].y);ctx.lineTo(ps[2].x,ps[2].y);ctx.strokeStyle='#1a343b1d';ctx.stroke();
+  if(hintId===t.id && now<hintUntil){ctx.save();polyPath(ps);ctx.strokeStyle='#fff';ctx.shadowBlur=15;ctx.shadowColor='#fff';ctx.lineWidth=4;ctx.stroke();ctx.strokeStyle='#446a70';ctx.lineWidth=1.4;ctx.stroke();ctx.restore();}
+  if(anim&&anim.id===t.id&&peel<.99){
+   const foldA=project(panel.pts[panel.reverse?2:0]),foldB=project(panel.pts[panel.reverse?3:1]);
+   ctx.save();ctx.beginPath();ctx.moveTo(foldA.x,foldA.y);ctx.lineTo(foldB.x,foldB.y);ctx.strokeStyle=tint(t.color,-.32);ctx.lineWidth=8;ctx.lineCap='round';ctx.shadowBlur=6;ctx.shadowColor='#0005';ctx.stroke();ctx.strokeStyle=tint(t.color,.65);ctx.lineWidth=4;ctx.stroke();ctx.restore();
+  }
+  if(!anim||anim.id!==t.id)hits.push({t,ps,faceDepth:av.y});
+ }
+ function render(){
+  now=performance.now();ctx.clearRect(0,0,W,H);hits=[];
+  ctx.save();
+  let shadowW=Math.min(boxScale*2.6,W*.64),shadowY=H*.79;
+  const grd=ctx.createRadialGradient(W/2,shadowY,4,W/2,shadowY,shadowW*.51);grd.addColorStop(0,'#82786732');grd.addColorStop(1,'#8a806900');
+  ctx.fillStyle=grd;ctx.beginPath();ctx.ellipse(W*.5,shadowY,shadowW*.62,shadowW*.20,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  const faces=FACE.filter(f=>normalVis(f)>.025).sort((a,b)=>{let x=[0,0,0],y=[0,0,0];x[a.axis]=a.sgn;y[b.axis]=b.sgn;return localPoint(x)[2]-localPoint(y)[2]});
+  for(const f of faces){
+   const pts=makeFacePoints(f,1).map(project);
+   const base=f.axis===1?'#ecd9bb':f.axis===0?'#c8ae88':'#dbc49e';
+   ctx.save();polyPath(pts);ctx.fillStyle=base;ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle='#8f795b35';ctx.stroke();ctx.clip();
+   const grad=ctx.createLinearGradient(pts[0].x,pts[0].y,pts[2].x,pts[2].y);grad.addColorStop(0,'#fff8');grad.addColorStop(1,'#4a3d2616');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+   // fine cardboard fibers
+   ctx.strokeStyle='#f9edd72a';ctx.lineWidth=.8;
+   for(let i=0;i<14;i++){const y=(i/13)*H;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y+5);ctx.stroke()}
+   ctx.restore();
+   // paper corners and small postage-style mark
+   if(f.axis===2&&f.sgn===1){
+     const mark=project([-.38,.31,1.013]);ctx.save();ctx.translate(mark.x,mark.y);ctx.rotate(.065);ctx.globalAlpha=.36;ctx.strokeStyle='#826c4e';ctx.lineWidth=1;ctx.strokeRect(-27,-17,54,34);ctx.textAlign='center';ctx.fillStyle='#785c3d';ctx.font='bold 8px system-ui';ctx.fillText('JUST FOR YOU',0,-1);ctx.font='7px system-ui';ctx.fillText('✳  PEEL  ✳',0,10);ctx.restore();
+   }
+   const faceStrips=strips.filter(t=>!t.removed&&t.axis!==f.axis).sort((a,b)=>a.layer-b.layer);
+   for(const t of faceStrips){let p=0;if(anim&&anim.id===t.id){const elapsed=(now-anim.t0)/anim.duration;p=Math.min(1,Math.max(0,elapsed));p=1-Math.pow(1-p,1.30)}drawTape(t,f,p)}
+  }
+  // curl dust floating over cube
+  for(let i=sparkle.length-1;i>=0;i--){const p=sparkle[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.04;p.life-=.018;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();if(p.life<=0)sparkle.splice(i,1)}ctx.globalAlpha=1;
+  if(anim&&now-anim.t0>anim.duration)finishPeel();
+  requestAnimationFrame(render)
+ }
+ function screenCenter(t){const list=hits.filter(h=>h.t.id===t.id);if(!list.length)return {x:W*.5,y:H*.5};const q=list[list.length-1];return q.ps.reduce((a,p)=>({x:a.x+p.x/4,y:a.y+p.y/4}),{x:0,y:0})}
+ function beginPeel(t){if(overlays||anim||t.removed)return;if(blocked(t)){notify('这卷被别的胶带压住了，先撕上层 ✦');play('no');return}
+  hist.push({removed:strips.map(s=>s.removed),tray:[...tray]});if(hist.length>40)hist.shift();anim={id:t.id,t0:performance.now(),duration:490};hintId=null;play('rip');updateUI();
+ }
+ function finishPeel(){if(!anim)return;const s=strips.find(s=>s.id===anim.id);if(!s)return;anim=null;s.removed=true;tray.push(s.ci);const n=tray.filter(x=>x===s.ci).length;
+  if(n>=3){tray=tray.filter(x=>x!==s.ci);play('match');const pos=screenCenter(s);spawn(pos.x,pos.y,s.color,20);notify('三卷同色！收纳成功 ✨')}else play('tap');
+  updateUI();
+  if(strips.every(s=>s.removed)&&tray.length===0){openModal(true)}else if(tray.length>=5){openModal(false)}
+ }
+ function openModal(won){overlays=true;$('modalIcon').textContent=won?'🎉':'📦';$('modalTitle').textContent=won?'拆包成功！':'收纳盒装满了';$('modalDesc').textContent=won?'所有胶带都拆干净啦。准备好迎接下一份小惊喜了吗？':'注意不同颜色的撕取顺序，凑齐三卷相同颜色才能腾出空间。';$('nextBtn').textContent=won?'开启下一盒 →':'重新挑战 ↻';$('nextBtn').onclick=()=>{if(won){level++;save()}makeLevel(level)};$('modal').hidden=false;play(won?'win':'no')}
+ function findTapeAt(p){for(let i=hits.length-1;i>=0;i--){if(inside(p,hits[i].ps))return hits[i].t}return null}
+ function resize(){const r=canvas.getBoundingClientRect();W=Math.max(250,r.width);H=Math.max(200,r.height);DPR=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.ceil(W*DPR);canvas.height=Math.ceil(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);boxScale=Math.min(W*.34,H*.32,149)}
+ function eventPoint(e){const r=canvas.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}}
+ canvas.addEventListener('pointerdown',e=>{if(overlays||anim)return;e.preventDefault();canvas.setPointerCapture(e.pointerId);const p=eventPoint(e);drag={id:e.pointerId,x:p.x,y:p.y,px:p.x,py:p.y,moved:false,from:performance.now()}});
+ canvas.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;e.preventDefault();const p=eventPoint(e);const dist=Math.hypot(p.x-drag.x,p.y-drag.y);if(dist>7)drag.moved=true;if(drag.moved){yaw=Math.max(-Math.PI*4,Math.min(Math.PI*4,yaw+(p.x-drag.px)*.009));pitch=Math.max(-1.35,Math.min(1.35,pitch+(p.y-drag.py)*.007))}drag.px=p.x;drag.py=p.y});
+ canvas.addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.id)return;const p=eventPoint(e);if(!drag.moved){const t=findTapeAt(p);if(t)beginPeel(t);else notify('轻点彩色胶带即可撕开 ✦')}drag=null});
+ canvas.addEventListener('pointercancel',()=>drag=null);
+ $('hintBtn').onclick=()=>{if(anim||overlays)return;const pick=strips.filter(t=>!t.removed&&!blocked(t)).sort((a,b)=>b.layer-a.layer)[0];if(!pick)return;hintId=pick.id;hintUntil=performance.now()+2200;const center=screenCenter(pick);spawn(center.x,center.y,pick.color,9);notify('发光的胶带可以先撕 ✨')};
+ $('undoBtn').onclick=()=>{if(!hist.length||anim)return;const last=hist.pop();strips.forEach((s,i)=>s.removed=last.removed[i]);tray=last.tray;overlays=false;$('modal').hidden=true;hintId=null;updateUI();notify('撤销成功 ↶')};
+ $('resetBtn').onclick=()=>makeLevel(level);
+ $('modalReset').onclick=()=>makeLevel(level);
+ $('soundBtn').onclick=()=>{sound=!sound;$('soundBtn').textContent=sound?'♫ 开':'♫ 关';if(sound)play('tap')};
+ function play(type){if(!sound)return;try{
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;audio=audio||new AC();if(audio.state==='suspended')audio.resume();const t=audio.currentTime;
+  function tone(f,d,v=.05,shape='sine',dt=0){const osc=audio.createOscillator(),g=audio.createGain();osc.type=shape;osc.frequency.setValueAtTime(f,t+dt);osc.frequency.exponentialRampToValueAtTime(f*(type==='no'?.85:1.4),t+dt+d);g.gain.setValueAtTime(.001,t+dt);g.gain.exponentialRampToValueAtTime(v,t+dt+.015);g.gain.exponentialRampToValueAtTime(.001,t+dt+d);osc.connect(g).connect(audio.destination);osc.start(t+dt);osc.stop(t+dt+d+.02)}
+  if(type==='rip'){let N=audio.sampleRate*.34,b=audio.createBuffer(1,N,audio.sampleRate),d=b.getChannelData(0);for(let i=0;i<N;i++)d[i]=(Math.random()*2-1)*(1-i/N);let s=audio.createBufferSource(),g=audio.createGain(),filter=audio.createBiquadFilter();filter.type='highpass';filter.frequency.value=850;s.buffer=b;g.gain.setValueAtTime(.085,t);g.gain.exponentialRampToValueAtTime(.002,t+.34);s.connect(filter).connect(g).connect(audio.destination);s.start();tone(320,.14,.023,'triangle')}
+  else if(type==='match'){tone(580,.18,.058,'sine');tone(760,.20,.057,'sine',.09);tone(1040,.29,.062,'sine',.18)}
+  else if(type==='win'){[440,550,660,880].forEach((f,i)=>tone(f,.32,.07,'sine',i*.11))}
+  else if(type==='no')tone(210,.14,.045,'triangle');else tone(470,.12,.022,'sine');
+ }catch(e){}
+ }
+ makeLevel(level);
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(wrap);
+ window.addEventListener('resize',resize);resize();requestAnimationFrame(render);
+})();
+</script>
+</body>
+</html>
