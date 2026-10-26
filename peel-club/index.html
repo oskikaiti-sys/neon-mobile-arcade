@@ -87,30 +87,35 @@ canvas:active{cursor:grabbing}
  function seg(face,along,cross,from,to,width,ci,layer){return {faceAxis:face.axis,faceSgn:face.sgn,along:along==='h'?'u':'v',cross,from,to,width,ci,layer}}
  const FRONT={axis:2,sgn:1}, RIGHT={axis:0,sgn:1}, TOP={axis:1,sgn:1};
  const LEVELS=[
-  {title:'爱心贴纸', subtitle:'一片片拆开彩色爱心', hint:'从上层边缘开始，凑齐三片同色', pieces:[
-   seg(FRONT,'h',.51,-.47,-.10,.23,0,31),seg(FRONT,'h',.51,.10,.47,.23,0,30),seg(FRONT,'h',.31,-.58,.58,.24,0,29),
-   seg(FRONT,'h',.11,-.60,.60,.25,7,23),seg(FRONT,'h',-.09,-.51,.51,.24,7,22),seg(FRONT,'h',-.27,-.39,.39,.23,7,21),
-   seg(FRONT,'h',-.43,-.30,.30,.22,6,15),seg(FRONT,'h',-.57,-.18,.18,.21,6,14),seg(FRONT,'h',-.68,-.08,.08,.19,6,13)
+  {title:'爱心礼盒', subtitle:'爱心主图案 + 盒盖蝴蝶结 + 侧面丝带', hint:'先收集盒盖蝴蝶结，再拆正面的爱心', pieces:[
+   seg(FRONT,'h',.50,-.46,-.10,.21,0,36),seg(FRONT,'h',.50,.10,.46,.21,0,35),seg(FRONT,'h',.22,-.58,.58,.23,0,34),
+   seg(TOP,'h',-.22,-.58,-.12,.18,4,30),seg(TOP,'h',-.22,.12,.58,.18,4,29),seg(TOP,'h',0.00,-.11,.11,.17,4,28),
+   seg(RIGHT,'v',-.38,-.78,.20,.17,6,24),seg(RIGHT,'v',.04,-.68,.26,.17,6,23),seg(RIGHT,'h',-.58,-.16,.18,.15,6,22),
+   seg(FRONT,'h',-.18,-.72,-.46,.12,1,18),seg(FRONT,'h',-.18,.46,.72,.12,1,17),seg(RIGHT,'h',.42,-.22,.22,.13,1,16)
   ]},
-  {title:'星星便利贴', subtitle:'像素风五角星 · 先撕金色星光', hint:'注意星星两侧有对称的胶带', pieces:[
-   seg(FRONT,'h',.67,-.12,.12,.20,2,32),seg(FRONT,'h',.48,-.23,.23,.21,2,31),seg(FRONT,'h',.24,-.67,.67,.21,2,30),
-   seg(FRONT,'h',.04,-.70,.70,.20,6,26),seg(FRONT,'h',-.16,-.43,.43,.20,6,25),seg(FRONT,'h',-.32,-.26,.26,.20,6,24),
-   seg(FRONT,'h',-.39,-.58,-.25,.18,0,20),seg(FRONT,'h',-.39,.25,.58,.18,0,19),seg(FRONT,'h',-.60,-.13,.13,.18,0,18)
+  {title:'星星礼盒', subtitle:'大星星 + 盒盖小星群 + 侧面流星尾迹', hint:'先从盒盖的小星星开始，会更容易腾位', pieces:[
+   seg(FRONT,'h',.66,-.12,.12,.19,2,36),seg(FRONT,'h',.42,-.54,.54,.22,2,35),seg(FRONT,'h',.10,-.24,.24,.16,2,34),
+   seg(FRONT,'h',-.10,-.74,.74,.20,6,30),seg(FRONT,'h',-.34,-.38,.38,.18,6,29),seg(FRONT,'h',-.58,-.12,.12,.16,6,28),
+   seg(TOP,'h',-.34,-.56,-.32,.12,3,24),seg(TOP,'h',-.02,-.10,.10,.12,3,23),seg(TOP,'h',.24,.30,.56,.12,3,22),
+   seg(RIGHT,'v',-.56,-.78,-.12,.12,0,18),seg(RIGHT,'v',-.24,-.62,.06,.12,0,17),seg(RIGHT,'v',.04,-.46,.24,.12,0,16)
   ]},
-  {title:'小花便签', subtitle:'花瓣、花茎和两片叶子', hint:'先撕花瓣，再收集绿色叶片', pieces:[
-   seg(FRONT,'h',.64,-.23,.23,.25,7,35),seg(FRONT,'v',-.42,.22,.55,.23,7,34),seg(FRONT,'v',.42,.22,.55,.23,7,33),
-   seg(FRONT,'v',-.42,-.08,.21,.23,4,29),seg(FRONT,'v',.42,-.08,.21,.23,4,28),seg(FRONT,'h',-.17,-.23,.23,.23,4,27),
-   seg(FRONT,'v',0,-.74,-.21,.17,5,21),seg(FRONT,'h',-.50,-.45,-.04,.18,5,20),seg(FRONT,'h',-.58,.04,.45,.18,5,19)
+  {title:'花束礼盒', subtitle:'花朵主体 + 顶面叶片 + 侧面藤蔓', hint:'花瓣优先，绿色叶片与藤蔓负责填满侧面', pieces:[
+   seg(FRONT,'h',.58,-.22,.22,.23,7,36),seg(FRONT,'v',-.40,.18,.54,.22,7,35),seg(FRONT,'v',.40,.18,.54,.22,7,34),
+   seg(FRONT,'v',-.40,-.10,.18,.22,4,30),seg(FRONT,'v',.40,-.10,.18,.22,4,29),seg(FRONT,'h',-.16,-.22,.22,.22,4,28),
+   seg(TOP,'h',-.22,-.58,-.18,.14,5,24),seg(TOP,'h',.00,-.10,.10,.14,5,23),seg(TOP,'h',.22,.18,.58,.14,5,22),
+   seg(RIGHT,'v',-.60,-.76,-.28,.14,1,18),seg(RIGHT,'v',-.24,-.42,.00,.14,1,17),seg(RIGHT,'v',.10,-.08,.28,.14,1,16)
   ]},
-  {title:'笑脸表情', subtitle:'眼睛、腮红与微笑', hint:'先拆眼睛，再拆嘴巴', pieces:[
-   seg(FRONT,'v',-.27,.20,.50,.18,3,36),seg(FRONT,'v',.27,.20,.50,.18,3,35),seg(FRONT,'h',.08,-.07,.07,.17,3,34),
-   seg(FRONT,'h',.10,-.63,-.40,.17,0,30),seg(FRONT,'h',.10,.40,.63,.17,0,29),seg(FRONT,'h',.64,-.20,.20,.16,0,28),
-   seg(FRONT,'v',-.31,-.36,-.05,.15,2,25),seg(FRONT,'h',-.37,-.31,.31,.18,2,24),seg(FRONT,'v',.31,-.36,-.05,.15,2,23)
+  {title:'笑脸礼盒', subtitle:'笑脸主图案 + 顶面小太阳 + 侧面表情符号', hint:'先拆眼睛和顶面的太阳，笑脸会更快成型', pieces:[
+   seg(FRONT,'v',-.28,.20,.50,.17,3,36),seg(FRONT,'v',.28,.20,.50,.17,3,35),seg(FRONT,'h',.06,-.08,.08,.15,3,34),
+   seg(FRONT,'h',.10,-.62,-.38,.16,0,30),seg(FRONT,'h',.10,.38,.62,.16,0,29),seg(FRONT,'h',.62,-.20,.20,.16,0,28),
+   seg(TOP,'h',-.32,-.12,.12,.12,2,24),seg(TOP,'v',-.12,.06,.26,.11,2,23),seg(TOP,'v',.12,.06,.26,.11,2,22),
+   seg(RIGHT,'h',.26,-.46,-.20,.12,6,18),seg(RIGHT,'h',.02,-.10,.10,.12,6,17),seg(RIGHT,'h',-.22,.20,.46,.12,6,16)
   ]},
-  {title:'礼物盒封条', subtitle:'从盒盖到正面的蝴蝶结', hint:'先收集盒盖的蝴蝶结，再揭正面的封条', pieces:[
-   seg(TOP,'h',-.24,-.65,-.12,.19,5,42),seg(TOP,'h',-.24,.12,.65,.19,5,41),seg(TOP,'h',-.02,-.12,.12,.20,5,40),
-   seg(TOP,'v',-.26,-.53,-.14,.17,0,34),seg(TOP,'v',.26,-.53,-.14,.17,0,33),seg(FRONT,'h',.53,-.45,.45,.17,0,32),
-   seg(FRONT,'v',0,-.84,.86,.21,1,26),seg(FRONT,'h',.0,-.74,.74,.21,1,25),seg(FRONT,'h',-.45,-.34,.34,.16,1,24)
+  {title:'豪华礼盒', subtitle:'正面十字封带 + 盒盖蝴蝶结 + 右侧封条', hint:'这一关三面都有关键胶带，先从最显眼的上层开始', pieces:[
+   seg(FRONT,'v',0,-.84,.84,.20,1,38),seg(FRONT,'h',0,-.76,.76,.20,1,37),seg(FRONT,'h',-.46,-.34,.34,.15,1,36),
+   seg(TOP,'h',-.24,-.68,-.14,.18,5,32),seg(TOP,'h',-.24,.14,.68,.18,5,31),seg(TOP,'h',0.00,-.12,.12,.19,5,30),
+   seg(TOP,'v',-.26,-.56,-.16,.16,0,26),seg(TOP,'v',.26,-.56,-.16,.16,0,25),seg(FRONT,'h',.54,-.46,.46,.16,0,24),
+   seg(RIGHT,'v',-.48,-.78,.22,.15,2,20),seg(RIGHT,'v',-.08,-.62,.06,.15,2,19),seg(RIGHT,'v',.28,-.42,-.06,.15,2,18)
   ]}
  ];
  function localAxes(faceAxis){return [0,1,2].filter(a=>a!==faceAxis)}
@@ -126,7 +131,7 @@ canvas:active{cursor:grabbing}
   currentLevelDef.guide=currentLevelDef.pieces;
   pieces=currentLevelDef.pieces.map((p,i)=>({...p,id:i,color:PALETTE[p.ci],removed:false,reverse:i%2===1}));
   tray=[];hist=[];anim=null;hintId=null;sparkle=[];overlays=false;$('modal').hidden=true;
-  yaw=currentLevelDef.title.includes('礼物盒')?-.72:-.56; pitch=currentLevelDef.title.includes('礼物盒')?.54:.37;
+  yaw=currentLevelDef.title.includes('豪华礼盒')?-.80:-.74; pitch=currentLevelDef.title.includes('豪华礼盒')?.52:.44;
   $('levelPill').textContent='LEVEL '+String(n).padStart(2,'0');
   $('patternTitle').textContent=currentLevelDef.title;
   $('subtitle').textContent=currentLevelDef.subtitle;
