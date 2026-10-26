@@ -150,47 +150,67 @@ canvas:active{cursor:grabbing}
   if(anim&&anim.id===t.id&&peel>.012&&peel<.995)tails.push({t,f,peel,reverse});
   if(!anim||anim.id!==t.id)hits.push({t,ps,face:f})
  }
- function drawFreeTail({t,f,peel,reverse}){
-  // A transparent ribbon bends away from the adhesive contact line, instead of becoming a rolled cylinder.
-  const free=3-t.axis-f.axis, edge=reverse?1-2*peel:-1+2*peel,dir=reverse?1:-1;
-  const length=Math.min(.9,Math.max(.025,2*peel)), rise=.12+.49*Math.min(1,peel*2.2);
-  function coords(u,side,surface=false){
-   const wave=surface?0:.012*Math.sin(u*9+now*.008)*u;
-   const lift=surface?.002:(.004+rise*(u*u*(3-2*u)) +wave);
-   const p=[0,0,0];
-   p[f.axis]=f.sgn*(1.016+lift);
-   p[t.axis]=t.pos+side*t.width*.5*(1-.035*u);
-   p[free]=Math.max(-1,Math.min(1,edge+dir*length*u));
-   return project(p)
+ function isFilamentVisible(p){
+  // Intersect the ray from the perspective camera to the ribbon vertex
+  // with the six cardboard planes. A preceding box hit means occlusion.
+  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const origin=[-5.7*cp*sy,5.7*sp,5.7*cp*cy];
+  let enter=0,leave=1;
+  for(let j=0;j<3;j++){
+   const d=p[j]-origin[j];
+   if(Math.abs(d)<1e-9){if(origin[j]<-1||origin[j]>1)return true;continue}
+   let a=(-1-origin[j])/d,b=(1-origin[j])/d;if(a>b){const tmp=a;a=b;b=tmp}
+   enter=Math.max(enter,a);leave=Math.min(leave,b);
+   if(enter>leave)return true
   }
-  // Adhesive stress/shadow moves across the box as the contact line advances.
-  const sh0=coords(0,-1,true),sh1=coords(0,1,true);
-  ctx.save();ctx.beginPath();ctx.moveTo(sh0.x,sh0.y);ctx.lineTo(sh1.x,sh1.y);
-  ctx.lineWidth=7;ctx.strokeStyle='#4b362752';ctx.shadowColor='#3b2c2b66';ctx.shadowBlur=7;ctx.stroke();ctx.restore();
-  const count=12,left=[],right=[];
+  // The ribbon itself is outside the cube; only closer intersections hide it.
+  return !(leave>0&&enter<1-.0002&&enter<=leave)
+ }
+ function drawFreeTail({t,f,peel,reverse}){
+  const free=3-t.axis-f.axis,edge=reverse?1-2*peel:-1+2*peel,dir=reverse?1:-1;
+  // Short, flexible lifted film: always remain outside the cardboard's own plane.
+  const length=Math.min(.77,Math.max(.025,1.65*peel));
+  const rise=.085+.34*Math.min(1,peel*2.3);
+  function coords(u,side,surface=false){
+   const lift=surface?.003:(.006+rise*u*u*(3-2*u));
+   const p=[0,0,0];
+   p[f.axis]=f.sgn*(1.022+lift);
+   p[t.axis]=t.pos+side*t.width*.5*(1-.016*u);
+   p[free]=Math.max(-1,Math.min(1,edge+dir*length*u));
+   return {...project(p),model:p}
+  }
+  const count=32,left=[],right=[];
   for(let i=0;i<=count;i++){let u=i/count;left.push(coords(u,-1));right.push(coords(u,1))}
+  // Painted contact shadow is confined to the contact line's face.
+  const sh0=coords(0,-1,true),sh1=coords(0,1,true);
+  if(isFilamentVisible(sh0.model)&&isFilamentVisible(sh1.model)){
+   ctx.save();ctx.beginPath();ctx.moveTo(sh0.x,sh0.y);ctx.lineTo(sh1.x,sh1.y);
+   ctx.lineWidth=3.6;ctx.strokeStyle='#473a3055';ctx.shadowColor='#32292355';ctx.shadowBlur=3;ctx.stroke();ctx.restore()
+  }
+  const visL=left.map(v=>isFilamentVisible(v.model)),visR=right.map(v=>isFilamentVisible(v.model));
+  // Clip every narrow band using 3D occlusion against the actual cube.
+  // Rendering the tail last is safe only for bands that pass this test.
   for(let i=0;i<count;i++){
+   if(!(visL[i]&&visR[i]&&visL[i+1]&&visR[i+1]))continue;
    const a=left[i],b=right[i],c=right[i+1],d=left[i+1],u=(i+.5)/count;
    ctx.save();ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.lineTo(d.x,d.y);ctx.closePath();
-   // Film is semitransparent, with a narrow specular glint and a shaded underside.
    const across=ctx.createLinearGradient(a.x,a.y,b.x,b.y);
-   across.addColorStop(0,tint(t.color,-.22));
-   across.addColorStop(.13,tint(t.color,.20));
-   across.addColorStop(.35,tint(t.color,.08));
-   across.addColorStop(.73,t.color);
-   across.addColorStop(1,tint(t.color,-.23));
-   ctx.globalAlpha=.82-.13*u;ctx.fillStyle=across;ctx.fill();
-   ctx.restore()
+   across.addColorStop(0,tint(t.color,-.18));across.addColorStop(.12,tint(t.color,.18));
+   across.addColorStop(.32,tint(t.color,.07));across.addColorStop(.76,t.color);
+   across.addColorStop(1,tint(t.color,-.18));
+   ctx.globalAlpha=.78-.11*u;ctx.fillStyle=across;ctx.fill();ctx.restore()
   }
-  ctx.save();ctx.lineWidth=1.2;ctx.strokeStyle='rgba(255,255,255,.68)';
-  ctx.beginPath();left.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
-  ctx.lineWidth=.95;ctx.strokeStyle='rgba(38,50,55,.24)';
-  ctx.beginPath();right.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
-  const a=left[count],b=right[count];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
-  ctx.lineWidth=1.35;ctx.strokeStyle='#f8fffdd9';ctx.stroke();
-  // A small stretch highlight across the just-released sticky edge.
-  const c0=left[0],c1=right[0];ctx.beginPath();ctx.moveTo(c0.x,c0.y);ctx.lineTo(c1.x,c1.y);
-  ctx.lineWidth=1.7;ctx.strokeStyle='#ffffffb8';ctx.stroke();ctx.restore()
+  ctx.save();
+  for(const [arr,vis,color,w] of [[left,visL,'rgba(255,255,255,.63)',.95],[right,visR,'rgba(33,49,58,.27)',.8]]){
+   ctx.lineWidth=w;ctx.strokeStyle=color;ctx.beginPath();let drawing=false;
+   for(let i=1;i<arr.length;i++){
+    if(vis[i-1]&&vis[i]){if(!drawing){ctx.moveTo(arr[i-1].x,arr[i-1].y);drawing=true}ctx.lineTo(arr[i].x,arr[i].y)}
+    else drawing=false
+   }
+   ctx.stroke()
+  }
+  if(visL[count]&&visR[count]){ctx.beginPath();ctx.moveTo(left[count].x,left[count].y);ctx.lineTo(right[count].x,right[count].y);ctx.lineWidth=1.2;ctx.strokeStyle='#f8fffdd0';ctx.stroke()}
+  ctx.restore()
  }
  function render(){
   now=performance.now();ctx.clearRect(0,0,W,H);hits=[];tails=[];
