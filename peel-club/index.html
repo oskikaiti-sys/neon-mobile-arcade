@@ -145,8 +145,58 @@ canvas:active{cursor:grabbing}
   ctx.beginPath();ctx.moveTo(ps[1].x,ps[1].y);ctx.lineTo(ps[2].x,ps[2].y);ctx.strokeStyle='#1a343b1d';ctx.stroke();
   if(hintId===t.id && now<hintUntil){ctx.save();polyPath(ps);ctx.strokeStyle='#fff';ctx.shadowBlur=15;ctx.shadowColor='#fff';ctx.lineWidth=4;ctx.stroke();ctx.strokeStyle='#446a70';ctx.lineWidth=1.4;ctx.stroke();ctx.restore();}
   if(anim&&anim.id===t.id&&peel<.99){
+   // Draw a flexible adhesive flap lifting away from the box, not a scroll/coil.
    const foldA=project(panel.pts[panel.reverse?2:0]),foldB=project(panel.pts[panel.reverse?3:1]);
-   ctx.save();ctx.beginPath();ctx.moveTo(foldA.x,foldA.y);ctx.lineTo(foldB.x,foldB.y);ctx.strokeStyle=tint(t.color,-.32);ctx.lineWidth=8;ctx.lineCap='round';ctx.shadowBlur=6;ctx.shadowColor='#0005';ctx.stroke();ctx.strokeStyle=tint(t.color,.65);ctx.lineWidth=4;ctx.stroke();ctx.restore();
+   const mid={x:(foldA.x+foldB.x)*.5,y:(foldA.y+foldB.y)*.5};
+   let nx=mid.x-av.x,ny=mid.y-av.y;const nl=Math.hypot(nx,ny)||1;nx/=nl;ny/=nl;
+   let ex=foldB.x-foldA.x,ey=foldB.y-foldA.y;const el=Math.hypot(ex,ey)||1;ex/=el;ey/=el;
+   const lift=(8+22*Math.sin(peel*Math.PI*.5))*(.82+.18*(1-peel));
+   const skew=(panel.reverse?-1:1)*(3+6*peel);
+   const tipA={x:foldA.x+nx*lift-ex*skew,y:foldA.y+ny*lift-ey*skew};
+   const tipB={x:foldB.x+nx*lift+ex*skew,y:foldB.y+ny*lift+ey*skew};
+   const bulge=5+10*Math.sin(peel*Math.PI);
+   const arc1={x:(foldA.x+tipA.x)*.5+nx*bulge,y:(foldA.y+tipA.y)*.5+ny*bulge};
+   const arc2={x:(foldB.x+tipB.x)*.5+nx*bulge,y:(foldB.y+tipB.y)*.5+ny*bulge};
+   ctx.save();
+   ctx.beginPath();
+   ctx.moveTo(foldA.x+nx*3,foldA.y+ny*3);
+   ctx.lineTo(foldB.x+nx*3,foldB.y+ny*3);
+   ctx.quadraticCurveTo(arc2.x,arc2.y,tipB.x+nx*2,tipB.y+ny*2);
+   ctx.lineTo(tipA.x+nx*2,tipA.y+ny*2);
+   ctx.quadraticCurveTo(arc1.x,arc1.y,foldA.x+nx*3,foldA.y+ny*3);
+   ctx.closePath();
+   ctx.fillStyle='#00000018';
+   ctx.filter='blur(3px)';
+   ctx.fill();
+   ctx.restore();
+   ctx.save();
+   ctx.beginPath();
+   ctx.moveTo(foldA.x,foldA.y);
+   ctx.lineTo(foldB.x,foldB.y);
+   ctx.quadraticCurveTo(arc2.x,arc2.y,tipB.x,tipB.y);
+   ctx.quadraticCurveTo((tipA.x+tipB.x)*.5+nx*(2+bulge*.25),(tipA.y+tipB.y)*.5+ny*(2+bulge*.25),tipA.x,tipA.y);
+   ctx.quadraticCurveTo(arc1.x,arc1.y,foldA.x,foldA.y);
+   ctx.closePath();
+   const flapGrad=ctx.createLinearGradient(mid.x,mid.y,mid.x+nx*lift,mid.y+ny*lift);
+   flapGrad.addColorStop(0,'rgba(255,255,255,.08)');
+   flapGrad.addColorStop(.06,t.color);
+   flapGrad.addColorStop(.58,tint(t.color,.28).replace('rgb','rgba').replace(')',',.72)'));
+   flapGrad.addColorStop(1,'rgba(255,255,255,.42)');
+   ctx.fillStyle=flapGrad;
+   ctx.shadowColor='#00000022';ctx.shadowBlur=8;ctx.shadowOffsetY=2;
+   ctx.fill();
+   ctx.restore();
+   ctx.save();
+   ctx.beginPath();ctx.moveTo(foldA.x,foldA.y);ctx.lineTo(foldB.x,foldB.y);
+   ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1.2;ctx.stroke();
+   ctx.beginPath();
+   ctx.moveTo(foldA.x+ex*2,foldA.y+ey*2);
+   ctx.quadraticCurveTo((tipA.x+tipB.x)*.5+nx*(5+bulge*.2),(tipA.y+tipB.y)*.5+ny*(5+bulge*.2),tipB.x-ex*2,tipB.y-ey*2);
+   ctx.strokeStyle='rgba(255,255,255,.78)';ctx.lineWidth=1.6;ctx.lineCap='round';ctx.stroke();
+   ctx.beginPath();
+   ctx.moveTo(foldA.x,foldA.y);ctx.lineTo(foldB.x,foldB.y);
+   ctx.strokeStyle=tint(t.color,-.28);ctx.lineWidth=2.6;ctx.lineCap='round';ctx.stroke();
+   ctx.restore();
   }
   if(!anim||anim.id!==t.id)hits.push({t,ps,faceDepth:av.y});
  }
