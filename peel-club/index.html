@@ -175,7 +175,7 @@ canvas:active{cursor:grabbing}
    for(const t of faceStrips){let p=0;if(anim&&anim.id===t.id){const elapsed=(now-anim.t0)/anim.duration;p=Math.min(1,Math.max(0,elapsed));p=1-Math.pow(1-p,1.30)}drawTape(t,f,p)}
   }
   // curl dust floating over cube
-  for(let i=sparkle.length-1;i>=0;i--){const p=sparkle[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.04;p.life-=.018;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();if(p.life<=0)sparkle.splice(i,1)}ctx.globalAlpha=1;
+  for(let i=sparkle.length-1;i>=0;i--){const p=sparkle[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.04;p.life-=.018;if(p.life<=0){sparkle.splice(i,1);continue}ctx.globalAlpha=p.life;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,Math.max(0,p.r*p.life),0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
   if(anim&&now-anim.t0>anim.duration)finishPeel();
   requestAnimationFrame(render)
  }
