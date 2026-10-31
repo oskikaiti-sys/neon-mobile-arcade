@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#10121c">
-<title>月下疑云 · Moonlit Village</title>
+<title>Moonlit Village</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
 *{box-sizing:border-box}
@@ -1199,7 +1199,7 @@ function displayName(name){
 }
 function applyStaticLanguage(){
  document.documentElement.lang={en:"en",zh:"zh-CN",ja:"ja"}[selectedLanguage];
- document.title=tr("title")+" · Moonlit Village";
+ document.title=selectedLanguage==="en"?"Moonlit Village":tr("title")+" · Moonlit Village";
  document.querySelectorAll("[data-i18n]").forEach(function(el){el.textContent=tr(el.getAttribute("data-i18n"))});
  $("myName").placeholder=tr("defaultName");
  if(!$("myName").dataset.userEdited)$("myName").value=tr("defaultName");
@@ -1280,11 +1280,11 @@ function updateLanguageOverlays(){
  $("sceneTitle").textContent=tr(night?"sceneNight":"sceneDay");
  $("sceneSubtitle").textContent=tr(night?"sceneNightSub":"sceneDaySub");
  $("roleOverlay").setAttribute("aria-label",tr("drawAria"));
- $("myRole").setAttribute("aria-label",tr("rolePending"));
+ $("myRole").setAttribute("aria-label",view&&view.myRole?roleName(view.myRole):tr("rolePending"));
 }
 
 function report(t){$("homeNotice").textContent=localizeNotice(t);$("notice").textContent=localizeNotice(t)}
-function getName(){return ($("myName").value.trim().slice(0,15)||"旅人")}
+function getName(){return ($("myName").value.trim().slice(0,15)||tr("defaultName"))}
 function enter(){ document.body.classList.add("game-active");$("homeScreen").style.display="none";$("gameScreen").style.display="block"; render() }
 function person(id){return st.players.find(function(p){return p.id===id})}
 function live(){return st.players.filter(function(p){return p.alive})}
