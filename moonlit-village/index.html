@@ -2087,7 +2087,7 @@ function cancelPhaseTimer(){
 function armPhaseTimer(phase){
  if(!st||!isHost)return;
  cancelPhaseTimer();
- /* This common timer applies to discussion and voting only. */
+ /* One host-authoritative timer for speech, confrontation, and voting. */
  st.phaseStartAt=Date.now();
  if(st.players.filter(function(p){return !p.bot}).length<=1){st.deadlineAt=0;return}
  var limit=phase==="debate"?DEBATE_LIMIT_MS:CHOICE_LIMIT_MS;
@@ -2105,7 +2105,7 @@ function armPhaseTimer(phase){
      .forEach(function(p){recordChallenge(p.id,null,"pass")});
    }else if(st.debateStage==="reply"){
     st.debateTargets.filter(function(id){return st.debateReplies[id]===undefined})
-     .forEach(function(id){recordDebateReply(id,"silence")});
+     .forEach(function(id){recordReply(id,"silence")});
    }
    stepBots();
   }else if(phase==="vote"){
@@ -2269,9 +2269,9 @@ function snapshot(id){var me=person(id);
   phaseElapsed:st.phaseStartAt?Math.max(0,Date.now()-st.phaseStartAt):0,
   nightStage:st.phase==="night"?st.nightStage:null,
   nightFixed:!!st.multiplayerNight,
-  publicHistory:(st.publicHistory||[]).slice(-30),
-  voteHistory:(st.voteHistory||[]).slice(-3),
-  publicEvents:(st.publicEvents||[]).slice(-70),
+  publicHistory:(st.publicHistory||[]).slice(-100),
+  voteHistory:(st.voteHistory||[]).slice(-12),
+  publicEvents:(st.publicEvents||[]).slice(-100),
   debateStage:st.phase==="debate"?st.debateStage:null,
   debateTargets:st.phase==="debate"&&st.debateStage==="reply"?st.debateTargets.slice():[],
   debateChallenges:(st.debateChallenges||[]).slice(-12),
@@ -2419,7 +2419,11 @@ function recordReply(id,kind){
  var p=person(id);if(!p||!p.alive)return;
  var challenged=st.debateChallenges.filter(function(h){return h.targetId===id});
  var contradicted=challenged.some(function(h){return debateContradiction(id,h.kind)});
- var h={day:st.day,id:id,kind:kind,contradicted:contradicted};
+ /* Base the answer on a real, public question. A reply is not evidence that
+    an unverified claim is true; it merely describes the original record. */
+ var first=challenged.find(function(c){return c.kind==="report"||c.kind==="claim"||c.kind==="vote"})||challenged[0];
+ var h={day:st.day,id:id,kind:kind,contradicted:contradicted,
+  sourceKind:first?first.kind:"reason",evidence:first?first.evidence:null};
  st.debateReplies[id]=h;st.debateOutcomes.push(h);
  publicEvent("reply",id,null,{kind:kind,contradicted:contradicted});
  if(kind==="silence")return;
@@ -2473,6 +2477,10 @@ var DEBATE_DIALOGUE={
   vote:"第{day}天{name}投了{subject}。请解释这一票。"
  },reply:{
   explain:"我的依据是公开发言和投票记录。这不等于我有系统确认的查验。",
+  explain_reason:"我的判断基于目前公开的发言和票型；我没有新的可核实证据，欢迎核对前后记录。",
+  explain_claim:"第{day}天我公开自称{role}，这是我的身份宣称而非系统认证；请核对我之后是否保持一致。",
+  explain_report:"第{day}天我对{subject}报了{role}，这条记录可以查到；但在公开结果揭晓前，这仍是我的宣称。",
+  explain_vote:"第{day}天我确实投给了{subject}。投票是我的判断，不是查验结果；应结合当时发言评价。",
   contradiction:"我的说法与已经确认的公开记录出现矛盾，目前无法给出可验证的解释。",
   counter:"质疑者也应该提供具体证据，单纯被质疑并不能证明我是狼人。",
   admit:"我承认之前的判断可能错了，但一次判断失误并不足以证明身份。",
@@ -2485,6 +2493,10 @@ var DEBATE_DIALOGUE={
   vote:"On day {day}, {name} voted for {subject}. Why?"
  },reply:{
   explain:"My reasoning comes from public statements and ballots. That is not a verified inspection.",
+  explain_reason:"My position comes from public claims and votes; I have no new independently verified evidence. Check the record.",
+  explain_claim:"On day {day}, I claimed {role}. That was my statement, not official proof. Judge its consistency over time.",
+  explain_report:"On day {day}, I reported {role} for {subject}. That report is on the record, but remains my claim until corroborated.",
+  explain_vote:"On day {day}, I voted for {subject}. It was a judgment, not an inspection. Compare it with my statements then.",
   contradiction:"My story conflicts with verified public records. I cannot support the inconsistency yet.",
   counter:"My accuser must show concrete evidence. Being challenged is not proof of a hidden role.",
   admit:"I may have made an incorrect judgment, but one mistake alone does not establish my role.",
@@ -2497,6 +2509,10 @@ var DEBATE_DIALOGUE={
   vote:"{day}日目に{name}は{subject}へ投票しました。理由は何ですか？"
  },reply:{
   explain:"公開発言と投票記録を参考にしました。占い結果として確定したものではありません。",
+  explain_reason:"私の判断は公開発言と投票によります。新たに確認できた事実はありません。記録を確認してください。",
+  explain_claim:"{day}日目に{role}とCOしました。これは自己申告であり確定証明ではありません。その後の一貫性を見てください。",
+  explain_report:"{day}日目に{subject}へ{role}を出した記録があります。公開結果で確認されるまでは本人の主張です。",
+  explain_vote:"{day}日目に{subject}へ投票しました。占い結果ではなく判断でした。当時の発言と照合してください。",
   contradiction:"自分の発言が公開された確定記録と矛盾しています。まだ説明できません。",
   counter:"疑う側も具体的な証拠を示すべきです。疑われただけで役職は確定しません。",
   admit:"以前の判断が間違っていた可能性はありますが、それだけで人狼とは限りません。",
@@ -2515,6 +2531,10 @@ function debateLine(lang,part,item){
  };
  var vars={name:findName(item.targetId),subject:findName(info.subject),day:info.day||item.day,role:(roleNames[lang]||roleNames.zh)[role]||role};
  var key=part==="reply"&&item.kind==="explain"&&item.contradicted?"contradiction":item.kind;
+ if(part==="reply"&&key==="explain"){
+  var detail=dict.reply["explain_"+(item.sourceKind||"reason")]||dict.reply.explain;
+  return detail.replace(/\{(name|subject|day|role)\}/g,function(_,name){return vars[name]||""});
+ }
  return (dict[part][key]||"").replace(/\{(name|subject|day|role)\}/g,function(_,name){return vars[name]||""});
 }
 function stepBots(){
