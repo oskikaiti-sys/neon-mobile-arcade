@@ -2874,6 +2874,13 @@ function aiSuspicion(observer,target){
    var exposed=aiVisibleAlignment(v.targetId);
    if(exposed==="good")score+=.65;
    else if(exposed==="wolf")score-=1.25;
+   var cast=round.votes.filter(function(ballot){
+    return ballot.targetId&&ballot.targetId!=="__abstain__";
+   });
+   if(cast.length===1&&cast[0].voterId===target.id&&
+      (st.revealed||[]).some(function(r){return r.id===v.targetId&&
+        r.source==="vote"&&r.day===round.day&&r.alignment==="good"}))
+    score+=.65;
   });
  });
  /* Challenge and reply outcomes use public contradictions, not speech fluency. */
@@ -2983,6 +2990,16 @@ function aiWorldAnalysis(observer){
      score+=.18;
     if(assigned[v.voterId]!=="wolf"&&assigned[v.targetId]==="wolf")
      score+=.12;
+    /* A lone vote that actually exiled a confirmed good resident is
+       more suspicious, not conclusive: good players can misvote too. */
+    var cast=round.votes.filter(function(ballot){
+     return ballot.targetId&&ballot.targetId!=="__abstain__";
+    });
+    if(cast.length===1&&cast[0].voterId===v.voterId&&
+       publicReveals.some(function(r){return r.id===v.targetId&&
+        r.source==="vote"&&r.day===round.day&&r.alignment==="good"})){
+     score+=assigned[v.voterId]==="wolf"?.8:-.12;
+    }
     /* Reject self-contradictory vote commitments cautiously: a good
        player who votes for a personally announced clear needs explaining. */
     if(assigned[v.voterId]!=="wolf"&&
@@ -3125,27 +3142,53 @@ function protectedSoloFirstNightTarget(wolf,targetId){
  return humans.length===1&&humans[0].alive&&humans[0].role!=="guard"&&
   humans[0].id===targetId;
 }
+/* The wolf knows its own attack, public ballots and role claims, but not
+   the Guardian's action or the true role of a claimed Seer. Attacking an
+   obvious claimed Seer repeatedly has a high protection and exposure cost.
+   Sample from strategically plausible targets rather than always choosing
+   the highest role-claim score. */
 function aiNightTargetWolf(p){
  var brain=aiState(p),candidates=live().filter(function(q){
   return q.id!==p.id&&!protectedSoloFirstNightTarget(p,q.id);
  });
  if(!candidates.length)return null;
+ var history=st.publicHistory||[],lastRound=(st.voteHistory||[]).slice(-1)[0];
+ var ownLastVote=lastRound&&lastRound.votes.find(function(v){return v.voterId===p.id});
+ var setup=aiPublicRoleSetup(),guardianPossible=!!(setup&&setup.guard>0);
  var assessed=candidates.map(function(q){
-  var history=st.publicHistory||[];
-  var claimed=aiClaimFor(q.id),cred=aiCredibility(p,q.id);
-  var score=.4+aiNoise(p.id+":"+st.day,q.id)*.55;
-  if(claimed==="seer")score+=2.1*cred;
-  if(history.some(function(h){return h.id===q.id&&h.kind==="black"&&h.targetId===p.id}))score+=3.3;
-  if(history.some(function(h){return h.id===q.id&&h.targetId===p.id&&["suspect","suspectVote"].includes(h.kind)}))score+=.9;
-  if(aiClaimFor(q.id)==="guard")score+=.5;
-  if(brain.lastNightTarget===q.id)score-=.3;
+  var claim=aiClaimFor(q.id),cred=aiCredibility(p,q.id);
+  var exposed=history.some(function(h){return h.id===q.id&&h.kind==="black"&&h.targetId===p.id});
+  var hostile=history.some(function(h){return h.id===q.id&&h.targetId===p.id&&
+   ["suspect","suspectVote","challengeClaim"].includes(h.kind)});
+  var score=.55+aiNoise(p.id+":"+st.day,q.id)*.7;
+  if(claim==="seer"){
+   score+=.95*cred; // valuable target, but not a verified Seer
+   if(guardianPossible)score-=.7; // guard may anticipate an obvious attack
+  }
+  if(exposed)score+=.65;
+  else if(hostile)score+=.27;
+  if(claim==="guard")score+=.35; // a claim alone is not proof
+  /* The public can later connect a lone ballot to the night victim. */
+  if(ownLastVote&&ownLastVote.targetId===q.id)score-=.75;
+  /* If yesterday's attempted kill failed, it may have been guarded. */
+  if(brain.lastNightTarget===q.id&&brain.lastNightDay===st.day-1&&q.alive)
+   score-=2.05;
+  else if(brain.lastNightTarget===q.id)score-=.6;
   return {p:q,score:score};
- }).sort(function(a,b){return b.score-a.score});
- /* A publicly announced Seer may be guarded; occasionally aim at a second
-    threat rather than repeatedly taking the obvious protected target. */
- var rank=assessed[0];
- if(assessed.length>1&&aiClaimFor(rank.p.id)==="seer"&&Math.random()<.3)rank=assessed[1];
- brain.lastNightTarget=rank.p.id;return rank.p.id;
+ });
+ var highest=Math.max.apply(null,assessed.map(function(x){return x.score}));
+ var total=0;
+ assessed.forEach(function(x){
+  x.weight=Math.exp((x.score-highest)/.9);total+=x.weight;
+ });
+ var roll=Math.random()*total,pick=assessed[assessed.length-1];
+ for(var candidate of assessed){
+  roll-=candidate.weight;
+  if(roll<=0){pick=candidate;break}
+ }
+ brain.lastNightTarget=pick.p.id;
+ brain.lastNightDay=st.day;
+ return pick.p.id;
 }
 function aiNightTargetSeer(p){
  var seen=(st.known[p.id]||[]).map(function(x){return x.id});
@@ -3777,11 +3820,69 @@ function aiVotingEvidence(observer,target){
  if(reports.some(function(h){return aiCredibility(observer,h.id)>=.45}))return 2.5;
  return 0;
 }
+/* Votes are simultaneous decisions. Do not consult st.votes here:
+   those are unannounced current ballots, not the wolf's public information.
+   A unique single ballot now exiles, making an unsupported lone vote a
+   serious exposure risk for the wolf. It may still gamble for a quick win. */
+function aiWolfVoteDecision(p){
+ var candidates=targetList(p.id);
+ if(!candidates.length)return "__abstain__";
+ var history=st.publicHistory||[],round=st.day,
+  today=history.filter(function(h){return h.day===round&&!h.retracted});
+ var previous=(st.voteHistory||[]).slice(-2),remaining=live().length;
+ var beingBlack=today.some(function(h){return h.kind==="black"&&h.targetId===p.id});
+ var beingAccused=today.some(function(h){return h.targetId===p.id&&
+  ["suspect","suspectVote","black"].includes(h.kind)});
+ var options=candidates.map(function(q){
+  var endorsements=new Set(today.filter(function(h){
+   return h.id!==p.id&&h.id!==q.id&&h.targetId===q.id&&
+    ["suspect","suspectVote","black","challengeClaim"].includes(h.kind);
+  }).map(function(h){return h.id}));
+  var protectedByPublic=new Set(today.filter(function(h){
+   return h.id!==p.id&&h.targetId===q.id&&
+    ["gold","trust","trustVote","followSeer"].includes(h.kind);
+  }).map(function(h){return h.id}));
+  var pastSupport=0;
+  previous.forEach(function(r){
+   r.votes.forEach(function(v){
+    if(v.voterId!==p.id&&v.voterId!==q.id&&v.targetId===q.id)pastSupport++;
+   });
+  });
+  var plan=aiState(p).plan;
+  var claim=aiClaimFor(q.id);
+  var score=.25+endorsements.size*1.1+Math.min(1,pastSupport)*.35
+   -protectedByPublic.size*.48+aiNoise(p.id+":"+round,q.id)*.35;
+  if(beingBlack&&today.some(function(h){return h.id===q.id&&h.kind==="black"&&h.targetId===p.id}))
+   score+=1.1; // defensive counter-push is risky but sometimes worthwhile
+  if(claim==="seer")score+=.24; // potential threat, not automatic proof
+  if(plan&&plan.targetId===q.id&&["suspect","black"].includes(plan.kind))score+=.38;
+  if(aiReportsBy(p.id).some(function(h){return h.kind==="gold"&&h.targetId===q.id}))score-=4;
+  return {q:q,score:score,backing:endorsements.size+Math.min(1,pastSupport),
+   claim:claim,publicSupport:protectedByPublic.size};
+ }).sort(function(a,b){return b.score-a.score});
+ var best=options[0];
+ if(!best)return "__abstain__";
+ var risk=remaining<=3;
+ var chance=(round===1?.11:.19);
+ if(best.backing>0)chance+=Math.min(.41,best.backing*.28);
+ if(best.backing===0&&best.claim==="seer"&&!beingBlack)chance-=.055;
+ if(best.publicSupport>0&&best.backing===0)chance-=.055;
+ if(beingAccused)chance+=.21;
+ if(beingBlack)chance+=.24;
+ if(risk)chance+=.40; // at parity, a successful lone vote can win
+ if(remaining===4)chance+=.11;
+ var temperament=aiState(p).temperament;
+ if(temperament==="opportunist")chance+=.08;
+ if(temperament==="cautious")chance-=.05;
+ chance=Math.max(.04,Math.min(.94,chance));
+ return Math.random()<chance?best.q.id:"__abstain__";
+}
 function botVote(p){
  /* Logical contradiction comes before weighted suspicions, personality
     and own previous words. Don't randomize away a decisive endgame. */
  var refuted=aiEndgameRefutedClaimant(p);
  if(refuted)return refuted.id;
+ if(p.role==="wolf")return aiWolfVoteDecision(p);
  if(st.day>=2&&p.role!=="wolf"){
   var model=aiWorldAnalysis(p);
   if(model&&model.worlds.length){
@@ -3842,7 +3943,7 @@ function finishVote(){
  delete counts["__abstain__"];
  var high=Math.max.apply(null,Object.values(counts));
  var leaders=Object.keys(counts).filter(function(id){return counts[id]===high});
- if(!leaders.length||high<2){log("票数不足，今天无人被放逐。","news")}
+ if(!leaders.length){log("所有人弃权，今天无人被放逐。","news")}
  else if(leaders.length!==1){log("投票平局，今天无人被放逐。","news")}
  else {var gone=person(leaders[0]);if(gone){gone.alive=false;st.revealed.push({id:gone.id,day:st.day,source:"vote",alignment:gone.role==="wolf"?"wolf":"good"});publicEvent("exile",null,gone.id,{alignment:gone.role==="wolf"?"wolf":"good"});log("投票结果："+gone.name+" 被放逐，身份是「"+(gone.role==="wolf"?"狼人":"好人")+"」。","news")}}
  if(winCheck())return;st.day++;beginNight()
