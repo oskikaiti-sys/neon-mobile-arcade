@@ -3919,12 +3919,17 @@ function validatedSpeechDetail(p,kind,targetId,detail){
  if(["gold","black"].includes(kind)){
   var inspectedTarget=person(targetId);
   if(!inspectedTarget||targetId===p.id)return null;
+  var hasNight=Object.prototype.hasOwnProperty.call(detail,"reportNight");
   var night=Number(detail.reportNight);
-  if(!Number.isInteger(night)||night<1||night>st.day){
+  if(!hasNight){
    if(!p.bot)return null;
-   var check=(st.known[p.id]||[]).find(function(k){return k.id===targetId&&!!k.evil===(kind==="black")});
-   night=check?check.night:st.day;
+   var check=(st.known[p.id]||[]).find(function(k){
+    return k.id===targetId&&!!k.evil===(kind==="black");
+   });
+   var fake=aiState(p).fakeReports&&aiState(p).fakeReports[targetId];
+   night=check?check.night:fake?fake.night:st.day;
   }
+  if(!Number.isInteger(night)||night<1||night>st.day)return null;
   if(p.role==="seer"&&!(st.known[p.id]||[]).some(function(k){
    return k.id===targetId&&k.night===night&&!!k.evil===(kind==="black");
   }))return null;
