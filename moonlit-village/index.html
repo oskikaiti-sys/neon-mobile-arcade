@@ -2718,8 +2718,20 @@ function aiPublicSeerPressure(p){
    person(h.id)&&person(h.id).alive;
  })||null;
 }
+/* Solo first-night grace: when the sole human is not the Guardian, a bot
+   werewolf must choose an AI resident instead. Keep this host-side, not
+   in public snapshots, so nobody learns hidden roles from an indicator.
+   Multiplayer (including a player disconnecting later) is unaffected. */
+function protectedSoloFirstNightTarget(wolf,targetId){
+ if(!st||st.multiplayerNight||st.day!==1||!wolf||!wolf.bot)return false;
+ var humans=st.players.filter(function(q){return !q.bot});
+ return humans.length===1&&humans[0].alive&&humans[0].role!=="guard"&&
+  humans[0].id===targetId;
+}
 function aiNightTargetWolf(p){
- var brain=aiState(p),candidates=live().filter(function(q){return q.id!==p.id});
+ var brain=aiState(p),candidates=live().filter(function(q){
+  return q.id!==p.id&&!protectedSoloFirstNightTarget(p,q.id);
+ });
  if(!candidates.length)return null;
  var assessed=candidates.map(function(q){
   var history=st.publicHistory||[];
@@ -2778,6 +2790,9 @@ function botNight(p){
 function finishNight(){
  var wolf=live().find(function(p){return p.role==="wolf"}),seer=live().find(function(p){return p.role==="seer"}),guard=live().find(function(p){return p.role==="guard"});
  var target=wolf?st.night[wolf.id]:null,save=guard?st.night[guard.id]:null;
+ /* Defensive host-side check: stale or anomalous target data must not
+    eliminate the protected solo player, even if target selection changes. */
+ if(protectedSoloFirstNightTarget(wolf,target))target=null;
  /* Seer results were already recorded at the moment of inspection. */
  if(target&&target!==save){person(target).alive=false;st.revealed.push({id:target,day:st.day,source:"night",alignment:"good"});publicEvent("death",null,target,{alignment:"good"});log("天亮了，昨夜 "+person(target).name+" 遇袭出局。","news")}
  else log("天亮了，昨夜是平安夜。","news");
