@@ -361,7 +361,7 @@ body.game-active #gameScreen.action-waiting #notice{margin:3px 0 0}
 body.game-active #gameScreen.night-tint>.panel:nth-child(1){background:linear-gradient(110deg,#2a2548,#161e36)}
 body.game-active #gameScreen.night-tint>.panel:nth-child(5){border-color:#4f506f}
 body.game-active #gameScreen.day-tint>.panel:nth-child(1){background:linear-gradient(110deg,#3c3439,#263348)}
-.time-scene{position:fixed;inset:0;z-index:85;pointer-events:none;display:grid;place-items:center;background:#090f1b;opacity:0}
+.time-scene{position:fixed;inset:0;z-index:85;pointer-events:none;display:grid;place-items:center;background:#090f1b;opacity:1}
 .time-scene.nightfall{animation:night-cut 1.45s ease-in-out both}
 .time-scene.sunrise{animation:dawn-cut 1.55s ease-in-out both}
 .time-scene-sky{position:absolute;inset:0;overflow:hidden;background:linear-gradient(to bottom,#1b2841,#33445d 55%,#131c2b);animation:sky-dark 1.45s ease-in-out both}
@@ -378,8 +378,8 @@ body.game-active #gameScreen.day-tint>.panel:nth-child(1){background:linear-grad
 .time-scene-horizon.layer-front{height:23%;background:#0c1723;clip-path:polygon(0 40%,13% 54%,25% 32%,39% 65%,52% 34%,62% 41%,76% 14%,91% 37%,100% 26%,100% 100%,0 100%)}
 .time-scene-copy{position:absolute;top:62%;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:9px;color:#fff6e6;text-shadow:0 2px 16px #0a0e1cd6;animation:scene-text 1.45s ease-in-out both}
 .time-scene-copy>span{font-size:30px}.time-scene-copy strong{font:600 31px Georgia,"Songti SC",serif;letter-spacing:5px}.time-scene-copy small{font-size:12px;letter-spacing:2px;color:#ede1d6}
-@keyframes night-cut{0%{opacity:0}20%{opacity:1}78%{opacity:1}100%{opacity:0}}
-@keyframes dawn-cut{0%{opacity:0}17%{opacity:1}82%{opacity:1}100%{opacity:0}}
+@keyframes night-cut{0%,78%{opacity:1}100%{opacity:0}}
+@keyframes dawn-cut{0%,82%{opacity:1}100%{opacity:0}}
 @keyframes moon-rise{0%{opacity:0;transform:translate(-50%,20vh)}45%{opacity:1}100%{opacity:1;transform:translate(-50%,-18vh)}}
 @keyframes sun-rise{0%{opacity:0;transform:translate(-50%,30vh)}40%{opacity:1}100%{opacity:1;transform:translate(-50%,-18vh)}}
 @keyframes sky-dark{0%{filter:brightness(1.6) hue-rotate(-10deg)}100%{filter:brightness(.67)}}
@@ -1044,11 +1044,12 @@ body.game-active #gameScreen>.game-head .topbar #roomInfo{font-size:10px}
 .speaker-overlay{
  position:absolute;inset:33px 1px 0;z-index:10;display:flex;flex-direction:column;
  align-items:center;justify-content:center;gap:8px;padding:8px 4px;
- background:linear-gradient(180deg,rgba(10,15,31,.85),rgba(20,28,58,.91));
+ background:linear-gradient(180deg,#0a0f1f,#141b3a);
  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
- animation:speaker-enter .35s cubic-bezier(.22,1,.36,1);
 }
 .speaker-overlay[hidden]{display:none!important}
+.speaker-overlay .speaker-card{animation:speaker-enter .35s cubic-bezier(.22,1,.36,1) both}
+.speaker-overlay .speaker-skip{animation:speaker-enter .4s cubic-bezier(.22,1,.36,1) both}
 .speaker-card{
  width:100%;min-height:142px;max-height:80%;display:flex;flex-direction:column;
  align-items:center;justify-content:center;gap:9px;
@@ -1477,8 +1478,14 @@ function playTimeScene(type){
  var el=$("timeScene");
  if(!el)return;
  if(sceneTimer){clearTimeout(sceneTimer);sceneTimer=null}
- el.hidden=false;
+ /* Reduced motion skips the cinematic, rather than exposing the next scene
+    through an invisible overlay. Only presentation state is affected. */
+ if(rpgReducedMotion()){
+  el.hidden=true;el.className="time-scene";stageAdvanceQueue();return;
+ }
+ /* Set the opaque transition state before revealing the element. */
  el.className="time-scene "+(type==="night"?"nightfall":"sunrise");
+ el.hidden=false;
  $("sceneIcon").textContent=type==="night"?"☾":"☀";
  $("sceneTitle").textContent=tr(type==="night"?"sceneNight":"sceneDay");
  $("sceneSubtitle").textContent=tr(type==="night"?"sceneNightSub":"sceneDaySub");
