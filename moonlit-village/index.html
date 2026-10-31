@@ -2097,6 +2097,22 @@ var mark=0, shownIdentityGame=0, previousScenePhase=null, lastSceneDay=0, pendin
 var hostPhaseTimer=null,phaseNonce=0;
 var CHOICE_LIMIT_MS=120000,DEBATE_LIMIT_MS=60000,MULTIPLAYER_NIGHT_TURN_MS=10000,SOLO_NIGHT_PROMPT_MS=2000;
 var NIGHT_ROLES=["wolf","seer","guard"];
+/* Public role composition, not inferred from any opponent's private role.
+   This game still deals six fixed seats; future modes must separately
+   implement their own dealing, turn order and win rules. */
+var BOARD_ROLE_SETUP={wolf:1,seer:1,guard:1,villager:3};
+function aiPublicRoleSetup(){
+ var configured=st&&st.publicRoleSetup||BOARD_ROLE_SETUP;
+ var result={wolf:0,seer:0,guard:0,villager:0},sum=0;
+ for(var key of Object.keys(result)){
+  var n=configured[key];
+  if(!Number.isInteger(n)||n<0)return null;
+  result[key]=n;sum+=n;
+ }
+ if(!st||sum!==st.players.length||result.wolf<1)return null;
+ result.seats=sum;
+ return result;
+}
 function cancelPhaseTimer(){
  phaseNonce++;
  if(hostPhaseTimer!==null){clearTimeout(hostPhaseTimer);hostPhaseTimer=null}
@@ -2277,7 +2293,7 @@ function publicEvent(kind,actor,target,detail){
  st.publicEvents.push({seq:st.publicEvents.length+1,day:st.day,kind:kind,
   actor:actor||null,target:target||null,detail:detail||null});
 }
-function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},nightFeedback:{},publicHistory:[],voteHistory:[],publicEvents:[],debateStage:null,debateChoices:{},debateReplies:{},debateTargets:[],debateChallenges:[],debateOutcomes:[],revealed:[],aiMemory:{},logs:[],winner:"",dealReady:{},phaseStartAt:0,deadlineAt:0,nightStage:0,multiplayerNight:false};myId="h";log("村庄正在等待玩家加入。")}
+function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},nightFeedback:{},publicHistory:[],voteHistory:[],publicEvents:[],debateStage:null,debateChoices:{},debateReplies:{},debateTargets:[],debateChallenges:[],debateOutcomes:[],revealed:[],aiMemory:{},logs:[],winner:"",dealReady:{},phaseStartAt:0,deadlineAt:0,nightStage:0,multiplayerNight:false,publicRoleSetup:Object.assign({},BOARD_ROLE_SETUP)};myId="h";log("村庄正在等待玩家加入。")}
 function snapshot(id){var me=person(id);
  var human=st.players.filter(function(p){return !p.bot});
  return {phase:st.phase,day:st.day,gameNo:st.gameNo,
@@ -2288,6 +2304,7 @@ function snapshot(id){var me=person(id);
   phaseElapsed:st.phaseStartAt?Math.max(0,Date.now()-st.phaseStartAt):0,
   nightStage:st.phase==="night"?st.nightStage:null,
   nightFixed:!!st.multiplayerNight,
+  publicRoleSetup:Object.assign({},st.publicRoleSetup||BOARD_ROLE_SETUP),
   publicHistory:(st.publicHistory||[]).slice(-100),
   voteHistory:(st.voteHistory||[]).slice(-12),
   publicEvents:(st.publicEvents||[]).slice(-100),
@@ -2376,7 +2393,12 @@ function startGame(){
  st.multiplayerNight=st.players.filter(function(p){return !p.bot}).length>1;
  var used=st.players.length;for(var i=used;i<6;i++)st.players.push({id:"bot"+i,name:["雾鸦","薇拉","灰石","伊莎","松风","星砂"][i],bot:true,alive:true,role:null,avatar:null,portrait:randomPortrait(st.players)});
  st.players.forEach(function(p,i){p.seat=i+1;p.alive=true});
- var roles=shuffle(["wolf","seer","guard","villager","villager","villager"]);st.players.forEach(function(p,i){p.role=roles[i]});
+ var setup=st.publicRoleSetup||BOARD_ROLE_SETUP;
+ var roles=shuffle(Object.keys(BOARD_ROLE_SETUP).flatMap(function(role){
+  return Array(setup[role]).fill(role);
+ }));
+ if(roles.length!==st.players.length)throw Error("Board composition does not match seats");
+ st.players.forEach(function(p,i){p.role=roles[i]});
  st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.nightFeedback={};st.publicHistory=[];st.voteHistory=[];st.publicEvents=[];st.debateStage=null;st.debateChoices={};st.debateReplies={};st.debateTargets=[];st.debateChallenges=[];st.debateOutcomes=[];st.revealed=[];st.aiMemory={};st.logs=[];st.phase="deal";st.dealReady={};log("请所有真人玩家翻开并确认身份牌。","news");broadcast()
 }
 function winCheck(){
@@ -2682,8 +2704,10 @@ function aiNoise(a,b){
    A refuted Seer story is NOT proof the storyteller is the wolf: even good
    residents can bluff. */
 function aiSeerSlotContradiction(observer,claimer){
- if(!observer||observer.role==="wolf"||!claimer||claimer.id===observer.id||
-    !claimer.alive||aiClaimFor(claimer.id)!=="seer")return null;
+ var setup=aiPublicRoleSetup();
+ if(!setup||setup.wolf!==1||setup.seer!==1||!observer||observer.role==="wolf"||
+    !claimer||claimer.id===observer.id||!claimer.alive||
+    aiClaimFor(claimer.id)!=="seer")return null;
  var alive=live();
  if(alive.length<3)return null;
  var clears=aiReportsBy(claimer.id).filter(function(h){
@@ -2767,7 +2791,7 @@ function aiSuspicion(observer,target){
  var distinct={};claims.forEach(function(h){distinct[roleClaim(h.kind)]=true});
  if(Object.keys(distinct).length>1)score+=3.8;
  if(claim==="seer"&&aiPublicRoleClaimers("seer").length>1)score+=.8;
- if(claim==="seer"&&observer.role==="seer")score+=3.6; // only one true Seer
+ if(claim==="seer"&&observer.role==="seer"&&aiPublicRoleSetup()&&aiPublicRoleSetup().seer===1)score+=3.6; // unique Seer
  var reports=aiReportsBy(target.id),resultSeen={};
  reports.forEach(function(r){
   if(resultSeen[r.targetId]&&resultSeen[r.targetId]!==r.kind)score+=3.2;
@@ -2823,20 +2847,22 @@ function aiSuspicion(observer,target){
    normalized over living, unconfirmed suspects rather than independent
    unbounded scores (MIT deepwolf-inspired inference). */
 
-/* 6-seat, 1-wolf possible-world engine. No LLM and no hidden-role peeking.
-   Always enumerate from the original roster; confirmed deceased good roles
-   still occupy their original roles. All private constraints are taken only
-   from this observer's own role and legitimate Seer inspection results.
-   Public CLAIMS are defeasible evidence, not true roles. A false Seer report
-   by a good player is strategically very costly, but not logically illegal.
-   Day 1 deliberately retains the lightweight heuristic model. */
+/* Role-count-aware possible-world inference, using only public role
+   counts and outcomes, self role, and the observer's legal Seer checks.
+   Exact enumeration is capped; larger boards fall back to ordinary evidence
+   scores rather than using biased partial worlds or freezing the UI. */
 function aiWorldAnalysis(observer){
  if(!observer||!st||st.day<2)return null;
  var roster=st.players,alive=live(),history=st.publicHistory||[];
  var known=observer.role==="seer"?(st.known[observer.id]||[]):[];
  var out={worlds:[],wolf:{},seer:{},guard:{},excluded:[],uncertainty:1,topId:null,certainty:false};
- if(roster.length!==6||!roster.some(function(p){return p.id===observer.id}))return null;
- var wolfAllowed=alive.filter(function(p){return p.id!==observer.id||observer.role==="wolf"});
+ var setup=aiPublicRoleSetup();
+ if(!setup||roster.length>12||!roster.some(function(p){return p.id===observer.id}))return null;
+ var cacheKey=st.day+"|"+history.length+"|"+(st.voteHistory||[]).length+"|"+
+  (st.revealed||[]).length+"|"+known.length+"|"+
+  alive.map(function(p){return p.id}).join(",");
+ var memory=aiState(observer);
+ if(memory.worldCache&&memory.worldCache.key===cacheKey)return memory.worldCache.value;
  /* Villagers and Guardians know they are not wolves. The true wolf has no
     uncertainty about its own identity but still must not learn anyone's
     other actual role from the host. */
@@ -2900,23 +2926,38 @@ function aiWorldAnalysis(observer){
   });
   return Math.max(-45,Math.min(20,score));
  }
- var possible=[];
- wolfAllowed.forEach(function(w){
-  if(!roleCompatible(w.id,"wolf"))return;
-  roster.forEach(function(seer){
-   if(seer.id===w.id||!roleCompatible(seer.id,"seer"))return;
-   roster.forEach(function(guard){
-    if(guard.id===w.id||guard.id===seer.id||
-       !roleCompatible(guard.id,"guard"))return;
-    var assigned={};roster.forEach(function(p){assigned[p.id]="villager"});
-    assigned[w.id]="wolf";assigned[seer.id]="seer";assigned[guard.id]="guard";
-    if(!roster.every(function(p){return roleCompatible(p.id,assigned[p.id])}))return;
-    possible.push({roles:assigned,wolfId:w.id,seerId:seer.id,
-      guardId:guard.id,score:observedWeight(assigned)});
-   });
-  });
+ var possible=[],remaining={wolf:setup.wolf,seer:setup.seer,
+  guard:setup.guard,villager:setup.villager};
+ var nodes=0,overflow=false,MAX_NODES=120000,MAX_WORLDS=12000;
+ var ordered=roster.slice().sort(function(a,b){
+  function priority(p){
+   return (p.id===observer.id?4:0)+(known.some(function(k){return k.id===p.id})?2:0)+
+    ((st.revealed||[]).some(function(r){return r.id===p.id})?1:0);
+  }
+  return priority(b)-priority(a);
  });
- if(!possible.length)return out; // Inconsistent record, fail closed, no guess.
+ var roleKeys=["wolf","seer","guard","villager"];
+ function enumerate(index,assigned){
+  if(overflow)return;
+  if(++nodes>MAX_NODES){overflow=true;return}
+  if(index===ordered.length){
+   possible.push({roles:Object.assign({},assigned),score:observedWeight(assigned)});
+   if(possible.length>MAX_WORLDS)overflow=true;
+   return;
+  }
+  var actor=ordered[index];
+  for(var r of roleKeys){
+   if(remaining[r]===0||!roleCompatible(actor.id,r))continue;
+   remaining[r]--;assigned[actor.id]=r;enumerate(index+1,assigned);
+   remaining[r]++;delete assigned[actor.id];
+   if(overflow)return;
+  }
+ }
+ enumerate(0,{});
+ if(overflow||!possible.length){
+  memory.worldCache={key:cacheKey,value:null};
+  return null;
+ }
  /* Relative exponential weights prevent underflow. Claims can be
     improbable without being treated as hard constraints. */
  var best=Math.max.apply(null,possible.map(function(x){return x.score}));
@@ -2934,6 +2975,7 @@ function aiWorldAnalysis(observer){
  out.topId=ranked.length?ranked[0].id:null;
  out.uncertainty=ranked.length?(out.wolf[ranked[0].id]||0):1;
  out.certainty=!!(ranked.length&&out.wolf[ranked[0].id]>1-1e-8);
+ memory.worldCache={key:cacheKey,value:out};
  return out;
 }
 function aiWorldCase(observer,target){
@@ -3381,12 +3423,47 @@ function aiFalseReport(p,target,want){
  brain.fakeReports[target.id]={kind:want,night:st.day};
  return want;
 }
+/* No random Seer concealment: decide by board size, living wolf pressure,
+   available checks, counterclaims, and possible Guardian coverage. */
+function aiSeerSpeechPlan(p){
+ if(!p||p.role!=="seer")return null;
+ var setup=aiPublicRoleSetup();
+ if(!setup)return null;
+ var alive=live().length,existing=aiClaimFor(p.id),reports=aiReportsBy(p.id);
+ var checks=(st.known[p.id]||[]).filter(function(k){
+  return person(k.id)&&person(k.id).alive;
+ });
+ function reported(k){return reports.some(function(r){return r.targetId===k.id})}
+ var wolf=checks.find(function(k){return k.evil&&!reported(k)});
+ if(wolf)return {kind:"black",targetId:wolf.id,reason:"confirmed-wolf"};
+ var rival=aiPublicRoleClaimers("seer").find(function(q){return q.id!==p.id});
+ var clear=checks.slice().reverse().find(function(k){return !k.evil&&!reported(k)});
+ var wolvesOut=(st.revealed||[]).filter(function(r){return r.alignment==="wolf"}).length;
+ var wolves=Math.max(0,setup.wolf-wolvesOut);
+ var urgency=alive<=2*wolves+2;
+ var ready=checks.length>=2;
+ var isSmall=setup.seats<=6;
+ var midgame=alive<=Math.max(4,Math.floor(setup.seats*.65));
+ /* Guardian presence improves expected survivability, but never proves
+    they are still alive. This flag only informs the disclosure choice. */
+ var reveal=!!rival||urgency||isSmall||ready||midgame||
+  (setup.guard>0&&st.day>=2&&alive<=setup.seats-2);
+ if(clear&&(existing==="seer"||reveal))
+  return {kind:"gold",targetId:clear.id,reason:"strategic-clear-disclosure"};
+ if(rival&&!existing)
+  return {kind:"claimSeer",targetId:null,reason:"counter-seer"};
+ if(!existing&&urgency&&checks.length)
+  return {kind:"claimSeer",targetId:null,reason:"parity-risk-disclosure"};
+ return null;
+}
 function aiChooseSpeech(p){
  var history=st.publicHistory||[],votes=st.voteHistory||[];
  var brain=aiState(p),ranked=aiRanking(p),lead=ranked[0]||null;
  var threat=lead&&lead.score>1.15?lead.p:null;
  var ally=aiBestAlly(p),rival=aiStrongestRivalSeer(p);
  var existing=aiClaimFor(p.id),left=live().length;
+ var seerPlan=aiSeerSpeechPlan(p);
+ if(seerPlan)return seerPlan;
  /* Refute claims that leave no possible wolf, before considering style,
     random speech options or routine probability scores. */
  if(p.role!=="wolf"){
@@ -3408,19 +3485,6 @@ function aiChooseSpeech(p){
    var exposure=first?aiWorldCase(p,first):null;
    var enough=!!first&&(high>=.64&&high-next>=.17||
     live().length===3&&high>=.52&&high-next>=.09);
-   if(p.role==="seer"){
-    var knownWolf=(st.known[p.id]||[]).find(function(k){
-     return k.evil&&person(k.id)&&person(k.id).alive;
-    });
-    if(knownWolf)return {kind:"black",targetId:knownWolf.id,reason:"private-confirmed-wolf"};
-    var rivalClaim=aiPublicRoleClaimers("seer").find(function(q){return q.id!==p.id});
-    if(rivalClaim&&!aiClaimFor(p.id))
-     return {kind:"claimSeer",targetId:null,reason:"counter-unsupported-seer"};
-    var checkedGood=aiUnreportedCheck(p);
-    if(checkedGood&&!checkedGood.evil&&person(checkedGood.id)&&person(checkedGood.id).alive&&
-      (st.day>=3||live().length<=4||!!rivalClaim))
-     return {kind:"gold",targetId:checkedGood.id,reason:"private-confirmed-clear"};
-   }
    if(p.role==="guard"){
     var blackOnMe=history.slice().reverse().find(function(h){
      return h.targetId===p.id&&h.kind==="black"&&person(h.id)&&person(h.id).alive;
@@ -3452,25 +3516,12 @@ function aiChooseSpeech(p){
  var roll=Math.max(.001,Math.min(.999,Math.random()+(styleShift[brain.temperament]||0)));
  var choice=null;
  function choose(kind,target,reason){return {kind:kind,targetId:target?target.id:null,reason:reason}}
- if(p.role==="seer"){
-  var unreported=aiUnreportedCheck(p);
-  var wolf=(st.known[p.id]||[]).find(function(k){return k.evil&&person(k.id)&&person(k.id).alive});
-  var knownWolf=wolf&&person(wolf.id);
-  var exposed=knownWolf&&aiReportsBy(p.id).some(function(h){return h.targetId===wolf.id&&h.kind==="black"});
-  if(knownWolf&&(!exposed||roll<.46))return choose("black",knownWolf,"verified-black");
-  if(rival&&!existing&&(left<=5||roll<.6))return choose("claimSeer",null,"counter-seer");
-  if(unreported&&!unreported.evil&&(left<=4||st.day>=3||roll<.39))
-   return choose("gold",person(unreported.id),"verified-clear");
-  if(!existing&&left<=3&&roll<.72)return choose("claimSeer",null,"endgame-reveal");
-  var checked=(st.known[p.id]||[]).slice().reverse().find(function(k){return person(k.id)&&person(k.id).alive});
-  if(checked&&!checked.evil&&roll<.55)return choose("trust",person(checked.id),"private-verified-good");
-  if(knownWolf)return choose("suspect",knownWolf,"private-verified-wolf");
- }
  if(p.role==="wolf"){
   /* The single wolf knows every other survivor is good. A new Seer+gold
      bluff in a three-seat endgame is refutable by both good survivors.
      Human wolves can still attempt it, but bot wolves avoid this trap. */
-  var unsafeFreshSeerClear=left===3;
+  var setup=aiPublicRoleSetup();
+  var unsafeFreshSeerClear=left===3&&setup&&setup.wolf===1;
   var pressure=(history||[]).filter(function(h){return h.targetId===p.id&&["black","suspect","suspectVote"].includes(h.kind)}).length;
   var accuser=history.slice().reverse().find(function(h){
    return h.targetId===p.id&&h.kind==="black"&&person(h.id)&&person(h.id).alive;
