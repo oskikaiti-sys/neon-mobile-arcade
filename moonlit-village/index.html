@@ -1122,8 +1122,8 @@ body.game-active .speaker-card-line{overflow-wrap:anywhere}
 </section>
 <section id="gameScreen">
 <div class="panel game-head">
-<div class="topbar"><span class="pill" id="phaseTag">准备开始</span><span id="roomInfo"></span></div>
-<div id="myRole" class="role-chip" aria-label="你的身份">等待身份分配</div>
+<div class="topbar"><span class="pill" id="phaseTag" data-i18n="phaseLobby">Waiting for players</span><span id="roomInfo"></span></div>
+<div id="myRole" class="role-chip" data-i18n="rolePending" aria-label="Your role">Awaiting role assignment</div>
 <div class="btns" id="shareBtns"></div>
 </div>
 <div class="village-stage">
@@ -1153,21 +1153,21 @@ body.game-active .speaker-card-line{overflow-wrap:anywhere}
     <div class="time-scene-stars"></div>
     <div class="time-scene-horizon layer-back"></div>
     <div class="time-scene-horizon layer-front"></div>
-    <div class="time-scene-copy"><span id="sceneIcon">☾</span><strong id="sceneTitle">夜幕降临</strong><small id="sceneSubtitle">村庄陷入沉睡</small></div>
+    <div class="time-scene-copy"><span id="sceneIcon">☾</span><strong id="sceneTitle" data-i18n="sceneNight">Night falls</strong><small id="sceneSubtitle" data-i18n="sceneNightSub">The village falls asleep</small></div>
   </div>
 </div>
 <div id="roleOverlay" class="role-overlay" hidden role="dialog" aria-modal="true" aria-label="抽取你的身份牌">
   <div class="deal-stage">
     <div class="deal-eyebrow">THE MOON CHOOSES</div>
     <h2 data-i18n="dealTitle"></h2>
-    <p class="deal-tip" id="drawHint">轻触中央的牌，揭晓只有你能看见的身份</p>
+    <p class="deal-tip" id="drawHint" data-i18n="dealHint">Tap the card to reveal your secret role</p>
     <div class="deal-deck">
       <div class="deal-behind a" aria-hidden="true"></div>
       <div class="deal-behind b" aria-hidden="true"></div>
       <button id="roleCard" data-do="flipRole" class="draw-card" aria-label="翻开你的身份牌">
         <span class="card-inner">
           <span class="card-side card-back"><span class="deal-symbol">☾</span><span class="small" data-i18n="cardBack"></span></span>
-          <span class="card-side card-front"><span id="roleSymbol" class="deal-symbol">✦</span><span id="roleFace" class="card-face-title">神秘身份</span><span id="roleDescription" class="card-face-desc"></span></span>
+          <span class="card-side card-front"><span id="roleSymbol" class="deal-symbol">✦</span><span id="roleFace" class="card-face-title" data-i18n="roleMystery">Secret Role</span><span id="roleDescription" class="card-face-desc"></span></span>
         </span>
       </button>
     </div>
@@ -1280,6 +1280,7 @@ function updateLanguageOverlays(){
  $("sceneTitle").textContent=tr(night?"sceneNight":"sceneDay");
  $("sceneSubtitle").textContent=tr(night?"sceneNightSub":"sceneDaySub");
  $("roleOverlay").setAttribute("aria-label",tr("drawAria"));
+ $("myRole").setAttribute("aria-label",tr("rolePending"));
 }
 
 function report(t){$("homeNotice").textContent=localizeNotice(t);$("notice").textContent=localizeNotice(t)}
@@ -1917,7 +1918,8 @@ function updateMusicButton(){
  var btn=$("musicToggle");
  btn.classList.toggle("is-muted",!musicWanted);
  btn.setAttribute("aria-pressed",musicWanted?"true":"false");
- btn.setAttribute("aria-label",musicWanted?"关闭背景音乐":"开启背景音乐");
+ btn.setAttribute("aria-label",tr(musicWanted?"musicOn":"musicOff"));
+ btn.setAttribute("title",tr("musicTitle"));
 }
 function toggleMusic(){
  musicWanted=!musicWanted;
@@ -1996,6 +1998,14 @@ document.addEventListener("keydown",function(e){
   e.preventDefault();menu[rpgMenuIndex].click();
  }
 });
+$("languageSelect").addEventListener("change",function(){setLanguage(this.value)});
+$("myName").addEventListener("input",function(){this.dataset.userEdited="1"});
+try{
+ var savedLanguage=localStorage.getItem("moonlit-language");
+ if(translations[savedLanguage])selectedLanguage=savedLanguage;
+}catch(e){}
+applyStaticLanguage();
+updateLanguageOverlays();
 var param=new URLSearchParams(location.search).get("room");if(param&&/^[A-Z0-9]{6}$/i.test(param)){$("roomInput").value=param.toUpperCase();$("homeNotice").textContent=tr("inviteDetected")}
 })();
 </script>
