@@ -1433,9 +1433,9 @@ function stageReducedMotion(){
 }
 function stageHighlightSpeaker(name){
  var all=view&&view.players||[];
- var unique=name&&all.filter(function(p){return p.name===name&&p.alive}).length===1;
+ var unique=name&&all.filter(function(p){return p.name===name}).length===1;
  $("players").querySelectorAll(".player").forEach(function(tile,i){
-  tile.classList.toggle("rpg-speaking",!!(unique&&all[i]&&all[i].name===name&&all[i].alive));
+  tile.classList.toggle("rpg-speaking",!!(unique&&all[i]&&all[i].name===name));
  });
 }
 function stagePaintHistory(){
@@ -1581,7 +1581,7 @@ function render(){
  var currentSpeaker=stageCurrent&&stageCurrent.kind==="choice"?String(stageCurrent.text).match(/^(.+?)：「/):null;
  var lastSpeaker=currentSpeaker&&currentSpeaker[1];
  var playerTiles=v.players.map(function(p,i){
-  var speaking=p.alive&&lastSpeaker===p.name;
+  var speaking=lastSpeaker===p.name;
   return '<div class="player'+(!p.alive?' dead':'')+(p.id===v.me?' me':'')+(speaking?' rpg-speaking':'')+'" data-seat="'+i+'">'
    +faceMarkup(p,p.alive?"normal":"out",i,"resident")
    +(p.id===v.me?'<span class="player-you">你</span>':'')
