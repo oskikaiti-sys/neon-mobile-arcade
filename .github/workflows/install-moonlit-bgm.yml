@@ -1,0 +1,35 @@
+name: Install licensed Moonlit Village BGM
+on:
+  push:
+    paths:
+      - '.github/workflows/install-moonlit-bgm.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  install-audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Fetch licensed BGM for inclusion in game
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p moonlit-village/assets/audio
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 --max-time 100             -H 'Referer: https://conte-de-fees.com/bgm/238'             -H 'User-Agent: Mozilla/5.0 MoonlitVillageGameAssetDownload/1.0'             'https://conte-de-fees.com/music_material/contedefees_0016.mp3'             --output moonlit-village/assets/audio/contedefees_0016.mp3
+          test "$(wc -c < moonlit-village/assets/audio/contedefees_0016.mp3)" -gt 100000
+          file moonlit-village/assets/audio/contedefees_0016.mp3
+      - name: Commit game audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add moonlit-village/assets/audio/contedefees_0016.mp3
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add licensed Fushigi na Mura BGM to Moonlit Village'
+            git push origin HEAD:main
+          fi
