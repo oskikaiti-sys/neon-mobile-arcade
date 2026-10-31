@@ -1119,12 +1119,16 @@ function notifyGameSounds(v){
  var prev=previousAudibleState;
  previousAudibleState=next;
  if(!prev||prev.gameNo!==next.gameNo||!musicWanted)return;
+ var death=v.players.some(function(p){return prev.alive[p.id]===true&&p.alive===false});
  if(next.phase==="ended"&&prev.phase!=="ended"){
   var wolfWon=next.winner==="狼人阵营";
-  playSfx((wolfWon?next.role==="wolf":next.role!=="wolf")?"chime":"gameover");
+  var outcome=(wolfWon?next.role==="wolf":next.role!=="wolf")?"chime":"gameover";
+  if(death){
+   playSfx("damage");
+   setTimeout(function(){playSfx(outcome)},320);
+  }else playSfx(outcome);
   return;
  }
- var death=v.players.some(function(p){return prev.alive[p.id]===true&&p.alive===false});
  if(death){playSfx("damage");return}
  if(prev.phase==="night"&&next.phase==="talk"){playSfx("chime");return}
  if(prev.phase!=="night"&&next.phase==="night"&&prev.phase!=="lobby"){playSfx("chime")}
@@ -1159,11 +1163,13 @@ function toggleMusic(){
  musicWanted=!musicWanted;
  updateMusicButton();
  var audio=$("bgmPlayer");
- if(!audio)return;
  if(!musicWanted){
-  if(typeof audio.pause==="function")audio.pause();
+  if(audio&&typeof audio.pause==="function")audio.pause();
   stopSfx();
- }else{ensureMusic();playSfx("confirm")}
+ }else{
+  ensureMusic();
+  playSfx("confirm");
+ }
 }
 
 document.addEventListener("click",function(e){
