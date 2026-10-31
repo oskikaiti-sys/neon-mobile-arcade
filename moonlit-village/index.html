@@ -3108,6 +3108,9 @@ var SPEECH_GROUPS={
 };
 var SPEECH_LINES={
  zh:{
+ suspectWorldClaims:"重新推演六人的身份组合后，{name}前后的身份宣称出现冲突。这里不是单凭态度猜测：如果维持那些说法，就必须让不相容的身份同时成立。我要求{name}解释。",
+ suspectWorldBallot:"我对照了{name}的查验宣称和已经记录的投票。给过金水又投向金水，或者前后立场无法自洽，需要{name}说明。单靠印象不能代替这个矛盾。",
+ suspectWorldLeading:"把已经公开的身份宣称、查验报告和投票记录放在一起推演，剩余的合理身份组合更指向{name}。这不是确认查杀，我希望大家也核对其此前的发言。",
   suspectNoWolfSlot:"{name}自称预言家，还给{related}发了金水。但我知道自己不是狼人，如果这两句话都是真的，所有存活的人就都不是狼。游戏仍在进行，说明这套身份与查验说法不可能同时成立。请解释这个矛盾。",
  analyseDualSeer:"目前{speaker}和{related}都公开跳了预言家。六人局只有一个真正的预言家，应检查双方查验日期、金水、查杀和已揭晓的身份，不能同时相信两人。",
  counterClaimSeer:"我也跳预言家。{speaker}自称预言家并不能证明是真的，现在是对跳局面，请大家核对双方查验记录和公开票型。",
@@ -3144,6 +3147,9 @@ var SPEECH_LINES={
  defendNone:"有人怀疑我可以提出依据，我会回应。但现阶段别把没有来源的猜测说成已经查验过。"
  },
  en:{
+ suspectWorldClaims:"After checking the possible role assignments, {name}'s role claims conflict. This is about incompatible claims, not a vague feeling. Please explain the inconsistency.",
+ suspectWorldBallot:"I checked {name}'s claimed results against the recorded votes. Voting against one's claimed clear, or shifting positions inconsistently, calls for a concrete explanation.",
+ suspectWorldLeading:"Considering the surviving roles, public claims, reports and earlier ballots together, more plausible worlds point to {name}. This is not a confirmed inspection. Check the record.",
   suspectNoWolfSlot:"{name} claims Seer and gave a clear to {related}. I know I am not a werewolf. If both claims were true, none of the living players could be the wolf—yet the game continues. This Seer story is logically inconsistent. Explain it.",
  analyseDualSeer:"Both {speaker} and {related} have claimed Seer. Only one true Seer exists in this six-person game. Compare their inspection dates, clears, accusations, and public reveals.",
  counterClaimSeer:"I also claim Seer. {speaker}'s claim alone is not proof. We have competing claims: compare our inspections and the public ballots.",
@@ -3180,6 +3186,9 @@ var SPEECH_LINES={
  defendNone:"I'm willing to answer questions. But a suspicion without a source is not an inspection result."
  },
  ja:{
+ suspectWorldClaims:"役職の可能な組み合わせを検証すると、{name}の役職COには矛盾があります。単なる印象ではなく、両立しない主張の説明が必要です。",
+ suspectWorldBallot:"{name}の占い結果の主張と過去の投票を照合しました。自分の白判定に投票するなど、整合性のない行動には説明が必要です。",
+ suspectWorldLeading:"生存役職、公開されたCO、占い結果、過去の投票を組み合わせると、{name}を人狼とする仮説が相対的に有力です。確定した占い結果ではないので記録を確認しましょう。",
   suspectNoWolfSlot:"{name}は占い師COし、{related}に白を出しました。私は自分が人狼ではないと知っています。その2つの主張が両方正しければ、生存者に人狼が一人もいなくなります。ゲームが続いている以上、この説明は矛盾しています。説明してください。",
  analyseDualSeer:"{speaker}と{related}がともに占い師COをしています。この6人村の本物は1人だけです。占い日時、白黒判定、公開された結果を比べましょう。",
  counterClaimSeer:"私も占い師COです。{speaker}のCOだけでは本物と証明できません。対抗COになったので、結果と票型を比べてください。",
@@ -3272,6 +3281,16 @@ function speechRecord(p,kind,target){
   }
  }
  if(p.bot&&kind==="suspect"&&target){
+  var plan=st.aiMemory&&st.aiMemory[p.id]&&st.aiMemory[p.id].plan;
+  if(st.day>=2&&plan&&plan.reason==="world-conflicting-claims"){
+   data.kind="suspectWorldClaims";return data;
+  }
+  if(st.day>=2&&plan&&plan.reason==="world-contradictory-ballot"){
+   data.kind="suspectWorldBallot";return data;
+  }
+  if(st.day>=2&&plan&&plan.reason==="world-posterior-leading"){
+   data.kind="suspectWorldLeading";return data;
+  }
   var slot=aiSeerSlotContradiction(p,target);
   if(slot){
    data.kind="suspectNoWolfSlot";
