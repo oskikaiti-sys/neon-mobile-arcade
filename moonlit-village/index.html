@@ -1431,6 +1431,13 @@ var stageHistory=[],stageQueue=[],stageCurrent=null,stageTimer=null,
 function stageReducedMotion(){
  return !!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
+function stageHighlightSpeaker(name){
+ var all=view&&view.players||[];
+ var unique=name&&all.filter(function(p){return p.name===name&&p.alive}).length===1;
+ $("players").querySelectorAll(".player").forEach(function(tile,i){
+  tile.classList.toggle("rpg-speaking",!!(unique&&all[i]&&all[i].name===name&&all[i].alive));
+ });
+}
 function stagePaintHistory(){
  var feed=$("feed");if(!feed)return;
  feed.innerHTML=stageHistory.map(function(m){
@@ -1452,6 +1459,7 @@ function stageFinishSpeech(){
  if(stageHistory.length>60)stageHistory.shift();
  stageCurrent=null;
  $("speakerOverlay").hidden=true;
+ stageHighlightSpeaker(null);
  stagePaintHistory();
  stageAdvanceQueue();
 }
@@ -1468,6 +1476,7 @@ function stageAdvanceQueue(){
   }
   stagePaintHistory();
   stageCurrent=next;
+  stageHighlightSpeaker(match[1]);
   $("speakerPortrait").innerHTML=rpgPortraitMarkup(match[1]);
   $("speakerName").textContent=match[1];
   $("speakerLine").textContent=match[2];
@@ -1476,6 +1485,7 @@ function stageAdvanceQueue(){
   return;
  }
  $("speakerOverlay").hidden=true;
+ stageHighlightSpeaker(null);
  stagePaintHistory();
 }
 function rpgRenderMessages(v){
@@ -1568,12 +1578,8 @@ function render(){
  $("roomInfo").textContent=v.solo?"单人练习":v.room?"房间码："+v.room:"";
  $("shareBtns").innerHTML=(!v.solo&&v.room&&v.phase==="lobby")?button("复制邀请链接","copy",null,null,"ghost"):"";
  $("countInfo").textContent=v.players.filter(function(p){return !p.bot}).length+" 位真人 / "+v.players.length+" 位居民";
- var lastSpeaker=null;
- if(v.phase==="talk"){
-  var lastSpeech=v.messages.slice().reverse().find(function(m){return m.kind==="choice"&&/：「/.test(m.text)});
-  var speaker=lastSpeech&&lastSpeech.text.match(/^(.+?)：「/);
-  if(speaker&&v.players.filter(function(p){return p.name===speaker[1]}).length===1)lastSpeaker=speaker[1];
- }
+ var currentSpeaker=stageCurrent&&stageCurrent.kind==="choice"?String(stageCurrent.text).match(/^(.+?)：「/):null;
+ var lastSpeaker=currentSpeaker&&currentSpeaker[1];
  var playerTiles=v.players.map(function(p,i){
   var speaking=p.alive&&lastSpeaker===p.name;
   return '<div class="player'+(!p.alive?' dead':'')+(p.id===v.me?' me':'')+(speaking?' rpg-speaking':'')+'" data-seat="'+i+'">'
