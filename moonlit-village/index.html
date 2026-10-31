@@ -1190,11 +1190,11 @@ body.game-active header h1{max-width:calc(100% - 215px)!important}
  <p class="settings-help" data-i18n="avatarHelp">Choose a portrait before entering the village.</p>
  <p id="avatarStatus" class="settings-status" aria-live="polite"></p>
 </div>
-<div class="btns"><button class="primary" data-do="solo" data-i18n="solo"></button><button data-do="create" data-i18n="create"></button></div>
+<div class="btns"><button id="soloStart" class="primary" data-do="solo" data-i18n="solo"></button><button id="roomCreate" data-do="create" data-i18n="create"></button></div>
 <div class="divider"></div>
 <label for="roomInput" data-i18n="roomLabel"></label>
 <input id="roomInput" maxlength="6" placeholder="例如 A7BC29" autocapitalize="characters" spellcheck="false">
-<div class="btns"><button data-do="join" data-i18n="join"></button></div>
+<div class="btns"><button id="roomJoin" data-do="join" data-i18n="join"></button></div>
 <p class="small" data-i18n="homeHint"></p>
 <div id="homeNotice" class="small" aria-live="polite"></div>
 </section>
@@ -1318,6 +1318,7 @@ function applyStaticLanguage(){
  $("roleCard").setAttribute("aria-label",tr("drawAria"));
  updateMusicButton();
  updateSettingsUI();
+ localAvatarPreview();
 }
 function setLanguage(next){
  if(!translations[next])return;
@@ -1401,8 +1402,9 @@ function log(t,kind){st.logs.push({text:t,kind:kind||"news"});if(st.logs.length>
 function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},logs:[],winner:""};myId="h";log("村庄正在等待玩家加入。")}
 function snapshot(id){var me=person(id);return {phase:st.phase,day:st.day,gameNo:st.gameNo,me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
 function broadcast(){if(!st)return;view=snapshot("h");render();for(var it of connections.entries()){var id=it[0],c=it[1];if(c.open){try{c.send({type:"state",state:snapshot(id)})}catch(e){}}}}
-function makeSolo(){solo=true;isHost=true;room="";makeState();enter();startGame()}
+function makeSolo(){if(avatarPending)return;solo=true;isHost=true;room="";makeState();enter();startGame()}
 function makeRoom(){
+ if(avatarPending)return;
  if(typeof Peer==="undefined"){report("联机库未加载。请检查网络连接。");return}
  solo=false;isHost=true;room=rand(6);makeState();report("正在创建房间…");peer=new Peer("moonlit-"+room);
  peer.on("open",function(){enter();broadcast()});
@@ -1413,9 +1415,9 @@ function makeRoom(){
    if(!assigned&&m.type==="hello"){
     if(st.phase!=="lobby"||st.players.length>=6){c.send({type:"error",message:"房间已经开始或人数已满。"});setTimeout(function(){c.close()},400);return}
     assigned="p"+rand(9);var name=String(m.name||"旅人").slice(0,15).trim()||"旅人";
-    st.players.push({id:assigned,name:name,bot:false,alive:true,role:null,avatar:safeAvatar(m.avatar),portrait:randomPortrait(st.players)});connections.set(assigned,c);log(name+" 加入了村庄。");broadcast();return;
+    st.players.push({id:assigned,name:name,bot:false,alive:true,role:null,avatar:safeAvatar(m.avatar),portrait:Number.isInteger(m.portrait)&&m.portrait>=0&&m.portrait<6?m.portrait:randomPortrait(st.players)});connections.set(assigned,c);log(name+" 加入了村庄。");broadcast();return;
    }
-   if(assigned&&m.type==="avatar"){
+   if(assigned&&m.type==="avatar"&&st.phase==="lobby"){
     var human=person(assigned);
     if(human&&!human.bot){
      human.avatar=safeAvatar(m.avatar);
@@ -1436,13 +1438,14 @@ function makeRoom(){
  peer.on("error",function(e){report("创建房间失败："+(e&&e.type||"连接故障")+"。可以刷新后再试。")});
 }
 function joinRoom(){
+ if(avatarPending)return;
  if(typeof Peer==="undefined"){report("联机库未加载，请检查网络。");return}
  var code=$("roomInput").value.toUpperCase().replace(/[^A-Z0-9]/g,"");
  if(code.length!==6){report("请输入六位房间码。");return}
  room=code;isHost=false;solo=false;report("正在连接房间…");peer=new Peer();
  peer.on("open",function(){
   conn=peer.connect("moonlit-"+room,{reliable:true});
-  conn.on("open",function(){conn.send({type:"hello",name:getName(),avatar:selectedAvatar})});
+  conn.on("open",function(){conn.send({type:"hello",name:getName(),avatar:selectedAvatar,portrait:previewPortrait})});
   conn.on("data",function(m){
    if(m&&m.type==="error"){report(m.message);return}
    if(m&&m.type==="state"){view=m.state;myId=view.me;enter();render()}
@@ -1638,7 +1641,7 @@ var faceConfig={
 };
 
 /* Human avatar choices are presentation-only. No image hosting or role data. */
-var selectedAvatar=null,previewPortrait=Math.floor(Math.random()*6),avatarLimit=26000;
+var selectedAvatar=null,previewPortrait=Math.floor(Math.random()*6),avatarLimit=26000,avatarPending=false;
 function safeAvatar(value){
  return typeof value==="string"&&value.length<avatarLimit&&
  /^data:image\/(?:webp|jpeg|png);base64,[a-zA-Z0-9+/]+={0,2}$/.test(value)?value:null;
@@ -1648,6 +1651,15 @@ function randomPortrait(players){
  var free=[0,1,2,3,4,5].filter(function(i){return !used.has(i)});
  var choices=free.length?free:[0,1,2,3,4,5];
  return choices[Math.floor(Math.random()*choices.length)];
+}
+
+function setAvatarPending(value){
+ avatarPending=!!value;
+ $("homeScreen").setAttribute("aria-busy",avatarPending?"true":"false");
+ ["soloStart","roomCreate","roomJoin"].forEach(function(id){$(id).disabled=avatarPending});
+ $("avatarUpload").disabled=avatarPending;
+ $("avatarUpload").parentElement.classList.toggle("is-pending",avatarPending);
+ $("avatarStatus").setAttribute("role",avatarPending?"status":"");
 }
 function localAvatarPreview(){
  var own=view&&view.players&&view.players.find(function(p){return p.id===view.me});
@@ -1660,30 +1672,14 @@ function localAvatarPreview(){
 }
 function updateAvatarStatus(key){$("avatarStatus").textContent=key?tr(key):""}
 function applyOwnAvatar(avatar,reroll){
+ /* Avatar choice is made only before entering a solo game or multiplayer lobby. */
+ if(document.body.classList.contains("game-active"))return;
  selectedAvatar=safeAvatar(avatar);
  if(reroll)previewPortrait=Math.floor(Math.random()*6);
  try{
   if(selectedAvatar)localStorage.setItem("moonlit-avatar",selectedAvatar);
   else localStorage.removeItem("moonlit-avatar");
  }catch(err){/* Storage may be disabled. */}
- if(isHost&&st){
-  var human=person("h");
-  if(human){
-   human.avatar=selectedAvatar;
-   if(reroll)human.portrait=randomPortrait(st.players.filter(function(p){return p.id!=="h"}));
-   broadcast();
-  }
- }else if(conn&&conn.open){
-  try{conn.send({type:"avatar",avatar:selectedAvatar,reroll:!!reroll})}catch(err){}
-  if(view){
-   var self=view.players.find(function(p){return p.id===myId});
-   if(self){
-    self.avatar=selectedAvatar;
-    if(reroll)self.portrait=previewPortrait;
-    render();
-   }
-  }
- }
  localAvatarPreview();
  updateAvatarStatus(selectedAvatar?"avatarReady":"avatarRemoved");
 }
@@ -1719,15 +1715,18 @@ function resizeAvatar(file){
  });
 }
 function onAvatarUpload(){
+ if(document.body.classList.contains("game-active")||avatarPending)return;
  var file=this.files&&this.files[0];
  if(!file)return;
  this.value="";
  if(!/^image\/(?:png|jpeg|webp)$/.test(file.type)||file.size>8*1024*1024){
   updateAvatarStatus("avatarInvalid");return;
  }
+ setAvatarPending(true);
  updateAvatarStatus("avatarProcessing");
  resizeAvatar(file).then(function(url){applyOwnAvatar(url,false)})
-  .catch(function(){updateAvatarStatus("avatarFailed")});
+  .catch(function(){updateAvatarStatus("avatarFailed")})
+  .finally(function(){setAvatarPending(false)});
 }
 
 var missingFaces={};
@@ -2012,7 +2011,6 @@ function updateSettingsUI(){
  $("bgmVolumeValue").textContent=bgmLevel+"%";$("effectsVolumeValue").textContent=effectsLevel+"%";
  $("bgmPlayer").volume=bgmLevel/100;
  if(sfxOutput)sfxOutput.gain.value=.8*(effectsLevel/100);
- localAvatarPreview();
 }
 function setVolume(kind,value){
  var level=Math.max(0,Math.min(100,Math.round(Number(value)||0)));
@@ -2194,7 +2192,7 @@ document.addEventListener("click",function(e){
  if(action==="skipSpeech"){playSfx("cursor");stageFinishSpeech();return;}
  if(action==="openSettings"){$("settingsOverlay").hidden=false;updateSettingsUI();return;}
  if(action==="closeSettings"){$("settingsOverlay").hidden=true;return;}
- if(action==="removeAvatar"){applyOwnAvatar(null,true);return;}
+ if(action==="removeAvatar"){if(!avatarPending&&!document.body.classList.contains("game-active"))applyOwnAvatar(null,true);return;}
  if(action==="musicToggle"){unlockSfx();toggleMusic();return;}
  unlockSfx();
  var clickSound={back:"cancel",pickSpeech:"cursor",create:"confirm",join:"confirm",
