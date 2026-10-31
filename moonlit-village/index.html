@@ -2663,40 +2663,114 @@ function speechText(lang,data){
  var vars={name:data.name||"",related:data.related||"",speaker:data.speaker||"",day:data.day||"",role:role};
  return template.replace(/\{(name|related|speaker|day|role)\}/g,function(_,k){return vars[k]});
 }
-function botSpeech(p){
- var people=targetList(p.id);
- if(!people.length){speak(p.id,"pass",null);return}
+
+/* One shared per-day tactical intention for each AI: what it says and how
+   it votes. Private inspections remain exclusive to the real seer. */
+function aiUnreportedCheck(p){
+ if(p.role!=="seer")return null;
+ var disclosed=aiReportsBy(p.id);
+ return (st.known[p.id]||[]).slice().reverse().find(function(k){
+  return person(k.id)&&person(k.id).alive&&!disclosed.some(function(r){return r.targetId===k.id});
+ })||null;
+}
+function aiBestAlly(p){
+ var ranked=aiRanking(p).slice().sort(function(a,b){return a.score-b.score});
+ return ranked.length&&ranked[0].score<1.55?ranked[0].p:null;
+}
+function aiStrongestRivalSeer(p){
+ return aiPublicRoleClaimers("seer").filter(function(q){return q.id!==p.id})
+ .sort(function(a,b){return aiCredibility(p,b.id)-aiCredibility(p,a.id)})[0]||null;
+}
+function aiFalseReport(p,target,want){
+ var brain=aiState(p);
+ if(!brain.fakeReports)brain.fakeReports={};
+ if(brain.fakeReports[target.id])return brain.fakeReports[target.id].kind;
+ brain.fakeReports[target.id]={kind:want,night:st.day};
+ return want;
+}
+function aiChooseSpeech(p){
  var history=st.publicHistory||[],votes=st.voteHistory||[];
- var hasClaim=history.some(function(h){return h.id===p.id&&roleClaim(h.kind)});
- var known=(st.known[p.id]||[]).slice().reverse().find(function(k){return k.night===st.day&&person(k.id)&&person(k.id).alive&&k.id!==p.id});
- var seerClaim=history.slice().reverse().find(function(h){return h.id!==p.id&&roleClaim(h.kind)==="seer"&&person(h.id)&&person(h.id).alive});
- var claimant=people.find(function(q){return lastClaim(history,q.id,false)});
- var voteTarget=people.find(function(q){return lastVote(votes,q.id)});
- var kind="suspect",target=people[Math.floor(Math.random()*people.length)],roll=Math.random();
- if(p.role==="seer"&&known&&roll<.70){kind=known.evil?"black":"gold";target=person(known.id)}
- else if(p.role==="wolf"&&!hasClaim&&roll<.07){
-  kind="gold";target=people.find(function(q){return q.role!=="wolf"})||target;
- }else if(!hasClaim&&roll<.22){
-  /* Anyone can bluff. Once they have claimed a role, avoid random
-     identity-switching across successive days. */
-  var claims={wolf:["claimSeer","claimGuard","claimVillager"],
-   seer:["claimSeer","claimVillager"],guard:["claimGuard","claimVillager","claimSeer"],
-   villager:["claimVillager","claimSeer","claimGuard"]};
-  var options=claims[p.role]||claims.villager;
-  kind=options[Math.floor(Math.random()*options.length)];target=null;
+ var brain=aiState(p),ranked=aiRanking(p),lead=ranked[0]||null;
+ var threat=lead&&lead.score>1.15?lead.p:null;
+ var ally=aiBestAlly(p),rival=aiStrongestRivalSeer(p);
+ var existing=aiClaimFor(p.id),left=live().length;
+ var roll=Math.random(),choice=null;
+ function choose(kind,target,reason){return {kind:kind,targetId:target?target.id:null,reason:reason}}
+ if(p.role==="seer"){
+  var unreported=aiUnreportedCheck(p);
+  var wolf=(st.known[p.id]||[]).find(function(k){return k.evil&&person(k.id)&&person(k.id).alive});
+  var knownWolf=wolf&&person(wolf.id);
+  var exposed=knownWolf&&aiReportsBy(p.id).some(function(h){return h.targetId===wolf.id&&h.kind==="black"});
+  if(knownWolf&&(!exposed||roll<.46))return choose("black",knownWolf,"verified-black");
+  if(rival&&!existing&&(left<=5||roll<.6))return choose("claimSeer",null,"counter-seer");
+  if(unreported&&!unreported.evil&&(left<=4||st.day>=3||roll<.39))
+   return choose("gold",person(unreported.id),"verified-clear");
+  if(!existing&&left<=3&&roll<.72)return choose("claimSeer",null,"endgame-reveal");
+  var checked=(st.known[p.id]||[]).slice().reverse().find(function(k){return person(k.id)&&person(k.id).alive});
+  if(checked&&!checked.evil&&roll<.55)return choose("trust",person(checked.id),"private-verified-good");
+  if(knownWolf)return choose("suspect",knownWolf,"private-verified-wolf");
  }
- else if(seerClaim&&roll<.42){kind=Math.random()<.5?"challengeClaim":"followSeer";target=person(seerClaim.id)}
- else if(claimant&&roll<.58){kind="challengeClaim";target=claimant}
- else if(voteTarget&&roll<.7){kind=Math.random()<.55?"suspectVote":"trustVote";target=voteTarget}
- else if(roll<.22){kind="trust"}
- else if(roll<.37){kind="question"}
- else if(roll<.51){kind="analyseVotes";target=null}
- else if(roll<.65){kind="analyseClaims";target=null}
- else if(roll<.75){kind="defend";target=null}
- else if(roll<.85){kind="clue";target=null}
- if(SPEECH_OPTIONS[kind].target&&!target)target=people[0];
- if(SPEECH_OPTIONS[kind].evidence&&!speechHasEvidence(history,votes,kind,target.id))kind="suspect";
- speak(p.id,kind,target?target.id:null);
+ if(p.role==="wolf"){
+  var pressure=(history||[]).filter(function(h){return h.targetId===p.id&&["black","suspect","suspectVote"].includes(h.kind)}).length;
+  var accuser=history.slice().reverse().find(function(h){
+   return h.targetId===p.id&&h.kind==="black"&&person(h.id)&&person(h.id).alive;
+  });
+  var counter=accuser&&person(accuser.id)||rival;
+  if(accuser&&(!existing||existing==="seer")&&roll<.86){
+   if(!existing&&roll<.44)return choose("claimSeer",null,"counterclaim");
+   if(counter&&!aiReportsBy(p.id).some(function(h){return h.targetId===counter.id&&h.kind==="gold"}))
+    return choose(aiFalseReport(p,counter,"black"),counter,"counter-accusation");
+  }
+  if(!existing&&left<=4&&roll<.32)return choose("claimGuard",null,"emergency-guardian-cover");
+  if(!existing&&roll<.22){
+   var victim=threat||targetList(p.id)[0];
+   if(victim)return choose(aiFalseReport(p,victim,pressure>0?"black":"gold"),victim,"crafted-seer-bluff");
+  }
+  if(!existing&&roll<.34)return choose("claimVillager",null,"quiet-cover");
+  if(rival&&roll<.52)return choose("challengeClaim",rival,"weaken-rival-seer");
+  if(pressure>0&&roll<.66)return choose("defend",null,"answer-suspicion");
+  if(threat)return choose("suspect",threat,"redirect-public-vote");
+  if(ally&&roll<.38)return choose("trust",ally,"build-coalition");
+  return choose("question",targetList(p.id)[0],"probe-others");
+ }
+ if(p.role==="guard"){
+  var challenged=history.some(function(h){return h.targetId===p.id&&["black","suspect","challengeClaim"].includes(h.kind)});
+  if(!existing&&left<=4&&challenged&&roll<.72)return choose("claimGuard",null,"protect-by-reveal");
+  if(!existing&&left<=3&&roll<.55)return choose("claimGuard",null,"late-role-reveal");
+ }
+ if(p.role==="villager"&&!existing&&left<=3&&roll<.34)
+  return choose("claimVillager",null,"endgame-role-claim");
+ if(threat&&lead.score>2.5&&aiClaimFor(threat.id)&&
+   speechHasEvidence(history,votes,"challengeClaim",threat.id)&&roll<.85)
+  return choose("challengeClaim",threat,"challenge-contradiction");
+ if(threat&&lead.score>2.0&&roll<.77)return choose("suspect",threat,"evidence-led-pressure");
+ if(threat&&lastVote(votes,threat.id)&&roll<.69)
+  return choose("suspectVote",threat,"ballot-accountability");
+ if(rival&&aiCredibility(p,rival.id)>.5&&aiSuspicion(p,rival)<1.1&&roll<.57)
+  return choose("followSeer",rival,"conditional-seer-trust");
+ if(ally&&roll<.35)return choose("trust",ally,"support-public-ally");
+ if(threat&&aiClaimFor(threat.id)&&roll<.48)return choose("challengeClaim",threat,"test-claim");
+ if(votes.length&&roll<.61)return choose("analyseVotes",null,"review-ballots");
+ if(history.some(function(h){return !!roleClaim(h.kind)})&&roll<.59)
+  return choose("analyseClaims",null,"review-claims");
+ if(history.some(function(h){return h.targetId===p.id&&["suspect","black","challengeClaim"].includes(h.kind)})&&roll<.62)
+  return choose("defend",null,"respond-to-accusation");
+ if(threat&&roll<.46)return choose("question",threat,"ask-for-explanation");
+ return choose(history.length?"clue":"pass",null,"observe-before-commitment");
+}
+function botSpeech(p){
+ var brain=aiState(p),choice=aiChooseSpeech(p);
+ if(!choice||!SPEECH_OPTIONS[choice.kind])choice={kind:"pass",targetId:null,reason:"fallback"};
+ if(SPEECH_OPTIONS[choice.kind].target){
+  if(!targetList(p.id).some(function(q){return q.id===choice.targetId}))
+   choice={kind:"pass",targetId:null,reason:"invalid-target"};
+  else if(!speechHasEvidence(st.publicHistory,st.voteHistory,choice.kind,choice.targetId))
+   choice={kind:"suspect",targetId:choice.targetId,reason:"claim-not-supported"};
+ }
+ var brainPlan={day:st.day,kind:choice.kind,targetId:choice.targetId,reason:choice.reason};
+ brain.plan=brainPlan;
+ brain.dayOfDecision=st.day;
+ speak(p.id,choice.kind,choice.targetId);
 }
 function speak(id,kind,targetId){
  var p=person(id),t=targetId?person(targetId):null;
@@ -2706,25 +2780,37 @@ function speak(id,kind,targetId){
  st.publicHistory.push({day:st.day,id:id,name:p.name,kind:kind,targetId:targetId||null,targetName:t?t.name:null});
  log(p.name+"：「"+speechText("zh",data)+"」","choice");
  st.logs[st.logs.length-1].speechData=data;
+ if(p.bot){
+  var brain=aiState(p);
+  brain.lastSpeech={day:st.day,kind:kind,targetId:targetId||null,reason:brain.plan&&brain.plan.reason||null};
+  if(roleClaim(kind)&&!brain.claim)brain.claim=roleClaim(kind);
+ }
 }
 function botVote(p){
- var choices=targetList(p.id);if(!choices.length)return p.id;
- var known=(st.known[p.id]||[]).find(function(k){return k.evil&&person(k.id)&&person(k.id).alive});
- if(known)return known.id;
- if(p.role==="wolf")choices=choices.filter(function(q){return q.role!=="wolf"});
- if(!choices.length)return p.id;
- var history=st.publicHistory||[];
- var scores=choices.map(function(q){
-  var score=1+Math.random()*1.7;
-  history.slice(-14).forEach(function(h){
-   if(h.targetId!==q.id)return;
-   if(["suspect","suspectVote","black"].includes(h.kind))score+=h.kind==="black"?1.1:.65;
-   if(["trust","trustVote","gold"].includes(h.kind))score-=h.kind==="gold"?.5:.3;
-  });
-  if(lastClaim(history,q.id,true))score+=.13;
-  return {id:q.id,score:Math.max(.1,score)};
+ var brain=aiState(p),ranked=aiRanking(p);
+ if(!ranked.length)return p.id;
+ var plan=brain.plan&&brain.plan.day===st.day?brain.plan:null;
+ var options=ranked.map(function(x){
+  var score=x.score,q=x.p;
+  if(plan&&plan.targetId===q.id){
+   if(["black","suspect","suspectVote","challengeClaim"].includes(plan.kind))score+=1.35;
+   if(["gold","trust","trustVote","followSeer"].includes(plan.kind))score-=2.35;
+  }
+  if(p.role==="wolf"){
+   var crowd=(st.publicHistory||[]).filter(function(h){return h.targetId===q.id&&
+    ["suspect","suspectVote","black"].includes(h.kind)}).length;
+   score+=.42*crowd;
+   if(plan&&plan.reason==="counter-accusation"&&plan.targetId===q.id)score+=1.8;
+  }
+  if(p.role==="seer"){
+   var check=aiObservedInspection(p,q.id);
+   if(check)score=check.evil?100:-100;
+  }
+  score+=aiNoise(p.id+":"+st.day,q.id)*.21;
+  return {id:q.id,score:score};
  });
- scores.sort(function(a,b){return b.score-a.score});return scores[0].id;
+ options.sort(function(a,b){return b.score-a.score});
+ return options[0].id;
 }
 function finishVote(){
  st.voteHistory.push({day:st.day,votes:Object.keys(st.votes).map(function(id){return {voterId:id,targetId:st.votes[id]}})});
