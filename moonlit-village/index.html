@@ -1259,7 +1259,7 @@ translations.en.effectsVolume="Sound effects volume";translations.zh.effectsVolu
 translations.en.avatarLabel="Your avatar";translations.zh.avatarLabel="你的头像";translations.ja.avatarLabel="自分のアイコン";
 translations.en.uploadAvatar="Choose an image";translations.zh.uploadAvatar="上传图片";translations.ja.uploadAvatar="画像を選ぶ";
 translations.en.removeAvatar="Use a random portrait";translations.zh.removeAvatar="改用随机预设头像";translations.ja.removeAvatar="ランダムな初期アイコンに戻す";
-translations.en.avatarHelp="Images are resized locally before being shared with room members. No separate image server is used.";translations.zh.avatarHelp="图片会在手机上缩小，然后直接发送给房间玩家，不经过独立图片服务器。";translations.ja.avatarHelp="画像は端末内で縮小し、同じ部屋のプレイヤーに直接共有します。画像専用サーバーには保存しません。";
+translations.en.avatarHelp="Human players can choose a picture from their computer or keep a random preset. Images are resized locally and shared within the room. AI uses presets.";translations.zh.avatarHelp="真人玩家可从电脑硬盘选择图片，或使用随机预设头像。图片会在本机缩小并同步给房间其他玩家；AI 使用预设头像。";translations.ja.avatarHelp="人間のプレイヤーはPCから画像を選ぶか、ランダムな初期画像を使用できます。画像は端末で縮小し、ルーム内のほかのプレイヤーと共有されます。AIは初期画像を使います。";
 translations.en.avatarReady="Custom avatar ready";translations.zh.avatarReady="自定义头像已准备好";translations.ja.avatarReady="アイコンを設定しました";
 translations.en.avatarRemoved="A random portrait will be used";translations.zh.avatarRemoved="将使用随机预设头像";translations.ja.avatarRemoved="ランダムな初期アイコンを使用します";
 translations.en.avatarInvalid="Please choose a PNG, JPEG or WebP under 8 MB.";translations.zh.avatarInvalid="请选择小于 8 MB 的 PNG、JPEG 或 WebP 图片。";translations.ja.avatarInvalid="8 MB未満のPNG・JPEG・WebP画像を選んでください。";
@@ -1603,12 +1603,107 @@ var faceConfig={
  expressions:["normal","suspect","out"],
  seatRings:["#e8c872","#9aa3c7","#91a4d0","#c0a9cc","#b8bcd2","#d4b794"]
 };
+
+/* Human avatar choices are presentation-only. No image hosting or role data. */
+var selectedAvatar=null,previewPortrait=Math.floor(Math.random()*6),avatarLimit=26000;
+function safeAvatar(value){
+ return typeof value==="string"&&value.length<avatarLimit&&
+ /^data:image\/(?:webp|jpeg|png);base64,[a-zA-Z0-9+/]+={0,2}$/.test(value)?value:null;
+}
+function randomPortrait(players){
+ var used=new Set((players||[]).filter(function(p){return !p.avatar}).map(function(p){return p.portrait}));
+ var free=[0,1,2,3,4,5].filter(function(i){return !used.has(i)});
+ var choices=free.length?free:[0,1,2,3,4,5];
+ return choices[Math.floor(Math.random()*choices.length)];
+}
+function localAvatarPreview(){
+ var own=view&&view.players&&view.players.find(function(p){return p.id===view.me});
+ var portrait=own&&Number.isInteger(own.portrait)?own.portrait:previewPortrait;
+ var src=safeAvatar(selectedAvatar)||
+  (own&&safeAvatar(own.avatar))||
+  faceConfig.basePath+faceConfig.portraits[portrait%faceConfig.portraits.length];
+ var image=$("avatarPreviewImage");
+ image.src=src;image.hidden=false;$("avatarPreviewPlaceholder").hidden=true;
+}
+function updateAvatarStatus(key){$("avatarStatus").textContent=key?tr(key):""}
+function applyOwnAvatar(avatar,reroll){
+ selectedAvatar=safeAvatar(avatar);
+ if(reroll)previewPortrait=Math.floor(Math.random()*6);
+ try{
+  if(selectedAvatar)localStorage.setItem("moonlit-avatar",selectedAvatar);
+  else localStorage.removeItem("moonlit-avatar");
+ }catch(err){/* Storage may be disabled. */}
+ if(isHost&&st){
+  var human=person("h");
+  if(human){
+   human.avatar=selectedAvatar;
+   if(reroll)human.portrait=randomPortrait(st.players.filter(function(p){return p.id!=="h"}));
+   broadcast();
+  }
+ }else if(conn&&conn.open){
+  try{conn.send({type:"avatar",avatar:selectedAvatar,reroll:!!reroll})}catch(err){}
+  if(view){
+   var self=view.players.find(function(p){return p.id===myId});
+   if(self){
+    self.avatar=selectedAvatar;
+    if(reroll)self.portrait=previewPortrait;
+    render();
+   }
+  }
+ }
+ localAvatarPreview();
+ updateAvatarStatus(selectedAvatar?"avatarReady":"avatarRemoved");
+}
+function resizeAvatar(file){
+ return new Promise(function(resolve,reject){
+  if(!file||!/^image\/(?:png|jpeg|webp)$/.test(file.type)||file.size>8*1024*1024){
+   reject(new Error("invalid"));return;
+  }
+  var url=URL.createObjectURL(file),image=new Image(),settled=false;
+  function release(){if(settled)return;settled=true;URL.revokeObjectURL(url)}
+  image.onerror=function(){release();reject(new Error("decode"))};
+  image.onload=function(){
+   try{
+    var canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");
+    if(!ctx)throw new Error("canvas");
+    var side=Math.min(image.naturalWidth,image.naturalHeight);
+    if(!side)throw new Error("image");
+    var x=(image.naturalWidth-side)/2,y=(image.naturalHeight-side)/2;
+    for(var target=160;target>=96;target-=32){
+     canvas.width=target;canvas.height=target;
+     ctx.fillStyle="#141b3a";ctx.fillRect(0,0,target,target);
+     ctx.drawImage(image,x,y,side,side,0,0,target,target);
+     for(var quality=.75;quality>=.40;quality-=.15){
+      var data=canvas.toDataURL("image/webp",quality);
+      if(!safeAvatar(data))data=canvas.toDataURL("image/jpeg",quality);
+      if(safeAvatar(data)){release();resolve(data);return}
+     }
+    }
+    throw new Error("size");
+   }catch(err){release();reject(err)}
+  };
+  image.src=url;
+ });
+}
+function onAvatarUpload(){
+ var file=this.files&&this.files[0];
+ if(!file)return;
+ this.value="";
+ if(!/^image\/(?:png|jpeg|webp)$/.test(file.type)||file.size>8*1024*1024){
+  updateAvatarStatus("avatarInvalid");return;
+ }
+ updateAvatarStatus("avatarProcessing");
+ resizeAvatar(file).then(function(url){applyOwnAvatar(url,false)})
+  .catch(function(){updateAvatarStatus("avatarFailed")});
+}
+
 var missingFaces={};
 function faceMarkup(player,expression,seat,context){
  var name=player&&player.name!=null?displayName(String(player.name)):tr("roleVillager");
  var emotion=faceConfig.expressions.includes(expression)?expression:"normal";
  var seatIndex=Number.isInteger(seat)&&seat>=0&&seat<faceConfig.portraits.length?seat:-1;
- var src=seatIndex<0?null:faceConfig.basePath+faceConfig.portraits[seatIndex];
+ var chosen=player&&Number.isInteger(player.portrait)&&player.portrait>=0&&player.portrait<faceConfig.portraits.length?player.portrait:seatIndex;
+ var src=(player&&safeAvatar(player.avatar)) || (chosen<0?null:faceConfig.basePath+faceConfig.portraits[chosen]);
  var tone=faceConfig.seatRings[seatIndex<0?0:seatIndex];
  var role=context==="log"?"rpg-portrait":context==="target"?"action-target-face":"avatar";
  var markup='<span class="'+role+' face-frame face-expression-'+emotion+'" style="--face-ring:'+tone+'" role="img" aria-label="'+escapeHtml(tr("portrait",{name:name}))+'">'
