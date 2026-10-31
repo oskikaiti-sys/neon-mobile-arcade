@@ -2961,10 +2961,9 @@ function aiGoodCoverPlausible(role,claim,day,reveals,setup){
  if(!["seer","guard"].includes(claim)||claim===role)return false;
  return day>=1&&day<=3&&aiAliveAtSpeech(day,reveals)>=4;
 }
-/* Good bots can offer a credible night decoy, but never invent inspection
-   results. A last-three fresh Seer bluff can accidentally clear the only
-   wolf and is forbidden to the good AI. All guards/ordinary villagers only
-   evaluate public claims and their OWN identity. */
+/* Good bots can offer a guarded identity decoy. To bluff Seer,
+   they must announce a gold and night for an already publicly confirmed
+   night victim; they never invent black or clear an unknown living wolf. */
 function aiGoodCoverPlan(p){
  if(!p||!p.bot||!["villager","guard"].includes(p.role))return null;
  var setup=aiPublicRoleSetup(),left=live().length;
@@ -2996,20 +2995,20 @@ function aiGoodCoverPlan(p){
  if(brain.temperament==="cautious")confidence*=.50;
  else if(brain.temperament==="opportunist")confidence*=1.18;
  if(Math.random()>=confidence)return null;
- var choice;
- if(p.role==="guard"){
-  /* A self-guarding fake Seer can consume a wolf night attack. */
-  choice=seers.length||earlyCover?"claimGuard":"claimSeer";
- }else{
-  /* Villagers are expendable night decoys, but a public Guardian claim
-     is less likely to collide with the genuine Seer's inspection. */
-  choice=guards.length?"claimSeer":"claimGuard";
-  if(!seers.length&&!guards.length&&st.day>=2&&Math.random()<.44)
-   choice="claimSeer";
+ var historicalSafe=(st.revealed||[]).slice().reverse().find(function(r){
+  return r.source==="night"&&r.alignment==="good"&&r.day<=st.day&&
+   person(r.id)&&!person(r.id).alive;
+ });
+ var baitSeer=!!historicalSafe&&!seers.length&&!earlyCover&&
+  (p.role==="guard"||guards.length||st.day>=2&&Math.random()<.44);
+ if(baitSeer){
+  var bait=person(historicalSafe.id);
+  return {kind:aiFalseReport(p,bait,"gold",historicalSafe.day),
+   targetId:bait.id,reason:"protective-decoy-reported-clear"};
  }
- /* Only one affirmative role claim; no fabricated gold/black reports. */
- if(roleClaim(choice)===p.role)return null;
- return {kind:choice,targetId:null,reason:"protective-decoy"};
+ if(p.role==="villager"&&!guards.length)
+  return {kind:"claimGuard",targetId:null,reason:"protective-decoy"};
+ return null;
 }
 function aiSeerSilencePenalty(actor,history,reveals,setup){
  if(!actor||!setup||!setup.seer)return 0;
@@ -3096,8 +3095,15 @@ function aiWorldAnalysis(observer){
       /* An invented check is normal wolf theatre, not evidence of truth. */
       score+=.05;
      }else{
-      /* A good non-Seer claiming an inspection is actively misleading. */
-      score-=4.5;
+      /* Good protective decoys may cite an already-public night death.
+         Clearing unknown wolves remains strategically disastrous. */
+      var confirmedNightVictim=publicReveals.some(function(r){
+       return r.id===h.targetId&&r.source==="night"&&
+        r.alignment==="good"&&r.day<=(h.reportNight||h.day);
+      });
+      var protective=h.kind==="gold"&&!actualEvil&&confirmedNightVictim&&
+       aiGoodCoverPlausible(role,"seer",h.day,publicReveals,setup);
+      score-=protective?1.1:4.5;
       if(h.kind==="gold"&&actualEvil)score-=4.0;
      }
     }
@@ -3383,12 +3389,12 @@ var SPEECH_OPTIONS={
  challengeClaim:{group:"doubt",target:true,evidence:"claim"},
  trustVote:{group:"support",target:true,evidence:"vote"},
  followSeer:{group:"support",target:true,evidence:"seerClaim"},
- claimSeer:{group:"identity"},claimGuard:{group:"identity"},claimVillager:{group:"identity"},
+ claimGuard:{group:"identity"},claimVillager:{group:"identity"},
  gold:{group:"report",target:true},black:{group:"report",target:true},
  question:{group:"analysis",target:true},analyseVotes:{group:"analysis"},
  analyseClaims:{group:"analysis"},defend:{group:"analysis"}
 };
-var SPEECH_GROUPS={identity:["claimSeer","claimGuard","claimVillager","gold","black"]};
+var SPEECH_GROUPS={identity:["claimGuard","claimVillager","gold","black"]};
 var SPEECH_LINES={
  zh:{
  suspectWorldClaims:"重新推演六人的身份组合后，{name}前后的身份宣称出现冲突。这里不是单凭态度猜测：如果维持那些说法，就必须让不相容的身份同时成立。我要求{name}解释。",
@@ -3645,7 +3651,7 @@ function speechRecord(p,kind,target,detail){
  }
  if(kind==="black"||kind==="gold"){
   var actual=p.bot&&p.role==="seer"?(st.known[p.id]||[]).find(function(k){return k.id===target.id}):null;
-  var fake=p.bot&&p.role==="wolf"&&st.aiMemory&&st.aiMemory[p.id]&&st.aiMemory[p.id].fakeReports
+  var fake=p.bot&&p.role!=="seer"&&st.aiMemory&&st.aiMemory[p.id]&&st.aiMemory[p.id].fakeReports
    ?st.aiMemory[p.id].fakeReports[target.id]:null;
   data.day=detail&&detail.reportNight||actual&&actual.night||fake&&fake.night||st.day;
  }
@@ -3700,11 +3706,11 @@ function aiStrongestRivalSeer(p){
  return aiPublicRoleClaimers("seer").filter(function(q){return q.id!==p.id})
  .sort(function(a,b){return aiCredibility(p,b.id)-aiCredibility(p,a.id)})[0]||null;
 }
-function aiFalseReport(p,target,want){
+function aiFalseReport(p,target,want,night){
  var brain=aiState(p);
  if(!brain.fakeReports)brain.fakeReports={};
  if(brain.fakeReports[target.id])return brain.fakeReports[target.id].kind;
- brain.fakeReports[target.id]={kind:want,night:st.day};
+ brain.fakeReports[target.id]={kind:want,night:Number.isInteger(night)?night:st.day};
  return want;
 }
 /* No random Seer concealment: decide by board size, living wolf pressure,
@@ -3715,13 +3721,18 @@ function aiSeerSpeechPlan(p){
  if(!setup)return null;
  var alive=live().length,existing=aiClaimFor(p.id),reports=aiReportsBy(p.id);
  var checks=(st.known[p.id]||[]).filter(function(k){
-  return person(k.id)&&person(k.id).alive;
+  return person(k.id)&&k.id!==p.id;
  });
  function reported(k){return reports.some(function(r){return r.targetId===k.id})}
- var wolf=checks.find(function(k){return k.evil&&!reported(k)});
+ var wolf=checks.find(function(k){return k.evil&&!reported(k)&&person(k.id).alive});
  if(wolf)return {kind:"black",targetId:wolf.id,reason:"confirmed-wolf"};
  var rival=aiPublicRoleClaimers("seer").find(function(q){return q.id!==p.id});
- var clear=checks.slice().reverse().find(function(k){return !k.evil&&!reported(k)});
+ var clear=checks.slice().reverse().find(function(k){
+  return !k.evil&&!reported(k)&&person(k.id).alive;
+ });
+ var historical=checks.slice().reverse().find(function(k){
+  return !reported(k)&&person(k.id)&&!person(k.id).alive;
+ });
  var wolvesOut=(st.revealed||[]).filter(function(r){return r.alignment==="wolf"}).length;
  var wolves=Math.max(0,setup.wolf-wolvesOut);
  var urgency=alive<=2*wolves+2;
@@ -3734,16 +3745,11 @@ function aiSeerSpeechPlan(p){
   (setup.guard>0&&st.day>=2&&alive<=setup.seats-2);
  if(clear&&(existing==="seer"||reveal))
   return {kind:"gold",targetId:clear.id,reason:"strategic-clear-disclosure"};
- if(rival&&!existing)
-  return {kind:"claimSeer",targetId:null,reason:"counter-seer"};
- /* If the only inspected player was killed overnight, everyone already
-    knows their good alignment. The inspection is redundant, but the
-    living Seer should still claim under the six-seat policy; otherwise
-    the AI's random silence spoils later inferences about a dead Seer. */
- if(!existing&&isSmall&&st.day>=1)
-  return {kind:"claimSeer",targetId:null,reason:"first-day-seer-claim-no-live-check"};
- if(!existing&&urgency&&checks.length)
-  return {kind:"claimSeer",targetId:null,reason:"parity-risk-disclosure"};
+ if(historical&&(existing==="seer"||reveal))
+  return {kind:historical.evil?"black":"gold",targetId:historical.id,
+   reason:"historic-check-disclosure"};
+ /* A Seer claim requires an inspection report. If no legal private
+    check exists, wait rather than making an unsupported bare claim. */
  return null;
 }
 function aiChooseSpeech(p){
@@ -3823,7 +3829,6 @@ function aiChooseSpeech(p){
   });
   var counter=accuser&&person(accuser.id)||rival;
   if(accuser&&(!existing||existing==="seer")&&roll<.86){
-   if(!existing&&roll<.44&&!unsafeFreshSeerClear)return choose("claimSeer",null,"counterclaim");
    if(counter&&!aiReportsBy(p.id).some(function(h){return h.targetId===counter.id&&h.kind==="gold"}))
     return choose(aiFalseReport(p,counter,"black"),counter,"counter-accusation");
   }
@@ -3869,7 +3874,9 @@ function botSpeech(p){
  var brain=aiState(p),choice=aiChooseSpeech(p);
  if(!choice||!SPEECH_OPTIONS[choice.kind])choice={kind:"pass",targetId:null,reason:"fallback"};
  if(SPEECH_OPTIONS[choice.kind].target){
-  if(!targetList(p.id).some(function(q){return q.id===choice.targetId}))
+  var eligible=(["gold","black"].includes(choice.kind)?
+   st.players.filter(function(q){return q.id!==p.id}):targetList(p.id));
+  if(!eligible.some(function(q){return q.id===choice.targetId}))
    choice={kind:"pass",targetId:null,reason:"invalid-target"};
   else if(!speechHasEvidence(st.publicHistory,st.voteHistory,choice.kind,choice.targetId))
    choice={kind:"suspect",targetId:choice.targetId,reason:"claim-not-supported"};
@@ -3902,6 +3909,8 @@ function validatedSpeechDetail(p,kind,targetId,detail){
   return ref?{evidenceSeq:ref.seq}:null;
  }
  if(["gold","black"].includes(kind)){
+  var inspectedTarget=person(targetId);
+  if(!inspectedTarget||targetId===p.id)return null;
   var night=Number(detail.reportNight);
   if(!Number.isInteger(night)||night<1||night>st.day){
    if(!p.bot)return null;
@@ -3911,6 +3920,8 @@ function validatedSpeechDetail(p,kind,targetId,detail){
   if(p.role==="seer"&&!(st.known[p.id]||[]).some(function(k){
    return k.id===targetId&&k.night===night&&!!k.evil===(kind==="black");
   }))return null;
+  var exit=(st.revealed||[]).find(function(r){return r.id===targetId});
+  if(exit&&night>exit.day)return null;
   return {reportNight:night};
  }
  return {};
@@ -4137,7 +4148,9 @@ function accept(id,action,target,speech,detail){
  }else if(st.phase==="talk"&&action==="speech"){
   if(st.speeches[id]||!SPEECH_OPTIONS[speech])return;
   var opt=SPEECH_OPTIONS[speech];
-  if(opt.target&&!targetList(id).some(function(t){return t.id===target}))return;
+  if(opt.target&&!(["gold","black"].includes(speech)?
+  st.players.filter(function(t){return t.id!==id}):targetList(id))
+  .some(function(t){return t.id===target}))return;
   if(!opt.target&&target)return;
   if(opt.evidence&&!speechHasEvidence(st.publicHistory,st.voteHistory,speech,target))return;
   speak(id,speech,target,detail);
@@ -4456,7 +4469,8 @@ function speechUILine(type,id){
 }
 function eligibleSpeechTargets(v,kind){
  return (v.players||[]).filter(function(p){
-  if(!p.alive||p.id===v.me||!speechHasEvidence(v.publicHistory||[],v.voteHistory||[],kind,p.id))return false;
+  if((!p.alive&&!["gold","black"].includes(kind))||
+     p.id===v.me||!speechHasEvidence(v.publicHistory||[],v.voteHistory||[],kind,p.id))return false;
   if(v.myRole==="seer"&&["gold","black"].includes(kind)){
    return (v.knowledge||[]).some(function(k){return k.id===p.id&&!!k.evil===(kind==="black")});
   }
