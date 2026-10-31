@@ -1,5 +1,22 @@
 # 月下疑云 / Moonlit Village
 
+## 游戏音效（Conte de Fées / こんとどぅふぇ）
+
+已将以下音效作为游戏素材托管在 `assets/audio/sfx/`，并在 `index.html` 的展示层使用。作品内的 MP3 不得作为独立音效素材另行发布或出售。
+
+| 事件 | 文件 | 原始素材 |
+|---|---|---|
+| 菜单光标、目标切换 | `cursor.mp3` | `cursor_04.mp3` · https://conte-de-fees.com/se/cursor |
+| 确认、选项提交、投票 | `confirm.mp3` | `confirm_01.mp3` · https://conte-de-fees.com/se/confirm |
+| 返回、取消 | `cancel.mp3` | `cancel_01.mp3` · https://conte-de-fees.com/se/cancel |
+| 玩家出局 | `damage.mp3` | `damage_01.mp3` · https://conte-de-fees.com/se/damage |
+| 天亮、夜晚提示、胜利 | `chime.mp3` | `chime_04.mp3` · https://conte-de-fees.com/se/chime |
+| 失败结算 | `gameover.mp3` | `gameover_07.mp3` · https://conte-de-fees.com/se/gameover |
+
+官方素材使用条款：https://conte-de-fees.com/how-to-use 。网站声明可用于商业游戏且无需强制署名，本项目仍列明素材作者与来源。现有 BGM《不思議な村》保持不变。
+
+声音由用户第一次交互触发浏览器播放。右上角音乐按钮同时控制 BGM 和音效；关闭时会停止正在播放的音效。事件音量低于默认背景音乐以避免干扰，重复点击有简短的防抖。音效逻辑仅对界面操作与收到的公开游戏状态作响应，**未修改角色分配、电脑策略、结算和同步协议**。
+
 ## 背景音乐：不思議な村 / The Mysterious Village
 
 - 曲名：**不思議な村**（Track No.0016，约 1 分 30 秒）
