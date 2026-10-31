@@ -927,6 +927,164 @@ body.game-active #musicToggle:focus-visible{outline:2px solid var(--gold);outlin
 body.game-active #musicToggle.is-muted::before{border-color:rgba(154,163,199,.33)}
 @media(prefers-reduced-motion:reduce){body.game-active #musicToggle::before{transition:none!important}}
 
+
+/* Six-resident werewolf stage: 3 fixed portraits on either side of the log.
+   Legacy mobile grid and horizontal-strip rules are overridden in this section. */
+body.game-active #gameScreen,body.game-active #gameScreen.is-lobby{
+ grid-template-rows:auto minmax(0,1fr) auto!important;
+ display:grid!important;gap:6px!important;min-height:0;overflow:hidden;
+}
+body.game-active #gameScreen>.game-head{
+ grid-row:1;display:flex;flex-direction:column;justify-content:center;
+ min-height:50px!important;max-height:116px;padding:6px 10px!important;
+ background:rgba(20,28,58,.65)!important;
+}
+body.game-active #gameScreen>.game-head .topbar{
+ width:100%;height:auto;min-height:27px;display:flex;align-items:center;gap:6px;
+}
+body.game-active #gameScreen>.game-head #myRole.role-chip{
+ display:block;position:static;flex:none;margin:3px 0 0;padding:2px 3px;
+ text-align:left;white-space:normal;max-height:42px;overflow-y:auto;
+ font-size:10px;line-height:1.3;border:0;border-top:1px solid rgba(232,200,114,.23);
+ background:transparent;
+}
+body.game-active #gameScreen>.game-head #myRole strong{font-size:10px;font-weight:650}
+body.game-active #gameScreen>.game-head #shareBtns{width:100%;margin-top:4px}
+body.game-active #gameScreen>.village-stage{
+ grid-row:2;display:flex;min-height:0;overflow:hidden;
+}
+body.game-active #players.player-layout{
+ width:100%;min-width:0;min-height:0;height:100%;
+ display:grid!important;grid-template-columns:clamp(58px,18vw,78px) minmax(0,1fr) clamp(58px,18vw,78px);
+ grid-template-rows:minmax(0,1fr)!important;gap:5px!important;
+ align-items:stretch;overflow:hidden!important;scroll-snap-type:none!important;padding:0!important;
+}
+body.game-active #players .character-rail{
+ display:flex;flex-direction:column;align-items:stretch;justify-content:space-around;
+ gap:6px;min-width:0;min-height:0;padding:10px 0;overflow:visible;
+}
+body.game-active #players .character-rail .player{
+ position:relative;display:flex!important;flex-direction:column!important;
+ justify-content:center;align-items:center;
+ flex:0 1 102px;width:100%!important;height:auto!important;
+ min-height:73px;max-height:112px!important;padding:7px 2px 6px!important;
+ gap:5px;box-sizing:border-box;transform:none;scroll-snap-align:none;
+ border:1px solid rgba(232,200,114,.23);
+ border-radius:8px;background:rgba(20,28,58,.6);
+ text-align:center;overflow:hidden;
+}
+body.game-active #players .character-rail .player.me{
+ border-color:rgba(232,200,114,.75);
+}
+body.game-active #players .character-rail .player .avatar.face-frame{
+ display:grid;flex:0 0 43px!important;width:43px!important;height:43px!important;
+ min-width:43px!important;min-height:43px!important;margin:0!important;
+ border-radius:50%;grid-column:auto;grid-row:auto;
+}
+body.game-active #players .character-rail .player .name{
+ display:block;width:100%;max-width:100%;flex:0 0 auto;
+ min-height:12px;margin:0!important;text-align:center;
+ font-size:11px!important;line-height:1.2;color:var(--ink);
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+body.game-active #players .character-rail .player .player-status-line{
+ flex:0 0 2px;width:52%;height:2px;margin:0;
+}
+body.game-active #players .character-rail .player .player-you{
+ top:3px;right:3px;font-size:9px;line-height:1.1;padding:1px 3px;
+}
+body.game-active #players .character-rail .player.dead::after{
+ content:"";position:absolute;left:4%;top:49%;width:92%;height:1px;
+ background:rgba(224,82,79,.85);transform:rotate(-28deg);pointer-events:none;z-index:3;
+}
+body.game-active #players .character-rail .player.rpg-selected{
+ transform:translateY(-2px)!important;box-shadow:0 0 15px rgba(232,200,114,.3);
+}
+body.game-active #players .character-rail .player.rpg-selectable{
+ cursor:pointer;min-height:73px;transition:transform .25s ease,border-color .25s ease;
+}
+body.game-active .story-column{
+ position:relative;display:flex;flex-direction:column;
+ min-width:0;min-height:0;overflow:hidden;padding:7px 1px 0;
+ background:transparent;isolation:isolate;
+}
+body.game-active .story-heading{flex:none;display:flex;align-items:center;justify-content:space-between;
+ gap:4px;padding:0 5px 7px;border-bottom:1px solid rgba(232,200,114,.2);
+}
+body.game-active .story-heading h2{margin:0;color:var(--gold);font-size:12px;letter-spacing:.8px;white-space:nowrap}
+body.game-active .story-heading #countInfo{font-size:9px;line-height:1.2;color:var(--muted);text-align:right}
+body.game-active #feed.story-feed{
+ display:flex;flex:1;min-height:0;max-height:none;
+ flex-direction:column;gap:8px;overflow-y:auto;overflow-x:hidden;
+ padding:28px 3px 10px;margin:0;overscroll-behavior:contain;
+ scrollbar-width:thin;scrollbar-color:rgba(154,163,199,.35) transparent;
+ mask-image:linear-gradient(to bottom,transparent 0,#000 32px,#000 100%);
+ -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 32px,#000 100%);
+}
+body.game-active .story-feed .rpg-line{font-size:11px;line-height:1.45}
+body.game-active #gameScreen>.game-actions{
+ grid-row:3;display:flex;flex-direction:column;justify-content:flex-start;
+ min-height:0;max-height:min(37dvh,260px);padding:8px 9px!important;
+ background:rgba(20,28,58,.65)!important;overflow:hidden;
+}
+body.game-active #gameScreen>.game-actions h2{
+ display:block!important;color:var(--ink)!important;
+ font-size:12px;line-height:1.25;margin:0 0 6px;
+}
+body.game-active #gameScreen>.game-actions #actions{
+ min-height:0;overflow-y:auto;flex:1;align-content:start;
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:minmax(56px,auto)!important;
+}
+body.game-active #gameScreen>.game-actions #notice{
+ margin:4px 0 0;max-height:40px;overflow-y:auto;flex:none;
+ font-size:11px;line-height:1.3;color:var(--muted);
+}
+body.game-active #gameScreen.action-waiting>.game-actions{min-height:55px}
+body.game-active #gameScreen>.game-head .topbar #roomInfo{font-size:10px}
+.speaker-overlay{
+ position:absolute;inset:33px 1px 0;z-index:10;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;gap:8px;padding:8px 4px;
+ background:linear-gradient(180deg,rgba(10,15,31,.85),rgba(20,28,58,.91));
+ backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+ animation:speaker-enter .35s cubic-bezier(.22,1,.36,1);
+}
+.speaker-overlay[hidden]{display:none!important}
+.speaker-card{
+ width:100%;min-height:142px;max-height:80%;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;gap:9px;
+ border:1px solid rgba(232,200,114,.43);border-radius:9px;
+ background:rgba(20,28,58,.8);padding:11px 8px;
+ box-shadow:0 0 25px rgba(232,200,114,.1);
+}
+.speaker-card-portrait .rpg-portrait.face-frame{width:57px;height:57px;flex:0 0 57px}
+.speaker-card-copy{text-align:center;width:100%;min-width:0}
+.speaker-card-name{font-size:12px;color:var(--gold);margin-bottom:7px;font-weight:650}
+.speaker-card-line{font-size:14px;color:var(--ink);line-height:1.6;overflow-wrap:anywhere;max-height:18vh;overflow-y:auto}
+.speaker-skip{
+ min-height:48px!important;min-width:100px;border:1px solid rgba(232,200,114,.35);
+ border-radius:6px;background:rgba(20,28,58,.8);color:var(--gold);
+ font-size:12px;padding:7px 12px;
+}
+@keyframes speaker-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:390px){
+ body.game-active #players.player-layout{grid-template-columns:64px minmax(0,1fr) 64px;gap:4px!important}
+ body.game-active #players .character-rail .player .avatar.face-frame{
+  width:37px!important;height:37px!important;min-width:37px!important;min-height:37px!important;flex-basis:37px!important;
+ }
+ body.game-active #players .character-rail .player .name{font-size:10px!important}
+ body.game-active .story-heading{flex-direction:column;align-items:flex-start;gap:3px}
+ body.game-active .story-heading #countInfo{font-size:8px;text-align:left}
+}
+@media(max-height:700px){
+ body.game-active #players .character-rail{padding:4px 0;gap:4px}
+ body.game-active #players .character-rail .player{min-height:63px;padding:4px 2px!important;gap:3px}
+ body.game-active #players .character-rail .player .avatar.face-frame{
+  width:33px!important;height:33px!important;min-width:33px!important;min-height:33px!important;flex-basis:33px!important;
+ }
+ body.game-active #gameScreen>.game-actions{max-height:min(39dvh,245px)}
+}
+@media(prefers-reduced-motion:reduce){.speaker-overlay{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -947,14 +1105,29 @@ body.game-active #musicToggle.is-muted::before{border-color:rgba(154,163,199,.33
 <div id="homeNotice" class="small" aria-live="polite"></div>
 </section>
 <section id="gameScreen">
-<div class="panel">
+<div class="panel game-head">
 <div class="topbar"><span class="pill" id="phaseTag">准备开始</span><span id="roomInfo"></span></div>
+<div id="myRole" class="role-chip" aria-label="你的身份">等待身份分配</div>
 <div class="btns" id="shareBtns"></div>
 </div>
-<div class="panel residents-panel"><h2 class="residents-heading"><span class="residents-heading-title">村庄居民 <span class="small" id="countInfo"></span></span><span id="myRole" class="role-chip" aria-label="你的身份">等待身份分配</span></h2><div id="players" class="players"></div></div>
-<div class="role-panel-retired" hidden aria-hidden="true"></div>
-<div class="panel"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
-<div class="panel log-surface"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
+<div class="village-stage">
+  <div id="players" class="player-layout">
+    <div id="leftPlayers" class="character-rail character-rail-left" aria-label="村庄居民，一至三号"></div>
+    <div class="story-column">
+      <div class="story-heading"><h2>村庄公告</h2><span class="small" id="countInfo"></span></div>
+      <div id="feed" class="story-feed" aria-live="polite"></div>
+      <div id="speakerOverlay" class="speaker-overlay" hidden>
+        <div class="speaker-card" role="status" aria-live="polite">
+          <div id="speakerPortrait" class="speaker-card-portrait"></div>
+          <div class="speaker-card-copy"><div id="speakerName" class="speaker-card-name"></div><div id="speakerLine" class="speaker-card-line"></div></div>
+        </div>
+        <button type="button" class="speaker-skip" data-do="skipSpeech" aria-label="结束当前发言动画">继续 <span aria-hidden="true">›</span></button>
+      </div>
+    </div>
+    <div id="rightPlayers" class="character-rail character-rail-right" aria-label="村庄居民，四至六号"></div>
+  </div>
+</div>
+<div class="panel game-actions"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
 </section>
 <div class="footer">月下疑云 · 原创轻量六人社交推理游戏<br>适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐<br>BGM：《不思議な村》— HiLi / <a href="https://conte-de-fees.com/bgm/238" target="_blank" rel="noopener noreferrer" style="color:inherit">こんとどぅふぇ</a></div>
 <div id="timeScene" class="time-scene" hidden aria-hidden="true">
@@ -1351,16 +1524,18 @@ function render(){
   var speaker=lastSpeech&&lastSpeech.text.match(/^(.+?)：「/);
   if(speaker&&v.players.filter(function(p){return p.name===speaker[1]}).length===1)lastSpeaker=speaker[1];
  }
- $("players").innerHTML=v.players.map(function(p,i){
+ var playerTiles=v.players.map(function(p,i){
   var speaking=p.alive&&lastSpeaker===p.name;
-  return '<div class="player'+(!p.alive?' dead':'')+(p.id===v.me?' me':'')+(speaking?' rpg-speaking':'')+'">'
+  return '<div class="player'+(!p.alive?' dead':'')+(p.id===v.me?' me':'')+(speaking?' rpg-speaking':'')+'" data-seat="'+i+'">'
    +faceMarkup(p,p.alive?"normal":"out",i,"resident")
    +(p.id===v.me?'<span class="player-you">你</span>':'')
-   +'<div class="name">'+escapeHtml(p.name)+'</div>'
+   +'<div class="name" title="'+escapeHtml(p.name)+'">'+escapeHtml(p.name)+'</div>'
    +'<div class="player-status-line" aria-hidden="true"></div>'
    +'<span class="sr-only">'+(p.alive?'在场':'已出局')+(speaking?'，最近发言':'')+'</span>'
    +'</div>'
- }).join("");
+ });
+ $("leftPlayers").innerHTML=playerTiles.slice(0,3).join("");
+ $("rightPlayers").innerHTML=playerTiles.slice(3,6).join("");
  if(v.phase==="talk"&&speechKind&&v.myAlive&&!v.submitted){
   var available=rpgTargets(v);
   if(!available.some(function(p){return p.id===rpgSpeechTarget}))rpgSpeechTarget=available.length?available[0].id:null;
