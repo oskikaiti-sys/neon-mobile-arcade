@@ -2818,10 +2818,15 @@ function aiPositiveTrustBasis(observer,target){
 }
 function aiCredibility(observer,id){
  var history=st.publicHistory||[],claims=history.filter(function(h){return h.id===id&&!h.retracted&&roleClaim(h.kind)});
- var confidence=1,distinct={};
+ var confidence=.8,distinct={};
  if(aiSeerStoryRefuted(observer,person(id)))confidence-=1.0;
  claims.forEach(function(h){distinct[roleClaim(h.kind)]=true});
  if(Object.keys(distinct).length>1)confidence-=.65;
+ var setup=aiPublicRoleSetup(),actor=person(id);
+ if(setup&&claims.some(function(h){return roleClaim(h.kind)==="seer"})){
+  confidence+=Math.max(-.5,aiSeerSilencePenalty(actor,history,st.revealed||[],setup)*.32);
+  if(aiCheapSelfClear(observer,actor))confidence-=.12;
+ }
  confidence-=Math.min(.5,history.filter(function(h){return h.id===id&&h.retracted}).length*.12);
  var reports=aiReportsBy(id),seen={};
  reports.forEach(function(r){
@@ -2868,7 +2873,7 @@ function aiSuspicion(observer,target){
   if(h.targetId!==target.id||h.id===target.id)return;
   var w=aiCredibility(observer,h.id);
   if(h.kind==="black")score+=1.9*w;
-  else if(h.kind==="gold")score-=1.2*w;
+  else if(h.kind==="gold"&&h.targetId!==observer.id)score-=.4*w;
   /* A player's bare suspicion is not new evidence. */
   else if(["trust","trustVote","followSeer"].includes(h.kind))score-=.08*w;
  });
@@ -2926,6 +2931,29 @@ function aiSuspicion(observer,target){
    counts and outcomes, self role, and the observer's legal Seer checks.
    Exact enumeration is capped; larger boards fall back to ordinary evidence
    scores rather than using biased partial worlds or freezing the UI. */
+/* Public silence is not certain death. A true Seer could have inspected
+   the night victim, died before speaking or chosen to stay hidden. These
+   probabilities use public survival history and public bot status only. */
+function aiSeerSilencePenalty(actor,history,reveals,setup){
+ if(!actor||!setup||!setup.seer)return 0;
+ var claims=history.filter(function(h){return h.id===actor.id&&!h.retracted&&roleClaim(h.kind)==="seer"});
+ var first=claims.length?Math.min.apply(null,claims.map(function(h){return h.day})):Infinity;
+ var exit=reveals.find(function(r){return r.id===actor.id});
+ var score=0,earliest=null;
+ for(var d=1;d<=Math.min(st.day,3);d++){
+  if(exit&&(exit.day<d||(exit.day===d&&exit.source==="night")))continue;
+  if(earliest===null)earliest=d;
+  if(d<first&&d<st.day)score+=actor.bot?-.95:-.32;
+ }
+ if(first>=3&&first!==Infinity&&earliest===1&&st.day>=3)score-=.65;
+ return score;
+}
+function aiCheapSelfClear(observer,claimer){
+ if(!observer||!claimer||observer.id===claimer.id||observer.role==="wolf")return false;
+ return aiReportsBy(claimer.id).some(function(h){
+  return h.kind==="gold"&&h.targetId===observer.id;
+ });
+}
 function aiWorldAnalysis(observer){
  if(!observer||!st||st.day<2)return null;
  var roster=st.players,alive=live(),history=st.publicHistory||[];
@@ -2962,8 +2990,10 @@ function aiWorldAnalysis(observer){
    var utterances=prior.filter(function(h){return !h.retracted});
    var announced=[...new Set(utterances.map(function(h){return roleClaim(h.kind)}).filter(Boolean))];
    score-=Math.min(.5,prior.filter(function(h){return h.retracted}).length*.12);
+   if(role==="seer")score+=aiSeerSilencePenalty(actor,history,publicReveals,setup);
    announced.forEach(function(claim){
-    if(claim===role)score+=.55;
+    /* A bare role claim cannot verify itself. */
+    if(claim===role)score+=.12;
     else if(role==="wolf")score+=.05; // A wolf can impersonate any good role.
     else score-=3.0; // Strategic penalty for unsupported good bluff.
    });
@@ -2972,7 +3002,9 @@ function aiWorldAnalysis(observer){
      if(!h.targetId)return;
      var actualEvil=assigned[h.targetId]==="wolf",saidEvil=h.kind==="black";
      if(role==="seer"){
-      score+=saidEvil===actualEvil?1.3:-9;
+      /* A lone wolf knows other residents are good, so a correct gold
+         report is no more impressive than a wolf's easy bluff. */
+      score+=saidEvil===actualEvil?0:-9;
      }else if(role==="wolf"){
       /* An invented check is normal wolf theatre, not evidence of truth. */
       score+=.05;
@@ -3090,6 +3122,9 @@ function aiWorldCase(observer,target){
  if(aiReportsBy(target.id).length)reasons.push("seer-report");
  if((st.voteHistory||[]).some(function(round){return round.votes.some(function(v){return v.voterId===target.id&&v.targetId!=="__abstain__"})}))
   reasons.push("past-vote");
+ if(aiClaimFor(target.id)==="seer"&&aiSeerSilencePenalty(target,st.publicHistory||[],st.revealed||[],aiPublicRoleSetup())<=-.8)
+  reasons.push("late-seer-claim");
+ if(aiCheapSelfClear(observer,target))reasons.push("cheap-self-clear");
  return {id:target.id,probability:p,reason:reasons[0]||"world-elimination",
   reasons:reasons,hard:!!(inspected&&inspected.evil),possibleWorlds:analysis.worlds.length};
 }
@@ -3264,6 +3299,7 @@ var SPEECH_LINES={
  suspectWorldClaims:"重新推演六人的身份组合后，{name}前后的身份宣称出现冲突。这里不是单凭态度猜测：如果维持那些说法，就必须让不相容的身份同时成立。我要求{name}解释。",
  suspectWorldBallot:"我对照了{name}的查验宣称和已经记录的投票。给过金水又投向金水，或者前后立场无法自洽，需要{name}说明。单靠印象不能代替这个矛盾。",
  suspectWorldLeading:"我把已知事实与尚未排除的身份组合重新核对了一遍。在这些组合里，{name}是狼的解释相对更有力。但这不是确定查杀，仍需复核公开记录。",
+ suspectLateSeer:"首日无人跳预言家，预言家可能已在夜里死亡，也可能暂时潜伏。{name}现在才跳预言家，需要解释之前沉默的原因和查验顺序；给一个好人发金水不足以证明其身份。",
   suspectNoWolfSlot:"{name}自称预言家，还给{related}发了金水。但我知道自己不是狼人，如果这两句话都是真的，所有存活的人就都不是狼。游戏仍在进行，说明这套身份与查验说法不可能同时成立。请解释这个矛盾。",
  analyseDualSeer:"目前{speaker}和{related}都公开跳了预言家。六人局只有一个真正的预言家，应检查双方查验日期、金水、查杀和已揭晓的身份，不能同时相信两人。",
  counterClaimSeer:"我也跳预言家。{speaker}自称预言家并不能证明是真的，现在是对跳局面，请大家核对双方查验记录和公开票型。",
@@ -3303,6 +3339,7 @@ var SPEECH_LINES={
  suspectWorldClaims:"After checking the possible role assignments, {name}'s role claims conflict. This is about incompatible claims, not a vague feeling. Please explain the inconsistency.",
  suspectWorldBallot:"I checked {name}'s claimed results against the recorded votes. Voting against one's claimed clear, or shifting positions inconsistently, calls for a concrete explanation.",
  suspectWorldLeading:"I checked the remaining role assignments against what I actually know. The more plausible assignments point toward {name}, but this is not a confirmed inspection. Review the public evidence.",
+ suspectLateSeer:"No Seer claimed on the first day; the Seer might have died or stayed hidden. {name} must explain the late claim and inspection history. A clear on a known-good recipient does not verify the speaker.",
   suspectNoWolfSlot:"{name} claims Seer and gave a clear to {related}. I know I am not a werewolf. If both claims were true, none of the living players could be the wolf—yet the game continues. This Seer story is logically inconsistent. Explain it.",
  analyseDualSeer:"Both {speaker} and {related} have claimed Seer. Only one true Seer exists in this six-person game. Compare their inspection dates, clears, accusations, and public reveals.",
  counterClaimSeer:"I also claim Seer. {speaker}'s claim alone is not proof. We have competing claims: compare our inspections and the public ballots.",
@@ -3342,6 +3379,7 @@ var SPEECH_LINES={
  suspectWorldClaims:"役職の可能な組み合わせを検証すると、{name}の役職COには矛盾があります。単なる印象ではなく、両立しない主張の説明が必要です。",
  suspectWorldBallot:"{name}の占い結果の主張と過去の投票を照合しました。自分の白判定に投票するなど、整合性のない行動には説明が必要です。",
  suspectWorldLeading:"自分が知る事実と可能な役職の組み合わせを照合すると、{name}を人狼とする仮説が比較的有力です。ただし確定した占い結果ではありません。公開記録を確認しましょう。",
+ suspectLateSeer:"初日に占い師COがなかったため、占い師は死亡したか潜伏していた可能性があります。{name}は遅れたCOと占い履歴を説明すべきです。白判定だけでは本人の真偽は確定しません。",
   suspectNoWolfSlot:"{name}は占い師COし、{related}に白を出しました。私は自分が人狼ではないと知っています。その2つの主張が両方正しければ、生存者に人狼が一人もいなくなります。ゲームが続いている以上、この説明は矛盾しています。説明してください。",
  analyseDualSeer:"{speaker}と{related}がともに占い師COをしています。この6人村の本物は1人だけです。占い日時、白黒判定、公開された結果を比べましょう。",
  counterClaimSeer:"私も占い師COです。{speaker}のCOだけでは本物と証明できません。対抗COになったので、結果と票型を比べてください。",
@@ -3480,6 +3518,9 @@ function speechRecord(p,kind,target,detail){
   }
   if(st.day>=2&&plan&&plan.reason==="world-posterior-leading"){
    data.kind="suspectWorldLeading";return data;
+  }
+  if(st.day>=2&&plan&&plan.reason==="world-late-seer"){
+   data.kind="suspectLateSeer";return data;
   }
   var slot=aiSeerSlotContradiction(p,target);
   if(slot){
@@ -3641,6 +3682,9 @@ function aiChooseSpeech(p){
      return {kind:"claimGuard",targetId:null,reason:"defend-real-guard"};
    }
    if(enough&&exposure){
+    if(exposure.reasons.includes("late-seer-claim")&&
+       aiClaimFor(first.id)==="seer"&&live().length<=4)
+     return {kind:"suspect",targetId:first.id,reason:"world-late-seer"};
     if(exposure.reasons.includes("changed-role")||exposure.reasons.includes("conflicting-report"))
      return {kind:"suspect",targetId:first.id,reason:"world-conflicting-claims"};
     if(exposure.reasons.includes("voted-own-clear"))
