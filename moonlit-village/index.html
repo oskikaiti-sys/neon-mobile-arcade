@@ -466,7 +466,8 @@ body.game-active header .eyebrow,body.game-active header .subtitle{display:none}
  box-shadow:0 0 16px rgba(232,200,114,.07);z-index:4}
 #musicToggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #musicToggle.is-muted{opacity:.58}
-button{font-family:inherit;transition:transform .3s var(--ease),background .3s var(--ease),border-color .3s var(--ease)}
+button{font-family:inherit;min-height:48px;transition:transform .3s var(--ease),background .3s var(--ease),border-color .3s var(--ease)}
+input{min-height:48px}
 button:active{transform:scale(.975)!important}
 button:focus-visible,[role=option]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 body.game-active #gameScreen{flex:1;min-height:0;display:grid!important;gap:7px;
@@ -916,6 +917,9 @@ function rpgRenderMessages(v){
  var feed=$("feed"),fingerprint=JSON.stringify(v.messages);
  if(fingerprint===rpgLogFingerprint)return;
  var oldCount=feed.querySelectorAll(".rpg-line").length;
+ var previousLast=feed.getAttribute("data-last-message")||"";
+ var incomingLast=v.messages.length?JSON.stringify(v.messages[v.messages.length-1]):"";
+ feed.setAttribute("data-last-message",incomingLast);
  rpgLogFingerprint=fingerprint;
  var messages=v.messages.map(function(m){
   var spoken=m.kind==="choice"?String(m.text).match(/^(.+?)：「([\s\S]*)」$/):null;
@@ -923,7 +927,7 @@ function rpgRenderMessages(v){
   return {speaker:null,text:m.text,spoken:false,danger:/遇袭|出局|被放逐|死亡|KO/.test(m.text)};
  });
  feed.innerHTML=messages.map(function(m,i){
-  var appear=i===messages.length-1&&messages.length>oldCount?" is-new":"";
+  var appear=i===messages.length-1&&incomingLast!==previousLast?" is-new":"";
   if(!m.spoken)return '<div class="rpg-line rpg-narrator'+(m.danger?' is-danger':'')+appear+'">'+
    (m.danger?'<span aria-hidden="true">☾ </span>':'')+escapeHtml(m.text)+'</div>';
   return '<div class="rpg-line rpg-dialogue'+appear+'">'
