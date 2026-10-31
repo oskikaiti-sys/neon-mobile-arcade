@@ -1835,6 +1835,25 @@ translations.en.nightYourTurn="It is your turn to act";translations.zh.nightYour
 translations.en.nightWaitYourTurn="Wait until your role is called.";translations.zh.nightWaitYourTurn="请等待轮到你的身份行动。";translations.ja.nightWaitYourTurn="自分の役職の番までお待ちください。";
 translations.en.nightChoiceSaved="Choice submitted. Waiting for this turn to end.";translations.zh.nightChoiceSaved="已完成行动，等待本轮结束。";translations.ja.nightChoiceSaved="行動を確定しました。このターンの終了を待っています。";
 translations.en.nightCuePosition="Turn {turn}/3";translations.zh.nightCuePosition="第 {turn}/3 轮";translations.ja.nightCuePosition="{turn}/3 ターン";
+translations.en.debatePhase="Challenge and reply";translations.zh.debatePhase="质疑与回应";translations.ja.debatePhase="質疑と返答";
+translations.en.debateChallengeTitle="Challenge a statement";translations.zh.debateChallengeTitle="质疑一个人的说法";translations.ja.debateChallengeTitle="発言を問いただす";
+translations.en.debateReplyTitle="Respond to the challenges";translations.zh.debateReplyTitle="回应针对你的质疑";translations.ja.debateReplyTitle="質疑に返答する";
+translations.en.debateWaitChallenge="Waiting for others to challenge or pass.";translations.zh.debateWaitChallenge="已选择质疑或放弃，等待其他人。";translations.ja.debateWaitChallenge="ほかの人の質疑を待っています。";
+translations.en.debateWaitReply="Waiting for challenged players to reply.";translations.zh.debateWaitReply="等待被质疑者集中回应。";translations.ja.debateWaitReply="質疑された人の返答を待っています。";
+translations.en.debateNotTargeted="You were not challenged this round. Wait for voting.";translations.zh.debateNotTargeted="本轮没有人质疑你，等待投票即可。";translations.ja.debateNotTargeted="この回は質疑されませんでした。投票を待ってください。";
+translations.en.debateSubmitted="Reply submitted. Waiting for voting.";translations.zh.debateSubmitted="已回应质疑，等待投票。";translations.ja.debateSubmitted="返答しました。投票を待っています。";
+translations.en.debateCardPick="Tap a character above to challenge their {kind}.";translations.zh.debateCardPick="点击上方角色卡，质疑对方的「{kind}」。";translations.ja.debateCardPick="上のカードを押し、相手の「{kind}」を問います。";
+translations.en.debateConfirm="Challenge {name} about {kind}?";translations.zh.debateConfirm="确定就「{kind}」质疑{name}吗？";translations.ja.debateConfirm="{name}の「{kind}」を質疑しますか？";
+translations.en.debatePass="No challenge";translations.zh.debatePass="本轮不质疑";translations.ja.debatePass="質疑しない";
+translations.en.debateDone="Confirm challenge";translations.zh.debateDone="确认质疑";translations.ja.debateDone="質疑を確定";
+translations.en.debateReason="Ask for evidence";translations.zh.debateReason="追问判断依据";translations.ja.debateReason="根拠を問いただす";
+translations.en.debateClaim="Question a role claim";translations.zh.debateClaim="质疑跳身份";translations.ja.debateClaim="役職COを質疑";
+translations.en.debateReport="Question an inspection";translations.zh.debateReport="质疑金水／查杀";translations.ja.debateReport="白黒判定を質疑";
+translations.en.debateVote="Question a past vote";translations.zh.debateVote="质疑历史票型";translations.ja.debateVote="過去の投票を質疑";
+translations.en.debateExplain="Explain public evidence";translations.zh.debateExplain="解释公开依据";translations.ja.debateExplain="公開根拠を説明";
+translations.en.debateCounter="Ask accuser for proof";translations.zh.debateCounter="反问质疑者的依据";translations.ja.debateCounter="相手に根拠を求める";
+translations.en.debateAdmit="Acknowledge a mistake";translations.zh.debateAdmit="承认判断可能有误";translations.ja.debateAdmit="判断の誤りを認める";
+translations.en.debateAvoid="Decline to answer";translations.zh.debateAvoid="暂不回应";translations.ja.debateAvoid="回答を控える";
 translations.en.speechChooseTarget="Choose a person · {kind}";translations.zh.speechChooseTarget="选择发言对象 · {kind}";translations.ja.speechChooseTarget="対象を選ぶ · {kind}";
 translations.en.speechPickCard="Tap a resident card above to select who to {kind}.";translations.zh.speechPickCard="点击上方角色卡，选择「{kind}」的对象。";translations.ja.speechPickCard="上の人物カードから「{kind}」の対象を選んでください。";
 translations.en.speechConfirmCard="Confirm “{kind}” about {name}?";translations.zh.speechConfirmCard="确定选择{name}并发表「{kind}」吗？";translations.ja.speechConfirmCard="{name}に対して「{kind}」と発言しますか？";
@@ -2105,7 +2124,7 @@ function readyRole(){
  else if(conn&&conn.open)conn.send({type:"roleReady",gameNo:view.gameNo});
 }
 
-var speechGroup="",rpgSpeechTarget=null,rpgMenuIndex=0,rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
+var speechGroup="",debateKind="",rpgSpeechTarget=null,rpgMenuIndex=0,rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
 var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
 var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 
@@ -3691,7 +3710,7 @@ function render(){
  acceptPrivateNightFeedback(v);
  showRoleDeal(v);
  handleTimeScene(v);
- var titles={lobby:tr("phaseLobby"),deal:tr("phaseDeal"),night:tr("phaseNight",{day:v.day}),talk:tr("phaseTalk",{day:v.day}),vote:tr("phaseVote",{day:v.day}),ended:tr("phaseEnded")};
+ var titles={lobby:tr("phaseLobby"),deal:tr("phaseDeal"),night:tr("phaseNight",{day:v.day}),talk:tr("phaseTalk",{day:v.day}),debate:tr("debatePhase"),vote:tr("phaseVote",{day:v.day}),ended:tr("phaseEnded")};
  $("phaseTag").textContent=titles[v.phase];
  $("roomInfo").textContent=v.solo?tr("soloInfo"):v.room?tr("roomInfo",{code:v.room}):"";
  $("shareBtns").innerHTML=(!v.solo&&v.room&&v.phase==="lobby")?button(tr("copy"),"copy",null,null,"ghost"):"";
@@ -3740,7 +3759,8 @@ function render(){
  $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleName(v.myRole)+" · "+roleDescription(v.myRole))+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):tr("roleUnassigned");
  rpgRenderMessages(v);
  var a="",title=tr("actionDefault"),notice="";
- if(v.phase!=="talk"||v.submitted){speechGroup="";speechKind="";rpgSpeechTarget=null;}
+ if(v.phase!=="talk"||v.submitted){speechGroup="";speechKind="";if(v.phase!=="debate")rpgSpeechTarget=null;}
+ if(v.phase!=="debate"||v.submitted||v.debateStage!=="challenge")debateKind="";
  if(v.phase==="lobby"){
   title=tr("actionLobby");
   if(v.host)a=button(tr("start"),"start",null,null,"primary full");
@@ -3780,6 +3800,36 @@ function render(){
    }).join("");
    notice=tr("speechMenuHelp");
   }
+ }else if(v.phase==="debate"){
+  title=tr(v.debateStage==="challenge"?"debateChallengeTitle":"debateReplyTitle");
+  if(!v.myAlive)notice=tr("spectate");
+  else if(v.debateStage==="challenge"){
+   if(v.submitted)notice=tr("debateWaitChallenge");
+   else if(debateKind){
+    var dkeys={reason:"debateReason",claim:"debateClaim",report:"debateReport",vote:"debateVote"};
+    title=tr("debateCardPick",{kind:tr(dkeys[debateKind])});
+    a=modernAction(tr("debateDone"),"confirmChallenge",null,null,"confirm","")
+     +modernAction(tr("back"),"backDebate",null,null,"back","");
+    notice=tr("speechPickCardHint");
+   }else{
+    var kinds={reason:"debateReason",claim:"debateClaim",report:"debateReport",vote:"debateVote"};
+    a=Object.keys(kinds).map(function(kind){
+     var available=kind==="reason"||v.players.some(function(p){
+      return p.id!==v.me&&p.alive&&clientDebateEvidence(v,p.id,kind)});
+     var markup=modernAction(tr(kinds[kind]),"debatePick",null,kind,"suspect",tr("speechTargetHelp"));
+     return available?markup:markup.replace('<button type="button"','<button type="button" disabled aria-disabled="true"');
+    }).join("");
+    a+=modernAction(tr("debatePass"),"debatePass",null,null,"pass","");
+   }
+  }else if(v.debateStage==="reply"){
+   if(v.submitted)notice=v.debateTargets.includes(v.me)?tr("debateSubmitted"):tr("debateNotTargeted");
+   else if(v.debateTargets.includes(v.me)){
+    a=["explain","counter","admit","avoid"].map(function(kind){
+     var key={explain:"debateExplain",counter:"debateCounter",admit:"debateAdmit",avoid:"debateAvoid"}[kind];
+     return modernAction(tr(key),"debateReply",null,kind,"clue",tr(key));
+    }).join("");
+   }else notice=tr("debateWaitReply");
+  }
  }else if(v.phase==="vote"){
   title=tr("actionVote");
   if(!v.myAlive)notice=tr("voteOut");
@@ -3793,10 +3843,11 @@ function render(){
  }
  $("actionTitle").textContent=title;
  $("actions").className="actions"+((v.phase==="night"||v.phase==="vote")?" targets":"")
-  +(v.phase==="talk"&&speechKind?" speech-confirmation":"");
+  +((v.phase==="talk"&&speechKind)||(v.phase==="debate"&&debateKind)?" speech-confirmation":"");
  $("actions").innerHTML=a;
  if(v.phase==="talk"&&speechKind){rpgHighlightTargets();updateSpeechTargetPrompt(v)}
- $("seerNotesButton").hidden=!(v.myRole==="seer"&&["night","talk","vote","ended"].includes(v.phase));
+ if(v.phase==="debate"&&debateKind){rpgHighlightTargets();updateDebateTargetPrompt(v)}
+ $("seerNotesButton").hidden=!(v.myRole==="seer"&&["night","talk","debate","vote","ended"].includes(v.phase));
  $("seerNotesButton").textContent=tr("seerNotesButton");
  rpgActivateMenu();
  $("notice").textContent=notice;
@@ -3804,7 +3855,7 @@ function render(){
  $("gameScreen").classList.toggle("is-lobby",v.phase==="lobby");
  notifyGameSounds(v);
  document.body.classList.toggle("night-mode",v.phase==="night");
- document.body.classList.toggle("day-mode",v.phase==="talk"||v.phase==="vote");
+ document.body.classList.toggle("day-mode",v.phase==="talk"||v.phase==="debate"||v.phase==="vote");
  updatePhaseHud();
  renderSeerNotes(v);
  updateEndgameReveal(v);
