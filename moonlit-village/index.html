@@ -421,119 +421,207 @@ body.game-active #gameScreen.day-tint>.panel:nth-child(1){background:linear-grad
 @media(prefers-reduced-motion:reduce){.time-scene.nightfall,.time-scene.sunrise{animation-duration:.2s}.time-scene *{animation-duration:.2s!important}}
 
 
-/* Stage 1: classic Japanese RPG window / dialogue system; gameplay rules unchanged. */
-:root{--rpg-blue:#1a2a6c;--rpg-night:#0d1440;--rpg-white:#fff;--rpg-gold:#ffd866;--rpg-danger:#e04848;--rpg-inner:#7a86c8}
-body,body.game-active{color:var(--rpg-white);background:linear-gradient(175deg,var(--rpg-blue),var(--rpg-night));font-family:"DotGothic16","Zpix",monospace}
-body:before{display:none}
-.window,body.game-active #gameScreen>.window,body.game-active #homeScreen.window{
- background:linear-gradient(155deg,var(--rpg-blue),var(--rpg-night))!important;
- border:2px solid #e8e8f0!important;border-radius:6px!important;
- box-shadow:inset 0 0 0 2px var(--rpg-night),inset 0 0 0 3px var(--rpg-inner),0 4px 0 rgba(0,0,0,.5)!important;
- color:var(--rpg-white);
+/* Modern Japanese RPG stage 1 — unified presentation layer, no pixel font */
+:root{
+ --night:#0a0f1f;--indigo:#141b3a;--panel:rgba(20,28,58,.6);
+ --gold:#e8c872;--danger:#e0524f;--ink:#f2f4fa;--muted:#9aa3c7;
+ --ease:cubic-bezier(.22,1,.36,1);
 }
-body.game-active header{border:0;background:transparent;box-shadow:none}
-body.game-active header h1{font-family:"DotGothic16","Zpix",monospace;color:var(--rpg-white);font-size:20px;letter-spacing:4px;text-shadow:none}
-body.game-active #musicToggle{background:var(--rpg-night);border:2px solid var(--rpg-inner);border-radius:5px;color:var(--rpg-white)}
-body.game-active #gameScreen{grid-template-rows:39px minmax(112px,1fr) 112px auto auto;gap:7px}
-body.game-active #gameScreen>.panel:nth-child(1){background:linear-gradient(120deg,var(--rpg-blue),var(--rpg-night))!important}
-body.game-active #phaseTag{border:1px solid var(--rpg-gold);background:var(--rpg-night);color:var(--rpg-gold);border-radius:3px}
-body.game-active #gameScreen>.panel h2,body.game-active #gameScreen>.panel:nth-child(5) h2{color:var(--rpg-gold);font-size:12px}
-body.game-active #gameScreen>.panel:nth-child(5){padding:8px 9px}
-body.game-active #feed{flex:1;min-height:0;max-height:none;overflow-y:auto;overflow-x:hidden;gap:8px;padding:2px 4px 6px;scrollbar-color:var(--rpg-inner) transparent}
-body.game-active #feed .rpg-line{
- display:flex!important;flex:none;position:relative;overflow:visible;border:1px solid var(--rpg-inner);
- border-radius:3px;padding:9px 10px;margin:0;min-height:40px;white-space:normal;
- font:400 12px/1.55 "DotGothic16","Zpix",monospace;letter-spacing:0;word-break:break-word;
- background:linear-gradient(135deg,var(--rpg-blue),var(--rpg-night));color:var(--rpg-white);
- box-shadow:inset 0 0 0 2px var(--rpg-night);
-}
-body.game-active #feed .rpg-narrator{justify-content:center;align-items:center;text-align:center}
-body.game-active #feed .rpg-line.is-danger{color:var(--rpg-danger);border-color:var(--rpg-danger)}
-body.game-active #feed .rpg-dialogue{gap:9px;align-items:flex-start;text-align:left;cursor:pointer;padding:12px 9px 13px}
-.rpg-portrait{width:49px;height:49px;flex:0 0 49px;display:grid;place-items:center;border:1px solid var(--rpg-inner);background:var(--rpg-night)}
-.rpg-portrait svg{width:100%;height:100%;display:block;color:var(--rpg-white)}
-.rpg-line-content{min-width:0;flex:1;position:relative;padding-top:7px}
-.rpg-nameplate{position:absolute;top:-18px;left:-2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
- padding:2px 7px;background:var(--rpg-night);border:1px solid var(--rpg-gold);color:var(--rpg-gold);font-size:11px;line-height:1.3}
-.rpg-spoken{display:block;min-height:18px;overflow-wrap:anywhere}
-.rpg-next{display:inline-block;color:var(--rpg-gold);font-size:11px;margin-left:5px;animation:rpg-cursor-blink 1s steps(2) infinite}
-.rpg-line.is-typing .rpg-next{display:none}
-body.game-active #gameScreen>.panel:nth-child(2){padding:5px 8px}
-body.game-active #players .player{border-color:var(--rpg-inner);border-radius:3px;background:linear-gradient(150deg,var(--rpg-blue),var(--rpg-night))}
-body.game-active #players .player.me{border-color:var(--rpg-gold)}
-body.game-active #players .player .tag{color:var(--rpg-white)}
-body.game-active #gameScreen>.panel:nth-child(3){background:linear-gradient(120deg,var(--rpg-blue),var(--rpg-night))!important;border-color:#e8e8f0}
-body.game-active #myRole{color:var(--rpg-gold)}
-body.game-active #gameScreen>.panel:nth-child(4){padding:7px 9px}
+html{background:var(--night)}
+body{background:linear-gradient(155deg,var(--night),var(--indigo) 85%);color:var(--ink);
+ font-family:-apple-system,BlinkMacSystemFont,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.48;z-index:0;
+ background:radial-gradient(circle at 14% 16%,rgba(242,244,250,.7) 0 1px,transparent 1.5px),
+ radial-gradient(circle at 76% 23%,rgba(232,200,114,.55) 0 1px,transparent 1.5px),
+ radial-gradient(circle at 43% 48%,rgba(242,244,250,.6) 0 1px,transparent 1.5px),
+ radial-gradient(circle at 83% 72%,rgba(232,200,114,.45) 0 1px,transparent 1.5px),
+ radial-gradient(circle at 25% 82%,rgba(242,244,250,.45) 0 1px,transparent 1.5px);
+ background-size:100% 100%;animation:dust-drift 24s ease-in-out infinite alternate}
+body:after{content:"";position:fixed;pointer-events:none;inset:0;z-index:0;
+ background:radial-gradient(ellipse at 50% 42%,transparent 30%,rgba(10,15,31,.62) 100%)}
+body.game-active.night-mode{background:linear-gradient(155deg,var(--night),var(--indigo))}
+body.game-active.day-mode{background:radial-gradient(ellipse at 85% 7%,rgba(232,200,114,.21),transparent 53%),linear-gradient(160deg,var(--night),var(--indigo))}
+main{position:relative;z-index:1}
+.panel,.window,body.game-active #gameScreen>.panel,body.game-active #homeScreen{
+ position:relative;isolation:isolate;background:var(--panel)!important;color:var(--ink);
+ border:1px solid rgba(232,200,114,.35)!important;border-radius:0!important;
+ clip-path:polygon(9px 0,calc(100% - 9px) 0,100% 9px,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 calc(100% - 9px),0 9px);
+ box-shadow:0 0 24px rgba(232,200,114,.08)!important;
+ backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.panel::before{content:"";position:absolute;top:0;left:9px;right:9px;height:1px;pointer-events:none;
+ background:linear-gradient(90deg,transparent,rgba(232,200,114,.85),transparent)}
+.panel h2{font-weight:650;letter-spacing:.7px}
+body.game-active main{width:100%;max-width:780px;box-sizing:border-box;height:100dvh;min-height:0;overflow:hidden;
+ display:flex;flex-direction:column;padding:max(5px,env(safe-area-inset-top)) 9px max(7px,env(safe-area-inset-bottom))}
+body.game-active header{position:relative;flex:none;min-height:48px;margin:0 0 7px;padding:5px 0 8px;display:flex;
+ justify-content:center;align-items:center;border:0;background:none;box-shadow:none}
+body.game-active header:after{content:"";position:absolute;height:1px;bottom:0;left:22%;right:22%;
+ background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+body.game-active header h1{font-family:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong",serif;
+ color:var(--ink);font-size:23px;font-weight:600;letter-spacing:4px;text-shadow:0 0 13px rgba(232,200,114,.27);margin:0;padding-left:4px}
+body.game-active header .eyebrow,body.game-active header .subtitle{display:none}
+#musicToggle,body.game-active #musicToggle{position:absolute;right:1px;top:2px;display:grid;place-items:center;
+ width:48px;height:48px;min-height:48px;min-width:48px;padding:0;background:var(--panel);
+ border:1px solid rgba(232,200,114,.36)!important;border-radius:50%;color:var(--gold);
+ box-shadow:0 0 16px rgba(232,200,114,.07);z-index:4}
+#musicToggle svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#musicToggle.is-muted{opacity:.58}
+button{font-family:inherit;transition:transform .3s var(--ease),background .3s var(--ease),border-color .3s var(--ease)}
+button:active{transform:scale(.975)!important}
+button:focus-visible,[role=option]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+body.game-active #gameScreen{flex:1;min-height:0;display:grid!important;gap:7px;
+ grid-template-rows:39px minmax(70px,1fr) 115px auto auto}
+body.game-active #gameScreen>.panel{min-width:0;min-height:0;overflow:hidden;margin:0;padding:8px 10px}
+body.game-active #gameScreen>.panel:nth-child(1){grid-row:1;padding:4px 10px}
+body.game-active .topbar{height:100%;gap:6px;align-items:center}
+body.game-active #phaseTag{position:relative;display:inline-flex;align-items:center;
+ min-height:28px;letter-spacing:.5px;font-size:11px;padding:5px 12px;color:var(--gold);
+ border:1px solid rgba(232,200,114,.52)!important;border-radius:0!important;background:rgba(232,200,114,.09);
+ clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px)}
+body.game-active #roomInfo{font-size:11px;color:var(--muted)}
+body.game-active #shareBtns{display:flex;min-height:0;margin-top:3px}
+body.game-active #shareBtns button{min-height:48px!important;font-size:12px;width:100%}
+body.game-active #gameScreen.is-lobby{grid-template-rows:94px minmax(70px,1fr) 115px auto auto}
+body.game-active #gameScreen.is-lobby>.panel:first-child{padding:6px 9px}
+body.game-active #gameScreen>.panel:nth-child(5){grid-row:2;display:flex;flex-direction:column;padding:9px 10px 7px}
+body.game-active #gameScreen>.panel:nth-child(5) h2{flex:none;font-size:12px;font-weight:700;line-height:1.2;margin:0 0 6px;color:var(--gold)}
+body.game-active #feed{flex:1;min-height:0;max-height:none;overflow-y:auto;overflow-x:hidden;
+ display:flex;flex-direction:column;gap:9px;justify-content:flex-start;padding:3px 4px 5px;
+ overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(154,163,199,.5) transparent}
+body.game-active #feed .rpg-line{display:flex!important;flex:none;font-size:12px;line-height:1.55;
+ border:0!important;border-radius:0!important;background:transparent!important;
+ padding:0;margin:0;max-height:none;min-height:0;color:var(--ink);box-shadow:none!important;
+ white-space:normal;overflow:visible;overflow-wrap:anywhere;-webkit-line-clamp:unset}
+body.game-active #feed .rpg-narrator{align-items:center;justify-content:center;gap:8px;text-align:center;
+ color:var(--muted);font-size:11px;letter-spacing:.25px;padding:3px 4px!important}
+body.game-active #feed .rpg-narrator:before,body.game-active #feed .rpg-narrator:after{
+ content:"";height:1px;min-width:9px;max-width:31px;flex:1;
+ background:linear-gradient(90deg,transparent,rgba(154,163,199,.5))}
+body.game-active #feed .rpg-narrator:after{transform:rotate(180deg)}
+body.game-active #feed .rpg-narrator.is-danger{color:var(--danger)}
+body.game-active #feed .rpg-dialogue{display:flex;gap:9px;align-items:flex-start;padding:1px 2px 3px!important;
+ border:0;min-height:51px}
+.rpg-portrait{width:39px;height:39px;flex:0 0 39px;border:1px solid rgba(232,200,114,.38);border-radius:50%;
+ display:grid;place-items:center;background:rgba(20,28,58,.7);clip-path:none;overflow:hidden;color:var(--muted)}
+.rpg-portrait svg{width:100%;height:100%}
+.rpg-line-content{position:relative;min-width:0;flex:1;display:flex;flex-direction:column;gap:3px;align-items:flex-start;padding-top:0}
+.rpg-nameplate{position:static;max-width:100%;font-size:10px;line-height:1.3;letter-spacing:.5px;
+ color:var(--gold);border:0;background:transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.rpg-spoken{display:block;width:100%;min-width:0;background:rgba(20,28,58,.64);border:1px solid rgba(232,200,114,.16);
+ padding:8px 10px;border-radius:9px 9px 9px 2px;min-height:35px;color:var(--ink)}
+.rpg-next{display:none!important}
+.rpg-line.is-new{animation:message-appear .48s var(--ease) both}
+body.game-active #gameScreen>.panel:nth-child(2){grid-row:3;display:flex;flex-direction:column;padding:7px 8px}
+body.game-active #gameScreen>.panel:nth-child(2) h2{font-size:11px;margin:0 0 5px;line-height:1.2;color:var(--ink)}
+body.game-active #countInfo{font-size:10px;font-weight:400;color:var(--muted)}
+body.game-active #players{display:grid;flex:1;min-height:0;grid-template-columns:repeat(3,minmax(0,1fr));
+ grid-template-rows:repeat(2,minmax(0,1fr));gap:5px}
+body.game-active #players .player{display:grid;grid-template-columns:23px minmax(0,1fr);grid-template-rows:auto auto;
+ column-gap:4px;row-gap:2px;align-content:center;align-items:center;justify-items:stretch;
+ min-width:0;min-height:0;padding:3px 4px;border:1px solid rgba(154,163,199,.2);border-radius:7px;
+ background:rgba(20,28,58,.48);text-align:left;overflow:hidden}
+body.game-active #players .player.me{border-color:rgba(232,200,114,.7)}
+body.game-active #players .player.dead{opacity:.43;filter:grayscale(1)}
+body.game-active #players .avatar{grid-column:1;grid-row:1/3;line-height:1;font-size:19px;justify-self:center}
+body.game-active #players .name{grid-column:2;grid-row:1;line-height:1.16;min-width:0;max-width:100%;
+ font-size:10px;margin:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--ink)}
+body.game-active #players .tag{grid-column:2;grid-row:2;line-height:1.2;min-width:0;margin:0;
+ font-size:9px;max-width:100%;white-space:normal;overflow-wrap:anywhere;color:var(--muted)}
+body.game-active #players .player.rpg-selectable{min-height:48px;cursor:pointer;
+ transition:transform .32s var(--ease),border-color .3s var(--ease),box-shadow .3s var(--ease)}
+body.game-active #players .player.rpg-selectable:hover,body.game-active #players .player.rpg-selected{
+ border-color:var(--gold);transform:translateY(-2px);box-shadow:0 0 15px rgba(232,200,114,.17)}
+body.game-active #players .player.rpg-selected:before{content:"";position:absolute;right:4px;top:3px;width:5px;height:5px;
+ background:var(--gold);border-radius:50%;animation:none}
+body.game-active #gameScreen>.panel:nth-child(3){grid-row:4;padding:5px 9px}
+body.game-active #gameScreen>.panel:nth-child(3) h2{display:none}
+body.game-active #myRole{background:none;border:0;color:var(--gold);padding:4px 6px;font-size:11px;line-height:1.35;max-height:none;overflow:visible}
+body.game-active #myRole .small{color:var(--muted);white-space:normal;font-size:10px}
+body.game-active #gameScreen>.panel:nth-child(4){grid-row:5;display:flex;flex-direction:column;padding:7px 9px}
+body.game-active #gameScreen>.panel:nth-child(4) h2{color:var(--ink);font-size:12px;margin:0 0 6px;line-height:1.25}
+body.game-active #actions,body.game-active #actions.targets,
 body.game-active #actions.rpg-menu,body.game-active #actions.rpg-target-menu{
- display:grid;grid-template-columns:minmax(0,1fr)!important;grid-auto-rows:48px!important;gap:1px;flex:none;min-height:0}
-body.game-active #actions.rpg-menu>button,body.game-active #actions.rpg-target-menu>button{
- position:relative;min-height:48px;max-height:none;height:48px;text-align:left;padding:6px 12px 6px 33px;
- background:transparent!important;border:0!important;border-radius:0!important;color:var(--rpg-white);
- font:400 13px/1.3 "DotGothic16","Zpix",monospace;
- box-shadow:none;
-}
-body.game-active #actions.rpg-menu>button:focus-visible,body.game-active #actions.rpg-target-menu>button:focus-visible{outline:1px solid var(--rpg-gold);outline-offset:-2px}
-body.game-active #actions.rpg-menu>button.cursor,body.game-active #actions.rpg-target-menu>button.cursor{color:var(--rpg-gold)}
-body.game-active #actions.rpg-menu>button.cursor::before,body.game-active #actions.rpg-target-menu>button.cursor::before{
- content:"▶";position:absolute;left:9px;top:50%;transform:translateY(-50%);animation:rpg-cursor-blink 1s steps(2) infinite;color:var(--rpg-gold)}
-body.game-active #actions.rpg-target-menu{grid-template-columns:1fr 1fr!important;grid-auto-rows:48px!important}
-body.game-active #actions.rpg-target-menu>button{font-size:12px}
-body.game-active #players .player.rpg-selectable{cursor:pointer;outline:1px solid var(--rpg-inner);outline-offset:-2px}
-body.game-active #players .player.rpg-selected{border:2px solid var(--rpg-gold);box-shadow:inset 0 0 0 1px var(--rpg-gold)}
-body.game-active #players .player.rpg-selected:before{content:"▶";position:absolute;top:1px;right:3px;font-size:10px;color:var(--rpg-gold);animation:rpg-cursor-blink 1s steps(2) infinite}
-body.game-active #players .player.rpg-selectable:focus-visible{outline:2px solid var(--rpg-gold)}
-body.game-active #actions:not(.rpg-menu):not(.rpg-target-menu)>button{
- border:1px solid var(--rpg-inner);background:linear-gradient(110deg,var(--rpg-blue),var(--rpg-night));
- color:var(--rpg-white);border-radius:3px;min-height:48px;max-height:none}
-body.game-active #actions:not(.rpg-menu):not(.rpg-target-menu)>button.primary{color:var(--rpg-gold)}
-body.game-active #gameScreen.night-tint>.panel:nth-child(1),body.game-active #gameScreen.day-tint>.panel:nth-child(1){background:linear-gradient(120deg,var(--rpg-blue),var(--rpg-night))!important}
-@keyframes rpg-cursor-blink{50%{opacity:0}}
+ display:grid;grid-template-columns:minmax(0,1fr)!important;grid-auto-rows:minmax(48px,auto)!important;
+ gap:5px;flex:none;min-height:0}
+body.game-active #actions.targets{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+body.game-active #actions>button,body.game-active #actions.rpg-menu>button,
+body.game-active #actions.rpg-target-menu>button{position:relative;display:flex;align-items:center;justify-content:flex-start;
+ min-width:0;min-height:48px!important;height:auto;max-height:none;text-align:left;padding:7px 9px!important;
+ border:1px solid rgba(154,163,199,.19)!important;border-radius:8px!important;
+ background:rgba(20,28,58,.65)!important;color:var(--ink);font-size:12px;font-weight:500;
+ box-shadow:none;overflow:hidden}
+body.game-active #actions>button:before{display:none!important}
+body.game-active #actions>button:hover,body.game-active #actions>button.cursor,
+body.game-active #actions>button:focus-visible{border-color:rgba(232,200,114,.6)!important;background:rgba(232,200,114,.08)!important}
+body.game-active #actions>button.is-activated:after{content:"";position:absolute;z-index:0;inset:0;
+ background:linear-gradient(110deg,transparent,rgba(232,200,114,.24),transparent);
+ animation:action-sweep .35s var(--ease) both;pointer-events:none}
+body.game-active #actions>button.primary{border-color:rgba(232,200,114,.45)!important;color:var(--gold);justify-content:center}
+.action-icon{display:grid;place-items:center;flex:0 0 27px;width:27px;height:27px;
+ border:1px solid rgba(232,200,114,.35);border-radius:7px;margin-right:9px;color:var(--gold)}
+.action-icon svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.action-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+.action-name{font-size:12px;font-weight:650;line-height:1.3;color:var(--ink)}
+.action-desc{font-size:10px;line-height:1.2;color:var(--muted)}
+.action-chevron{font-size:16px;line-height:1;color:var(--gold);margin-left:7px}
+.action-target-face{width:30px;height:30px;flex:0 0 30px;border-radius:8px;display:grid;place-items:center;
+ background:rgba(154,163,199,.1);border:1px solid rgba(154,163,199,.25);color:var(--muted);margin-right:7px}
+.action-target-face svg{width:25px;height:25px;stroke:currentColor;stroke-width:1.3;fill:none}
+body.game-active #actions.targets .action-name{font-size:11px}
+body.game-active #actions.targets .action-desc{font-size:9px}
+body.game-active #actions.targets>button{padding:7px!important}
+body.game-active #actions.targets .action-chevron{display:none}
+body.game-active #notice{min-height:0;max-height:none;margin:4px 0 0;font-size:10px;line-height:1.35;color:var(--muted)}
+body.game-active #gameScreen.action-waiting>.panel:nth-child(4) h2{display:block}
+body.game-active #gameScreen.action-waiting #notice{margin:3px 0}
+body.game-active #gameScreen.night-tint>.panel:nth-child(1),
+body.game-active #gameScreen.day-tint>.panel:nth-child(1){background:var(--panel)!important}
+body.game-active #gameScreen.is-lobby #shareBtns{min-height:48px;margin-top:4px}
+body.game-active #gameScreen.is-lobby #shareBtns button{min-height:48px!important}
+body.game-active #gameScreen.is-lobby>.panel:first-child{display:flex;flex-direction:column;justify-content:center}
+body.game-active #gameScreen>.panel{animation:panel-in .45s var(--ease) both}
+body.game-active #gameScreen>.panel:nth-child(2){animation-delay:.05s}
+body.game-active #gameScreen>.panel:nth-child(3){animation-delay:.1s}
+body.game-active #gameScreen>.panel:nth-child(4){animation-delay:.15s}
+@keyframes panel-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes message-appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes action-sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@keyframes dust-drift{from{transform:translate3d(0,-4px,0)}to{transform:translate3d(3px,14px,0)}}
 @media(max-width:700px){
- body.game-active #gameScreen{grid-template-rows:36px minmax(112px,1fr) 111px auto auto;gap:5px}
- body.game-active #gameScreen>.panel:nth-child(5){padding:7px 8px}
- body.game-active #feed .rpg-line{font-size:12px;padding:8px}
- body.game-active #actions.rpg-menu>button,body.game-active #actions.rpg-target-menu>button{font-size:12px}
- body.game-active #players .player{grid-template-columns:21px minmax(0,1fr);column-gap:2px;padding:3px}
+ body.game-active header{min-height:44px;margin-bottom:5px}
+ body.game-active header h1{font-size:21px}
+ body.game-active #gameScreen{grid-template-rows:37px minmax(65px,1fr) 113px auto auto;gap:5px}
+ body.game-active #gameScreen.is-lobby{grid-template-rows:92px minmax(65px,1fr) 113px auto auto}
+ body.game-active #gameScreen>.panel{padding:6px 8px}
+ body.game-active #gameScreen>.panel:nth-child(5){padding:8px 8px 6px}
+ body.game-active #feed .rpg-spoken{font-size:11px}
+ body.game-active #feed .rpg-narrator{font-size:10px}
+ body.game-active #players .player{grid-template-columns:20px minmax(0,1fr);column-gap:2px;padding:2px 3px}
  body.game-active #players .avatar{font-size:18px}
  body.game-active #players .name{font-size:10px}
+ body.game-active #players .tag{font-size:9px}
+ body.game-active #gameScreen>.panel:nth-child(4){padding:7px 8px}
+ body.game-active #actions>button,body.game-active #actions.rpg-menu>button,
+ body.game-active #actions.rpg-target-menu>button{min-height:48px!important}
 }
-@media(max-height:700px){
- body.game-active #gameScreen{grid-template-rows:33px minmax(90px,1fr) 105px auto auto}
- body.game-active #actions.rpg-menu,body.game-active #actions.rpg-target-menu{grid-auto-rows:48px!important}
- body.game-active #actions.rpg-menu>button,body.game-active #actions.rpg-target-menu>button{height:48px}
- body.game-active header{min-height:28px}
+@media(max-height:680px){
+ body.game-active #gameScreen{grid-template-rows:36px minmax(45px,1fr) 102px auto auto;gap:4px}
+ body.game-active #gameScreen.is-lobby{grid-template-rows:92px minmax(45px,1fr) 102px auto auto}
+ body.game-active header{min-height:40px;padding-top:2px}
+ body.game-active #players .avatar{font-size:16px}
+ body.game-active #actions{gap:4px}
 }
 @media(prefers-reduced-motion:reduce){
- *,*::before,*::after{animation:none!important;transition:none!important}
- .rpg-next,.cursor::before{animation:none!important}
-}
-
-/* Stage 1 touch target audit: 48px minimum, including the header and lobby share button. */
-button,button.primary,#musicToggle,body.game-active #musicToggle,body.game-active #shareBtns button,#roleContinue{min-height:48px!important}
-body.game-active header{min-height:49px!important}
-body.game-active #musicToggle{right:0;top:0;padding:8px 9px}
-body.game-active #gameScreen{grid-template-rows:40px minmax(90px,1fr) 140px auto auto}
-body.game-active #gameScreen.is-lobby{grid-template-rows:104px minmax(90px,1fr) 140px auto auto}
-body.game-active #gameScreen.is-lobby>.panel:nth-child(1){display:flex;flex-direction:column;justify-content:center}
-body.game-active #shareBtns{display:flex;min-height:0;margin-top:5px}
-body.game-active #shareBtns button{min-height:48px!important;display:block;width:100%}
-body.game-active #players .player.rpg-selectable{min-height:48px;touch-action:manipulation}
-@media(max-width:700px){
- body.game-active #gameScreen{grid-template-rows:38px minmax(80px,1fr) 140px auto auto}
- body.game-active #gameScreen.is-lobby{grid-template-rows:104px minmax(80px,1fr) 140px auto auto}
-}
-@media(max-height:650px){
- body.game-active #gameScreen{grid-template-rows:35px minmax(70px,1fr) 134px auto auto}
- body.game-active #gameScreen.is-lobby{grid-template-rows:100px minmax(70px,1fr) 134px auto auto}
+ *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+ body:before{animation:none!important}
 }
 </style>
 </head>
 <body>
 <audio id="bgmPlayer" src="assets/audio/contedefees_0016.mp3" preload="auto" loop playsinline></audio>
 <main>
-<header><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐">♫ 音乐开</button><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1>月下疑云</h1><div class="subtitle">六人迷你狼人杀 · 一个人也能开局 · 选项式发言</div></header>
-<section id="homeScreen" class="panel window">
+<header><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐" title="音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="19" rx="3" ry="2"/><ellipse cx="18" cy="17" rx="3" ry="2"/></svg></button><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1>月下疑云</h1><div class="subtitle">六人迷你狼人杀 · 一个人也能开局 · 选项式发言</div></header>
+<section id="homeScreen" class="panel">
 <h2>踏入月下村庄</h2>
 <label for="myName">你的昵称（不会要求注册）</label>
 <input id="myName" maxlength="15" value="旅人" autocomplete="nickname">
@@ -546,14 +634,14 @@ body.game-active #players .player.rpg-selectable{min-height:48px;touch-action:ma
 <div id="homeNotice" class="small" aria-live="polite"></div>
 </section>
 <section id="gameScreen">
-<div class="panel window">
+<div class="panel">
 <div class="topbar"><span class="pill" id="phaseTag">准备开始</span><span id="roomInfo"></span></div>
 <div class="btns" id="shareBtns"></div>
 </div>
-<div class="panel window"><h2>村庄居民 <span class="small" id="countInfo"></span></h2><div id="players" class="players"></div></div>
-<div class="panel window"><h2>你的身份</h2><div id="myRole" class="role">等待身份分配</div></div>
-<div class="panel window"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
-<div class="panel window"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
+<div class="panel"><h2>村庄居民 <span class="small" id="countInfo"></span></h2><div id="players" class="players"></div></div>
+<div class="panel"><h2>你的身份</h2><div id="myRole" class="role">等待身份分配</div></div>
+<div class="panel"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
+<div class="panel"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
 </section>
 <div class="footer">月下疑云 · 原创轻量六人社交推理游戏<br>适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐<br>BGM：《不思議な村》— HiLi / <a href="https://conte-de-fees.com/bgm/238" target="_blank" rel="noopener noreferrer" style="color:inherit">こんとどぅふぇ</a></div>
 <div id="timeScene" class="time-scene" hidden aria-hidden="true">
@@ -823,51 +911,27 @@ function rpgPortraitMarkup(name){
  +'<path d="M25 138 Q27 88 72 88 Q117 88 119 138Z" fill="currentColor" opacity=".8"/>'
  +'</svg></div>';
 }
-function rpgFinishTyping(){
- if(rpgTypingTimer!==null){clearInterval(rpgTypingTimer);rpgTypingTimer=null}
- if(rpgTypeComplete){rpgTypeComplete();rpgTypeComplete=null}
-}
+function rpgFinishTyping(){ /* Legacy compatibility: typing animation removed by design. */ }
 function rpgRenderMessages(v){
  var feed=$("feed"),fingerprint=JSON.stringify(v.messages);
  if(fingerprint===rpgLogFingerprint)return;
- rpgFinishTyping();
+ var oldCount=feed.querySelectorAll(".rpg-line").length;
  rpgLogFingerprint=fingerprint;
- var segments=v.messages.map(function(m){
-  var speech=m.kind==="choice"?String(m.text).match(/^(.+?)：「([\s\S]*)」$/):null;
-  if(speech){
-   return {speaker:speech[1],text:speech[2],spoken:true,source:m};
-  }
-  return {speaker:null,text:m.text,spoken:false,danger:/遇袭|出局|被放逐|死亡|KO/.test(m.text),source:m};
+ var messages=v.messages.map(function(m){
+  var spoken=m.kind==="choice"?String(m.text).match(/^(.+?)：「([\s\S]*)」$/):null;
+  if(spoken)return {speaker:spoken[1],text:spoken[2],spoken:true,danger:false};
+  return {speaker:null,text:m.text,spoken:false,danger:/遇袭|出局|被放逐|死亡|KO/.test(m.text)};
  });
- feed.innerHTML=segments.map(function(seg,i){
-  if(!seg.spoken){
-   return '<div class="rpg-line rpg-narrator'+(seg.danger?' is-danger':'')+'">'+escapeHtml(seg.text)+'</div>';
-  }
-  return '<div class="rpg-line rpg-dialogue" data-rpg-dialogue="'+i+'" tabindex="0" role="button" aria-label="点击跳过打字效果">'
-   +rpgPortraitMarkup(seg.speaker)
-   +'<div class="rpg-line-content"><span class="rpg-nameplate">'+escapeHtml(seg.speaker)+'</span>'
-   +'<span class="rpg-spoken">'+escapeHtml(seg.text)+'</span><span class="rpg-next" aria-hidden="true">▼</span></div></div>';
+ feed.innerHTML=messages.map(function(m,i){
+  var appear=i===messages.length-1&&messages.length>oldCount?" is-new":"";
+  if(!m.spoken)return '<div class="rpg-line rpg-narrator'+(m.danger?' is-danger':'')+appear+'">'+
+   (m.danger?'<span aria-hidden="true">☾ </span>':'')+escapeHtml(m.text)+'</div>';
+  return '<div class="rpg-line rpg-dialogue'+appear+'">'
+   +rpgPortraitMarkup(m.speaker)
+   +'<div class="rpg-line-content"><span class="rpg-nameplate">'+escapeHtml(m.speaker)+'</span>'
+   +'<span class="rpg-spoken">'+escapeHtml(m.text)+'</span></div></div>';
  }).join("");
  feed.scrollTop=feed.scrollHeight;
- if(rpgReducedMotion()||segments.length===0)return;
- var last=segments[segments.length-1];
- if(!last.spoken)return;
- var row=feed.querySelector('[data-rpg-dialogue="'+(segments.length-1)+'"]');
- if(!row)return;
- var textNode=row.querySelector(".rpg-spoken");
- var characters=Array.from(last.text),offset=0;
- if(characters.length===0)return;
- row.classList.add("is-typing");
- textNode.textContent="";
- var finish=function(){textNode.textContent=last.text;row.classList.remove("is-typing");feed.scrollTop=feed.scrollHeight};
- rpgTypeComplete=finish;
- rpgTypingTimer=setInterval(function(){
-  if(!row.isConnected){rpgFinishTyping();return}
-  offset=Math.min(offset+2,characters.length);
-  textNode.textContent=characters.slice(0,offset).join("");
-  feed.scrollTop=feed.scrollHeight;
-  if(offset>=characters.length)rpgFinishTyping();
- },42);
 }
 function rpgTargets(v){return v.players.filter(function(p){return p.alive&&p.id!==v.me})}
 function rpgHighlightTargets(){
@@ -897,12 +961,43 @@ function rpgActivateMenu(){
  }
 }
 
+/* Stage 1 display helpers: no changes to game rules or action payloads. */
+function modernIcon(kind){
+ var paths={
+  suspect:'<circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/><path d="M8 11h6"/>',
+  trust:'<path d="M12 21s-8-4.8-8-11a4.5 4.5 0 0 1 8-2.4A4.5 4.5 0 0 1 20 10c0 6.2-8 11-8 11Z"/>',
+  clue:'<circle cx="12" cy="12" r="8"/><path d="M9 10a3 3 0 1 1 4.7 2.4c-1.1.7-1.7 1.4-1.7 2.6"/><path d="M12 18h.01"/>',
+  pass:'<path d="M4 12h16"/><path d="m15 7 5 5-5 5"/>',
+  night:'<path d="M20.5 14.7A9 9 0 0 1 9.3 3.5 9 9 0 1 0 20.5 14.7Z"/>',
+  vote:'<path d="M4 10h16v11H4z"/><path d="m8 6 4-4 4 4"/><path d="M12 2v12"/>',
+  confirm:'<path d="m4 12 5 5L20 6"/>',
+  back:'<path d="m10 5-7 7 7 7"/><path d="M3 12h18"/>'
+ };
+ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(paths[kind]||paths.clue)+'</svg>';
+}
+function modernAction(label,action,target,speech,icon,detail){
+ var data=' data-do="'+escapeHtml(action)+'"'+(target?' data-target="'+escapeHtml(target)+'"':'')+
+ (speech?' data-speech="'+escapeHtml(speech)+'"':'');
+ return '<button type="button" class="action-card"'+data+'>'
+ +'<span class="action-icon">'+modernIcon(icon)+'</span>'
+ +'<span class="action-copy"><span class="action-name">'+escapeHtml(label)+'</span>'
+ +'<span class="action-desc">'+escapeHtml(detail||"")+'</span></span>'
+ +'<span class="action-chevron" aria-hidden="true">›</span></button>';
+}
+function modernTarget(p,prefix,action,icon){
+ return '<button type="button" class="action-card action-card--target" data-do="'+escapeHtml(action)+
+ '" data-target="'+escapeHtml(p.id)+'"><span class="action-target-face" aria-hidden="true">'+
+ '<svg viewBox="0 0 40 40"><circle cx="20" cy="14" r="8"/><path d="M6 37q2-15 14-15t14 15"/></svg></span>'+
+ '<span class="action-copy"><span class="action-name">'+escapeHtml(p.name)+'</span>'+
+ '<span class="action-desc">'+escapeHtml(prefix)+'</span></span>'+
+ '<span class="action-chevron" aria-hidden="true">›</span></button>';
+}
 function render(){
  if(!view)return;
  var v=view;
  showRoleDeal(v);
  handleTimeScene(v);
- var titles={lobby:"等待入场",night:"🌙 第 "+v.day+" 夜",talk:"☀️ 第 "+v.day+" 天 · 发言",vote:"🗳️ 第 "+v.day+" 天 · 投票",ended:"🏆 游戏结束"};
+ var titles={lobby:"等待入场",night:"第 "+v.day+" 夜 · 夜幕",talk:"第 "+v.day+" 天 · 发言",vote:"第 "+v.day+" 天 · 投票",ended:"游戏结束"};
  $("phaseTag").textContent=titles[v.phase];
  $("roomInfo").textContent=v.solo?"单人练习":v.room?"房间码："+v.room:"";
  $("shareBtns").innerHTML=(!v.solo&&v.room&&v.phase==="lobby")?button("复制邀请链接","copy",null,null,"ghost"):"";
@@ -940,7 +1035,7 @@ function render(){
   else if(v.submitted)notice="已提交夜间选择，等待其他玩家。";
   else {
    var r={wolf:"袭击",seer:"查验",guard:"保护"}[v.myRole];
-   a=v.players.filter(function(p){return p.alive&&(v.myRole==="guard"||p.id!==v.me)}).map(function(p,i){return button(r+" "+p.name,"night",p.id)}).join("");
+   a=v.players.filter(function(p){return p.alive&&(v.myRole==="guard"||p.id!==v.me)}).map(function(p){return modernTarget(p,r+"目标","night","night")}).join("");
   }
  }else if(v.phase==="talk"){
   title="选择公开发言";
@@ -948,15 +1043,15 @@ function render(){
   else if(v.submitted)notice="发言已同步，等待其他玩家。";
   else if(speechKind==="suspect"||speechKind==="trust"){
    title=(speechKind==="suspect"?"选择怀疑对象":"选择信任对象");
-   a=button("确认选中的居民","confirmTarget")+button("返回发言","back",null,null,"ghost");
+   a=modernAction("确认这名居民","confirmTarget",null,null,"confirm","提交当前选择")+modernAction("返回上一层","back",null,null,"back","重新选择发言");
   }else{
-   a=button("我怀疑某人","pickSpeech",null,"suspect")+button("我相信某人","pickSpeech",null,"trust")+button("我有线索","say",null,"clue")+button("暂不表态","say",null,"pass");
+   a=modernAction("我怀疑某人","pickSpeech",null,"suspect","suspect","指出可疑的居民")+modernAction("我相信某人","pickSpeech",null,"trust","trust","表达你的信任")+modernAction("我有线索","say",null,"clue","clue","公开透露线索")+modernAction("暂不表态","say",null,"pass","pass","保留本轮意见");
   }
  }else if(v.phase==="vote"){
   title="投票放逐";
   if(!v.myAlive)notice="你已经出局，不能投票。";
   else if(v.submitted)notice="你已投票，等待其他玩家。";
-  else a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return button("投给 "+p.name,"vote",p.id)}).join("");
+  else a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return modernTarget(p,"投票放逐","vote","vote")}).join("");
  }else if(v.phase==="ended"){
   title="最终结果："+v.winner;
   if(v.host)a=button("重新开局","again",null,null,"primary full");
@@ -969,6 +1064,8 @@ function render(){
  $("notice").textContent=notice;
  $("gameScreen").classList.toggle("action-waiting",!a);
  $("gameScreen").classList.toggle("is-lobby",v.phase==="lobby");
+ document.body.classList.toggle("night-mode",v.phase==="night");
+ document.body.classList.toggle("day-mode",v.phase==="talk"||v.phase==="vote");
 }
 
 /* BGM: "不思議な村" by HiLi (こんとどぅふぇ), used as an in-game track.
@@ -992,7 +1089,7 @@ function ensureMusic(){
 }
 function updateMusicButton(){
  var btn=$("musicToggle");
- btn.textContent=musicWanted?"♫ 音乐开":"♫ 音乐关";
+ btn.classList.toggle("is-muted",!musicWanted);
  btn.setAttribute("aria-pressed",musicWanted?"true":"false");
  btn.setAttribute("aria-label",musicWanted?"关闭背景音乐":"开启背景音乐");
 }
@@ -1007,11 +1104,10 @@ function toggleMusic(){
 }
 
 document.addEventListener("click",function(e){
- var dialogue=e.target.closest(".rpg-dialogue.is-typing");
- if(dialogue){rpgFinishTyping();return}
  var resident=e.target.closest("[data-rpg-target]");
  if(resident){rpgSelectTarget(resident.getAttribute("data-rpg-target"));return}
  var b=e.target.closest("button[data-do]");if(!b)return;
+ if(b.classList){b.classList.add("is-activated");}
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
  if(action==="musicToggle"){toggleMusic();return;}
  ensureMusic();
