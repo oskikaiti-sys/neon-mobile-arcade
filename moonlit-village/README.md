@@ -1,5 +1,16 @@
 # 月下疑云 / Moonlit Village
 
+## 背景音乐：不思議な村 / The Mysterious Village
+
+- 曲名：**不思議な村**（Track No.0016，约 1 分 30 秒）
+- 作者：**HiLi-ひぃ- / こんとどぅふぇ (Conte de Fées)**
+- 来源：https://conte-de-fees.com/bgm/238
+- 使用条款：https://conte-de-fees.com/how-to-use
+- 实际游戏文件：`assets/audio/contedefees_0016.mp3`，随游戏同源托管；禁止将音乐文件另行作为素材分发、销售或声称为原创。音源不经外链直接引用作者服务器。
+- 使用方式：在 `index.html` 中由 `<audio id="bgmPlayer" loop>` 播放。首次用户点击后尝试播放，右上角音乐开关控制暂停/恢复。
+- 原来的程序合成 BGM 已移除；声音循环为浏览器音频文件自然循环。手机静音模式、Safari 用户手势规则和设备音量可能影响实际播放。
+- 根据官方条款，该曲可以免费嵌入公开及商用游戏，无需强制署名；本项目自愿标注来源。
+
 轻量六人狼人杀。静态 HTML + CSS + JavaScript；房主通过 PeerJS 与加入的好友同步公开选项、行动阶段和结果。无账户、无构建步骤。原有游戏规则与 AI 逻辑不因界面改动而调整。
 
 ## 第一阶段：日系 RPG 窗口与对话（2026-10-30）
