@@ -2803,7 +2803,147 @@ function aiSuspicion(observer,target){
 /* Known wolf count is exactly one. Unknown suspicion weights are
    normalized over living, unconfirmed suspects rather than independent
    unbounded scores (MIT deepwolf-inspired inference). */
+
+/* 6-seat, 1-wolf possible-world engine. No LLM and no hidden-role peeking.
+   Always enumerate from the original roster; confirmed deceased good roles
+   still occupy their original roles. All private constraints are taken only
+   from this observer's own role and legitimate Seer inspection results.
+   Public CLAIMS are defeasible evidence, not true roles. A false Seer report
+   by a good player is strategically very costly, but not logically illegal.
+   Day 1 deliberately retains the lightweight heuristic model. */
+function aiWorldAnalysis(observer){
+ if(!observer||!st||st.day<2)return null;
+ var roster=st.players,alive=live(),history=st.publicHistory||[];
+ var known=observer.role==="seer"?(st.known[observer.id]||[]):[];
+ var out={worlds:[],wolf:{},seer:{},guard:{},excluded:[],uncertainty:1,topId:null,certainty:false};
+ if(roster.length!==6||!roster.some(function(p){return p.id===observer.id}))return null;
+ var wolfAllowed=alive.filter(function(p){return p.id!==observer.id||observer.role==="wolf"});
+ /* Villagers and Guardians know they are not wolves. The true wolf has no
+    uncertainty about its own identity but still must not learn anyone's
+    other actual role from the host. */
+ var own=observer.role,publicReveals=st.revealed||[];
+ var eventsByActor={};
+ history.forEach(function(h){
+  if(!eventsByActor[h.id])eventsByActor[h.id]=[];
+  eventsByActor[h.id].push(h);
+ });
+ function roleCompatible(id,role){
+  if(id===observer.id&&role!==own)return false;
+  if(publicReveals.some(function(r){return r.id===id&&
+    ((r.alignment==="wolf")!==(role==="wolf"))}))return false;
+  return !known.some(function(k){return k.id===id&&k.role!==role});
+ }
+ function observedWeight(assigned){
+  var score=0;
+  roster.forEach(function(actor){
+   if(actor.id===observer.id)return; /* Own public deception is not evidence. */
+   var utterances=eventsByActor[actor.id]||[],role=assigned[actor.id];
+   var announced=[...new Set(utterances.map(function(h){return roleClaim(h.kind)}).filter(Boolean))];
+   announced.forEach(function(claim){
+    if(claim===role)score+=.55;
+    else if(role==="wolf")score+=.05; // A wolf can impersonate any good role.
+    else score-=3.0; // Strategic penalty for unsupported good bluff.
+   });
+   utterances.forEach(function(h){
+    if(h.kind==="gold"||h.kind==="black"){
+     if(!h.targetId)return;
+     var actualEvil=assigned[h.targetId]==="wolf",saidEvil=h.kind==="black";
+     if(role==="seer"){
+      score+=saidEvil===actualEvil?1.3:-9;
+     }else if(role==="wolf"){
+      /* An invented check is normal wolf theatre, not evidence of truth. */
+      score+=.05;
+     }else{
+      /* A good non-Seer claiming an inspection is actively misleading. */
+      score-=4.5;
+      if(h.kind==="gold"&&actualEvil)score-=4.0;
+     }
+    }
+   });
+  });
+  /* A ballot is a historical choice, not a confirmed check. Weak weight;
+     voting for good happens frequently and must not force wolf labels. */
+  (st.voteHistory||[]).forEach(function(round){
+   round.votes.forEach(function(v){
+    if(v.voterId===observer.id||!assigned[v.voterId]||
+       !assigned[v.targetId]||v.targetId==="__abstain__")return;
+    if(assigned[v.voterId]==="wolf"&&assigned[v.targetId]!=="wolf")
+     score+=.18;
+    if(assigned[v.voterId]!=="wolf"&&assigned[v.targetId]==="wolf")
+     score+=.12;
+    /* Reject self-contradictory vote commitments cautiously: a good
+       player who votes for a personally announced clear needs explaining. */
+    if(assigned[v.voterId]!=="wolf"&&
+       (eventsByActor[v.voterId]||[]).some(function(h){
+        return h.day<=round.day&&h.kind==="gold"&&h.targetId===v.targetId;
+       }))score-=1.5;
+   });
+  });
+  return Math.max(-45,Math.min(20,score));
+ }
+ var possible=[];
+ wolfAllowed.forEach(function(w){
+  if(!roleCompatible(w.id,"wolf"))return;
+  roster.forEach(function(seer){
+   if(seer.id===w.id||!roleCompatible(seer.id,"seer"))return;
+   roster.forEach(function(guard){
+    if(guard.id===w.id||guard.id===seer.id||
+       !roleCompatible(guard.id,"guard"))return;
+    var assigned={};roster.forEach(function(p){assigned[p.id]="villager"});
+    assigned[w.id]="wolf";assigned[seer.id]="seer";assigned[guard.id]="guard";
+    if(!roster.every(function(p){return roleCompatible(p.id,assigned[p.id])}))return;
+    possible.push({roles:assigned,wolfId:w.id,seerId:seer.id,
+      guardId:guard.id,score:observedWeight(assigned)});
+   });
+  });
+ });
+ if(!possible.length)return out; // Inconsistent record, fail closed, no guess.
+ /* Relative exponential weights prevent underflow. Claims can be
+    improbable without being treated as hard constraints. */
+ var best=Math.max.apply(null,possible.map(function(x){return x.score}));
+ var total=0;
+ possible.forEach(function(x){x.weight=Math.exp(x.score-best);total+=x.weight});
+ possible.forEach(function(x){
+  var share=x.weight/total;
+  out.wolf[x.wolfId]=(out.wolf[x.wolfId]||0)+share;
+  out.seer[x.seerId]=(out.seer[x.seerId]||0)+share;
+  out.guard[x.guardId]=(out.guard[x.guardId]||0)+share;
+ });
+ out.worlds=possible;
+ out.excluded=alive.filter(function(p){return !(out.wolf[p.id]>1e-8)}).map(function(p){return p.id});
+ var ranked=alive.slice().sort(function(a,b){return (out.wolf[b.id]||0)-(out.wolf[a.id]||0)});
+ out.topId=ranked.length?ranked[0].id:null;
+ out.uncertainty=ranked.length?(out.wolf[ranked[0].id]||0):1;
+ out.certainty=!!(ranked.length&&out.wolf[ranked[0].id]>1-1e-8);
+ return out;
+}
+function aiWorldCase(observer,target){
+ if(!observer||!target||observer.id===target.id||st.day<2)return null;
+ var analysis=aiWorldAnalysis(observer);
+ if(!analysis||!analysis.worlds.length)return null;
+ var p=analysis.wolf[target.id]||0;
+ var reasons=[];
+ var inspected=aiObservedInspection(observer,target.id);
+ if(inspected)reasons.push(inspected.evil?"private-black":"private-clear");
+ if(aiSeerStoryRefuted(observer,target))reasons.push("impossible-seer-world");
+ if(observer.role==="seer"&&aiClaimFor(target.id)==="seer")reasons.push("self-is-seer");
+ if(debateContradiction(target.id,"claim"))reasons.push("changed-role");
+ if(debateContradiction(target.id,"report"))reasons.push("conflicting-report");
+ if((st.voteHistory||[]).some(function(round){return round.votes.some(function(v){
+  return v.voterId===target.id&&v.targetId!=="__abstain__"&&
+    (st.publicHistory||[]).some(function(h){
+     return h.id===target.id&&h.kind==="gold"&&h.targetId===v.targetId&&h.day<=round.day;
+    });
+ })}))reasons.push("voted-own-clear");
+ if(aiReportsBy(target.id).length)reasons.push("seer-report");
+ if((st.voteHistory||[]).some(function(round){return round.votes.some(function(v){return v.voterId===target.id&&v.targetId!=="__abstain__"})}))
+  reasons.push("past-vote");
+ return {id:target.id,probability:p,reason:reasons[0]||"world-elimination",
+  reasons:reasons,hard:!!(inspected&&inspected.evil),possibleWorlds:analysis.worlds.length};
+}
 function aiWolfProbabilities(p){
+ var model=aiWorldAnalysis(p);
+ if(model&&model.worlds.length)return model.wolf;
  var targets=targetList(p.id),found=null,weights={},total=0;
  targets.forEach(function(q){
   var check=aiObservedInspection(p,q.id);
@@ -2820,8 +2960,16 @@ function aiWolfProbabilities(p){
  return weights;
 }
 function aiRanking(p,exclude){
- var brain=aiState(p);
+ var brain=aiState(p),world=aiWorldAnalysis(p);
  var chosen=targetList(p.id).filter(function(q){return !exclude||!exclude.includes(q.id)});
+ if(st.day>=2&&world&&world.worlds.length){
+  return chosen.map(function(q){
+   var probability=world.wolf[q.id]||0;
+   /* Keep the .score interface, but make it mean a posterior probability
+      instead of a free-floating arbitrary suspicion number from day 2. */
+   return {p:q,score:probability*10,probability:probability};
+  }).sort(function(a,b){return b.score-a.score});
+ }
  return chosen.map(function(q){
   var fresh=aiSuspicion(p,q),before=brain.beliefs[q.id];
   var remembered=before&&before.day<st.day&&Math.abs(fresh)<10
