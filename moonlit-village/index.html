@@ -2015,7 +2015,7 @@ var icons=["🧑","👩","🧔","👨","👩‍🦰","🧑‍🦳"];
 var peer=null,conn=null,isHost=false,solo=false,st=null,view=null,room="",myId="",connections=new Map(),speechKind="",busy=false;
 var mark=0, shownIdentityGame=0, previousScenePhase=null, lastSceneDay=0, pendingScene=null, sceneTimer=null, nightSerial=0;
 var hostPhaseTimer=null,phaseNonce=0;
-var CHOICE_LIMIT_MS=120000,MULTIPLAYER_NIGHT_TURN_MS=10000,SOLO_NIGHT_PROMPT_MS=2000;
+var CHOICE_LIMIT_MS=120000,DEBATE_LIMIT_MS=60000,MULTIPLAYER_NIGHT_TURN_MS=10000,SOLO_NIGHT_PROMPT_MS=2000;
 var NIGHT_ROLES=["wolf","seer","guard"];
 function cancelPhaseTimer(){
  phaseNonce++;
@@ -2028,13 +2028,23 @@ function armPhaseTimer(phase){
  /* This common timer applies to discussion and voting only. */
  st.phaseStartAt=Date.now();
  if(st.players.filter(function(p){return !p.bot}).length<=1){st.deadlineAt=0;return}
- st.deadlineAt=st.phaseStartAt+CHOICE_LIMIT_MS;
+ var limit=phase==="debate"?DEBATE_LIMIT_MS:CHOICE_LIMIT_MS;
+ st.deadlineAt=st.phaseStartAt+limit;
  var game=st.gameNo,day=st.day,nonce=phaseNonce;
  hostPhaseTimer=setTimeout(function(){
   if(!st||st.gameNo!==game||st.day!==day||st.phase!==phase||nonce!==phaseNonce)return;
   hostPhaseTimer=null;
   if(phase==="talk"){
    live().filter(function(p){return !st.speeches[p.id]}).forEach(function(p){speak(p.id,"pass",null)});
+   stepBots();
+  }else if(phase==="debate"){
+   if(st.debateStage==="challenge"){
+    live().filter(function(p){return st.debateChoices[p.id]===undefined})
+     .forEach(function(p){recordChallenge(p.id,null,"pass")});
+   }else if(st.debateStage==="reply"){
+    st.debateTargets.filter(function(id){return st.debateReplies[id]===undefined})
+     .forEach(function(id){recordDebateReply(id,"silence")});
+   }
    stepBots();
   }else if(phase==="vote"){
    live().filter(function(p){return st.votes[p.id]===undefined}).forEach(function(p){
@@ -2043,7 +2053,7 @@ function armPhaseTimer(phase){
    stepBots();
   }
   broadcast();
- },CHOICE_LIMIT_MS);
+ },limit);
 }
 /* Host-controlled sequential role turns keep the prompts, choices, and
    authoritative action checks aligned. Empty role turns still appear. */
@@ -2171,7 +2181,15 @@ function person(id){return st.players.find(function(p){return p.id===id})}
 function live(){return st.players.filter(function(p){return p.alive})}
 function targetList(id){return live().filter(function(p){return p.id!==id})}
 function log(t,kind){st.logs.push({text:t,kind:kind||"news"});if(st.logs.length>60)st.logs.shift()}
-function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},nightFeedback:{},publicHistory:[],voteHistory:[],revealed:[],aiMemory:{},logs:[],winner:"",dealReady:{},phaseStartAt:0,deadlineAt:0,nightStage:0,multiplayerNight:false};myId="h";log("村庄正在等待玩家加入。")}
+/* Public event log: independent implementation informed by MIT-licensed
+ * deepwolf (JuneQQQ) and agent-mafia (CrashLabs). No private role or
+ * unseen night action is ever entered into the shared public ledger. */
+function publicEvent(kind,actor,target,detail){
+ if(!st.publicEvents)st.publicEvents=[];
+ st.publicEvents.push({seq:st.publicEvents.length+1,day:st.day,kind:kind,
+  actor:actor||null,target:target||null,detail:detail||null});
+}
+function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},nightFeedback:{},publicHistory:[],voteHistory:[],publicEvents:[],debateStage:null,debateChoices:{},debateReplies:{},debateTargets:[],debateChallenges:[],debateOutcomes:[],revealed:[],aiMemory:{},logs:[],winner:"",dealReady:{},phaseStartAt:0,deadlineAt:0,nightStage:0,multiplayerNight:false};myId="h";log("村庄正在等待玩家加入。")}
 function snapshot(id){var me=person(id);
  var human=st.players.filter(function(p){return !p.bot});
  return {phase:st.phase,day:st.day,gameNo:st.gameNo,
@@ -2184,9 +2202,13 @@ function snapshot(id){var me=person(id);
   nightFixed:!!st.multiplayerNight,
   publicHistory:(st.publicHistory||[]).slice(-30),
   voteHistory:(st.voteHistory||[]).slice(-3),
+  publicEvents:(st.publicEvents||[]).slice(-70),
+  debateStage:st.phase==="debate"?st.debateStage:null,
+  debateTargets:st.phase==="debate"&&st.debateStage==="reply"?st.debateTargets.slice():[],
+  debateChallenges:(st.debateChallenges||[]).slice(-12),
   /* A target and role are shared only with the player who acted. */
   privateNightFeedback:st.nightFeedback&&st.nightFeedback[id]&&st.phase!=="lobby"&&st.phase!=="deal"?Object.assign({},st.nightFeedback[id]):null,
-  me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:me&&me.role==="seer"?(st.known[id]||[]).map(function(k){return {id:k.id,name:k.name,role:k.role,night:k.night,evil:k.evil}}):[],messages:st.logs.slice(-25),winner:st.winner}}
+  me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="debate"?(st.debateStage==="challenge"?st.debateChoices[id]!==undefined:!st.debateTargets.includes(id)||st.debateReplies[id]!==undefined):st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:me&&me.role==="seer"?(st.known[id]||[]).map(function(k){return {id:k.id,name:k.name,role:k.role,night:k.night,evil:k.evil}}):[],messages:st.logs.slice(-25),winner:st.winner}}
 function broadcast(){if(!st)return;view=snapshot("h");render();for(var it of connections.entries()){var id=it[0],c=it[1];if(c.open){try{c.send({type:"state",state:snapshot(id)})}catch(e){}}}}
 function makeSolo(){if(avatarPending)return;solo=true;isHost=true;room="";makeState();enter();startGame()}
 function makeRoom(){
@@ -2267,7 +2289,7 @@ function startGame(){
  var used=st.players.length;for(var i=used;i<6;i++)st.players.push({id:"bot"+i,name:["雾鸦","薇拉","灰石","伊莎","松风","星砂"][i],bot:true,alive:true,role:null,avatar:null,portrait:randomPortrait(st.players)});
  st.players.forEach(function(p,i){p.seat=i+1;p.alive=true});
  var roles=shuffle(["wolf","seer","guard","villager","villager","villager"]);st.players.forEach(function(p,i){p.role=roles[i]});
- st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.nightFeedback={};st.publicHistory=[];st.voteHistory=[];st.revealed=[];st.aiMemory={};st.logs=[];st.phase="deal";st.dealReady={};log("请所有真人玩家翻开并确认身份牌。","news");broadcast()
+ st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.nightFeedback={};st.publicHistory=[];st.voteHistory=[];st.publicEvents=[];st.debateStage=null;st.debateChoices={};st.debateReplies={};st.debateTargets=[];st.debateChallenges=[];st.debateOutcomes=[];st.revealed=[];st.aiMemory={};st.logs=[];st.phase="deal";st.dealReady={};log("请所有真人玩家翻开并确认身份牌。","news");broadcast()
 }
 function winCheck(){
  var wolves=live().filter(function(p){return p.role==="wolf"}).length;
@@ -2935,7 +2957,7 @@ function restart(){
  if(!isHost||!st||st.phase!=="ended")return;
  nightSerial++;cancelPhaseTimer();
  st.players=st.players.filter(function(p){return !p.bot}).map(function(p){return {id:p.id,name:p.name,bot:false,alive:true,role:null,portrait:p.portrait,avatar:safeAvatar(p.avatar)}});
- st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.nightFeedback={};st.known={};st.publicHistory=[];st.voteHistory=[];st.revealed=[];st.aiMemory={};st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
+ st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.nightFeedback={};st.known={};st.publicHistory=[];st.voteHistory=[];st.publicEvents=[];st.debateStage=null;st.debateChoices={};st.debateReplies={};st.debateTargets=[];st.debateChallenges=[];st.debateOutcomes=[];st.revealed=[];st.aiMemory={};st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
 }
 function button(label,action,target,speech,cls){
  return '<button class="'+(cls||"")+'" data-do="'+action+'" '+(target?'data-target="'+escapeHtml(target)+'" ':'')+(speech?'data-speech="'+speech+'" ':'')+'>'+escapeHtml(label)+'</button>'
