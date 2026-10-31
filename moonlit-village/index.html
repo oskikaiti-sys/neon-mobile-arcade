@@ -508,6 +508,25 @@ body.game-active #gameScreen.night-tint>.panel:nth-child(1),body.game-active #ga
  *,*::before,*::after{animation:none!important;transition:none!important}
  .rpg-next,.cursor::before{animation:none!important}
 }
+
+/* Stage 1 touch target audit: 48px minimum, including the header and lobby share button. */
+button,button.primary,#musicToggle,body.game-active #musicToggle,body.game-active #shareBtns button,#roleContinue{min-height:48px!important}
+body.game-active header{min-height:49px!important}
+body.game-active #musicToggle{right:0;top:0;padding:8px 9px}
+body.game-active #gameScreen{grid-template-rows:40px minmax(90px,1fr) 140px auto auto}
+body.game-active #gameScreen.is-lobby{grid-template-rows:104px minmax(90px,1fr) 140px auto auto}
+body.game-active #gameScreen.is-lobby>.panel:nth-child(1){display:flex;flex-direction:column;justify-content:center}
+body.game-active #shareBtns{display:flex;min-height:0;margin-top:5px}
+body.game-active #shareBtns button{min-height:48px!important;display:block;width:100%}
+body.game-active #players .player.rpg-selectable{min-height:48px;touch-action:manipulation}
+@media(max-width:700px){
+ body.game-active #gameScreen{grid-template-rows:38px minmax(80px,1fr) 140px auto auto}
+ body.game-active #gameScreen.is-lobby{grid-template-rows:104px minmax(80px,1fr) 140px auto auto}
+}
+@media(max-height:650px){
+ body.game-active #gameScreen{grid-template-rows:35px minmax(70px,1fr) 134px auto auto}
+ body.game-active #gameScreen.is-lobby{grid-template-rows:100px minmax(70px,1fr) 134px auto auto}
+}
 </style>
 </head>
 <body>
@@ -948,6 +967,7 @@ function render(){
  rpgActivateMenu();
  $("notice").textContent=notice;
  $("gameScreen").classList.toggle("action-waiting",!a);
+ $("gameScreen").classList.toggle("is-lobby",v.phase==="lobby");
 }
 
 /* Original procedural ambient soundtrack. Starts only after a user gesture (iOS requirement). */
