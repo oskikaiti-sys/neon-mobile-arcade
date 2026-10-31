@@ -1544,7 +1544,7 @@ body.game-active .endgame-panel .face-frame .face-image{object-fit:cover}
     <div id="rightPlayers" class="character-rail character-rail-right" aria-label="村庄居民，四至六号"></div>
   </div>
 </div>
-<div class="panel game-actions"><div class="action-heading"><h2 id="actionTitle" data-i18n="actionDefault"></h2><span id="phaseClock" class="phase-clock" hidden aria-label="Time remaining">02:00</span></div><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
+<div class="panel game-actions"><div class="action-heading"><h2 id="actionTitle" data-i18n="actionDefault"></h2><button type="button" id="seerNotesButton" class="seer-notes-button" data-do="openSeerNotes" hidden>Inspection history</button><span id="phaseClock" class="phase-clock" hidden aria-label="Time remaining">02:00</span></div><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
 </section>
 <div class="footer"><span data-i18n="footer1"></span><br><span data-i18n="footer2"></span><br>BGM：《不思議な村》— HiLi / <a href="https://conte-de-fees.com/bgm/238" target="_blank" rel="noopener noreferrer" style="color:inherit">こんとどぅふぇ</a></div>
 <div id="timeScene" class="time-scene" hidden aria-hidden="true">
@@ -1719,6 +1719,54 @@ translations.ja.helpWinTitle="勝利条件";
 translations.ja.helpWinDetail="人狼を追放すると村人陣営の勝利。生存中の人狼の数がほかの生存者以上になると人狼の勝利です。12日目を超えても人狼の勝利になります。";
 translations.ja.helpTimerDetail="複数人プレイ：夜の行動・発言・投票は各2分間で、未回答は行動なし・発言なし・棄権扱いです。ソロ：選択の時間制限はなく、夜の各案内は2秒のカウントダウンです。同数票や投票なしの場合は追放されません。";
 translations.ja.helpDone="わかりました";
+translations.en.revealEyebrow="THE FINAL REVEAL";
+translations.en.revealTitle="All identities revealed";
+translations.en.revealSubtitle="The game has ended. All six players’ true roles are now public.";
+translations.en.revealOpen="View all identities";
+translations.en.revealDone="Return to results";
+translations.en.revealClose="Close final identities";
+translations.en.revealWinner="Winner: {winner}";
+translations.en.revealYou="You";
+translations.en.seerNotesEyebrow="PRIVATE SEER NOTES";
+translations.en.seerNotesTitle="Inspected identities";
+translations.en.seerNotesIntro="Only you can view the exact roles of players you investigated.";
+translations.en.seerNotesButton="Inspection history";
+translations.en.seerNotesDone="Back to game";
+translations.en.seerNotesClose="Close inspection history";
+translations.en.seerNotesEmpty="You have not inspected anyone yet.";
+translations.en.seerNotesNight="Night {night}";
+translations.zh.revealEyebrow="终局身份揭晓";
+translations.zh.revealTitle="全员身份揭晓";
+translations.zh.revealSubtitle="游戏已经结束，所有六名玩家的真实职业现已公开。";
+translations.zh.revealOpen="查看全员身份";
+translations.zh.revealDone="返回结算";
+translations.zh.revealClose="关闭身份揭晓";
+translations.zh.revealWinner="获胜阵营：{winner}";
+translations.zh.revealYou="你";
+translations.zh.seerNotesEyebrow="预言家私人笔记";
+translations.zh.seerNotesTitle="已查验身份";
+translations.zh.seerNotesIntro="只有你本人能查看已经查验的玩家的具体职业。";
+translations.zh.seerNotesButton="查验记录";
+translations.zh.seerNotesDone="返回游戏";
+translations.zh.seerNotesClose="关闭查验记录";
+translations.zh.seerNotesEmpty="你还没有查验过任何人。";
+translations.zh.seerNotesNight="第 {night} 夜";
+translations.ja.revealEyebrow="役職の最終公開";
+translations.ja.revealTitle="全員の役職を公開";
+translations.ja.revealSubtitle="ゲームが終了し、6人全員の正確な役職が公開されました。";
+translations.ja.revealOpen="全員の役職を見る";
+translations.ja.revealDone="結果に戻る";
+translations.ja.revealClose="役職公開を閉じる";
+translations.ja.revealWinner="勝利陣営：{winner}";
+translations.ja.revealYou="あなた";
+translations.ja.seerNotesEyebrow="占い師だけの記録";
+translations.ja.seerNotesTitle="占った役職";
+translations.ja.seerNotesIntro="占ったプレイヤーの正確な役職は自分にだけ表示されます。";
+translations.ja.seerNotesButton="占いの記録";
+translations.ja.seerNotesDone="ゲームに戻る";
+translations.ja.seerNotesClose="占いの記録を閉じる";
+translations.ja.seerNotesEmpty="まだ誰も占っていません。";
+translations.ja.seerNotesNight="{night}日目の夜";
 var selectedLanguage="en";
 translations.en.languageAria="Language";translations.zh.languageAria="语言";translations.ja.languageAria="言語";
 function tr(key,values){
@@ -1759,6 +1807,8 @@ function applyStaticLanguage(){
  $("helpToggle").setAttribute("title",tr("helpButton"));
  $("helpOverlay").querySelector(".rules-close").setAttribute("aria-label",tr("helpClose"));
  $("roleOverlay").querySelector(".deal-guide").setAttribute("aria-label",tr("helpButton"));
+ $("endgameOverlay").querySelector(".endgame-close").setAttribute("aria-label",tr("revealClose"));
+ $("seerNotesOverlay").querySelector(".seer-notes-close").setAttribute("aria-label",tr("seerNotesClose"));
  localAvatarPreview();
 }
 function setLanguage(next){
@@ -2471,6 +2521,80 @@ function updatePhaseHud(){
  }
 }
 
+
+/* Endgame information is always derived from a completed host snapshot.
+ * No class/identity hints are sent in public player rows before phase=ended. */
+var revealedGameNo=null,revealPreviousFocus=null,notesPreviousFocus=null;
+function endgameVisible(v){
+ return !!(v&&v.phase==="ended"&&v.gameNo&&v.players&&v.players.length===6&&
+  v.players.every(function(p){return ["wolf","seer","guard","villager"].includes(p.role)}));
+}
+function renderEndgameReveal(v){
+ if(!endgameVisible(v))return;
+ $("endgameWinner").textContent=tr("revealWinner",{winner:teamName(v.winner)});
+ $("endgameRoster").innerHTML=v.players.map(function(p,i){
+  return '<div role="listitem" class="endgame-row'+(p.role==="wolf"?' is-wolf':'')+'">'
+   +faceMarkup(p,p.alive?"normal":"out",i,"resident")
+   +'<span class="endgame-person"><span class="endgame-person-name">'+escapeHtml(displayName(p.name))
+   +(p.id===v.me?' · '+escapeHtml(tr("revealYou")):'')+'</span>'
+   +'<span class="endgame-person-status">'+escapeHtml(tr(p.alive?"alive":"out"))+'</span></span>'
+   +'<span class="endgame-person-role">'+escapeHtml(roleName(p.role))+'</span></div>';
+ }).join("");
+}
+function openEndgameReveal(trigger){
+ if(!endgameVisible(view))return;
+ renderEndgameReveal(view);
+ revealPreviousFocus=trigger||document.activeElement||null;
+ $("endgameOverlay").hidden=false;
+ var close=$("endgameOverlay").querySelector(".endgame-close");
+ if(close&&close.focus)close.focus();
+}
+function closeEndgameReveal(){
+ $("endgameOverlay").hidden=true;
+ if(revealPreviousFocus&&revealPreviousFocus.focus)revealPreviousFocus.focus();
+ revealPreviousFocus=null;
+}
+function updateEndgameReveal(v){
+ if(!endgameVisible(v)){
+  $("endgameOverlay").hidden=true;
+  revealedGameNo=null;
+  return;
+ }
+ renderEndgameReveal(v);
+ if(revealedGameNo!==v.gameNo){
+  revealedGameNo=v.gameNo;
+  /* The result dialog is shown once, but stays closed when manually dismissed. */
+  openEndgameReveal(null);
+ }
+}
+function renderSeerNotes(v){
+ if(!v||v.myRole!=="seer"||v.phase==="lobby"||v.phase==="deal"){
+  $("seerNotesOverlay").hidden=true;return;
+ }
+ $("seerNotesList").innerHTML=(v.knowledge||[]).length?(v.knowledge||[]).map(function(k){
+  var role=typeof k.role==="string"&&["wolf","seer","guard","villager"].includes(k.role)?k.role:null;
+  var player=v.players.find(function(p){return p.id===k.id});
+  var display=player?displayName(player.name):displayName(k.name);
+  return '<div role="listitem" class="seer-note-row'+((role==="wolf"||k.evil)?' is-wolf':'')+'">'
+   +'<span class="seer-note-name">'+escapeHtml(display)
+   +'<span class="seer-note-night"> · '+escapeHtml(tr("seerNotesNight",{night:k.night}))+'</span></span>'
+   +'<span class="seer-note-role">'+escapeHtml(role?roleName(role):tr(k.evil?"roleWolfShort":"roleGoodShort"))+'</span></div>';
+ }).join(""):'<div class="seer-notes-empty">'+escapeHtml(tr("seerNotesEmpty"))+'</div>';
+}
+function openSeerNotes(trigger){
+ if(!view||view.myRole!=="seer"||!["night","talk","vote","ended"].includes(view.phase))return;
+ renderSeerNotes(view);
+ notesPreviousFocus=trigger||document.activeElement||null;
+ $("seerNotesOverlay").hidden=false;
+ var close=$("seerNotesOverlay").querySelector(".seer-notes-close");
+ if(close&&close.focus)close.focus();
+}
+function closeSeerNotes(){
+ $("seerNotesOverlay").hidden=true;
+ if(notesPreviousFocus&&notesPreviousFocus.focus)notesPreviousFocus.focus();
+ notesPreviousFocus=null;
+}
+
 function render(){
  if(!view)return;
  var v=view;
@@ -2489,6 +2613,11 @@ function render(){
    +faceMarkup(p,p.alive?"normal":"out",i,"resident")
    +(p.id===v.me?'<span class="player-you">'+escapeHtml(tr("you"))+'</span>':'')
    +'<div class="name" title="'+escapeHtml(displayName(p.name))+'">'+escapeHtml(displayName(p.name))+'</div>'
+   +((function(){
+    var inspected=v.myRole==="seer"?(v.knowledge||[]).find(function(k){return k.id===p.id}):null;
+    var discovered=v.phase==="ended"?p.role:inspected&&inspected.role;
+    return discovered?'<span class="reveal-role-tag'+(discovered==="wolf"?' is-wolf':'')+'">'+escapeHtml(roleName(discovered))+'</span>':"";
+   })())
    +'<div class="player-status-line" aria-hidden="true"></div>'
    +'<span class="sr-only">'+escapeHtml(tr(p.alive?"alive":"out"))+(speaking?', '+escapeHtml(tr("speakerNow")):"")+'</span>'
    +'</div>'
@@ -2549,12 +2678,15 @@ function render(){
   else a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return modernTarget(p,tr("voteTarget"),"vote","vote")}).join("");
  }else if(v.phase==="ended"){
   title=tr("actionResult",{winner:teamName(v.winner)});
-  if(v.host)a=button(tr("again"),"again",null,null,"primary full");
+  if(endgameVisible(v))a=button(tr("revealOpen"),"openReveal",null,null,"full");
+  if(v.host)a+=button(tr("again"),"again",null,null,"primary full");
   else notice=tr("waitHostAgain");
  }
  $("actionTitle").textContent=title;
  $("actions").className="actions"+((v.phase==="night"||v.phase==="vote"||(v.phase==="talk"&&speechKind))?" targets":"");
  $("actions").innerHTML=a;
+ $("seerNotesButton").hidden=!(v.myRole==="seer"&&["night","talk","vote","ended"].includes(v.phase));
+ $("seerNotesButton").textContent=tr("seerNotesButton");
  rpgActivateMenu();
  $("notice").textContent=notice;
  $("gameScreen").classList.toggle("action-waiting",!a);
@@ -2563,6 +2695,8 @@ function render(){
  document.body.classList.toggle("night-mode",v.phase==="night");
  document.body.classList.toggle("day-mode",v.phase==="talk"||v.phase==="vote");
  updatePhaseHud();
+ renderSeerNotes(v);
+ updateEndgameReveal(v);
 }
 
 
