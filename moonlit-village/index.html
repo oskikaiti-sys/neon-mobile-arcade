@@ -1298,11 +1298,18 @@ function tr(key,values){
 function roleName(role){return tr({wolf:"roleWolf",seer:"roleSeer",guard:"roleGuard",villager:"roleVillager"}[role]||"roleMystery")}
 function roleDescription(role){return tr({wolf:"roleWolfDesc",seer:"roleSeerDesc",guard:"roleGuardDesc",villager:"roleVillagerDesc"}[role]||"roleMystery")}
 function teamName(team){return team==="狼人阵营"?tr("roleWolfTeam"):team==="好人阵营"?tr("roleGood"):team}
+/* Keep an explicit record of NPC names seen in a round. After a match ends,
+ * the host removes bot entries from the lobby roster, but archived dialogue
+ * may still be translated. Never translate a current human player's nickname. */
+var recognizedBotNames=new Set();
 function displayName(name){
  var bots=["雾鸦","薇拉","灰石","伊莎","松风","星砂"];
- var player=view&&view.players.find(function(p){return p.bot&&p.name===name});
- var index=player?bots.indexOf(name):-1;
- return index<0?name:tr("bot"+index);
+ var index=bots.indexOf(name);
+ if(index<0)return name;
+ var matching=view&&view.players.filter(function(p){return p.name===name})||[];
+ if(matching.some(function(p){return !p.bot}))return name;
+ if(matching.some(function(p){return p.bot}))recognizedBotNames.add(name);
+ return recognizedBotNames.has(name)?tr("bot"+index):name;
 }
 function applyStaticLanguage(){
  document.documentElement.lang={en:"en",zh:"zh-CN",ja:"ja"}[selectedLanguage];
@@ -1824,14 +1831,22 @@ function stageAdvanceQueue(){
 }
 function rpgRenderMessages(v){
  var messages=v.messages||[],fingerprint=JSON.stringify(messages);
- if(stageGameNo!==v.gameNo){
+ var incoming=messages.map(function(m){return JSON.stringify(m)});
+ /* Restart clears the authoritative log without incrementing gameNo until
+  * the next match begins. Detect its new lobby log, and clear the visual
+  * queue/history on every client instead of displaying the previous game. */
+ var newLobbyLog=v.phase==="lobby"&&messages.length>0&&
+  messages[0].text==="新的村庄正在等待开局。"&&
+  stageSeenMessages.length>0&&stageSeenMessages[0]!==incoming[0];
+ if(stageGameNo!==v.gameNo||newLobbyLog){
   if(stageTimer!==null){clearTimeout(stageTimer);stageTimer=null}
   stageGameNo=v.gameNo;stageHistory=[];stageQueue=[];stageCurrent=null;stageSeenMessages=[];stageFingerprint="";
   $("speakerOverlay").hidden=true;
+  stageHighlightSpeaker(null);
+  stagePaintHistory();
  }
  if(fingerprint===stageFingerprint)return;
  stageFingerprint=fingerprint;
- var incoming=messages.map(function(m){return JSON.stringify(m)});
  var overlap=0,max=Math.min(stageSeenMessages.length,incoming.length);
  for(var len=max;len>0;len--){
   var fits=true;
