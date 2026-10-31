@@ -1074,42 +1074,107 @@ function render(){
 }
 
 
-/* Licensed Conte de Fées sound effects, hosted locally with the game.
- * No audio file or external network request is required by the UI logic.
- * Shared musicWanted flag mutes BGM and SFX together. */
+/* Conte de Fées samples: prefetch and decode once; instant AudioBufferSource playback.
+ * No delayed queue: an unready first cue is skipped instead of lagging behind the UI.
+ * iOS Safari's AudioContext is resumed synchronously in the user gesture. */
 var sfxSources={
- cursor:"assets/audio/sfx/cursor.mp3",
- confirm:"assets/audio/sfx/confirm.mp3",
- cancel:"assets/audio/sfx/cancel.mp3",
- damage:"assets/audio/sfx/damage.mp3",
- chime:"assets/audio/sfx/chime.mp3",
- gameover:"assets/audio/sfx/gameover.mp3"
+ cursor:"assets/audio/sfx/cursor.mp3",confirm:"assets/audio/sfx/confirm.mp3",
+ cancel:"assets/audio/sfx/cancel.mp3",damage:"assets/audio/sfx/damage.mp3",
+ chime:"assets/audio/sfx/chime.mp3",gameover:"assets/audio/sfx/gameover.mp3"
 };
 var sfxVolumes={cursor:.18,confirm:.27,cancel:.24,damage:.32,chime:.27,gameover:.3};
-var sfxPlayers={},sfxLastAt={},previousAudibleState=null;
+var sfxContext=null,sfxOutput=null,sfxBuffers={},sfxLoading={},sfxFallback={},
+ sfxActive=[],sfxLastAt={},previousAudibleState=null;
+function getSfxContext(){
+ if(sfxContext)return sfxContext;
+ var Creator=window.AudioContext||window.webkitAudioContext;
+ if(!Creator)return null;
+ try{
+  try{sfxContext=new Creator({latencyHint:"interactive"})}
+  catch(e){sfxContext=new Creator()}
+  sfxOutput=sfxContext.createGain();
+  sfxOutput.gain.value=.8;
+  sfxOutput.connect(sfxContext.destination);
+ }catch(err){sfxContext=null;sfxOutput=null}
+ return sfxContext;
+}
+function trimSfxSilence(buffer,kind){
+ if(!/^(cursor|confirm|cancel|damage)$/.test(kind))return buffer;
+ try{
+  var rate=buffer.sampleRate,limit=Math.min(buffer.length,Math.floor(rate*.28)),first=limit;
+  for(var ch=0;ch<buffer.numberOfChannels;ch++){
+   var samples=buffer.getChannelData(ch);
+   for(var i=0;i<limit;i++){if(Math.abs(samples[i])>.004){first=Math.min(first,i);break}}
+  }
+  if(first===limit||first<Math.floor(rate*.012))return buffer;
+  var start=Math.max(0,first-Math.floor(rate*.004));
+  var trimmed=sfxContext.createBuffer(buffer.numberOfChannels,buffer.length-start,rate);
+  for(var k=0;k<buffer.numberOfChannels;k++)
+   trimmed.getChannelData(k).set(buffer.getChannelData(k).subarray(start));
+  return trimmed;
+ }catch(err){return buffer}
+}
+function prepareSfx(){
+ var ctx=getSfxContext();
+ Object.keys(sfxSources).forEach(function(kind){
+  if(!ctx||typeof fetch!=="function"){
+   if(sfxFallback[kind])return;
+   try{
+    var a=new Audio(sfxSources[kind]);a.preload="auto";
+    if(typeof a.load==="function")a.load();
+    sfxFallback[kind]=a;
+   }catch(err){}
+   return;
+  }
+  if(sfxLoading[kind]||sfxBuffers[kind])return;
+  sfxLoading[kind]=fetch(sfxSources[kind],{cache:"force-cache"})
+   .then(function(resp){if(!resp.ok)throw new Error("Sound HTTP "+resp.status);return resp.arrayBuffer()})
+   .then(function(data){return ctx.decodeAudioData(data)})
+   .then(function(buffer){sfxBuffers[kind]=trimSfxSilence(buffer,kind)})
+   .catch(function(){/* Optional SFX never blocks gameplay. */})
+   .then(function(){delete sfxLoading[kind]});
+ });
+}
+function unlockSfx(){
+ var ctx=getSfxContext();
+ if(ctx&&ctx.state==="suspended")
+  try{var p=ctx.resume();if(p&&p.catch)p.catch(function(){})}catch(err){}
+}
 function playSfx(kind){
  if(!musicWanted||!sfxSources[kind])return;
- try{
-  var now=Date.now();
-  /* Prevent simultaneous rerenders/duplicate clicks from stuttering one cue. */
-  if(sfxLastAt[kind]&&now-sfxLastAt[kind]<85)return;
-  sfxLastAt[kind]=now;
-  var player=sfxPlayers[kind];
-  if(!player){
-   player=new Audio(sfxSources[kind]);
-   player.preload="auto";
-   sfxPlayers[kind]=player;
-  }
-  player.pause();
-  player.currentTime=0;
-  player.volume=sfxVolumes[kind]||.25;
-  var promise=player.play();
-  if(promise&&typeof promise.catch==="function")promise.catch(function(){});
- }catch(err){/* Missing audio and Safari gesture restrictions never block play. */}
+ unlockSfx();
+ var now=Date.now();
+ if(sfxLastAt[kind]&&now-sfxLastAt[kind]<50)return;
+ if(sfxContext&&sfxBuffers[kind]&&sfxOutput){
+  try{
+   var src=sfxContext.createBufferSource(),gain=sfxContext.createGain();
+   src.buffer=sfxBuffers[kind];gain.gain.value=sfxVolumes[kind]||.25;
+   src.connect(gain);gain.connect(sfxOutput);
+   var active={source:src,gain:gain};sfxActive.push(active);
+   src.onended=function(){
+    var i=sfxActive.indexOf(active);if(i>=0)sfxActive.splice(i,1);
+    try{src.disconnect();gain.disconnect()}catch(err){}
+   };
+   src.start(0);
+   sfxLastAt[kind]=now;
+   return;
+  }catch(err){}
+ }
+ /* No late playback when the decoded buffer isn't ready. */
+ if(!sfxContext&&sfxFallback[kind]){
+  try{
+   var audio=sfxFallback[kind];audio.pause();audio.currentTime=0;
+   audio.volume=sfxVolumes[kind]||.25;
+   var promise=audio.play();if(promise&&promise.catch)promise.catch(function(){});
+   sfxLastAt[kind]=now;
+  }catch(err){}
+ }
 }
 function stopSfx(){
- Object.keys(sfxPlayers).forEach(function(key){
-  try{sfxPlayers[key].pause();sfxPlayers[key].currentTime=0}catch(err){}
+ sfxActive.slice().forEach(function(item){try{item.source.stop()}catch(err){}});
+ sfxActive.length=0;
+ Object.keys(sfxFallback).forEach(function(kind){
+  try{sfxFallback[kind].pause();sfxFallback[kind].currentTime=0}catch(err){}
  });
 }
 function notifyGameSounds(v){
@@ -1172,19 +1237,23 @@ function toggleMusic(){
  }
 }
 
+/* Preload tiny sound assets before a user touches a button. */
+prepareSfx();
+
 document.addEventListener("click",function(e){
  var resident=e.target.closest("[data-rpg-target]");
  if(resident){rpgSelectTarget(resident.getAttribute("data-rpg-target"));return}
  var b=e.target.closest("button[data-do]");if(!b)return;
  if(b.classList){b.classList.add("is-activated");}
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
- if(action==="musicToggle"){toggleMusic();return;}
- ensureMusic();
+ if(action==="musicToggle"){unlockSfx();toggleMusic();return;}
+ unlockSfx();
  var clickSound={back:"cancel",pickSpeech:"cursor",create:"confirm",join:"confirm",
   solo:"confirm",start:"confirm",again:"confirm",night:"confirm",
   vote:"confirm",say:"confirm",speakTarget:"confirm",confirmTarget:"confirm",
   copy:"confirm",flipRole:"confirm",closeRole:"confirm"}[action];
  if(clickSound)playSfx(clickSound);
+ ensureMusic();
  if(action==="flipRole"){if(!$("roleOverlay").classList.contains("revealed")){$("roleOverlay").classList.add("revealed");$("roleContinue").hidden=false;$("roleCard").disabled=true;$("drawHint").textContent="身份已经揭晓，准备进入村庄";}}
  else if(action==="closeRole"){$("roleOverlay").hidden=true;if(pendingScene){playTimeScene(pendingScene);pendingScene=null;}}
  else if(action==="solo")makeSolo();
