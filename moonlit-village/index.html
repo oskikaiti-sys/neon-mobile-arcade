@@ -2140,12 +2140,43 @@ function modernTarget(p,prefix,action,icon){
  '<span class="action-chevron" aria-hidden="true">›</span></button>';
 }
 
+
+/* The host sends remaining milliseconds, not its wall-clock timestamp. Client
+ * time is only for display; the host always enforces the authoritative cutoff. */
+var clockSnapshot=null,clockSeenAt=0;
+function updatePhaseHud(){
+ var v=view,clock=$("phaseClock"),round=$("nightTurn");
+ if(!clock||!round)return;
+ if(!v){
+  clock.hidden=true;round.hidden=true;return;
+ }
+ if(clockSnapshot!==v){clockSnapshot=v;clockSeenAt=Date.now()}
+ var elapsed=Math.max(0,Date.now()-clockSeenAt);
+ var timed=["night","talk","vote"].includes(v.phase);
+ clock.hidden=!timed;
+ if(timed){
+  var remaining=Math.max(0,Math.ceil((Math.max(0,v.deadlineRemaining||0)-elapsed)/1000));
+  var mm=String(Math.floor(remaining/60)).padStart(2,"0"),ss=String(remaining%60).padStart(2,"0");
+  clock.textContent=mm+":"+ss;
+  clock.setAttribute("aria-label",tr("clockLabel")+": "+clock.textContent);
+  clock.classList.toggle("is-low",remaining<=20);
+ }
+ round.hidden=v.phase!=="night";
+ if(v.phase==="night"){
+  var nightMs=Math.max(0,(v.phaseElapsed||0)+elapsed);
+  var index=Math.floor(nightMs/NIGHT_PROMPT_MS);
+  var keys=["nightWolfRound","nightSeerRound","nightGuardRound"];
+  $("nightTurnLabel").textContent=tr(keys[index]||"nightWaitRound");
+  $("nightTurnCount").textContent=index<3?(index+1)+"/3":"";
+ }
+}
+
 function render(){
  if(!view)return;
  var v=view;
  showRoleDeal(v);
  handleTimeScene(v);
- var titles={lobby:tr("phaseLobby"),night:tr("phaseNight",{day:v.day}),talk:tr("phaseTalk",{day:v.day}),vote:tr("phaseVote",{day:v.day}),ended:tr("phaseEnded")};
+ var titles={lobby:tr("phaseLobby"),deal:tr("phaseDeal"),night:tr("phaseNight",{day:v.day}),talk:tr("phaseTalk",{day:v.day}),vote:tr("phaseVote",{day:v.day}),ended:tr("phaseEnded")};
  $("phaseTag").textContent=titles[v.phase];
  $("roomInfo").textContent=v.solo?tr("soloInfo"):v.room?tr("roomInfo",{code:v.room}):"";
  $("shareBtns").innerHTML=(!v.solo&&v.room&&v.phase==="lobby")?button(tr("copy"),"copy",null,null,"ghost"):"";
@@ -2187,6 +2218,9 @@ function render(){
   title=tr("actionLobby");
   if(v.host)a=button(tr("start"),"start",null,null,"primary full");
   else notice=tr("waitHostStart");
+ }else if(v.phase==="deal"){
+  title=tr("dealWaitTitle");
+  notice=tr(v.readyMe?"dealWaitOthers":"dealPleaseConfirm",{ready:v.readyCount,total:v.readyTotal});
  }else if(v.phase==="night"){
   title=tr("actionNight");
   if(!v.myAlive)notice=tr("spectate");
@@ -2226,6 +2260,7 @@ function render(){
  notifyGameSounds(v);
  document.body.classList.toggle("night-mode",v.phase==="night");
  document.body.classList.toggle("day-mode",v.phase==="talk"||v.phase==="vote");
+ updatePhaseHud();
 }
 
 
@@ -2499,6 +2534,7 @@ try{
 }catch(e){}
 applyStaticLanguage();
 updateLanguageOverlays();
+setInterval(updatePhaseHud,250);
 var param=new URLSearchParams(location.search).get("room");if(param&&/^[A-Z0-9]{6}$/i.test(param)){$("roomInput").value=param.toUpperCase();$("homeNotice").textContent=tr("inviteDetected")}
 })();
 </script>
