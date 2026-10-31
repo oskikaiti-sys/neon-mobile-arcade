@@ -48,11 +48,22 @@
 - **6：** `#players` 改成横向滚动队伍卡，`.player-you` 表示自己，`.rpg-speaking` 表示**最近一次公开发言**的居民（当前规则没有轮流发言的固定发言者），出局者显示红斜线。
 - **7：** 顶栏 `#musicToggle` 的可见圆形是 40px，但保留 48px 触控区域。
 
-### 添加头像 PNG
+### 当前头像素材（已接入）
 
-可将 512×512 方形 PNG 放入 `moonlit-village/assets/faces/`，使用 `{玩家id}_{表情}.png` 命名。支持 `normal`、`suspect`、`out`。具体 ID 是内部玩家标识，可从运行时数据确认；离线电脑玩家的 ID 可能因每局而变化，建议在未来做正式脸图包时为座位配置稳定资产键，不能假设本轮 ID 永久不变。
+六张头像来自原「学院游戏」的十二人日系肖像图集，经裁剪和压缩得到 256×256 WebP，实际文件位于 `moonlit-village/assets/faces/resident_0.webp` 至 `resident_5.webp`。
 
-当前代码会请求对应的 PNG；文件缺失或无法加载时自动隐藏图片，继续显示剪影。六种头像色环是**公开座位配色，不代表隐藏职业、阵营或好坏**，避免泄露狼人身份。若添加了此前缺失的图片，请刷新页面以清除本次页面会话中的缺图记录。
+| 公开座位（从 0 起） | 头像文件 | 视觉特征 |
+|---|---|---|
+| 0 | `resident_0.webp` | 银发男学生 |
+| 1 | `resident_1.webp` | 银发女学生 |
+| 2 | `resident_2.webp` | 黑发男学生 |
+| 3 | `resident_3.webp` | 栗发女学生 |
+| 4 | `resident_4.webp` | 薄荷绿长发精灵 |
+| 5 | `resident_5.webp` | 粉发兽耳少女 |
+
+`faceConfig.portraits` 和 `faceMarkup(player, expression, seat, context)` 使用公开玩家座位决定头像，不依赖每局变化的 player ID 或保密职业。居民栏、中央对话、历史记录与夜间/投票目标使用同一个头像映射；出局状态使用 CSS 灰度并保留红色斜线。缺失图片时仍显示内联 SVG 剪影。座位色环是视觉区分，不暗示隐藏阵营。
+
+未来替换素材时，可直接更换六张 WebP；不需要为 normal、suspect、out 分别复制一份人物图。
 
 ### 验收建议
 
