@@ -2473,7 +2473,9 @@ function debateContradiction(id,kind){
  }
  if(kind==="report"){
   var seen={};
-  return aiReportsBy(id).some(function(h){
+  return (st.publicHistory||[]).filter(function(h){
+   return h.id===id&&(h.kind==="gold"||h.kind==="black")&&h.targetId;
+  }).some(function(h){
    var conflict=seen[h.targetId]&&seen[h.targetId]!==h.kind;
    seen[h.targetId]=h.kind;
    var shown=aiVisibleAlignment(h.targetId);
@@ -2615,7 +2617,8 @@ var DEBATE_DIALOGUE={
   explain_vote:"第{day}天我确实投给了{subject}。投票是我的判断，不是查验结果；应结合当时发言评价。",
   contradiction:"我的说法与已经确认的公开记录出现矛盾，目前无法给出可验证的解释。",
   counter:"质疑者也应该提供具体证据，单纯被质疑并不能证明我是狼人。",
-  admit:"我撤回刚才被质疑的说法，原发言保留在公开记录中供所有人核对。",
+  admit:"我撤回被质疑的说法；原发言仍保留在公开记录中。",
+  admitNoChange:"我承认之前的判断可能有误，但历史投票和发言不会被删除。",
   avoid:"暂时不回应，先观察其他人的表态。"
  }},
  en:{challenge:{
@@ -2632,7 +2635,8 @@ var DEBATE_DIALOGUE={
   explain_vote:"On day {day}, I voted for {subject}. It was a judgment, not an inspection. Compare it with my statements then.",
   contradiction:"My story conflicts with verified public records. I cannot support the inconsistency yet.",
   counter:"My accuser must show concrete evidence. Being challenged is not proof of a hidden role.",
-  admit:"I retract the challenged statement. The original remains in the public record.",
+  admit:"I retract the challenged statement. It remains in the public record.",
+  admitNoChange:"My earlier judgment may have been wrong; the public record is unchanged.",
   avoid:"I won't address this yet. I'll hear the other statements first."
  }},
  ja:{challenge:{
@@ -2650,6 +2654,7 @@ var DEBATE_DIALOGUE={
   contradiction:"自分の発言が公開された確定記録と矛盾しています。まだ説明できません。",
   counter:"疑う側も具体的な証拠を示すべきです。疑われただけで役職は確定しません。",
   admit:"質疑された発言を撤回します。元の発言は公開記録に残ります。",
+  admitNoChange:"以前の判断に誤りがあったかもしれません。公開記録は消えません。",
   avoid:"今は回答を控え、ほかの発言を聞きます。"
  }}
 };
@@ -2664,7 +2669,8 @@ function debateLine(lang,part,item){
   ja:{seer:"占い師",guard:"騎士",villager:"村人",black:"黒判定",gold:"白判定"}
  };
  var vars={name:findName(item.targetId),subject:findName(info.subject),day:info.day||item.day,role:(roleNames[lang]||roleNames.zh)[role]||role};
- var key=part==="reply"&&item.kind==="explain"?
+ var key=part==="reply"&&item.kind==="admit"&&!item.retracted?"admitNoChange":
+  part==="reply"&&item.kind==="explain"?
   (item.contradicted?"contradiction":item.cautious?"explain_caution":"explain"):item.kind;
  if(part==="reply"&&(key==="explain"||key==="explain_caution")){
   var detail=dict.reply["explain_"+(item.sourceKind||"reason")]||dict.reply.explain;
@@ -2802,11 +2808,12 @@ function aiPositiveTrustBasis(observer,target){
   })&&!aiSeerStoryRefuted(observer,target);
 }
 function aiCredibility(observer,id){
- var history=st.publicHistory||[],claims=history.filter(function(h){return h.id===id&&roleClaim(h.kind)});
+ var history=st.publicHistory||[],claims=history.filter(function(h){return h.id===id&&!h.retracted&&roleClaim(h.kind)});
  var confidence=1,distinct={};
  if(aiSeerStoryRefuted(observer,person(id)))confidence-=1.0;
  claims.forEach(function(h){distinct[roleClaim(h.kind)]=true});
  if(Object.keys(distinct).length>1)confidence-=.65;
+ confidence-=Math.min(.5,history.filter(function(h){return h.id===id&&h.retracted}).length*.12);
  var reports=aiReportsBy(id),seen={};
  reports.forEach(function(r){
   var prior=seen[r.targetId];
@@ -2911,7 +2918,8 @@ function aiWorldAnalysis(observer){
  var setup=aiPublicRoleSetup();
  if(!setup||roster.length>12||!roster.some(function(p){return p.id===observer.id}))return null;
  var cacheKey=st.day+"|"+history.length+"|"+(st.voteHistory||[]).length+"|"+
-  (st.revealed||[]).length+"|"+known.length+"|"+
+  (st.revealed||[]).length+"|"+(st.debateOutcomes||[]).length+"|"+
+  history.filter(function(h){return h.retracted}).length+"|"+known.length+"|"+
   alive.map(function(p){return p.id}).join(",");
  var memory=aiState(observer);
  if(memory.worldCache&&memory.worldCache.key===cacheKey)return memory.worldCache.value;
@@ -2934,8 +2942,10 @@ function aiWorldAnalysis(observer){
   var score=0;
   roster.forEach(function(actor){
    if(actor.id===observer.id)return; /* Own public deception is not evidence. */
-   var utterances=eventsByActor[actor.id]||[],role=assigned[actor.id];
+   var prior=eventsByActor[actor.id]||[],role=assigned[actor.id];
+   var utterances=prior.filter(function(h){return !h.retracted});
    var announced=[...new Set(utterances.map(function(h){return roleClaim(h.kind)}).filter(Boolean))];
+   score-=Math.min(.5,prior.filter(function(h){return h.retracted}).length*.12);
    announced.forEach(function(claim){
     if(claim===role)score+=.55;
     else if(role==="wolf")score+=.05; // A wolf can impersonate any good role.
@@ -4718,7 +4728,8 @@ function render(){
   }else if(v.debateStage==="reply"){
    if(v.submitted)notice=v.debateTargets.includes(v.me)?tr("debateSubmitted"):tr("debateNotTargeted");
    else if(v.debateTargets.includes(v.me)){
-    a=["explain","counter","admit","avoid"].map(function(kind){
+    var hasStatement=(v.publicHistory||[]).some(function(h){return h.id===v.me&&!h.retracted});
+    a=["explain","counter"].concat(hasStatement?["admit"]:[]).concat(["avoid"]).map(function(kind){
      var key={explain:"debateExplain",counter:"debateCounter",admit:"debateAdmit",avoid:"debateAvoid"}[kind];
      return modernAction(tr(key),"debateReply",null,kind,"clue",tr(key));
     }).join("");
