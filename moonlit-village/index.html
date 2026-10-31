@@ -1928,6 +1928,9 @@ translations.en.nightCueCountdown="{seconds}s · {turn}/3";translations.zh.night
 translations.en.logNightStart="Night {day}: The village is asleep.";translations.zh.logNightStart="第 {day} 夜：夜间行动开始。";translations.ja.logNightStart="{day}日目の夜：夜の行動が始まります。";
 translations.en.clockLabel="Time remaining";translations.zh.clockLabel="剩余时间";translations.ja.clockLabel="残り時間";
 translations.en.logVoteAbstain="{name} abstained from voting.";translations.zh.logVoteAbstain="{name} 弃权投票。";translations.ja.logVoteAbstain="{name} は投票を棄権しました。";
+translations.en.voteAbstain="Abstain";translations.zh.voteAbstain="弃票（证据不足）";translations.ja.voteAbstain="棄権";
+translations.en.voteAbstainDesc="No reliable case; do not eliminate anyone.";translations.zh.voteAbstainDesc="暂时没有足够证据，不投任何人";translations.ja.voteAbstainDesc="まだ確かな証拠がないため投票しない";
+translations.en.logInsufficientVotes="Not enough votes to exile anyone.";translations.zh.logInsufficientVotes="票数不足，今天无人被放逐。";translations.ja.logInsufficientVotes="追放に必要な票数が足りませんでした。";
 translations.en.nightTimeLimit="Multiplayer: each night turn lasts 10 seconds even after an early choice. Solo: your own turn is untimed.";translations.zh.nightTimeLimit="多人模式每个夜间轮次固定10秒，提前提交也要等满10秒；单人模式自己行动不限时。";translations.ja.nightTimeLimit="複数人プレイは夜の各ターンが必ず10秒間です。早く確定しても終了を待ちます。ソロで自分の行動に制限はありません。";
 
 translations.en.helpButton="How to play and role guide";
@@ -2219,6 +2222,7 @@ function localizeLog(message){
  if((m=value.match(/^第 (\d+) 夜：夜间行动开始。$/)))return tr("logNightStart",{day:m[1]});
  if((m=value.match(/^第 (\d+) 夜：等待狼人、预言家和守卫行动。$/)))return tr("logNight",{day:m[1]});
  if((m=value.match(/^第 (\d+) 天：请选择一句公开发言。$/)))return tr("logDay",{day:m[1]});
+ if(value==="票数不足，今天无人被放逐。")return tr("logInsufficientVotes");
  if(value==="公开发言结束，进入质疑阶段。")return tr("debateLogStart");
  if(value==="质疑结束，被质疑者获得一次回应机会。")return tr("debateLogReplies");
  if(value==="辩论结束，开始投票。")return tr("debateLogVote");
@@ -2470,21 +2474,28 @@ function beginVoteAfterDebate(){
  st.phase="vote";st.debateStage=null;armPhaseTimer("vote");log("辩论结束，开始投票。","news");stepBots();
 }
 function botChallenge(p){
- var ranked=aiRanking(p),top=ranked[0];
- var temperament=aiState(p).temperament;
- var threshold={cautious:1.4,analytical:1.2,assertive:.86,opportunist:1.08}[temperament]||1.1;
- if((!top||top.score<threshold)&&Math.random()>.28){
+ /* Only challenge an actual claim, report, vote or expressed accusation.
+    First-day absence of voting records is not a suspicious statement. */
+ var history=st.publicHistory||[];
+ var options=aiRanking(p).map(function(x){
+  var q=x.p;
+  var types=["report","claim","vote"].filter(function(k){return !!debateEvidence(q.id,k)});
+  var last=history.slice().reverse().find(function(h){return h.id===q.id});
+  if(!types.length&&last&&["suspect","suspectVote","black"].includes(last.kind))types.push("reason");
+  if(!types.length)return null;
+  return {q:q,kind:types.find(function(k){return debateContradiction(q.id,k)})||types[0],score:x.score};
+ }).filter(Boolean).sort(function(a,b){return b.score-a.score});
+ if(!options.length){recordChallenge(p.id,null,"pass");return}
+ var chosen=options[0];
+ if(p.role==="wolf"){
+  var rival=aiPublicRoleClaimers("seer").find(function(q){return q.id!==p.id});
+  if(rival&&Math.random()<.55)
+   chosen={q:rival,kind:debateEvidence(rival.id,"report")?"report":"claim"};
+ }else if(aiState(p).temperament==="cautious"&&
+  !debateContradiction(chosen.q.id,chosen.kind)&&Math.random()<.35){
   recordChallenge(p.id,null,"pass");return;
  }
- if(!top){recordChallenge(p.id,null,"pass");return}
- var target=top.p;
- var kinds=["report","claim","vote"].filter(function(k){return !!debateEvidence(target.id,k)});
- var kind=kinds.find(function(k){return debateContradiction(target.id,k)})||kinds[0]||"reason";
- if(p.role==="wolf"){
-  var competitor=aiPublicRoleClaimers("seer").find(function(q){return q.id!==p.id});
-  if(competitor&&Math.random()<.55){target=competitor;kind=debateEvidence(target.id,"report")?"report":"claim"}
- }
- recordChallenge(p.id,target.id,kind);
+ recordChallenge(p.id,chosen.q.id,chosen.kind);
 }
 function botReply(p){
  var challenged=st.debateChallenges.filter(function(h){return h.targetId===p.id});
@@ -2586,7 +2597,10 @@ function stepBots(){
    if(st.debateTargets.every(function(id){return st.debateReplies[id]!==undefined}))beginVoteAfterDebate();
   }
  }else if(st.phase==="vote"){
-  live().filter(function(p){return p.bot&&!st.votes[p.id]}).forEach(function(p){var t=botVote(p);st.votes[p.id]=t;log(p.name+" 投票给 "+person(t).name+"。","choice")});
+  live().filter(function(p){return p.bot&&!st.votes[p.id]}).forEach(function(p){
+   var t=botVote(p);st.votes[p.id]=t;
+   log(t==="__abstain__"?p.name+" 弃权投票。":p.name+" 投票给 "+person(t).name+"。","choice");
+  });
   if(live().every(function(p){return !!st.votes[p.id]}))finishVote();
  }
 }
@@ -2683,8 +2697,8 @@ function aiSuspicion(observer,target){
   var w=aiCredibility(observer,h.id);
   if(h.kind==="black")score+=1.9*w;
   else if(h.kind==="gold")score-=1.2*w;
-  else if(["suspect","suspectVote","challengeClaim"].includes(h.kind))score+=.22*w;
-  else if(["trust","trustVote","followSeer"].includes(h.kind))score-=.15*w;
+  /* A player's bare suspicion is not new evidence. */
+  else if(["trust","trustVote","followSeer"].includes(h.kind))score-=.08*w;
  });
  allVotes.slice(-3).forEach(function(round){
   round.votes.forEach(function(v){
@@ -3202,17 +3216,37 @@ function speak(id,kind,targetId){
   if(roleClaim(kind)&&!brain.claim)brain.claim=roleClaim(kind);
  }
 }
+/* A valid vote needs public contradiction, a reported accusation,
+   or the real Seer's own private inspection. No hidden knowledge for
+   villagers or the Guardian. */
+function aiVotingEvidence(observer,target){
+ if(!target||observer.id===target.id)return 0;
+ var actual=aiObservedInspection(observer,target.id);
+ if(actual)return actual.evil?10:-10;
+ if(observer.role==="seer"&&aiClaimFor(target.id)==="seer")return 5;
+ var claims=(st.publicHistory||[]).filter(function(h){return h.id===target.id&&roleClaim(h.kind)});
+ if(new Set(claims.map(function(h){return roleClaim(h.kind)})).size>1)return 5;
+ if(debateContradiction(target.id,"report"))return 5;
+ var reports=(st.publicHistory||[]).filter(function(h){
+  return h.kind==="black"&&h.targetId===target.id&&person(h.id)&&person(h.id).alive;
+ });
+ if(reports.some(function(h){return aiCredibility(observer,h.id)>=.45}))return 2.5;
+ return 0;
+}
 function botVote(p){
  var brain=aiState(p),ranked=aiRanking(p);
- if(!ranked.length)return p.id;
+ if(!ranked.length)return "__abstain__";
+ if(p.role!=="wolf"&&!ranked.some(function(x){return aiVotingEvidence(p,x.p)>=2}))
+  return "__abstain__";
  var plan=brain.plan&&brain.plan.day===st.day?brain.plan:null;
  var posterior=p.role==="wolf"?null:aiWolfProbabilities(p);
  var options=ranked.map(function(x){
   var score=x.score,q=x.p;
   if(plan&&plan.targetId===q.id){
-   if(["black","suspect","suspectVote","challengeClaim"].includes(plan.kind))score+=1.35;
+   if(plan.kind==="black")score+=1.35;
    if(["gold","trust","trustVote","followSeer"].includes(plan.kind))score-=30;
   }
+  if(p.role!=="wolf"&&aiVotingEvidence(p,q)<2)score=-100;
   /* A player's previous public Seer reports are durable commitments.
      Wolves may bluff, but cannot casually vote their own claimed clear. */
   aiReportsBy(p.id).forEach(function(h){
@@ -3242,7 +3276,8 @@ function finishVote(){
  delete counts["__abstain__"];
  var high=Math.max.apply(null,Object.values(counts));
  var leaders=Object.keys(counts).filter(function(id){return counts[id]===high});
- if(leaders.length!==1){log("投票平局，今天无人被放逐。","news")}
+ if(!leaders.length||high<2){log("票数不足，今天无人被放逐。","news")}
+ else if(leaders.length!==1){log("投票平局，今天无人被放逐。","news")}
  else {var gone=person(leaders[0]);if(gone){gone.alive=false;st.revealed.push({id:gone.id,day:st.day,source:"vote",alignment:gone.role==="wolf"?"wolf":"good"});publicEvent("exile",null,gone.id,{alignment:gone.role==="wolf"?"wolf":"good"});log("投票结果："+gone.name+" 被放逐，身份是「"+(gone.role==="wolf"?"狼人":"好人")+"」。","news")}}
  if(winCheck())return;st.day++;beginNight()
 }
@@ -3284,8 +3319,12 @@ function accept(id,action,target,speech){
    if(st.debateStage!=="reply"||!st.debateTargets.includes(id)||st.debateReplies[id]!==undefined||!DEBATE_REPLIES.includes(speech))return;
    recordReply(id,speech);
   }else if(st.phase==="vote"&&action==="vote"){
-  if(st.votes[id]||!targetList(id).some(function(t){return t.id===target}))return;
-  st.votes[id]=target;log(p.name+" 投票给 "+person(target).name+"。","choice");
+  if(st.votes[id])return;
+  if(target==="__abstain__"){st.votes[id]=target;log(p.name+" 弃权投票。","choice")}
+  else{
+   if(!targetList(id).some(function(t){return t.id===target}))return;
+   st.votes[id]=target;log(p.name+" 投票给 "+person(target).name+"。","choice");
+  }
  }else return;
  stepBots();broadcast()
 }
@@ -4063,7 +4102,10 @@ function render(){
   title=tr("actionVote");
   if(!v.myAlive)notice=tr("voteOut");
   else if(v.submitted)notice=tr("voteSubmitted");
-  else a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return modernTarget(p,tr("voteTarget"),"vote","vote")}).join("");
+  else {
+   a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return modernTarget(p,tr("voteTarget"),"vote","vote")}).join("");
+   a+=modernAction(tr("voteAbstain"),"voteAbstain",null,null,"pass",tr("voteAbstainDesc"));
+  }
  }else if(v.phase==="ended"){
   title=tr("actionResult",{winner:teamName(v.winner)});
   if(endgameVisible(v))a=button(tr("revealOpen"),"openReveal",null,null,"full");
@@ -4344,6 +4386,7 @@ document.addEventListener("click",function(e){
    sendAction("night",nightTargetId,null);
  }
  else if(action==="vote")sendAction("vote",target,null);
+ else if(action==="voteAbstain")sendAction("vote","__abstain__",null);
  else if(action==="debatePick"){if(view&&view.phase==="debate"&&view.debateStage==="challenge"&&!view.submitted&&["reason","claim","report","vote"].includes(speech)){debateKind=speech;rpgSpeechTarget=null;rpgMenuIndex=0;render()}}
  else if(action==="backDebate"){debateKind="";rpgSpeechTarget=null;rpgMenuIndex=0;render()}
  else if(action==="confirmChallenge"){if(debateKind&&rpgSpeechTarget)sendAction("challenge",rpgSpeechTarget,debateKind)}
