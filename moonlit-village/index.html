@@ -1163,13 +1163,118 @@ body.game-active header h1{max-width:calc(100% - 215px)!important}
 .home-avatar-picker .settings-remove:disabled{opacity:.55;cursor:wait}
 #homeScreen .btns button:disabled{opacity:.45;cursor:wait;pointer-events:none}
 @media(max-width:390px){.home-avatar-picker{padding:10px}.home-avatar-picker .settings-avatar-preview{width:68px;height:68px;flex-basis:68px}}
+
+/* Header layout repair: explicit control row and separate hero copy.
+   The old absolutely-positioned controls overlapped the large home heading.
+   On gameplay screens the same elements collapse back to a compact single row. */
+.game-header{
+ position:relative;display:flex;flex-direction:column;gap:0;
+ width:100%;min-width:0;text-align:center;
+ margin:8px auto 18px;padding:0 0 10px;
+}
+.game-header .header-controls{
+ display:flex;align-items:center;justify-content:space-between;
+ min-height:48px;width:100%;gap:12px;
+}
+.game-header .header-actions{
+ display:flex;flex:none;align-items:center;justify-content:flex-end;gap:6px;
+}
+.game-header .lang-control{
+ position:relative!important;top:auto!important;left:auto!important;
+ right:auto!important;bottom:auto!important;transform:none!important;
+ display:block;flex:none;z-index:7;
+}
+.game-header .settings-toggle{
+ position:relative!important;top:auto!important;right:auto!important;
+ bottom:auto!important;left:auto!important;transform:none!important;
+ flex:none;margin:0!important;
+}
+.game-header #musicToggle,
+body.game-active .game-header #musicToggle{
+ position:relative!important;top:auto!important;right:auto!important;
+ left:auto!important;bottom:auto!important;transform:none!important;
+ flex:none;margin:0!important;
+}
+.game-header .hero-copy{
+ display:flex;flex-direction:column;align-items:center;
+ min-width:0;width:100%;padding:12px 0 0;
+}
+.game-header .hero-copy .eyebrow{
+ max-width:100%;font-size:10px;letter-spacing:2.2px;
+ line-height:1.5;overflow-wrap:anywhere;
+}
+.game-header .hero-copy h1{
+ max-width:100%;width:100%;margin:6px 0 4px;
+ font-size:clamp(32px,7vw,54px);line-height:1.14;
+ font-weight:600;letter-spacing:clamp(.5px,.45vw,3px);
+ overflow-wrap:normal;white-space:normal;
+}
+.game-header .hero-copy .subtitle{
+ max-width:560px;width:100%;margin:auto;
+ font-size:clamp(12px,3vw,14px);line-height:1.55;
+ overflow-wrap:anywhere;
+}
+@media(max-width:480px){
+ .game-header{margin:4px auto 13px;padding-bottom:8px}
+ .game-header .header-controls{gap:8px}
+ .game-header .hero-copy{padding:13px 0 0}
+ .game-header .hero-copy .eyebrow{font-size:9px;letter-spacing:1.15px;line-height:1.4}
+ .game-header .hero-copy h1{font-size:clamp(31px,8.2vw,39px);letter-spacing:.5px;margin:5px 0 6px}
+ .game-header .hero-copy .subtitle{font-size:12px;line-height:1.5}
+}
+body.game-active .game-header{
+ display:grid!important;
+ grid-template-columns:clamp(68px,19vw,82px) minmax(0,1fr) 102px;
+ grid-template-rows:48px;gap:6px;
+ align-items:center;justify-content:stretch;
+ flex:none;margin:0 0 7px!important;padding:0 0 6px!important;
+ min-height:48px!important;
+}
+body.game-active .game-header .header-controls{display:contents}
+body.game-active .game-header .lang-control{
+ grid-column:1;grid-row:1;justify-self:start;
+}
+body.game-active .game-header .header-actions{
+ grid-column:3;grid-row:1;justify-self:end;display:flex;gap:6px;
+}
+body.game-active .game-header .hero-copy{
+ grid-column:2;grid-row:1;min-width:0;padding:0;
+ display:flex;justify-content:center;align-items:center;
+}
+body.game-active .game-header .hero-copy h1{
+ width:100%;max-width:100%!important;min-width:0;
+ font-size:clamp(13px,3.6vw,20px)!important;
+ white-space:nowrap;letter-spacing:.15px;
+ margin:0;padding:0;
+ text-overflow:clip;text-align:center;
+}
+body.game-active .game-header .hero-copy .eyebrow,
+body.game-active .game-header .hero-copy .subtitle{display:none!important}
+body.game-active .game-header::after{
+ content:"";position:absolute;bottom:0;left:20%;right:20%;
+ height:1px;pointer-events:none;
+ background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+@media(max-width:370px){
+ body.game-active .game-header{
+  grid-template-columns:68px minmax(0,1fr) 98px;gap:4px;
+ }
+ body.game-active .game-header .lang-control select{
+  width:68px;padding-left:6px;padding-right:16px;
+ }
+ body.game-active .game-header .hero-copy h1{
+  font-size:12.5px!important;letter-spacing:0;
+ }
+ body.game-active .game-header .header-actions{gap:2px}
+}
+
 </style>
 </head>
 <body>
 <div id="ambientSky" class="ambient-sky" aria-hidden="true"><div class="moon-glow"></div><div class="ambient-stars"><span class="ambient-star" style="--x:8%;--y:8%;--dur:17s;--delay:-0s"></span><span class="ambient-star" style="--x:17%;--y:19%;--dur:22s;--delay:-2s"></span><span class="ambient-star" style="--x:29%;--y:9%;--dur:26s;--delay:-4s"></span><span class="ambient-star" style="--x:39%;--y:24%;--dur:20s;--delay:-1s"></span><span class="ambient-star" style="--x:53%;--y:7%;--dur:24s;--delay:-3s"></span><span class="ambient-star" style="--x:66%;--y:18%;--dur:19s;--delay:-5s"></span><span class="ambient-star" style="--x:77%;--y:7%;--dur:21s;--delay:-2s"></span><span class="ambient-star" style="--x:91%;--y:14%;--dur:27s;--delay:-4s"></span><span class="ambient-star" style="--x:4%;--y:39%;--dur:24s;--delay:-6s"></span><span class="ambient-star" style="--x:15%;--y:50%;--dur:20s;--delay:-2s"></span><span class="ambient-star" style="--x:25%;--y:36%;--dur:23s;--delay:-5s"></span><span class="ambient-star" style="--x:36%;--y:54%;--dur:18s;--delay:-1s"></span><span class="ambient-star" style="--x:47%;--y:41%;--dur:25s;--delay:-6s"></span><span class="ambient-star" style="--x:59%;--y:56%;--dur:21s;--delay:-3s"></span><span class="ambient-star" style="--x:70%;--y:36%;--dur:28s;--delay:-4s"></span><span class="ambient-star" style="--x:82%;--y:47%;--dur:20s;--delay:-2s"></span><span class="ambient-star" style="--x:94%;--y:33%;--dur:26s;--delay:-5s"></span><span class="ambient-star" style="--x:7%;--y:78%;--dur:22s;--delay:-3s"></span><span class="ambient-star" style="--x:18%;--y:69%;--dur:27s;--delay:-1s"></span><span class="ambient-star" style="--x:31%;--y:87%;--dur:19s;--delay:-6s"></span><span class="ambient-star" style="--x:43%;--y:74%;--dur:24s;--delay:-4s"></span><span class="ambient-star" style="--x:56%;--y:90%;--dur:21s;--delay:-2s"></span><span class="ambient-star" style="--x:65%;--y:71%;--dur:26s;--delay:-5s"></span><span class="ambient-star" style="--x:78%;--y:84%;--dur:20s;--delay:-0s"></span><span class="ambient-star" style="--x:89%;--y:68%;--dur:23s;--delay:-3s"></span><span class="ambient-star" style="--x:96%;--y:92%;--dur:25s;--delay:-2s"></span></div></div>
 <audio id="bgmPlayer" src="assets/audio/contedefees_0016.mp3" preload="auto" loop playsinline></audio>
 <main>
-<header><button type="button" id="settingsToggle" class="settings-toggle" data-do="openSettings" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20h-2.55v-.11a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.17 15a1.7 1.7 0 0 0-1.55-1H6.5v-2.55h.12a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V5.5h2.55v.12a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1h.11v2.55h-.11a1.7 1.7 0 0 0-1.55 1Z"/></svg></button><label class="lang-control"><span class="sr-only" data-i18n="languageAria">Language</span><select id="languageSelect" aria-label="Language"><option value="en">EN</option><option value="zh">中文</option><option value="ja">日本語</option></select></label><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐" title="音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="19" rx="3" ry="2"/><ellipse cx="18" cy="17" rx="3" ry="2"/></svg></button><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1 data-i18n="title">Moonlit Village</h1><div class="subtitle" data-i18n="subtitle"></div></header>
+<header class="game-header"><div class="header-controls"><label class="lang-control"><span class="sr-only" data-i18n="languageAria">Language</span><select id="languageSelect" aria-label="Language"><option value="en">EN</option><option value="zh">中文</option><option value="ja">日本語</option></select></label><div class="header-actions"><button type="button" id="settingsToggle" class="settings-toggle" data-do="openSettings" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20h-2.55v-.11a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.17 15a1.7 1.7 0 0 0-1.55-1H6.5v-2.55h.12a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V5.5h2.55v.12a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1h.11v2.55h-.11a1.7 1.7 0 0 0-1.55 1Z"/></svg></button><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐" title="音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="19" rx="3" ry="2"/><ellipse cx="18" cy="17" rx="3" ry="2"/></svg></button></div></div><div class="hero-copy"><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1 data-i18n="title">Moonlit Village</h1><div class="subtitle" data-i18n="subtitle"></div></div></header>
 <section id="homeScreen" class="panel">
 <h2 data-i18n="homeTitle"></h2>
 <label for="myName" data-i18n="nameLabel"></label>
