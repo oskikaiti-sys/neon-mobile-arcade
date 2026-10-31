@@ -2791,7 +2791,17 @@ function aiSeerSlotContradiction(observer,claimer){
 function aiEndgameRefutedClaimant(observer){
  if(!observer||observer.role==="wolf"||live().length!==3)return null;
  return targetList(observer.id).find(function(q){
-  return aiSeerSlotContradiction(observer,q)!==null;
+  if(!aiSeerSlotContradiction(observer,q))return false;
+  /* A day-one bodyguard Seer bluff can be a deliberate good sacrifice.
+     It still refutes the truth of the Seer story, but does not logically
+     establish wolf alignment. Require ordinary possible-world inference
+     rather than forcibly executing an early protective decoy. */
+  var first=(st.publicHistory||[]).find(function(h){
+   return h.id===q.id&&!h.retracted&&roleClaim(h.kind)==="seer";
+  });
+  var setup=aiPublicRoleSetup();
+  return !(first&&setup&&aiAliveAtSpeech(first.day,st.revealed||[])>=4&&
+   first.day<=2);
  })||null;
 }
 function aiSeerStoryRefuted(observer,target){
@@ -2937,6 +2947,70 @@ function aiSuspicion(observer,target){
    publicly confirmed good, but is NOT a justification for a live bot
    Seer to miss its first-day claim on this small board.
    Do not inspect anyone else's hidden role when computing likelihood. */
+/* Publicly plausible protective impersonation. This does not prove that
+   a known claimant is good: it keeps "good bait" among possible hypotheses
+   without making incoherent three-player fake clears respectable. */
+function aiAliveAtSpeech(day,publicReveals){
+ return st.players.length-(publicReveals||[]).filter(function(r){
+  return r.day<day||(r.day===day&&r.source==="night");
+ }).length;
+}
+function aiGoodCoverPlausible(role,claim,day,reveals,setup){
+ if(!setup||setup.wolf!==1||setup.seer!==1||setup.seats>6)return false;
+ if(role!=="villager"&&role!=="guard")return false;
+ if(!["seer","guard"].includes(claim)||claim===role)return false;
+ return day>=1&&day<=3&&aiAliveAtSpeech(day,reveals)>=4;
+}
+/* Good bots can offer a credible night decoy, but never invent inspection
+   results. A last-three fresh Seer bluff can accidentally clear the only
+   wolf and is forbidden to the good AI. All guards/ordinary villagers only
+   evaluate public claims and their OWN identity. */
+function aiGoodCoverPlan(p){
+ if(!p||!p.bot||!["villager","guard"].includes(p.role))return null;
+ var setup=aiPublicRoleSetup(),left=live().length;
+ if(!setup||setup.wolf!==1||setup.seer!==1||setup.seats>6||
+    left<=3||st.day>3||aiClaimFor(p.id))return null;
+ var history=(st.publicHistory||[]),active=history.filter(function(h){
+  return !h.retracted&&h.day===st.day&&!!roleClaim(h.kind);
+ });
+ /* Never pile on several decoys on the same day. The real Seer can still
+    enter against one fake, leaving an informative but uncertain duel. */
+ var earlyCover=active.some(function(h){
+  return h.id!==p.id&&["claimSeer","claimGuard","gold","black"].includes(h.kind);
+ });
+ var seers=aiPublicRoleClaimers("seer"),guards=aiPublicRoleClaimers("guard");
+ var threatened=history.some(function(h){
+  return h.day===st.day&&h.targetId===p.id&&
+   ["black","suspect","suspectVote"].includes(h.kind);
+ });
+ if(threatened)return null; // A bait claim under pressure looks desperate.
+ var confidence=st.day===1?.20:st.day===2?.28:.31;
+ /* Fewer players mean fewer spare good lives; bluffing may now squander
+    the next vote. Conversely, the absence of a day-one Seer claim is a
+    motive to draw the wolf away from an unknown survivor. */
+ if(left===4)confidence*=.65;
+ if(seers.length)confidence*=.28;
+ if(earlyCover)confidence*=.30;
+ if(guards.length&&p.role==="villager")confidence*=.65;
+ var brain=aiState(p);
+ if(brain.temperament==="cautious")confidence*=.50;
+ else if(brain.temperament==="opportunist")confidence*=1.18;
+ if(Math.random()>=confidence)return null;
+ var choice;
+ if(p.role==="guard"){
+  /* A self-guarding fake Seer can consume a wolf night attack. */
+  choice=seers.length||earlyCover?"claimGuard":"claimSeer";
+ }else{
+  /* Villagers are expendable night decoys, but a public Guardian claim
+     is less likely to collide with the genuine Seer's inspection. */
+  choice=guards.length?"claimSeer":"claimGuard";
+  if(!seers.length&&!guards.length&&st.day>=2&&Math.random()<.44)
+   choice="claimSeer";
+ }
+ /* Only one affirmative role claim; no fabricated gold/black reports. */
+ if(roleClaim(choice)===p.role)return null;
+ return {kind:choice,targetId:null,reason:"protective-decoy"};
+}
 function aiSeerSilencePenalty(actor,history,reveals,setup){
  if(!actor||!setup||!setup.seer)return 0;
  var claims=history.filter(function(h){return h.id===actor.id&&!h.retracted&&roleClaim(h.kind)==="seer"});
@@ -3004,7 +3078,11 @@ function aiWorldAnalysis(observer){
     /* A bare role claim cannot verify itself. */
     if(claim===role)score+=.12;
     else if(role==="wolf")score+=.05; // A wolf can impersonate any good role.
-    else score-=3.0; // Strategic penalty for unsupported good bluff.
+    else if(aiGoodCoverPlausible(role,claim,utterances.find(function(h){
+      return roleClaim(h.kind)===claim;
+     })?.day||st.day,publicReveals,setup))
+     score-=1.55; // Night-protection bluff is possible, but still risky.
+    else score-=3.0; // Endgame or inconsistent unsupported good bluff.
    });
    utterances.forEach(function(h){
     if(h.kind==="gold"||h.kind==="black"){
@@ -3255,7 +3333,15 @@ function aiNightTargetGuard(p){
   return {p:q,trust:aiCredibility(p,q.id)-aiSuspicion(p,q)*.12};
  }).sort(function(a,b){return b.trust-a.trust});
  var target=null;
- if(ranked.length&&ranked[0].trust>.2&&Math.random()<.75)target=ranked[0].p;
+ /* A Guardian impersonating the Seer may invite the wolf to attack it.
+    Self-guarding is useful if there is no more credible exposed Seer;
+    with a rival claimant sometimes shelter that claimant instead. */
+ var ownSeerBait=aiClaimFor(p.id)==="seer";
+ if(ownSeerBait){
+  var exposedAlternative=ranked.length&&ranked[0].trust>.52;
+  if(Math.random()<(exposedAlternative?.48:.81))target=p;
+ }
+ if(!target&&ranked.length&&ranked[0].trust>.2&&Math.random()<.75)target=ranked[0].p;
  if(!target){
   var danger=candidates.map(function(q){
    var accused=(st.publicHistory||[]).filter(function(h){return h.targetId===q.id&&h.kind==="black"}).length;
@@ -3668,6 +3754,8 @@ function aiChooseSpeech(p){
  var existing=aiClaimFor(p.id),left=live().length;
  var seerPlan=aiSeerSpeechPlan(p);
  if(seerPlan)return seerPlan;
+ var decoyPlan=aiGoodCoverPlan(p);
+ if(decoyPlan)return decoyPlan;
  /* Refute claims that leave no possible wolf, before considering style,
     random speech options or routine probability scores. */
  if(p.role!=="wolf"){
