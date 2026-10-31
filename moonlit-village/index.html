@@ -2912,6 +2912,10 @@ document.addEventListener("click",function(e){
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
  if(action==="openHelp"){playSfx("cursor");openRoleGuide(b);return;}
  if(action==="closeHelp"){playSfx("cancel");closeRoleGuide();return;}
+ if(action==="openReveal"){playSfx("confirm");openEndgameReveal(b);return;}
+ if(action==="closeReveal"){playSfx("cancel");closeEndgameReveal();return;}
+ if(action==="openSeerNotes"){playSfx("cursor");openSeerNotes(b);return;}
+ if(action==="closeSeerNotes"){playSfx("cancel");closeSeerNotes();return;}
  if(action==="skipSpeech"){playSfx("cursor");stageFinishSpeech();return;}
  if(action==="openSettings"){$("settingsOverlay").hidden=false;updateSettingsUI();return;}
  if(action==="closeSettings"){$("settingsOverlay").hidden=true;return;}
@@ -2955,6 +2959,20 @@ document.addEventListener("keydown",function(e){
    }
   }
   return;
+ }
+ for(var item of [{id:"endgameOverlay",close:closeEndgameReveal},{id:"seerNotesOverlay",close:closeSeerNotes}]){
+  if(!$(item.id).hidden){
+   if(e.key==="Escape"){e.preventDefault();item.close()}
+   else if(e.key==="Tab"){
+    var focusables=Array.from($(item.id).querySelectorAll('button:not([disabled])'));
+    if(focusables.length){
+     var first=focusables[0],last=focusables[focusables.length-1];
+     if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+     else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+    }
+   }
+   return;
+  }
  }
  if(!view||view.phase!=="talk"||!view.myAlive||view.submitted||!$("roleOverlay").hidden)return;
  if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||""))return;
