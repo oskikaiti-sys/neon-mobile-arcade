@@ -1612,6 +1612,28 @@ body.game-active #gameScreen>.game-actions #actions.rpg-target-menu .action-icon
   grid-template-columns:minmax(0,1fr)!important;
  }
 }
+/* Speech target selection uses the resident portrait rails, not a list. */
+body.game-active #gameScreen>.game-actions #actions.rpg-target-menu.speech-confirmation{
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ grid-auto-rows:max-content!important;gap:8px!important;overflow:visible!important;
+ padding:2px 0 4px!important;
+}
+body.game-active #gameScreen>.game-actions #actions.rpg-target-menu.speech-confirmation>button{
+ min-height:52px!important;max-height:none!important;
+ padding:8px!important;justify-content:center!important;
+}
+body.game-active #actions.speech-confirmation>button .action-desc,
+body.game-active #actions.speech-confirmation>button .action-chevron{display:none!important}
+body.game-active #actions.speech-confirmation>button:disabled{opacity:.42;cursor:not-allowed}
+body.game-active #players .character-rail .player.rpg-selectable{cursor:pointer;touch-action:manipulation}
+body.game-active #players .character-rail .player.rpg-selectable:focus-visible{
+ outline:2px solid var(--gold);outline-offset:2px;
+}
+@media(max-width:700px){
+ body.game-active #gameScreen>.game-actions #actions.rpg-target-menu.speech-confirmation{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ }
+}
 </style>
 </head>
 <body>
@@ -1814,6 +1836,9 @@ translations.en.nightWaitYourTurn="Wait until your role is called.";translations
 translations.en.nightChoiceSaved="Choice submitted. Waiting for this turn to end.";translations.zh.nightChoiceSaved="已完成行动，等待本轮结束。";translations.ja.nightChoiceSaved="行動を確定しました。このターンの終了を待っています。";
 translations.en.nightCuePosition="Turn {turn}/3";translations.zh.nightCuePosition="第 {turn}/3 轮";translations.ja.nightCuePosition="{turn}/3 ターン";
 translations.en.speechChooseTarget="Choose a person · {kind}";translations.zh.speechChooseTarget="选择发言对象 · {kind}";translations.ja.speechChooseTarget="対象を選ぶ · {kind}";
+translations.en.speechPickCard="Tap a resident card above to select who to {kind}.";translations.zh.speechPickCard="点击上方角色卡，选择「{kind}」的对象。";translations.ja.speechPickCard="上の人物カードから「{kind}」の対象を選んでください。";
+translations.en.speechConfirmCard="Confirm “{kind}” about {name}?";translations.zh.speechConfirmCard="确定选择{name}并发表「{kind}」吗？";translations.ja.speechConfirmCard="{name}に対して「{kind}」と発言しますか？";
+translations.en.speechPickCardHint="Tap a selectable portrait above. Nothing is sent before confirmation.";translations.zh.speechPickCardHint="点击上方可选的角色卡，确认前不会发送发言。";translations.ja.speechPickCardHint="上のカードから選択してください。確認するまで送信されません。";
 translations.en.speechMenuHelp="Choose a speaking strategy. Role claims and inspection reports can be bluffs.";translations.zh.speechMenuHelp="选择发言方向。跳身份、金水与查杀都只是个人公开宣称，可能是假话。";translations.ja.speechMenuHelp="発言内容を選びます。COや占い結果は嘘の可能性があります。";
 translations.en.speechTargetHelp="Tap a resident to select, then confirm. Evidence-based choices require a public record.";translations.zh.speechTargetHelp="点击居民选中，再确认。与票型或身份有关的质疑必须有公开记录。";translations.ja.speechTargetHelp="対象を選んで確定。投票や役職COの根拠には公開記録が必要です。";
 translations.en.speechEvidenceVote="Day {day}: voted for {name}";translations.zh.speechEvidenceVote="第{day}天投给了{name}";translations.ja.speechEvidenceVote="{day}日目に{name}へ投票";
@@ -2896,20 +2921,27 @@ function speechMenuCard(kind,v){
 function rpgTargets(v){return speechKind&&SPEECH_OPTIONS[speechKind]?eligibleSpeechTargets(v,speechKind):v.players.filter(function(p){return p.alive&&p.id!==v.me})}
 function rpgHighlightTargets(){
  var selected=rpgSpeechTarget;
- $("actions").querySelectorAll('[data-do="selectSpeechTarget"]').forEach(function(btn){
-  var on=btn.getAttribute("data-target")===selected;
-  btn.classList.toggle("rpg-selected",on);btn.setAttribute("aria-pressed",on?"true":"false");
- });
  $("players").querySelectorAll("[data-rpg-target]").forEach(function(tile){
-  var on=tile.getAttribute("data-rpg-target")===selected;
-  tile.classList.toggle("rpg-selected",on);
-  tile.setAttribute("aria-selected",on?"true":"false");
+  var chosen=tile.getAttribute("data-rpg-target")===selected;
+  tile.classList.toggle("rpg-selected",chosen);
+  tile.setAttribute("aria-pressed",chosen?"true":"false");
  });
 }
+function updateSpeechTargetPrompt(v){
+ if(!v||v.phase!=="talk"||!speechKind||!SPEECH_OPTIONS[speechKind]||!SPEECH_OPTIONS[speechKind].target)return;
+ var label=speechUILine("kinds",speechKind)[0];
+ var target=eligibleSpeechTargets(v,speechKind).find(function(p){return p.id===rpgSpeechTarget});
+ $("actionTitle").textContent=target
+  ?tr("speechConfirmCard",{kind:label,name:displayName(target.name)})
+  :tr("speechPickCard",{kind:label});
+ $("notice").textContent=target?speechTargetDetail(v,speechKind,target):tr("speechPickCardHint");
+ var confirm=$("actions").querySelector('[data-do="confirmTarget"]');
+ if(confirm){confirm.disabled=!target;confirm.setAttribute("aria-disabled",target?"false":"true")}
+}
 function rpgSelectTarget(id){
- if(!view||!speechKind)return;
- if(!rpgTargets(view).some(function(p){return p.id===id}))return;
- rpgSpeechTarget=id;rpgHighlightTargets();playSfx("cursor");
+ if(!view||view.phase!=="talk"||view.submitted||!speechKind)return;
+ if(!eligibleSpeechTargets(view,speechKind).some(function(p){return p.id===id}))return;
+ rpgSpeechTarget=id;rpgHighlightTargets();updateSpeechTargetPrompt(view);playSfx("cursor");
 }
 function rpgActivateMenu(){
  var menu=$("actions");
@@ -2921,7 +2953,8 @@ function rpgActivateMenu(){
   if(opts.length)rpgMenuIndex=Math.min(rpgMenuIndex,opts.length-1);
   opts.forEach(function(btn,i){btn.classList.toggle("cursor",i===rpgMenuIndex);btn.setAttribute("aria-current",i===rpgMenuIndex?"true":"false")});
  }else if(isTalk&&speechKind){
-  var b=menu.querySelector('[data-do="confirmTarget"]');if(b)b.classList.add("cursor");
+  var b=menu.querySelector('[data-do="'+(rpgSpeechTarget?"confirmTarget":"back")+'"]');
+  if(b)b.classList.add("cursor");
  }
 }
 
@@ -3150,14 +3183,14 @@ function render(){
  $("leftPlayers").innerHTML=playerTiles.slice(0,3).join("");
  $("rightPlayers").innerHTML=playerTiles.slice(3,6).join("");
  if(v.phase==="talk"&&speechKind&&v.myAlive&&!v.submitted){
-  var available=rpgTargets(v);
-  if(!available.some(function(p){return p.id===rpgSpeechTarget}))rpgSpeechTarget=available.length?available[0].id:null;
+  var available=eligibleSpeechTargets(v,speechKind);
+  if(!available.some(function(p){return p.id===rpgSpeechTarget}))rpgSpeechTarget=null;
   $("players").querySelectorAll(".player").forEach(function(tile,i){
    var p=v.players[i];
    if(available.some(function(x){return x.id===p.id})){
     tile.classList.add("rpg-selectable");
     tile.setAttribute("data-rpg-target",p.id);
-    tile.setAttribute("role","option");
+    tile.setAttribute("role","button");
     tile.setAttribute("tabindex","0");
     tile.setAttribute("aria-label",tr("select",{name:displayName(p.name)}));
    }
@@ -3193,14 +3226,10 @@ function render(){
   if(!v.myAlive)notice=tr("talkOut");
   else if(v.submitted)notice=tr("talkSubmitted");
   else if(speechKind&&SPEECH_OPTIONS[speechKind]&&SPEECH_OPTIONS[speechKind].target){
-   title=tr("speechChooseTarget",{kind:speechUILine("kinds",speechKind)[0]});
-   var availableTargets=eligibleSpeechTargets(v,speechKind);
-   if(!availableTargets.some(function(p){return p.id===rpgSpeechTarget}))
-    rpgSpeechTarget=availableTargets.length?availableTargets[0].id:null;
-   a=availableTargets.map(function(p){return modernTarget(p,speechTargetDetail(v,speechKind,p),"selectSpeechTarget","speech")}).join("");
-   a+=modernAction(tr("confirmTarget"),"confirmTarget",null,null,"confirm",tr("confirmDesc"));
-   a+=modernAction(tr("back"),"back",null,null,"back",tr("backDesc"));
-   notice=tr("speechTargetHelp");
+   title=tr("speechPickCard",{kind:speechUILine("kinds",speechKind)[0]});
+   a=modernAction(tr("confirmTarget"),"confirmTarget",null,null,"confirm",tr("confirmDesc"))
+    +modernAction(tr("back"),"back",null,null,"back",tr("backDesc"));
+   notice=tr("speechPickCardHint");
   }else if(speechGroup&&SPEECH_GROUPS[speechGroup]){
    title=speechUILine("groups",speechGroup)[0];
    a=SPEECH_GROUPS[speechGroup].map(function(kind){return speechMenuCard(kind,v)}).join("");
@@ -3226,9 +3255,10 @@ function render(){
   else notice=tr("waitHostAgain");
  }
  $("actionTitle").textContent=title;
- $("actions").className="actions"+((v.phase==="night"||v.phase==="vote")?" targets":"");
+ $("actions").className="actions"+((v.phase==="night"||v.phase==="vote")?" targets":"")
+  +(v.phase==="talk"&&speechKind?" speech-confirmation":"");
  $("actions").innerHTML=a;
- if(v.phase==="talk"&&speechKind)rpgHighlightTargets();
+ if(v.phase==="talk"&&speechKind){rpgHighlightTargets();updateSpeechTargetPrompt(v)}
  $("seerNotesButton").hidden=!(v.myRole==="seer"&&["night","talk","vote","ended"].includes(v.phase));
  $("seerNotesButton").textContent=tr("seerNotesButton");
  rpgActivateMenu();
@@ -3527,13 +3557,22 @@ document.addEventListener("keydown",function(e){
  if(speechKind){
   var options=rpgTargets(view);
   if(e.key==="Escape"){e.preventDefault();playSfx("cancel");speechKind="";rpgSpeechTarget=null;render();return}
-  if(e.key==="ArrowUp"||e.key==="ArrowLeft"||e.key==="ArrowDown"||e.key==="ArrowRight"){
+  var card=e.target&&e.target.closest?e.target.closest("[data-rpg-target]"):null;
+  if(card&&(e.key==="Enter"||e.key===" ")){
+   e.preventDefault();rpgSelectTarget(card.getAttribute("data-rpg-target"));return;
+  }
+  if(["ArrowUp","ArrowLeft","ArrowDown","ArrowRight"].includes(e.key)){
    e.preventDefault();if(!options.length)return;
    var pos=options.findIndex(function(p){return p.id===rpgSpeechTarget});
    pos=(pos+(e.key==="ArrowUp"||e.key==="ArrowLeft"?-1:1)+options.length)%options.length;
    rpgSelectTarget(options[pos].id);return;
   }
-  if(e.key==="Enter"&&rpgSpeechTarget){e.preventDefault();sendAction("speech",rpgSpeechTarget,speechKind)}
+  if(e.key==="Enter"&&e.target&&e.target.closest&&e.target.closest("button[data-do]"))return;
+  if(e.key==="Enter"&&rpgSpeechTarget){
+   e.preventDefault();
+   var confirm=$("actions").querySelector('[data-do="confirmTarget"]:not([disabled])');
+   if(confirm)confirm.click();
+  }
   return;
  }
  if(e.key==="Escape"&&speechGroup){e.preventDefault();speechGroup="";rpgMenuIndex=0;render();return;}
