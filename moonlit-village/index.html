@@ -1374,8 +1374,8 @@ function person(id){return st.players.find(function(p){return p.id===id})}
 function live(){return st.players.filter(function(p){return p.alive})}
 function targetList(id){return live().filter(function(p){return p.id!==id})}
 function log(t,kind){st.logs.push({text:t,kind:kind||"news"});if(st.logs.length>60)st.logs.shift()}
-function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null}],votes:{},speeches:{},night:{},known:{},logs:[],winner:""};myId="h";log("村庄正在等待玩家加入。")}
-function snapshot(id){var me=person(id);return {phase:st.phase,day:st.day,gameNo:st.gameNo,me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
+function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},logs:[],winner:""};myId="h";log("村庄正在等待玩家加入。")}
+function snapshot(id){var me=person(id);return {phase:st.phase,day:st.day,gameNo:st.gameNo,me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
 function broadcast(){if(!st)return;view=snapshot("h");render();for(var it of connections.entries()){var id=it[0],c=it[1];if(c.open){try{c.send({type:"state",state:snapshot(id)})}catch(e){}}}}
 function makeSolo(){solo=true;isHost=true;room="";makeState();enter();startGame()}
 function makeRoom(){
@@ -1389,14 +1389,23 @@ function makeRoom(){
    if(!assigned&&m.type==="hello"){
     if(st.phase!=="lobby"||st.players.length>=6){c.send({type:"error",message:"房间已经开始或人数已满。"});setTimeout(function(){c.close()},400);return}
     assigned="p"+rand(9);var name=String(m.name||"旅人").slice(0,15).trim()||"旅人";
-    st.players.push({id:assigned,name:name,bot:false,alive:true,role:null});connections.set(assigned,c);log(name+" 加入了村庄。");broadcast();return;
+    st.players.push({id:assigned,name:name,bot:false,alive:true,role:null,avatar:safeAvatar(m.avatar),portrait:randomPortrait(st.players)});connections.set(assigned,c);log(name+" 加入了村庄。");broadcast();return;
+   }
+   if(assigned&&m.type==="avatar"){
+    var human=person(assigned);
+    if(human&&!human.bot){
+     human.avatar=safeAvatar(m.avatar);
+     if(m.reroll===true)human.portrait=randomPortrait(st.players.filter(function(p){return p.id!==assigned}));
+     broadcast();
+    }
+    return;
    }
    if(assigned&&m.type==="action")accept(assigned,m.action,m.target,m.speech);
   });
   c.on("close",function(){
    if(!assigned||!st)return;connections.delete(assigned);var p=person(assigned);if(!p)return;
    if(st.phase==="lobby"){st.players=st.players.filter(function(x){return x.id!==assigned});log(p.name+" 离开了房间。")}
-   else if(st.phase!=="ended"){p.bot=true;log(p.name+" 掉线，已由电脑接管。");stepBots()}
+   else if(st.phase!=="ended"){p.bot=true;p.avatar=null;p.portrait=randomPortrait(st.players.filter(function(x){return x.id!==assigned}));log(p.name+" 掉线，已由电脑接管。");stepBots()}
    broadcast();
   });
  });
@@ -1409,7 +1418,7 @@ function joinRoom(){
  room=code;isHost=false;solo=false;report("正在连接房间…");peer=new Peer();
  peer.on("open",function(){
   conn=peer.connect("moonlit-"+room,{reliable:true});
-  conn.on("open",function(){conn.send({type:"hello",name:getName()})});
+  conn.on("open",function(){conn.send({type:"hello",name:getName(),avatar:selectedAvatar})});
   conn.on("data",function(m){
    if(m&&m.type==="error"){report(m.message);return}
    if(m&&m.type==="state"){view=m.state;myId=view.me;enter();render()}
@@ -1422,7 +1431,7 @@ function joinRoom(){
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
 function startGame(){
  if(!isHost||!st||st.phase!=="lobby")return;
- var used=st.players.length;for(var i=used;i<6;i++)st.players.push({id:"bot"+i,name:["雾鸦","薇拉","灰石","伊莎","松风","星砂"][i],bot:true,alive:true,role:null});
+ var used=st.players.length;for(var i=used;i<6;i++)st.players.push({id:"bot"+i,name:["雾鸦","薇拉","灰石","伊莎","松风","星砂"][i],bot:true,alive:true,role:null,avatar:null,portrait:randomPortrait(st.players)});
  st.players.forEach(function(p,i){p.seat=i+1;p.alive=true});
  var roles=shuffle(["wolf","seer","guard","villager","villager","villager"]);st.players.forEach(function(p,i){p.role=roles[i]});
  st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.logs=[];log("月亮升起，所有人闭上眼睛。","news");beginNight();broadcast()
@@ -1536,7 +1545,7 @@ function sendAction(action,target,speech){
 function restart(){
  if(!isHost||!st||st.phase!=="ended")return;
  nightSerial++;
- st.players=st.players.filter(function(p){return !p.bot}).map(function(p){return {id:p.id,name:p.name,bot:false,alive:true,role:null}});
+ st.players=st.players.filter(function(p){return !p.bot}).map(function(p){return {id:p.id,name:p.name,bot:false,alive:true,role:null,portrait:p.portrait,avatar:safeAvatar(p.avatar)}});
  st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.known={};st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
 }
 function button(label,action,target,speech,cls){
@@ -1979,6 +1988,7 @@ function updateSettingsUI(){
  $("bgmVolumeValue").textContent=bgmLevel+"%";$("effectsVolumeValue").textContent=effectsLevel+"%";
  $("bgmPlayer").volume=bgmLevel/100;
  if(sfxOutput)sfxOutput.gain.value=.8*(effectsLevel/100);
+ localAvatarPreview();
 }
 function setVolume(kind,value){
  var level=Math.max(0,Math.min(100,Math.round(Number(value)||0)));
@@ -2160,6 +2170,7 @@ document.addEventListener("click",function(e){
  if(action==="skipSpeech"){playSfx("cursor");stageFinishSpeech();return;}
  if(action==="openSettings"){$("settingsOverlay").hidden=false;updateSettingsUI();return;}
  if(action==="closeSettings"){$("settingsOverlay").hidden=true;return;}
+ if(action==="removeAvatar"){applyOwnAvatar(null,true);return;}
  if(action==="musicToggle"){unlockSfx();toggleMusic();return;}
  unlockSfx();
  var clickSound={back:"cancel",pickSpeech:"cursor",create:"confirm",join:"confirm",
@@ -2214,10 +2225,12 @@ document.addEventListener("keydown",function(e){
   e.preventDefault();menu[rpgMenuIndex].click();
  }
 });
+try{selectedAvatar=safeAvatar(localStorage.getItem("moonlit-avatar"))}catch(err){selectedAvatar=null}
 bgmLevel=readVolumePreference("moonlit-bgm-level",38);
 effectsLevel=readVolumePreference("moonlit-sfx-level",100);
 $("bgmVolume").addEventListener("input",function(){setVolume("bgm",this.value)});
 $("effectsVolume").addEventListener("input",function(){setVolume("sfx",this.value)});
+$("avatarUpload").addEventListener("change",onAvatarUpload);
 $("languageSelect").addEventListener("change",function(){setLanguage(this.value)});
 $("myName").addEventListener("input",function(){this.dataset.userEdited="1"});
 try{
