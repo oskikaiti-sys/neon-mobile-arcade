@@ -1992,7 +1992,7 @@ function readyRole(){
  else if(conn&&conn.open)conn.send({type:"roleReady",gameNo:view.gameNo});
 }
 
-var rpgSpeechTarget=null,rpgMenuIndex=0,rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
+var speechGroup="",rpgSpeechTarget=null,rpgMenuIndex=0,rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
 var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
 var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 
@@ -2006,7 +2006,13 @@ function localizeSpeech(raw){
 }
 function parseSpeech(message){
  var m=message.kind==="choice"?message.text.match(/^(.+?)：「([\s\S]*)」$/):null;
- return m?{rawSpeaker:m[1],speaker:displayName(m[1]),text:localizeSpeech(m[2])}:null;
+ if(!m)return null;
+ if(message.speechData){
+  var data=Object.assign({},message.speechData);
+  ["name","related","speaker"].forEach(function(key){if(data[key])data[key]=displayName(data[key])});
+  return {rawSpeaker:m[1],speaker:displayName(m[1]),text:speechText(selectedLanguage,data)};
+ }
+ return {rawSpeaker:m[1],speaker:displayName(m[1]),text:localizeSpeech(m[2])};
 }
 function localizeLog(message){
  var value=String(message.text),m;
@@ -2062,7 +2068,7 @@ function person(id){return st.players.find(function(p){return p.id===id})}
 function live(){return st.players.filter(function(p){return p.alive})}
 function targetList(id){return live().filter(function(p){return p.id!==id})}
 function log(t,kind){st.logs.push({text:t,kind:kind||"news"});if(st.logs.length>60)st.logs.shift()}
-function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},nightFeedback:{},logs:[],winner:"",dealReady:{},phaseStartAt:0,deadlineAt:0,nightStage:0,multiplayerNight:false};myId="h";log("村庄正在等待玩家加入。")}
+function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},nightFeedback:{},publicHistory:[],voteHistory:[],logs:[],winner:"",dealReady:{},phaseStartAt:0,deadlineAt:0,nightStage:0,multiplayerNight:false};myId="h";log("村庄正在等待玩家加入。")}
 function snapshot(id){var me=person(id);
  var human=st.players.filter(function(p){return !p.bot});
  return {phase:st.phase,day:st.day,gameNo:st.gameNo,
@@ -2073,6 +2079,8 @@ function snapshot(id){var me=person(id);
   phaseElapsed:st.phaseStartAt?Math.max(0,Date.now()-st.phaseStartAt):0,
   nightStage:st.phase==="night"?st.nightStage:null,
   nightFixed:!!st.multiplayerNight,
+  publicHistory:(st.publicHistory||[]).slice(-30),
+  voteHistory:(st.voteHistory||[]).slice(-3),
   /* A target and role are shared only with the player who acted. */
   privateNightFeedback:st.nightFeedback&&st.nightFeedback[id]&&st.phase!=="lobby"&&st.phase!=="deal"?Object.assign({},st.nightFeedback[id]):null,
   me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:me&&me.role==="seer"?(st.known[id]||[]).map(function(k){return {id:k.id,name:k.name,role:k.role,night:k.night,evil:k.evil}}):[],messages:st.logs.slice(-25),winner:st.winner}}
@@ -2156,7 +2164,7 @@ function startGame(){
  var used=st.players.length;for(var i=used;i<6;i++)st.players.push({id:"bot"+i,name:["雾鸦","薇拉","灰石","伊莎","松风","星砂"][i],bot:true,alive:true,role:null,avatar:null,portrait:randomPortrait(st.players)});
  st.players.forEach(function(p,i){p.seat=i+1;p.alive=true});
  var roles=shuffle(["wolf","seer","guard","villager","villager","villager"]);st.players.forEach(function(p,i){p.role=roles[i]});
- st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.nightFeedback={};st.logs=[];st.phase="deal";st.dealReady={};log("请所有真人玩家翻开并确认身份牌。","news");broadcast()
+ st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.nightFeedback={};st.publicHistory=[];st.voteHistory=[];st.logs=[];st.phase="deal";st.dealReady={};log("请所有真人玩家翻开并确认身份牌。","news");broadcast()
 }
 function winCheck(){
  var wolves=live().filter(function(p){return p.role==="wolf"}).length;
@@ -2198,36 +2206,213 @@ function finishNight(){
  if(winCheck())return;
  st.phase="talk";armPhaseTimer("talk");log("第 "+st.day+" 天：请选择一句公开发言。");stepBots()
 }
-function botSpeech(p){
- var choices=targetList(p.id);if(!choices.length){st.speeches[p.id]={speech:"pass",target:null};return}
- var knows=(st.known[p.id]||[]).find(function(k){return k.evil&&person(k.id)&&person(k.id).alive});
- var t=knows?person(knows.id):choices[Math.floor(Math.random()*choices.length)];
- var kind=knows?"suspect":["suspect","trust","pass","clue"][Math.floor(Math.random()*4)];
- speak(p.id,kind,kind==="suspect"||kind==="trust"?t.id:null)
+
+/* Public claims can be truthful or bluffs. Only public speech and ballots
+   support an evidence statement; secret roles never enter the common log. */
+var SPEECH_OPTIONS={
+ suspect:{group:"doubt",target:true},trust:{group:"support",target:true},
+ clue:{group:"analysis"},pass:{group:"analysis"},
+ suspectVote:{group:"doubt",target:true,evidence:"vote"},
+ challengeClaim:{group:"doubt",target:true,evidence:"claim"},
+ trustVote:{group:"support",target:true,evidence:"vote"},
+ followSeer:{group:"support",target:true,evidence:"seerClaim"},
+ claimSeer:{group:"identity"},claimGuard:{group:"identity"},claimVillager:{group:"identity"},
+ gold:{group:"report",target:true},black:{group:"report",target:true},
+ question:{group:"analysis",target:true},analyseVotes:{group:"analysis"},
+ analyseClaims:{group:"analysis"},defend:{group:"analysis"}
+};
+var SPEECH_GROUPS={
+ doubt:["suspect","suspectVote","challengeClaim"],
+ support:["trust","trustVote","followSeer"],
+ identity:["claimSeer","claimGuard","claimVillager"],
+ report:["gold","black"],
+ analysis:["question","analyseVotes","analyseClaims","defend","pass"]
+};
+var SPEECH_LINES={
+ zh:{
+ suspect:"我暂时怀疑{name}，但这是基于发言和态度的推测，不是查杀。我希望对方解释立场。",
+ trust:"我目前更愿意相信{name}，只是暂时站边，并没有查验结果能直接证明。",
+ clue:"我手里没有确定的夜间查验信息。真正能分析的是公开发言、跳身份和投票记录。",
+ pass:"目前我没有可核实的新证据，先听其他人的解释，不把猜测当成事实。",
+ suspectVote:"我想重点问{name}：第{day}天你投票给{related}。这票的理由是什么？票型要结合当时的发言看。",
+ challengeClaim:"{name}之前公开跳了{role}，但宣称不等于真实身份。请说明依据，让大家判断是否可信。",
+ trustVote:"第{day}天{name}把票投给了{related}。我认为这条公开票型值得讨论，暂时先听{name}的解释。",
+ followSeer:"{name}已经公开跳预言家。我愿意先听查验顺序，但不会仅凭身份宣称认定真假。",
+ claimSeer:"我现在跳预言家。身份是我的公开宣称，大家可以结合后续查验和发言判断真假。",
+ claimGuard:"我跳守卫，夜里可以守护一个人。但我不会公开每晚的守护目标。",
+ claimVillager:"我跳村民，夜晚没有技能。我的判断只能来自公开发言和投票。",
+ gold:"我跳预言家，昨晚查验了{name}，结果是好人，我给{name}发金水。这是我公开报出的查验结论。",
+ black:"我跳预言家，昨晚查验了{name}，结果是狼人，我报{name}查杀。请大家核对我的说法。",
+ question:"我想问{name}：你现在更相信谁、怀疑谁？理由是投票、发言，还是查验？请区分猜测和证据。",
+ analyseVotes:"第{day}天公开票型里，{speaker}把票投给了{related}。单看一票不能定身份，应该结合前后的发言复盘。",
+ analyseVotesNone:"目前还没有上一轮的投票记录，不能凭空编造票型。今天只能先分析发言和身份宣称。",
+ analyseClaims:"{speaker}曾公开跳过{role}。这是其个人宣称，不是系统确认；应核对其后续发言有没有自相矛盾。",
+ analyseClaimsNone:"目前没有公开的身份宣称可以核对。没有具体查验或票型就不要把模糊猜测叫作线索。",
+ defend:"{speaker}之前质疑了我。我愿意回应，但希望对方说清依据；没有查验就不能把个人怀疑说成铁证。",
+ defendNone:"有人怀疑我可以提出依据，我会回应。但现阶段别把没有来源的猜测说成已经查验过。"
+ },
+ en:{
+ suspect:"I tentatively suspect {name}, based on how the conversation feels, not a confirmed inspection. I'd like them to explain their position.",
+ trust:"For now I lean toward trusting {name}, but this is only a read, not a verified inspection.",
+ clue:"I have no verified private information to share. Our actual clues are public statements, role claims, and voting records.",
+ pass:"I don't have verifiable new evidence yet. I'll listen rather than pass off speculation as fact.",
+ suspectVote:"On day {day}, {name} voted for {related}. Why? We should examine that vote alongside what was said.",
+ challengeClaim:"{name} publicly claimed to be the {role}, but a claim isn't proof. Please explain your evidence.",
+ trustVote:"On day {day}, {name} voted for {related}. That is public information worth examining; I'd hear their reasoning first.",
+ followSeer:"{name} has claimed to be the Seer. I'd like to hear the inspection order before deciding whether to believe them.",
+ claimSeer:"I'm claiming Seer. This is my public claim; judge it against my inspection reports and later statements.",
+ claimGuard:"I claim Guardian. I can protect someone at night, but I won't disclose my targets.",
+ claimVillager:"I claim ordinary Villager, with no night power. I can only reason from public statements and votes.",
+ gold:"I claim Seer. I inspected {name} last night and received an innocent result—I'm giving {name} a clear.",
+ black:"I claim Seer. I inspected {name} last night and received a werewolf result—I'm accusing {name}. Check my claim.",
+ question:"{name}, who do you trust or suspect, and why? Is this based on votes, statements, or an inspection?",
+ analyseVotes:"On day {day}, {speaker} voted for {related}. That alone proves nothing; compare it with their statements.",
+ analyseVotesNone:"There are no earlier voting records yet. We must reason from public statements and claims instead.",
+ analyseClaims:"{speaker} claimed {role}. That's a public claim, not an official confirmation. Let's see whether it stays consistent.",
+ analyseClaimsNone:"Nobody has publicly claimed a role yet. Don't invent clues when there is no specific evidence.",
+ defend:"{speaker} challenged me earlier. I'll answer, but I'd like a concrete reason rather than an unsupported accusation.",
+ defendNone:"I'm willing to answer questions. But a suspicion without a source is not an inspection result."
+ },
+ ja:{
+ suspect:"私は今のところ{name}を疑っています。ただし発言からの推測であり、占い結果ではありません。理由を聞きたいです。",
+ trust:"今は{name}を少し信じています。ただし暫定的な判断で、占いで確認したわけではありません。",
+ clue:"確定した夜の情報はありません。公開発言、役職宣言、投票記録なら検討できます。",
+ pass:"今は確かめられる新情報がありません。推測を事実として話すより、ほかの意見を聞きます。",
+ suspectVote:"{day}日目に{name}は{related}に投票しました。その根拠を聞きたいです。",
+ challengeClaim:"{name}は{role}だと名乗りましたが、宣言だけでは証明になりません。根拠を示してください。",
+ trustVote:"{day}日目に{name}は{related}へ投票しました。公開された票なので、理由を聞いてから判断します。",
+ followSeer:"{name}は占い師だと名乗っています。占い順を聞いてから判断したいです。",
+ claimSeer:"私は占い師だと名乗ります。今後の占い結果や発言で真偽を判断してください。",
+ claimGuard:"私は騎士だと名乗ります。ただし夜に誰を守ったかは明かしません。",
+ claimVillager:"私は村人だと名乗ります。夜の能力はなく、公開発言と投票で推理します。",
+ gold:"占い師COです。昨夜{name}を占い、人狼ではない結果でした。{name}に白を出します。",
+ black:"占い師COです。昨夜{name}を占い、人狼という結果でした。{name}に黒を出します。",
+ question:"{name}は誰を信じ、誰を疑いますか？根拠は投票、発言、占いのどれですか？",
+ analyseVotes:"{day}日目に{speaker}は{related}へ投票しました。それだけで断定せず、発言と照合しましょう。",
+ analyseVotesNone:"まだ前日の投票記録がありません。公開発言や役職宣言から考えるしかありません。",
+ analyseClaims:"{speaker}は{role}を名乗りました。これは本人の主張で、確定情報ではありません。",
+ analyseClaimsNone:"まだ役職を名乗った人はいません。根拠のない推測を手がかりとは呼べません。",
+ defend:"{speaker}は先ほど私を疑いました。根拠を具体的に示してほしいです。",
+ defendNone:"質問には答えます。ただし根拠のない疑いを占い結果のように扱わないでください。"
+ }
+};
+function roleClaim(kind){
+ if(["claimSeer","gold","black"].includes(kind))return "seer";
+ if(kind==="claimGuard")return "guard";
+ if(kind==="claimVillager")return "villager";
+ return null;
 }
-function speak(id,kind,target){
- var p=person(id),t=target?person(target):null;
- st.speeches[id]={speech:kind,target:target};
- var msg=kind==="suspect"?"我怀疑 "+t.name+"。":kind==="trust"?"我相信 "+t.name+"。":kind==="clue"?"我掌握了一些线索。":"我暂不表态。";
- log(p.name+"：「"+msg+"」","choice")
+function lastClaim(history,id,onlySeer){
+ return (history||[]).slice().reverse().find(function(h){
+  var role=roleClaim(h.kind);
+  return h.id===id&&role&&(!onlySeer||role==="seer");
+ })||null;
+}
+function lastVote(history,id){
+ for(var i=(history||[]).length-1;i>=0;i--){
+  var vote=history[i].votes.find(function(v){return v.voterId===id&&v.targetId&&v.targetId!=="__abstain__"});
+  if(vote)return {day:history[i].day,targetId:vote.targetId};
+ }
+ return null;
+}
+function speechHasEvidence(history,votes,kind,id){
+ var opt=SPEECH_OPTIONS[kind];if(!opt)return false;
+ if(opt.evidence==="vote")return !!lastVote(votes,id);
+ if(opt.evidence==="claim")return !!lastClaim(history,id,false);
+ if(opt.evidence==="seerClaim")return !!lastClaim(history,id,true);
+ return true;
+}
+function speechRecord(p,kind,target){
+ var data={kind:kind,name:target?target.name:"",related:"",speaker:"",claim:"",day:st.day};
+ var history=st.publicHistory||[],votes=st.voteHistory||[];
+ if(kind==="suspectVote"||kind==="trustVote"){
+  var vote=lastVote(votes,target.id),voted=vote&&person(vote.targetId);
+  if(voted){data.related=voted.name;data.day=vote.day}
+ }
+ if(kind==="challengeClaim"){var c=lastClaim(history,target.id,false);if(c)data.claim=roleClaim(c.kind)}
+ if(kind==="analyseVotes"){
+  var last=votes[votes.length-1],first=last&&last.votes.find(function(v){return v.targetId&&v.targetId!=="__abstain__"});
+  var from=first&&person(first.voterId),to=first&&person(first.targetId);
+  if(from&&to){data.speaker=from.name;data.related=to.name;data.day=last.day}
+  else data.kind="analyseVotesNone";
+ }
+ if(kind==="analyseClaims"){
+  var previous=history.slice().reverse().find(function(h){return roleClaim(h.kind)});
+  if(previous){data.speaker=previous.name;data.claim=roleClaim(previous.kind)}
+  else data.kind="analyseClaimsNone";
+ }
+ if(kind==="defend"){
+  var challenger=history.slice().reverse().find(function(h){return h.targetId===p.id&&["suspect","suspectVote","challengeClaim","black"].includes(h.kind)});
+  if(challenger)data.speaker=challenger.name;
+  else data.kind="defendNone";
+ }
+ return data;
+}
+function speechText(lang,data){
+ var lines=SPEECH_LINES[lang]||SPEECH_LINES.zh;
+ var template=lines[data.kind]||SPEECH_LINES.zh[data.kind]||"";
+ var dict=translations[lang]||translations.zh;
+ var label={seer:"roleSeer",guard:"roleGuard",villager:"roleVillager"}[data.claim];
+ var role=label?dict[label]:"";
+ var vars={name:data.name||"",related:data.related||"",speaker:data.speaker||"",day:data.day||"",role:role};
+ return template.replace(/\{(name|related|speaker|day|role)\}/g,function(_,k){return vars[k]});
+}
+function botSpeech(p){
+ var people=targetList(p.id);
+ if(!people.length){speak(p.id,"pass",null);return}
+ var history=st.publicHistory||[],votes=st.voteHistory||[];
+ var hasClaim=history.some(function(h){return h.id===p.id&&roleClaim(h.kind)});
+ var known=(st.known[p.id]||[]).slice().reverse().find(function(k){return person(k.id)&&person(k.id).alive&&k.id!==p.id});
+ var seerClaim=history.slice().reverse().find(function(h){return h.id!==p.id&&roleClaim(h.kind)==="seer"&&person(h.id)&&person(h.id).alive});
+ var claimant=people.find(function(q){return lastClaim(history,q.id,false)});
+ var voteTarget=people.find(function(q){return lastVote(votes,q.id)});
+ var kind="suspect",target=people[Math.floor(Math.random()*people.length)],roll=Math.random();
+ if(p.role==="seer"&&known&&roll<.70){kind=known.evil?"black":"gold";target=person(known.id)}
+ else if(p.role==="wolf"&&!hasClaim&&roll<.16){kind="gold";target=people.find(function(q){return q.role!=="wolf"})||target}
+ else if(p.role==="guard"&&!hasClaim&&roll<.11){kind="claimGuard";target=null}
+ else if(p.role==="villager"&&!hasClaim&&roll<.1){kind=Math.random()<.4?"claimSeer":"claimVillager";target=null}
+ else if(seerClaim&&roll<.42){kind=Math.random()<.5?"challengeClaim":"followSeer";target=person(seerClaim.id)}
+ else if(claimant&&roll<.58){kind="challengeClaim";target=claimant}
+ else if(voteTarget&&roll<.7){kind=Math.random()<.55?"suspectVote":"trustVote";target=voteTarget}
+ else if(roll<.22){kind="trust"}
+ else if(roll<.37){kind="question"}
+ else if(roll<.51){kind="analyseVotes";target=null}
+ else if(roll<.65){kind="analyseClaims";target=null}
+ else if(roll<.75){kind="defend";target=null}
+ if(SPEECH_OPTIONS[kind].target&&!target)target=people[0];
+ if(SPEECH_OPTIONS[kind].evidence&&!speechHasEvidence(history,votes,kind,target.id))kind="suspect";
+ speak(p.id,kind,target?target.id:null);
+}
+function speak(id,kind,targetId){
+ var p=person(id),t=targetId?person(targetId):null;
+ if(!p||!SPEECH_OPTIONS[kind])return;
+ var data=speechRecord(p,kind,t);
+ st.speeches[id]={speech:kind,target:targetId||null};
+ st.publicHistory.push({day:st.day,id:id,name:p.name,kind:kind,targetId:targetId||null,targetName:t?t.name:null});
+ log(p.name+"：「"+speechText("zh",data)+"」","choice");
+ st.logs[st.logs.length-1].speechData=data;
 }
 function botVote(p){
- var choices=targetList(p.id);
- if(!choices.length)return p.id;
+ var choices=targetList(p.id);if(!choices.length)return p.id;
  var known=(st.known[p.id]||[]).find(function(k){return k.evil&&person(k.id)&&person(k.id).alive});
  if(known)return known.id;
  if(p.role==="wolf")choices=choices.filter(function(q){return q.role!=="wolf"});
+ if(!choices.length)return p.id;
+ var history=st.publicHistory||[];
  var scores=choices.map(function(q){
-  var s=1+Math.random()*2;
-  Object.keys(st.speeches).forEach(function(id){
-   var v=st.speeches[id];if(v.speech==="suspect"&&v.target===q.id)s+=.8;
-   if(v.speech==="trust"&&v.target===q.id)s-=.35;
+  var score=1+Math.random()*1.7;
+  history.slice(-14).forEach(function(h){
+   if(h.targetId!==q.id)return;
+   if(["suspect","suspectVote","black"].includes(h.kind))score+=h.kind==="black"?1.1:.65;
+   if(["trust","trustVote","gold"].includes(h.kind))score-=h.kind==="gold"?.5:.3;
   });
-  return {id:q.id,score:Math.max(.05,s)};
+  if(lastClaim(history,q.id,true))score+=.13;
+  return {id:q.id,score:Math.max(.1,score)};
  });
- scores.sort(function(a,b){return b.score-a.score});return scores[0].id
+ scores.sort(function(a,b){return b.score-a.score});return scores[0].id;
 }
 function finishVote(){
+ st.voteHistory.push({day:st.day,votes:Object.keys(st.votes).map(function(id){return {voterId:id,targetId:st.votes[id]}})});
  var counts={};Object.keys(st.votes).forEach(function(id){var target=st.votes[id];counts[target]=(counts[target]||0)+1});
  delete counts["__abstain__"];
  var high=Math.max.apply(null,Object.values(counts));
@@ -2257,8 +2442,11 @@ function accept(id,action,target,speech){
    },1400);
   }
  }else if(st.phase==="talk"&&action==="speech"){
-  if(st.speeches[id]||!["suspect","trust","clue","pass"].includes(speech))return;
-  if(["suspect","trust"].includes(speech)&&!targetList(id).some(function(t){return t.id===target}))return;
+  if(st.speeches[id]||!SPEECH_OPTIONS[speech])return;
+  var opt=SPEECH_OPTIONS[speech];
+  if(opt.target&&!targetList(id).some(function(t){return t.id===target}))return;
+  if(!opt.target&&target)return;
+  if(opt.evidence&&!speechHasEvidence(st.publicHistory,st.voteHistory,speech,target))return;
   speak(id,speech,target);
  }else if(st.phase==="vote"&&action==="vote"){
   if(st.votes[id]||!targetList(id).some(function(t){return t.id===target}))return;
@@ -2276,7 +2464,7 @@ function restart(){
  if(!isHost||!st||st.phase!=="ended")return;
  nightSerial++;cancelPhaseTimer();
  st.players=st.players.filter(function(p){return !p.bot}).map(function(p){return {id:p.id,name:p.name,bot:false,alive:true,role:null,portrait:p.portrait,avatar:safeAvatar(p.avatar)}});
- st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.nightFeedback={};st.known={};st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
+ st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.nightFeedback={};st.known={};st.publicHistory=[];st.voteHistory=[];st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
 }
 function button(label,action,target,speech,cls){
  return '<button class="'+(cls||"")+'" data-do="'+action+'" '+(target?'data-target="'+escapeHtml(target)+'" ':'')+(speech?'data-speech="'+speech+'" ':'')+'>'+escapeHtml(label)+'</button>'
