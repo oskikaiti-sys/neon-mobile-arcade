@@ -628,6 +628,30 @@ body.game-active #gameScreen>.panel:nth-child(4){animation-delay:.15s}
  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
  body:before{animation:none!important}
 }
+
+/* UI 2/3 — frameless announcement stream, independent from framed panels. */
+body.game-active #gameScreen>.panel.log-surface{
+ background:transparent!important;border:0!important;box-shadow:none!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+ clip-path:none!important;padding:7px 3px 3px!important;overflow:hidden;
+}
+body.game-active #gameScreen>.panel.log-surface::before,
+body.game-active #gameScreen>.panel.log-surface::after{display:none!important}
+body.game-active #gameScreen>.panel.log-surface h2{
+ display:flex;align-items:center;gap:9px;color:var(--gold);font-size:12px;
+ font-weight:600;letter-spacing:1.2px;margin:0 0 5px;padding:0 5px;
+}
+body.game-active #gameScreen>.panel.log-surface h2::after{
+ content:"";height:1px;flex:1;background:linear-gradient(90deg,rgba(232,200,114,.3),transparent)
+}
+body.game-active #gameScreen>.panel.log-surface #feed{
+ flex:1;min-height:0;max-height:none;overflow-y:auto;overflow-x:hidden;
+ mask-image:linear-gradient(to bottom,transparent 0px,#000 32px,#000 100%);
+ -webkit-mask-image:linear-gradient(to bottom,transparent 0px,#000 32px,#000 100%);
+ scrollbar-width:thin;scrollbar-color:rgba(154,163,199,.4) transparent;
+ padding:30px 4px 6px;
+}
+
 </style>
 </head>
 <body>
@@ -654,7 +678,7 @@ body.game-active #gameScreen>.panel:nth-child(4){animation-delay:.15s}
 <div class="panel"><h2>村庄居民 <span class="small" id="countInfo"></span></h2><div id="players" class="players"></div></div>
 <div class="panel"><h2>你的身份</h2><div id="myRole" class="role">等待身份分配</div></div>
 <div class="panel"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
-<div class="panel"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
+<div class="panel log-surface"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
 </section>
 <div class="footer">月下疑云 · 原创轻量六人社交推理游戏<br>适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐<br>BGM：《不思議な村》— HiLi / <a href="https://conte-de-fees.com/bgm/238" target="_blank" rel="noopener noreferrer" style="color:inherit">こんとどぅふぇ</a></div>
 <div id="timeScene" class="time-scene" hidden aria-hidden="true">
