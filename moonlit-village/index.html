@@ -50,6 +50,98 @@ button.danger{border-color:#9b5365;color:#ffc0cb}
 .footer{text-align:center;margin:24px 0 0;color:#9896a9;font-size:11px;line-height:1.8}
 @media(max-width:460px){.panel{padding:14px}.players{gap:6px}.player{padding:10px 3px}.avatar{font-size:26px}.player .name{font-size:12px}h1{letter-spacing:2px}.actions>button{font-size:12px;padding:10px 6px}}
 </style>
+<style id="compact-responsive-game">
+[hidden]{display:none!important}
+body.game-active{overflow:hidden}
+body.game-active main{height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+body.game-active header{flex:none;margin:0 0 8px}
+body.game-active header .eyebrow{font-size:9px;letter-spacing:2px}
+body.game-active header h1{font-size:clamp(23px,4vh,32px);margin:2px 0 0}
+body.game-active header .subtitle{display:none}
+body.game-active .footer{display:none}
+body.game-active #gameScreen{flex:1;min-height:0;display:grid!important;grid-template-rows:auto minmax(0,1.05fr) auto minmax(0,1.1fr) minmax(0,.48fr);gap:7px}
+body.game-active #gameScreen>.panel{min-width:0;min-height:0;overflow:hidden;margin:0;padding:9px 12px}
+body.game-active #gameScreen>.panel h2{font-size:13px;margin:0 0 5px;line-height:1.2;letter-spacing:.2px}
+body.game-active #gameScreen>.panel:first-child{padding:7px 11px}
+body.game-active .topbar{gap:5px}
+body.game-active .pill{font-size:11px;padding:4px 9px}
+body.game-active #roomInfo{font-size:11px}
+body.game-active #phaseHelp{font-size:10px;line-height:1.3;margin:5px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.game-active #shareBtns{margin-top:4px}
+body.game-active #shareBtns button{min-height:24px;padding:3px 8px;font-size:10px}
+body.game-active #gameScreen>.panel:nth-child(2){display:flex;flex-direction:column}
+body.game-active #players{flex:1;min-height:0;display:grid;grid-template-rows:repeat(2,minmax(0,1fr));grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+body.game-active .player{padding:3px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+body.game-active .avatar{font-size:clamp(18px,3.8vh,32px);line-height:1.04}
+body.game-active .player .name{font-size:clamp(10px,1.45vh,13px);margin-top:3px;max-width:100%}
+body.game-active .player .tag{font-size:10px;margin-top:1px;min-height:0}
+body.game-active #gameScreen>.panel:nth-child(3){padding:7px 11px}
+body.game-active #gameScreen>.panel:nth-child(3) h2{margin-bottom:4px}
+body.game-active #myRole{padding:5px 8px;border-radius:7px;line-height:1.3;font-size:12px;max-height:52px;overflow:hidden}
+body.game-active #myRole .small{font-size:10px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.game-active #gameScreen>.panel:nth-child(4){display:flex;flex-direction:column;padding:8px 11px}
+body.game-active #actions{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:6px}
+body.game-active #actions.targets{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.game-active #actions>button{min-height:0;padding:3px 5px;font-size:clamp(11px,1.6vh,14px);line-height:1.15;word-break:break-word}
+body.game-active #actions>button.full{grid-column:1/-1}
+body.game-active #notice{flex:none;font-size:10px;line-height:1.15;min-height:0;margin:4px 0 0;max-height:27px;overflow:hidden}
+body.game-active #gameScreen>.panel:nth-child(5){display:flex;flex-direction:column;padding:7px 11px}
+body.game-active #gameScreen>.panel:nth-child(5) h2{margin-bottom:3px}
+body.game-active #feed{flex:1;min-height:0;max-height:none;overflow:hidden;justify-content:flex-end;gap:3px}
+body.game-active #feed .entry{font-size:10px;line-height:1.25;padding:4px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-height:0}
+.role-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(circle at 50% 35%,#343047f0,#090d19f8 73%);backdrop-filter:blur(11px);overflow:hidden}
+.deal-stage{width:min(94vw,390px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;animation:deal-appear .45s ease-out}
+.deal-eyebrow{font-size:11px;letter-spacing:4px;color:#e2c7a3}
+.deal-stage h2{font:500 clamp(26px,5vw,34px) Georgia,"STSong",serif;letter-spacing:2px;margin:0;color:#f3e8db}
+.deal-tip{font-size:12px;color:#c8c2cf;margin:0;line-height:1.5}
+.deal-deck{position:relative;width:220px;height:255px;margin:4px 0 6px;perspective:900px;display:flex;align-items:center;justify-content:center}
+.deal-behind{position:absolute;top:12px;left:40px;width:140px;height:212px;background:repeating-linear-gradient(135deg,#37304f 0 10px,#29253d 10px 20px);border:2px solid #ac8e6c;border-radius:13px;box-shadow:0 6px 20px #0007}
+.deal-behind.a{transform:rotate(-19deg) translate(-17px,4px);animation:shuffle-left 1s ease-in-out 2}
+.deal-behind.b{transform:rotate(16deg) translate(17px,0);animation:shuffle-right 1s ease-in-out 2}
+.draw-card{position:relative;width:148px;height:215px;padding:0;border:0;background:transparent;perspective:900px;box-shadow:none;border-radius:13px;z-index:2;animation:card-float 2.3s ease-in-out infinite}
+.draw-card:hover{background:transparent;filter:none}
+.draw-card:active{transform:scale(.985)}
+.card-inner{position:absolute;inset:0;display:block;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.7,.1,1)}
+.role-overlay.revealed .card-inner{transform:rotateY(180deg)}
+.card-side{position:absolute;inset:0;border:2px solid #e1c18d;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 35px #000b,inset 0 0 0 7px #12182ba9}
+.card-back{background:radial-gradient(circle,#53445d,#272139 75%);color:#e8c997}
+.card-front{transform:rotateY(180deg);background:radial-gradient(circle at 50% 20%,#6b5471,#252c42 72%);color:#fff5df}
+.deal-symbol{font-size:56px;font-family:serif;text-shadow:0 0 24px #caa4b29c}
+.card-face-title{font-size:23px;font-weight:800;margin:8px 0 4px}
+.card-face-desc{font-size:12px;color:#e7d5c3;padding:0 9px;line-height:1.5}
+.role-overlay.revealed .draw-card{animation:none;cursor:default}
+.role-overlay.revealed .deal-behind{opacity:.14;transition:opacity .5s}
+#roleContinue{width:200px;max-width:100%;animation:deal-appear .3s ease-out}
+@keyframes shuffle-left{0%,100%{transform:rotate(-19deg) translate(-17px,4px)}45%{transform:rotate(-38deg) translate(-54px,-14px)}}
+@keyframes shuffle-right{0%,100%{transform:rotate(16deg) translate(17px,0)}45%{transform:rotate(33deg) translate(54px,-11px)}}
+@keyframes card-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes deal-appear{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){
+body.game-active main{padding:max(5px,env(safe-area-inset-top)) 8px max(6px,env(safe-area-inset-bottom))}
+body.game-active header{margin:0 0 4px}
+body.game-active header .eyebrow{display:none}
+body.game-active header h1{font-size:21px}
+body.game-active #gameScreen{gap:5px}
+body.game-active #gameScreen>.panel{padding:7px 8px;border-radius:10px}
+body.game-active #gameScreen>.panel h2{font-size:12px;margin-bottom:3px}
+body.game-active #gameScreen>.panel:nth-child(3) h2{display:none}
+body.game-active #myRole{font-size:11px;padding:6px}
+body.game-active #gameScreen>.panel:nth-child(4){padding:7px 8px}
+body.game-active #gameScreen>.panel:nth-child(5){padding:6px 8px}
+}
+@media(max-height:690px){
+body.game-active header h1{font-size:19px}
+body.game-active #gameScreen{grid-template-rows:auto minmax(0,1.1fr) auto minmax(0,1.3fr) minmax(0,.4fr)}
+body.game-active #gameScreen>.panel:first-child{padding:4px 8px}
+body.game-active #phaseHelp{display:none}
+body.game-active #players{gap:3px}
+body.game-active .player .tag{font-size:9px}
+body.game-active .avatar{font-size:20px}
+body.game-active #gameScreen>.panel:nth-child(5) #feed .entry:not(:last-child){display:none}
+}
+@media(max-height:570px){body.game-active #gameScreen{gap:3px;grid-template-rows:34px minmax(0,.9fr) 30px minmax(0,1.25fr) 45px}body.game-active #gameScreen>.panel{padding:3px 7px!important}body.game-active #myRole{padding:2px 6px}body.game-active #gameScreen>.panel:nth-child(5) h2{display:none}body.game-active #gameScreen>.panel:nth-child(2) h2{display:none}body.game-active .player .name{margin:1px 0 0}}
+@media(prefers-reduced-motion:reduce){.deal-stage,.deal-behind,.draw-card,#roleContinue{animation:none!important}.card-inner{transition:none}}
+</style>
 </head>
 <body>
 <main>
@@ -78,6 +170,24 @@ button.danger{border-color:#9b5365;color:#ffc0cb}
 <div class="panel"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
 </section>
 <div class="footer">月下疑云 · 原创轻量六人社交推理游戏<br>适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐</div>
+<div id="roleOverlay" class="role-overlay" hidden role="dialog" aria-modal="true" aria-label="抽取你的身份牌">
+  <div class="deal-stage">
+    <div class="deal-eyebrow">THE MOON CHOOSES</div>
+    <h2>命运正在洗牌</h2>
+    <p class="deal-tip" id="drawHint">轻触中央的牌，揭晓只有你能看见的身份</p>
+    <div class="deal-deck">
+      <div class="deal-behind a" aria-hidden="true"></div>
+      <div class="deal-behind b" aria-hidden="true"></div>
+      <button id="roleCard" data-do="flipRole" class="draw-card" aria-label="翻开你的身份牌">
+        <span class="card-inner">
+          <span class="card-side card-back"><span class="deal-symbol">☾</span><span class="small">命运之牌</span></span>
+          <span class="card-side card-front"><span id="roleSymbol" class="deal-symbol">✦</span><span id="roleFace" class="card-face-title">神秘身份</span><span id="roleDescription" class="card-face-desc"></span></span>
+        </span>
+      </button>
+    </div>
+    <button class="primary" data-do="closeRole" id="roleContinue" hidden>进入村庄</button>
+  </div>
+</div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 <script>
@@ -87,18 +197,18 @@ var $=function(id){return document.getElementById(id)};
 var roleText={wolf:"狼人 · 夜晚袭击一人",seer:"预言家 · 每晚查验一人",guard:"守卫 · 每晚保护一人",villager:"村民 · 白天找出狼人"};
 var icons=["🧑","👩","🧔","👨","👩‍🦰","🧑‍🦳"];
 var peer=null,conn=null,isHost=false,solo=false,st=null,view=null,room="",myId="",connections=new Map(),speechKind="",busy=false;
-var mark=0;
+var mark=0, shownIdentityGame=0;
 var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
 var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 function report(t){$("homeNotice").textContent=t;$("notice").textContent=t}
 function getName(){return ($("myName").value.trim().slice(0,15)||"旅人")}
-function enter(){ $("homeScreen").style.display="none";$("gameScreen").style.display="block"; render() }
+function enter(){ document.body.classList.add("game-active");$("homeScreen").style.display="none";$("gameScreen").style.display="block"; render() }
 function person(id){return st.players.find(function(p){return p.id===id})}
 function live(){return st.players.filter(function(p){return p.alive})}
 function targetList(id){return live().filter(function(p){return p.id!==id})}
 function log(t,kind){st.logs.push({text:t,kind:kind||"news"});if(st.logs.length>60)st.logs.shift()}
-function makeState(){st={phase:"lobby",day:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null}],votes:{},speeches:{},night:{},known:{},logs:[],winner:""};myId="h";log("村庄正在等待玩家加入。")}
-function snapshot(id){var me=person(id);return {phase:st.phase,day:st.day,me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
+function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null}],votes:{},speeches:{},night:{},known:{},logs:[],winner:""};myId="h";log("村庄正在等待玩家加入。")}
+function snapshot(id){var me=person(id);return {phase:st.phase,day:st.day,gameNo:st.gameNo,me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
 function broadcast(){if(!st)return;view=snapshot("h");render();for(var it of connections.entries()){var id=it[0],c=it[1];if(c.open){try{c.send({type:"state",state:snapshot(id)})}catch(e){}}}}
 function makeSolo(){solo=true;isHost=true;room="";makeState();enter();startGame()}
 function makeRoom(){
@@ -148,7 +258,7 @@ function startGame(){
  var used=st.players.length;for(var i=used;i<6;i++)st.players.push({id:"bot"+i,name:["雾鸦","薇拉","灰石","伊莎","松风","星砂"][i],bot:true,alive:true,role:null});
  st.players.forEach(function(p,i){p.seat=i+1;p.alive=true});
  var roles=shuffle(["wolf","seer","guard","villager","villager","villager"]);st.players.forEach(function(p,i){p.role=roles[i]});
- st.day=1;st.known={};st.logs=[];log("月亮升起，所有人闭上眼睛。","news");beginNight();broadcast()
+ st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.logs=[];log("月亮升起，所有人闭上眼睛。","news");beginNight();broadcast()
 }
 function winCheck(){
  var wolves=live().filter(function(p){return p.role==="wolf"}).length;
@@ -261,9 +371,24 @@ function restart(){
 function button(label,action,target,speech,cls){
  return '<button class="'+(cls||"")+'" data-do="'+action+'" '+(target?'data-target="'+escapeHtml(target)+'" ':'')+(speech?'data-speech="'+speech+'" ':'')+'>'+escapeHtml(label)+'</button>'
 }
+function showRoleDeal(v){
+  if(!v.myRole||!v.gameNo||shownIdentityGame===v.gameNo)return;
+  shownIdentityGame=v.gameNo;
+  var names={wolf:"狼人",seer:"预言家",guard:"守卫",villager:"村民"};
+  var symbols={wolf:"🐺",seer:"🔮",guard:"🛡️",villager:"🕯️"};
+  $("roleSymbol").textContent=symbols[v.myRole]||"☾";
+  $("roleFace").textContent=names[v.myRole]||"未知身份";
+  $("roleDescription").textContent=(roleText[v.myRole]||"").split(" · ").slice(1).join(" · ");
+  $("roleOverlay").hidden=false;
+  $("roleOverlay").classList.remove("revealed");
+  $("roleContinue").hidden=true;
+  $("roleCard").disabled=false;
+  $("drawHint").textContent="轻触中央的牌，揭晓只有你能看见的身份";
+}
 function render(){
  if(!view)return;
  var v=view;
+ showRoleDeal(v);
  var titles={lobby:"等待入场",night:"🌙 第 "+v.day+" 夜",talk:"☀️ 第 "+v.day+" 天 · 发言",vote:"🗳️ 第 "+v.day+" 天 · 投票",ended:"🏆 游戏结束"};
  $("phaseTag").textContent=titles[v.phase];
  $("phaseHelp").textContent=v.phase==="lobby"?"房主准备后即可开局；不足六人的位置会由电脑补齐。":v.phase==="night"?"夜间行动属于私人信息，不会显示给其他玩家。":v.phase==="talk"?"每人选择一句发言，其他玩家会即时看到。":v.phase==="vote"?"选择一名玩家放逐；每张投票都会同步展示。":"胜利阵营："+v.winner+"。";
@@ -275,7 +400,7 @@ function render(){
  }).join("");
  var tips=v.knowledge.slice(-4).map(function(k){return '第 '+k.night+' 夜查验：'+k.name+' 是'+(k.evil?'狼人':'好人')}).join("；");
  $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleText[v.myRole])+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):'身份尚未分配，开局后仅你自己能看到。';
- $("feed").innerHTML=v.messages.map(function(m){return '<div class="entry '+(m.kind==="choice"?"choice":"news")+'">'+escapeHtml(m.text)+'</div>'}).join("");
+ $("feed").innerHTML=v.messages.slice(-2).map(function(m){return '<div class="entry '+(m.kind==="choice"?"choice":"news")+'">'+escapeHtml(m.text)+'</div>'}).join("");
  $("feed").scrollTop=$("feed").scrollHeight;
  var a="",title="做出决定",notice="";
  if(v.phase==="lobby"){
@@ -312,13 +437,16 @@ function render(){
   else notice="等待房主发起下一局。";
  }
  $("actionTitle").textContent=title;
+ $("actions").className="actions"+((v.phase==="night"||v.phase==="vote"||(v.phase==="talk"&&speechKind))?" targets":"");
  $("actions").innerHTML=a;
  $("notice").textContent=notice;
 }
 document.addEventListener("click",function(e){
  var b=e.target.closest("button[data-do]");if(!b)return;
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
- if(action==="solo")makeSolo();
+ if(action==="flipRole"){if(!$("roleOverlay").classList.contains("revealed")){$("roleOverlay").classList.add("revealed");$("roleContinue").hidden=false;$("roleCard").disabled=true;$("drawHint").textContent="身份已经揭晓，准备进入村庄";}}
+ else if(action==="closeRole"){$("roleOverlay").hidden=true;}
+ else if(action==="solo")makeSolo();
  else if(action==="create")makeRoom();
  else if(action==="join")joinRoom();
  else if(action==="start")startGame();
