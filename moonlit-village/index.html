@@ -1634,6 +1634,19 @@ body.game-active #players .character-rail .player.rpg-selectable:focus-visible{
   grid-template-columns:repeat(2,minmax(0,1fr))!important;
  }
 }
+body.game-active .story-heading .evidence-toggle{
+ flex:none;min-width:30px!important;width:30px;height:30px;min-height:30px!important;
+ margin-left:auto;padding:0!important;border:1px solid rgba(232,200,114,.44);
+ border-radius:7px;color:var(--gold);background:rgba(20,28,58,.74);font-size:18px;
+}
+body.game-active .story-heading .evidence-toggle[hidden]{display:none!important}
+body.game-active .story-heading .evidence-toggle:focus-visible{outline:2px solid var(--gold)}
+body.game-active .evidence-list{display:flex;flex-direction:column;gap:6px}
+body.game-active .evidence-entry{border:1px solid rgba(232,200,114,.24);
+ border-radius:7px;background:rgba(20,28,58,.6);padding:9px 10px;
+ font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+body.game-active .evidence-day{display:block;color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.6px}
+body.game-active .evidence-empty{font-size:12px;color:var(--muted);padding:20px 5px;text-align:center}
 </style>
 </head>
 <body>
@@ -1680,7 +1693,7 @@ body.game-active #players .character-rail .player.rpg-selectable:focus-visible{
   <div id="players" class="player-layout">
     <div id="leftPlayers" class="character-rail character-rail-left" aria-label="村庄居民，一至三号"></div>
     <div class="story-column">
-      <div class="story-heading"><h2 data-i18n="story"></h2><span class="small" id="countInfo"></span></div>
+      <div class="story-heading"><h2 data-i18n="story"></h2><span class="small" id="countInfo"></span><button id="evidenceButton" type="button" class="evidence-toggle" data-do="openEvidence" data-i18n-aria="evidenceTitle" aria-label="Evidence ledger" title="Evidence ledger" hidden>▤</button></div>
       <div id="feed" class="story-feed" aria-live="polite"></div>
       <div id="nightTurn" class="night-turn night-dialogue" hidden aria-live="off">
         <div class="night-dialogue-card">
@@ -1773,6 +1786,17 @@ body.game-active #players .character-rail .player.rpg-selectable:focus-visible{
   <button type="button" data-do="closeSeerNotes" class="endgame-done" data-i18n="seerNotesDone">Back to game</button>
  </div>
 </div>
+<div id="evidenceOverlay" class="endgame-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="evidenceTitle">
+ <div class="endgame-panel panel">
+  <div class="endgame-head">
+   <div><div class="endgame-eyebrow" data-i18n="evidenceEyebrow">PUBLIC RECORD</div><h2 id="evidenceTitle" data-i18n="evidenceTitle">Evidence ledger</h2></div>
+   <button type="button" class="endgame-close evidence-close" data-do="closeEvidence" aria-label="Close evidence">×</button>
+  </div>
+  <p class="endgame-explainer" data-i18n="evidenceIntro">Public claims and votes are observations, not verified identities.</p>
+  <div id="evidenceList" class="evidence-list" role="list"></div>
+  <button type="button" data-do="closeEvidence" class="endgame-done" data-i18n="evidenceDone">Return to game</button>
+ </div>
+</div>
 <div id="endgameOverlay" class="endgame-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="endgameRevealTitle">
  <div class="endgame-panel panel">
   <div class="endgame-head"><div><div class="endgame-eyebrow" data-i18n="revealEyebrow">THE FINAL REVEAL</div><h2 id="endgameRevealTitle" data-i18n="revealTitle">All identities revealed</h2></div><button type="button" data-do="closeReveal" class="endgame-close" aria-label="Close results">×</button></div>
@@ -1835,6 +1859,19 @@ translations.en.nightYourTurn="It is your turn to act";translations.zh.nightYour
 translations.en.nightWaitYourTurn="Wait until your role is called.";translations.zh.nightWaitYourTurn="请等待轮到你的身份行动。";translations.ja.nightWaitYourTurn="自分の役職の番までお待ちください。";
 translations.en.nightChoiceSaved="Choice submitted. Waiting for this turn to end.";translations.zh.nightChoiceSaved="已完成行动，等待本轮结束。";translations.ja.nightChoiceSaved="行動を確定しました。このターンの終了を待っています。";
 translations.en.nightCuePosition="Turn {turn}/3";translations.zh.nightCuePosition="第 {turn}/3 轮";translations.ja.nightCuePosition="{turn}/3 ターン";
+translations.en.evidenceEyebrow="PUBLIC RECORD";translations.zh.evidenceEyebrow="公开证据";translations.ja.evidenceEyebrow="公開記録";
+translations.en.evidenceTitle="Evidence ledger";translations.zh.evidenceTitle="公开证据账本";translations.ja.evidenceTitle="公開情報の記録";
+translations.en.evidenceIntro="Claims, votes, challenges and replies are recorded here. Statements are not verified roles or inspection results.";translations.zh.evidenceIntro="记录所有公开发言、投票、质疑与回应。自称身份和查验报告都是玩家宣称，不能直接当成事实。";translations.ja.evidenceIntro="公開発言・投票・質疑と返答を記録します。COや占い結果は本人の主張です。";
+translations.en.evidenceDone="Back to village";translations.zh.evidenceDone="返回村庄";translations.ja.evidenceDone="村へ戻る";
+translations.en.evidenceEmpty="No public evidence yet.";translations.zh.evidenceEmpty="暂时没有公开记录。";translations.ja.evidenceEmpty="まだ公開記録がありません。";
+translations.en.evidenceDay="Day {day} · {kind}";translations.zh.evidenceDay="第{day}天 · {kind}";translations.ja.evidenceDay="{day}日目 · {kind}";
+translations.en.evidenceSaid="{actor} made a public statement: {kind}{target}.";translations.zh.evidenceSaid="{actor}公开发言：{kind}{target}。";translations.ja.evidenceSaid="{actor}の発言：{kind}{target}。";
+translations.en.evidenceVote="{actor} voted for {target}.";translations.zh.evidenceVote="{actor}投票给{target}。";translations.ja.evidenceVote="{actor}は{target}に投票。";
+translations.en.evidenceChallenge="{actor} challenged {target} about {kind}.";translations.zh.evidenceChallenge="{actor}质疑{target}：{kind}。";translations.ja.evidenceChallenge="{actor}は{target}の{kind}を質疑。";
+translations.en.evidenceReply="{actor} replied: {kind}.";translations.zh.evidenceReply="{actor}回应质疑：{kind}。";translations.ja.evidenceReply="{actor}の返答：{kind}。";
+translations.en.evidenceDeath="{target} died during the night (village alignment).";translations.zh.evidenceDeath="{target}夜间遇袭出局（好人阵营）。";translations.ja.evidenceDeath="{target}は夜に脱落（村側）。";
+translations.en.evidenceExile="{target} was exiled: {alignment}.";translations.zh.evidenceExile="{target}被放逐，公开阵营：{alignment}。";translations.ja.evidenceExile="{target}は追放。公開陣営：{alignment}。";
+translations.en.evidenceNoTarget="(no target)";translations.zh.evidenceNoTarget="（弃票）";translations.ja.evidenceNoTarget="（棄権）";
 translations.en.debateLogStart="Discussion finished. Everyone may challenge once.";translations.zh.debateLogStart="公开发言结束，开始质疑。";translations.ja.debateLogStart="発言が終わり、質疑を始めます。";
 translations.en.debateLogReplies="Each challenged player gets one reply.";translations.zh.debateLogReplies="质疑结束，被质疑者集中回应。";translations.ja.debateLogReplies="質疑を受けた人が返答します。";
 translations.en.debateLogVote="Debate complete. Time to vote.";translations.zh.debateLogVote="辩论结束，开始投票。";translations.ja.debateLogVote="討論が終わり、投票開始です。";
@@ -2022,6 +2059,9 @@ function applyStaticLanguage(){
  $("roleOverlay").querySelector(".deal-guide").setAttribute("aria-label",tr("helpButton"));
  $("endgameOverlay").querySelector(".endgame-close").setAttribute("aria-label",tr("revealClose"));
  $("seerNotesOverlay").querySelector(".seer-notes-close").setAttribute("aria-label",tr("seerNotesClose"));
+ $("evidenceButton").setAttribute("aria-label",tr("evidenceTitle"));
+ $("evidenceButton").setAttribute("title",tr("evidenceTitle"));
+ $("evidenceOverlay").querySelector(".evidence-close").setAttribute("aria-label",tr("evidenceDone"));
  localAvatarPreview();
 }
 function setLanguage(next){
@@ -3699,7 +3739,7 @@ function renderSeerNotes(v){
  }).join(""):'<div class="seer-notes-empty">'+escapeHtml(tr("seerNotesEmpty"))+'</div>';
 }
 function openSeerNotes(trigger){
- if(!view||view.myRole!=="seer"||!["night","talk","vote","ended"].includes(view.phase))return;
+ if(!view||view.myRole!=="seer"||!["night","talk","debate","vote","ended"].includes(view.phase))return;
  renderSeerNotes(view);
  notesPreviousFocus=trigger||document.activeElement||null;
  $("seerNotesOverlay").hidden=false;
