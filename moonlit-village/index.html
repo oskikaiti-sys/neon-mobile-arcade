@@ -765,9 +765,48 @@ body.game-active #gameScreen>.panel.log-surface{flex:1;min-height:0}
 @media(max-height:650px){
  body.game-active #gameScreen>.panel:nth-child(4){max-height:min(37dvh,190px)}
 }
+
+/* UI 4: atmosphere layer — 26 low-cost, non-interactive drifting stars. */
+body{background:linear-gradient(160deg,#0a0f1f 0%,#141b3a 100%)!important}
+body::before{
+ content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+ background:radial-gradient(ellipse at 78% 6%,rgba(232,200,114,.23),transparent 51%),
+ linear-gradient(155deg,rgba(20,28,58,.12),rgba(232,200,114,.12));
+ opacity:0;animation:none!important;transition:opacity 1.2s cubic-bezier(.22,1,.36,1);
+}
+body.game-active.day-mode::before{opacity:1}
+body.game-active.night-mode::before{opacity:0}
+body::after{
+ content:"";position:fixed;z-index:0;inset:0;pointer-events:none;
+ background:radial-gradient(ellipse at center,transparent 26%,rgba(10,15,31,.66) 100%);
+}
+.ambient-sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.moon-glow{position:absolute;right:-18%;top:-26%;width:90vw;height:78vw;max-width:700px;max-height:700px;
+ background:radial-gradient(circle,rgba(154,163,199,.13) 0%,rgba(232,200,114,.075) 21%,transparent 64%);
+ filter:blur(14px);opacity:.95;transition:opacity 1.2s ease}
+body.day-mode .moon-glow{opacity:.23}
+.ambient-stars{position:absolute;inset:0;opacity:.7;transition:opacity 1.2s ease}
+body.day-mode .ambient-stars{opacity:.25}
+.ambient-star{position:absolute;left:var(--x);top:var(--y);width:2px;height:2px;border-radius:50%;
+ background:rgba(242,244,250,.68);box-shadow:0 0 5px rgba(232,200,114,.2);
+ animation:star-float var(--dur) ease-in-out var(--delay) infinite alternate;
+ will-change:opacity,transform}
+.ambient-star:nth-child(4n){width:1px;height:1px;background:rgba(232,200,114,.72)}
+.ambient-star:nth-child(7n){width:3px;height:3px;opacity:.56}
+@keyframes star-float{
+ 0%{transform:translate3d(0,4px,0);opacity:.22}
+ 55%{opacity:.82}
+ 100%{transform:translate3d(3px,-10px,0);opacity:.46}
+}
+@media(prefers-reduced-motion:reduce){
+ .ambient-star{animation:none!important;will-change:auto}
+ .moon-glow,.ambient-stars,body::before{transition:none!important}
+}
+
 </style>
 </head>
 <body>
+<div id="ambientSky" class="ambient-sky" aria-hidden="true"><div class="moon-glow"></div><div class="ambient-stars"><span class="ambient-star" style="--x:8%;--y:8%;--dur:17s;--delay:-0s"></span><span class="ambient-star" style="--x:17%;--y:19%;--dur:22s;--delay:-2s"></span><span class="ambient-star" style="--x:29%;--y:9%;--dur:26s;--delay:-4s"></span><span class="ambient-star" style="--x:39%;--y:24%;--dur:20s;--delay:-1s"></span><span class="ambient-star" style="--x:53%;--y:7%;--dur:24s;--delay:-3s"></span><span class="ambient-star" style="--x:66%;--y:18%;--dur:19s;--delay:-5s"></span><span class="ambient-star" style="--x:77%;--y:7%;--dur:21s;--delay:-2s"></span><span class="ambient-star" style="--x:91%;--y:14%;--dur:27s;--delay:-4s"></span><span class="ambient-star" style="--x:4%;--y:39%;--dur:24s;--delay:-6s"></span><span class="ambient-star" style="--x:15%;--y:50%;--dur:20s;--delay:-2s"></span><span class="ambient-star" style="--x:25%;--y:36%;--dur:23s;--delay:-5s"></span><span class="ambient-star" style="--x:36%;--y:54%;--dur:18s;--delay:-1s"></span><span class="ambient-star" style="--x:47%;--y:41%;--dur:25s;--delay:-6s"></span><span class="ambient-star" style="--x:59%;--y:56%;--dur:21s;--delay:-3s"></span><span class="ambient-star" style="--x:70%;--y:36%;--dur:28s;--delay:-4s"></span><span class="ambient-star" style="--x:82%;--y:47%;--dur:20s;--delay:-2s"></span><span class="ambient-star" style="--x:94%;--y:33%;--dur:26s;--delay:-5s"></span><span class="ambient-star" style="--x:7%;--y:78%;--dur:22s;--delay:-3s"></span><span class="ambient-star" style="--x:18%;--y:69%;--dur:27s;--delay:-1s"></span><span class="ambient-star" style="--x:31%;--y:87%;--dur:19s;--delay:-6s"></span><span class="ambient-star" style="--x:43%;--y:74%;--dur:24s;--delay:-4s"></span><span class="ambient-star" style="--x:56%;--y:90%;--dur:21s;--delay:-2s"></span><span class="ambient-star" style="--x:65%;--y:71%;--dur:26s;--delay:-5s"></span><span class="ambient-star" style="--x:78%;--y:84%;--dur:20s;--delay:-0s"></span><span class="ambient-star" style="--x:89%;--y:68%;--dur:23s;--delay:-3s"></span><span class="ambient-star" style="--x:96%;--y:92%;--dur:25s;--delay:-2s"></span></div></div>
 <audio id="bgmPlayer" src="assets/audio/contedefees_0016.mp3" preload="auto" loop playsinline></audio>
 <main>
 <header><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐" title="音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="19" rx="3" ry="2"/><ellipse cx="18" cy="17" rx="3" ry="2"/></svg></button><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1>月下疑云</h1><div class="subtitle">六人迷你狼人杀 · 一个人也能开局 · 选项式发言</div></header>
