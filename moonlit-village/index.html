@@ -2400,9 +2400,15 @@ function aiSuspicion(observer,target){
  return Math.max(-12,Math.min(24,score));
 }
 function aiRanking(p,exclude){
+ var brain=aiState(p);
  var chosen=targetList(p.id).filter(function(q){return !exclude||!exclude.includes(q.id)});
- return chosen.map(function(q){return {p:q,score:aiSuspicion(p,q)}})
-  .sort(function(a,b){return b.score-a.score});
+ return chosen.map(function(q){
+  var fresh=aiSuspicion(p,q),before=brain.beliefs[q.id];
+  var remembered=before&&before.day<st.day&&Math.abs(fresh)<10
+   ?fresh*.84+before.score*.16:fresh;
+  brain.beliefs[q.id]={score:remembered,day:st.day};
+  return {p:q,score:remembered};
+ }).sort(function(a,b){return b.score-a.score});
 }
 function aiPublicSeerPressure(p){
  return (st.publicHistory||[]).slice().reverse().find(function(h){
@@ -2519,8 +2525,8 @@ var SPEECH_LINES={
  claimSeer:"我现在跳预言家。身份是我的公开宣称，大家可以结合后续查验和发言判断真假。",
  claimGuard:"我跳守卫，夜里可以守护一个人。但我不会公开每晚的守护目标。",
  claimVillager:"我跳村民，夜晚没有技能。我的判断只能来自公开发言和投票。",
- gold:"我跳预言家，昨晚查验了{name}，结果是好人，我给{name}发金水。这是我公开报出的查验结论。",
- black:"我跳预言家，昨晚查验了{name}，结果是狼人，我报{name}查杀。请大家核对我的说法。",
+ gold:"我跳预言家，第{day}夜查验了{name}，结果不是狼人，我给{name}发金水。这是我公开报出的查验结论。",
+ black:"我跳预言家，第{day}夜查验了{name}，结果是狼人，我报{name}查杀。请大家核对我的说法。",
  question:"我想问{name}：你现在更相信谁、怀疑谁？理由是投票、发言，还是查验？请区分猜测和证据。",
  analyseVotes:"第{day}天公开票型里，{speaker}把票投给了{related}。单看一票不能定身份，应该结合前后的发言复盘。",
  analyseVotesNone:"目前还没有上一轮的投票记录，不能凭空编造票型。今天只能先分析发言和身份宣称。",
@@ -2549,8 +2555,8 @@ var SPEECH_LINES={
  claimSeer:"I'm claiming Seer. This is my public claim; judge it against my inspection reports and later statements.",
  claimGuard:"I claim Guardian. I can protect someone at night, but I won't disclose my targets.",
  claimVillager:"I claim ordinary Villager, with no night power. I can only reason from public statements and votes.",
- gold:"I claim Seer. I inspected {name} last night and received an innocent result—I'm giving {name} a clear.",
- black:"I claim Seer. I inspected {name} last night and received a werewolf result—I'm accusing {name}. Check my claim.",
+ gold:"I claim Seer. I inspected {name} on night {day} and got a non-werewolf result—I'm giving {name} a clear.",
+ black:"I claim Seer. I inspected {name} on night {day} and got a werewolf result—I'm accusing {name}. Check my claim.",
  question:"{name}, who do you trust or suspect, and why? Is this based on votes, statements, or an inspection?",
  analyseVotes:"On day {day}, {speaker} voted for {related}. That alone proves nothing; compare it with their statements.",
  analyseVotesNone:"There are no earlier voting records yet. We must reason from public statements and claims instead.",
@@ -2579,8 +2585,8 @@ var SPEECH_LINES={
  claimSeer:"私は占い師だと名乗ります。今後の占い結果や発言で真偽を判断してください。",
  claimGuard:"私は騎士だと名乗ります。ただし夜に誰を守ったかは明かしません。",
  claimVillager:"私は村人だと名乗ります。夜の能力はなく、公開発言と投票で推理します。",
- gold:"占い師COです。昨夜{name}を占い、人狼ではない結果でした。{name}に白を出します。",
- black:"占い師COです。昨夜{name}を占い、人狼という結果でした。{name}に黒を出します。",
+ gold:"占い師COです。{day}日目の夜に{name}を占い、人狼ではない結果でした。{name}に白を出します。",
+ black:"占い師COです。{day}日目の夜に{name}を占い、人狼という結果でした。{name}に黒を出します。",
  question:"{name}は誰を信じ、誰を疑いますか？根拠は投票、発言、占いのどれですか？",
  analyseVotes:"{day}日目に{speaker}は{related}へ投票しました。それだけで断定せず、発言と照合しましょう。",
  analyseVotesNone:"まだ前日の投票記録がありません。公開発言や役職宣言から考えるしかありません。",
@@ -2636,6 +2642,12 @@ function speechRecord(p,kind,target){
   }else data.kind=kind+"Statement";
  }
  if(kind==="challengeClaim"){var c=lastClaim(history,target.id,false);if(c)data.claim=roleClaim(c.kind)}
+ if(kind==="black"||kind==="gold"){
+  var actual=p.bot&&p.role==="seer"?(st.known[p.id]||[]).find(function(k){return k.id===target.id}):null;
+  var fake=p.bot&&p.role==="wolf"&&st.aiMemory&&st.aiMemory[p.id]&&st.aiMemory[p.id].fakeReports
+   ?st.aiMemory[p.id].fakeReports[target.id]:null;
+  data.day=actual?actual.night:fake?fake.night:st.day;
+ }
  if(kind==="analyseVotes"){
   var last=votes[votes.length-1],first=last&&last.votes.find(function(v){return v.targetId&&v.targetId!=="__abstain__"});
   var from=first&&person(first.voterId),to=first&&person(first.targetId);
@@ -2756,6 +2768,7 @@ function aiChooseSpeech(p){
  if(history.some(function(h){return h.targetId===p.id&&["suspect","black","challengeClaim"].includes(h.kind)})&&roll<.62)
   return choose("defend",null,"respond-to-accusation");
  if(threat&&roll<.46)return choose("question",threat,"ask-for-explanation");
+ if(p.role==="seer")return choose("analyseClaims",null,"conceal-private-inspection");
  return choose(history.length?"clue":"pass",null,"observe-before-commitment");
 }
 function botSpeech(p){
