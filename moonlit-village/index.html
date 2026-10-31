@@ -1676,7 +1676,7 @@ function modernTarget(p,prefix,action,icon){
  var seat=view?view.players.findIndex(function(x){return x.id===p.id}):0;
  return '<button type="button" class="action-card action-card--target" data-do="'+escapeHtml(action)+
  '" data-target="'+escapeHtml(p.id)+'">'+faceMarkup(p,p.alive?"normal":"out",seat,"target")+
- '<span class="action-copy"><span class="action-name">'+escapeHtml(p.name)+'</span>'+
+ '<span class="action-copy"><span class="action-name">'+escapeHtml(displayName(p.name))+'</span>'+
  '<span class="action-desc">'+escapeHtml(prefix)+'</span></span>'+
  '<span class="action-chevron" aria-hidden="true">›</span></button>';
 }
