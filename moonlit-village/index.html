@@ -2941,7 +2941,10 @@ function aiWorldAnalysis(observer){
   if(overflow)return;
   if(++nodes>MAX_NODES){overflow=true;return}
   if(index===ordered.length){
-   possible.push({roles:Object.assign({},assigned),score:observedWeight(assigned)});
+   possible.push({roles:Object.assign({},assigned),score:observedWeight(assigned),
+    wolfIds:ordered.filter(function(p){return assigned[p.id]==="wolf"}).map(function(p){return p.id}),
+    seerIds:ordered.filter(function(p){return assigned[p.id]==="seer"}).map(function(p){return p.id}),
+    guardIds:ordered.filter(function(p){return assigned[p.id]==="guard"}).map(function(p){return p.id})});
    if(possible.length>MAX_WORLDS)overflow=true;
    return;
   }
@@ -2965,9 +2968,9 @@ function aiWorldAnalysis(observer){
  possible.forEach(function(x){x.weight=Math.exp(x.score-best);total+=x.weight});
  possible.forEach(function(x){
   var share=x.weight/total;
-  out.wolf[x.wolfId]=(out.wolf[x.wolfId]||0)+share;
-  out.seer[x.seerId]=(out.seer[x.seerId]||0)+share;
-  out.guard[x.guardId]=(out.guard[x.guardId]||0)+share;
+  x.wolfIds.forEach(function(id){out.wolf[id]=(out.wolf[id]||0)+share});
+  x.seerIds.forEach(function(id){out.seer[id]=(out.seer[id]||0)+share});
+  x.guardIds.forEach(function(id){out.guard[id]=(out.guard[id]||0)+share});
  });
  out.worlds=possible;
  out.excluded=alive.filter(function(p){return !(out.wolf[p.id]>1e-8)}).map(function(p){return p.id});
