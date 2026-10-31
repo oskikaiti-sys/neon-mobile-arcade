@@ -949,7 +949,7 @@ function rpgHighlightTargets(){
 function rpgSelectTarget(id){
  if(!view||!speechKind)return;
  if(!rpgTargets(view).some(function(p){return p.id===id}))return;
- rpgSpeechTarget=id;rpgHighlightTargets();
+ rpgSpeechTarget=id;rpgHighlightTargets();playSfx("cursor");
 }
 function rpgActivateMenu(){
  var menu=$("actions");
@@ -1068,8 +1068,66 @@ function render(){
  $("notice").textContent=notice;
  $("gameScreen").classList.toggle("action-waiting",!a);
  $("gameScreen").classList.toggle("is-lobby",v.phase==="lobby");
+ notifyGameSounds(v);
  document.body.classList.toggle("night-mode",v.phase==="night");
  document.body.classList.toggle("day-mode",v.phase==="talk"||v.phase==="vote");
+}
+
+
+/* Licensed Conte de Fées sound effects, hosted locally with the game.
+ * No audio file or external network request is required by the UI logic.
+ * Shared musicWanted flag mutes BGM and SFX together. */
+var sfxSources={
+ cursor:"assets/audio/sfx/cursor.mp3",
+ confirm:"assets/audio/sfx/confirm.mp3",
+ cancel:"assets/audio/sfx/cancel.mp3",
+ damage:"assets/audio/sfx/damage.mp3",
+ chime:"assets/audio/sfx/chime.mp3",
+ gameover:"assets/audio/sfx/gameover.mp3"
+};
+var sfxVolumes={cursor:.18,confirm:.27,cancel:.24,damage:.32,chime:.27,gameover:.3};
+var sfxPlayers={},sfxLastAt={},previousAudibleState=null;
+function playSfx(kind){
+ if(!musicWanted||!sfxSources[kind])return;
+ try{
+  var now=Date.now();
+  /* Prevent simultaneous rerenders/duplicate clicks from stuttering one cue. */
+  if(sfxLastAt[kind]&&now-sfxLastAt[kind]<85)return;
+  sfxLastAt[kind]=now;
+  var player=sfxPlayers[kind];
+  if(!player){
+   player=new Audio(sfxSources[kind]);
+   player.preload="auto";
+   sfxPlayers[kind]=player;
+  }
+  player.pause();
+  player.currentTime=0;
+  player.volume=sfxVolumes[kind]||.25;
+  var promise=player.play();
+  if(promise&&typeof promise.catch==="function")promise.catch(function(){});
+ }catch(err){/* Missing audio and Safari gesture restrictions never block play. */}
+}
+function stopSfx(){
+ Object.keys(sfxPlayers).forEach(function(key){
+  try{sfxPlayers[key].pause();sfxPlayers[key].currentTime=0}catch(err){}
+ });
+}
+function notifyGameSounds(v){
+ /* Compare public game state rather than modifying the game engine. */
+ var next={phase:v.phase,gameNo:v.gameNo,day:v.day,winner:v.winner,role:v.myRole,
+  alive:Object.fromEntries(v.players.map(function(p){return [p.id,p.alive]}))};
+ var prev=previousAudibleState;
+ previousAudibleState=next;
+ if(!prev||prev.gameNo!==next.gameNo||!musicWanted)return;
+ if(next.phase==="ended"&&prev.phase!=="ended"){
+  var wolfWon=next.winner==="狼人阵营";
+  playSfx((wolfWon?next.role==="wolf":next.role!=="wolf")?"chime":"gameover");
+  return;
+ }
+ var death=v.players.some(function(p){return prev.alive[p.id]===true&&p.alive===false});
+ if(death){playSfx("damage");return}
+ if(prev.phase==="night"&&next.phase==="talk"){playSfx("chime");return}
+ if(prev.phase!=="night"&&next.phase==="night"&&prev.phase!=="lobby"){playSfx("chime")}
 }
 
 /* BGM: "不思議な村" by HiLi (こんとどぅふぇ), used as an in-game track.
@@ -1104,7 +1162,8 @@ function toggleMusic(){
  if(!audio)return;
  if(!musicWanted){
   if(typeof audio.pause==="function")audio.pause();
- }else ensureMusic();
+  stopSfx();
+ }else{ensureMusic();playSfx("confirm")}
 }
 
 document.addEventListener("click",function(e){
@@ -1115,6 +1174,11 @@ document.addEventListener("click",function(e){
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
  if(action==="musicToggle"){toggleMusic();return;}
  ensureMusic();
+ var clickSound={back:"cancel",pickSpeech:"cursor",create:"confirm",join:"confirm",
+  solo:"confirm",start:"confirm",again:"confirm",night:"confirm",
+  vote:"confirm",say:"confirm",speakTarget:"confirm",confirmTarget:"confirm",
+  copy:"confirm",flipRole:"confirm",closeRole:"confirm"}[action];
+ if(clickSound)playSfx(clickSound);
  if(action==="flipRole"){if(!$("roleOverlay").classList.contains("revealed")){$("roleOverlay").classList.add("revealed");$("roleContinue").hidden=false;$("roleCard").disabled=true;$("drawHint").textContent="身份已经揭晓，准备进入村庄";}}
  else if(action==="closeRole"){$("roleOverlay").hidden=true;if(pendingScene){playTimeScene(pendingScene);pendingScene=null;}}
  else if(action==="solo")makeSolo();
@@ -1139,7 +1203,7 @@ document.addEventListener("keydown",function(e){
  if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||""))return;
  if(speechKind){
   var options=rpgTargets(view);
-  if(e.key==="Escape"){e.preventDefault();speechKind="";rpgSpeechTarget=null;render();return}
+  if(e.key==="Escape"){e.preventDefault();playSfx("cancel");speechKind="";rpgSpeechTarget=null;render();return}
   if(e.key==="ArrowUp"||e.key==="ArrowLeft"||e.key==="ArrowDown"||e.key==="ArrowRight"){
    e.preventDefault();if(!options.length)return;
    var pos=options.findIndex(function(p){return p.id===rpgSpeechTarget});
@@ -1154,6 +1218,7 @@ document.addEventListener("keydown",function(e){
  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
   e.preventDefault();rpgMenuIndex=(rpgMenuIndex+(e.key==="ArrowDown"?1:-1)+menu.length)%menu.length;
   menu.forEach(function(b,i){b.classList.toggle("cursor",i===rpgMenuIndex);b.setAttribute("aria-current",i===rpgMenuIndex?"true":"false")});
+  playSfx("cursor");
   return;
  }
  if(e.key==="Enter"){
