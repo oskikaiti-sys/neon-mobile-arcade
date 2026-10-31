@@ -444,12 +444,24 @@ body.game-active.day-mode{background:radial-gradient(ellipse at 85% 7%,rgba(232,
 main{position:relative;z-index:1}
 .panel,.window,body.game-active #gameScreen>.panel,body.game-active #homeScreen{
  position:relative;isolation:isolate;background:var(--panel)!important;color:var(--ink);
- border:1px solid rgba(232,200,114,.35)!important;border-radius:0!important;
- clip-path:polygon(9px 0,calc(100% - 9px) 0,100% 9px,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 calc(100% - 9px),0 9px);
+ border:1px solid rgba(232,200,114,.3)!important;border-radius:0!important;
+ clip-path:none!important;
  box-shadow:0 0 24px rgba(232,200,114,.08)!important;
  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .panel::before{content:"";position:absolute;top:0;left:9px;right:9px;height:1px;pointer-events:none;
  background:linear-gradient(90deg,transparent,rgba(232,200,114,.85),transparent)}
+.panel::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+ background-image:
+ linear-gradient(var(--gold),var(--gold)),linear-gradient(var(--gold),var(--gold)),
+ linear-gradient(var(--gold),var(--gold)),linear-gradient(var(--gold),var(--gold)),
+ linear-gradient(var(--gold),var(--gold)),linear-gradient(var(--gold),var(--gold)),
+ linear-gradient(var(--gold),var(--gold)),linear-gradient(var(--gold),var(--gold));
+ background-repeat:no-repeat;
+ background-size:10px 1px,1px 10px,10px 1px,1px 10px,10px 1px,1px 10px,10px 1px,1px 10px;
+ background-position:
+ left top,left top,right top,right top,
+ left bottom,left bottom,right bottom,right bottom;
+ opacity:.83}
 .panel h2{font-weight:650;letter-spacing:.7px}
 body.game-active main{width:100%;max-width:780px;box-sizing:border-box;height:100dvh;min-height:0;overflow:hidden;
  display:flex;flex-direction:column;padding:max(5px,env(safe-area-inset-top)) 9px max(7px,env(safe-area-inset-bottom))}
