@@ -1931,6 +1931,10 @@ translations.en.logVoteAbstain="{name} abstained from voting.";translations.zh.l
 translations.en.voteAbstain="Abstain";translations.zh.voteAbstain="弃票（证据不足）";translations.ja.voteAbstain="棄権";
 translations.en.voteAbstainDesc="No reliable case; do not eliminate anyone.";translations.zh.voteAbstainDesc="暂时没有足够证据，不投任何人";translations.ja.voteAbstainDesc="まだ確かな証拠がないため投票しない";
 translations.en.logInsufficientVotes="Not enough votes to exile anyone.";translations.zh.logInsufficientVotes="票数不足，今天无人被放逐。";translations.ja.logInsufficientVotes="追放に必要な票数が足りませんでした。";
+translations.en.logAllAbstain="Everyone abstained. No one is exiled.";translations.zh.logAllAbstain="所有人弃权，今天无人被放逐。";translations.ja.logAllAbstain="全員棄権したため、追放はありません。";
+translations.en.voteRule="Ballots stay hidden until everyone has voted. One vote can exile if it is the unique highest count; a tie or all abstentions exile nobody.";
+translations.zh.voteRule="投票在全部提交后统一公开。唯一最高票即使只有1票也会放逐；平票或全体弃权则无人出局。";
+translations.ja.voteRule="全員が投票するまで内容は非公開。単独最多票は1票でも追放、同数または全員棄権なら追放なし。";
 translations.en.nightTimeLimit="Multiplayer: each night turn lasts 10 seconds even after an early choice. Solo: your own turn is untimed.";translations.zh.nightTimeLimit="多人模式每个夜间轮次固定10秒，提前提交也要等满10秒；单人模式自己行动不限时。";translations.ja.nightTimeLimit="複数人プレイは夜の各ターンが必ず10秒間です。早く確定しても終了を待ちます。ソロで自分の行動に制限はありません。";
 
 translations.en.helpButton="How to play and role guide";
@@ -2174,7 +2178,7 @@ function armPhaseTimer(phase){
    stepBots();
   }else if(phase==="vote"){
    live().filter(function(p){return st.votes[p.id]===undefined}).forEach(function(p){
-    st.votes[p.id]="__abstain__";log(p.name+" 弃权投票。","news");
+    st.votes[p.id]="__abstain__";
    });
    stepBots();
   }
@@ -2269,6 +2273,7 @@ function localizeLog(message){
  if((m=value.match(/^第 (\d+) 夜：等待狼人、预言家和守卫行动。$/)))return tr("logNight",{day:m[1]});
  if((m=value.match(/^第 (\d+) 天：请选择一句公开发言。$/)))return tr("logDay",{day:m[1]});
  if(value==="票数不足，今天无人被放逐。")return tr("logInsufficientVotes");
+ if(value==="所有人弃权，今天无人被放逐。")return tr("logAllAbstain");
  if(value==="公开发言结束，进入质疑阶段。")return tr("debateLogStart");
  if(value==="质疑结束，被质疑者获得一次回应机会。")return tr("debateLogReplies");
  if(value==="辩论结束，开始投票。")return tr("debateLogVote");
@@ -2700,7 +2705,6 @@ function stepBots(){
  }else if(st.phase==="vote"){
   live().filter(function(p){return p.bot&&!st.votes[p.id]}).forEach(function(p){
    var t=botVote(p);st.votes[p.id]=t;
-   log(t==="__abstain__"?p.name+" 弃权投票。":p.name+" 投票给 "+person(t).name+"。","choice");
   });
   if(live().every(function(p){return !!st.votes[p.id]}))finishVote();
  }
@@ -3864,6 +3868,15 @@ function aiWolfVoteDecision(p){
  if(!best)return "__abstain__";
  var risk=remaining<=3;
  var chance=(round===1?.11:.19);
+ /* A publicly exposed lone ballot which eliminated a confirmed good
+    resident makes another early solo push notably more suspicious. */
+ var priorSoloPush=previous.some(function(votes){
+  var actual=votes.votes.filter(function(v){return v.targetId&&v.targetId!=="__abstain__"});
+  return actual.length===1&&actual[0].voterId===p.id&&
+   (st.revealed||[]).some(function(r){return r.id===actual[0].targetId&&
+    r.day===votes.day&&r.source==="vote"&&r.alignment==="good"});
+ });
+ if(priorSoloPush&&remaining>3)chance-=.12;
  if(best.backing>0)chance+=Math.min(.41,best.backing*.28);
  if(best.backing===0&&best.claim==="seer"&&!beingBlack)chance-=.055;
  if(best.publicSupport>0&&best.backing===0)chance-=.055;
@@ -3938,7 +3951,13 @@ function botVote(p){
 }
 function finishVote(){
  st.voteHistory.push({day:st.day,votes:Object.keys(st.votes).map(function(id){return {voterId:id,targetId:st.votes[id]}})});
- st.voteHistory[st.voteHistory.length-1].votes.forEach(function(v){publicEvent("vote",v.voterId,v.targetId,null)});
+ st.voteHistory[st.voteHistory.length-1].votes.forEach(function(v){
+  publicEvent("vote",v.voterId,v.targetId,null);
+  var voter=person(v.voterId),target=person(v.targetId);
+  if(!voter)return;
+  log(v.targetId==="__abstain__"||!target?
+   voter.name+" 弃权投票。":voter.name+" 投票给 "+target.name+"。","choice");
+ });
  var counts={};Object.keys(st.votes).forEach(function(id){var target=st.votes[id];counts[target]=(counts[target]||0)+1});
  delete counts["__abstain__"];
  var high=Math.max.apply(null,Object.values(counts));
@@ -3987,10 +4006,10 @@ function accept(id,action,target,speech,detail){
    recordReply(id,speech);
   }else if(st.phase==="vote"&&action==="vote"){
   if(st.votes[id])return;
-  if(target==="__abstain__"){st.votes[id]=target;log(p.name+" 弃权投票。","choice")}
+  if(target==="__abstain__"){st.votes[id]=target}
   else{
    if(!targetList(id).some(function(t){return t.id===target}))return;
-   st.votes[id]=target;log(p.name+" 投票给 "+person(target).name+"。","choice");
+   st.votes[id]=target;
   }
  }else return;
  stepBots();broadcast()
@@ -4863,6 +4882,7 @@ function render(){
   else {
    a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return modernTarget(p,tr("voteTarget"),"vote","vote")}).join("");
    a+=modernAction(tr("voteAbstain"),"voteAbstain",null,null,"pass",tr("voteAbstainDesc"));
+   notice=tr("voteRule");
   }
  }else if(v.phase==="ended"){
   title=tr("actionResult",{winner:teamName(v.winner)});
