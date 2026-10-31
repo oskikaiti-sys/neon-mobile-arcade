@@ -901,6 +901,32 @@ body.game-active #players .player.rpg-selected::before{
  body.game-active #players .player.rpg-speaking{animation:none!important}
 }
 
+
+/* UI 7: 40px visible music control, 48px accessible touch target. */
+body.game-active header{position:relative;display:flex;align-items:center;justify-content:center}
+body.game-active #musicToggle{
+ position:absolute;right:0;top:50%;transform:translateY(-50%);
+ display:grid;place-items:center;z-index:5;
+ width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;
+ padding:0!important;border:0!important;border-radius:50%;
+ background:transparent!important;box-shadow:none!important;color:var(--gold)
+}
+body.game-active #musicToggle::before{
+ content:"";position:absolute;width:40px;height:40px;inset:auto;z-index:0;
+ border-radius:50%;border:1px solid rgba(232,200,114,.35);
+ background:rgba(20,28,58,.6);
+ box-shadow:0 0 11px rgba(232,200,114,.07);
+ transition:background .25s ease,border-color .25s ease
+}
+body.game-active #musicToggle svg{
+ position:relative;z-index:1;width:18px;height:18px;
+ fill:none;stroke:currentColor;stroke-width:1.8;
+}
+body.game-active #musicToggle:active{transform:translateY(-50%) scale(.96)!important}
+body.game-active #musicToggle:focus-visible{outline:2px solid var(--gold);outline-offset:-1px}
+body.game-active #musicToggle.is-muted::before{border-color:rgba(154,163,199,.33)}
+@media(prefers-reduced-motion:reduce){body.game-active #musicToggle::before{transition:none!important}}
+
 </style>
 </head>
 <body>
