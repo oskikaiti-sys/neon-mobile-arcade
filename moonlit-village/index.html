@@ -2400,6 +2400,16 @@ function debateEvidence(id,kind){
  if(kind==="vote"){var v=lastVote(st.voteHistory||[],id);return v?{day:v.day,subject:v.targetId}:null}
  return null;
 }
+function cautiousPublicStatement(id){
+ var statement=(st.publicHistory||[]).slice().reverse().find(function(h){
+  return h.id===id&&h.day===st.day;
+ });
+ if(!statement)return false;
+ /* The first day's lack of public ballots is a truthful statement, not
+    avoidance or an attempt to suppress information. */
+ return (st.voteHistory||[]).length===0&&
+  ["clue","pass","analyseVotes","analyseClaims"].includes(statement.kind);
+}
 function debateContradiction(id,kind){
  if(kind==="claim"){
   return new Set((st.publicHistory||[]).filter(function(h){return h.id===id&&roleClaim(h.kind)})
@@ -2438,6 +2448,7 @@ function recordReply(id,kind){
     an unverified claim is true; it merely describes the original record. */
  var first=challenged.find(function(c){return c.kind==="report"||c.kind==="claim"||c.kind==="vote"})||challenged[0];
  var h={day:st.day,id:id,kind:kind,contradicted:contradicted,
+  cautious:cautiousPublicStatement(id),
   sourceKind:first?first.kind:"reason",evidence:first?first.evidence:null};
  st.debateReplies[id]=h;st.debateOutcomes.push(h);
  publicEvent("reply",id,null,{kind:kind,contradicted:contradicted});
@@ -2479,8 +2490,12 @@ function botReply(p){
  var challenged=st.debateChallenges.filter(function(h){return h.targetId===p.id});
  var contradictory=challenged.some(function(h){return debateContradiction(p.id,h.kind)});
  var temperament=aiState(p).temperament;
- recordReply(p.id,contradictory?(temperament==="opportunist"?"counter":"admit"):
-  temperament==="assertive"?"counter":"explain");
+ /* A cautious factually correct answer is always defended with an
+    evidence-based explanation rather than a random evasive-sounding retort. */
+ var kind=cautiousPublicStatement(p.id)?"explain":
+  contradictory?(temperament==="opportunist"?"counter":"admit"):
+  temperament==="assertive"?"counter":"explain";
+ recordReply(p.id,kind);
 }
 
 /* Literal debates carry structured source records, not inferred roles. */
@@ -2493,6 +2508,7 @@ var DEBATE_DIALOGUE={
  },reply:{
   explain:"我的依据是公开发言和投票记录。这不等于我有系统确认的查验。",
   explain_reason:"我的判断基于目前公开的发言和票型；我没有新的可核实证据，欢迎核对前后记录。",
+  explain_caution:"这是第一天，还没有任何上一轮的公开投票记录。我说无法从票型得出结论，是承认信息不足，不是回避已存在的证据。请先指出我哪条具体说法有误。",
   explain_claim:"第{day}天我公开自称{role}，这是我的身份宣称而非系统认证；请核对我之后是否保持一致。",
   explain_report:"第{day}天我对{subject}报了{role}，这条记录可以查到；但在公开结果揭晓前，这仍是我的宣称。",
   explain_vote:"第{day}天我确实投给了{subject}。投票是我的判断，不是查验结果；应结合当时发言评价。",
@@ -2509,6 +2525,7 @@ var DEBATE_DIALOGUE={
  },reply:{
   explain:"My reasoning comes from public statements and ballots. That is not a verified inspection.",
   explain_reason:"My position comes from public claims and votes; I have no new independently verified evidence. Check the record.",
+  explain_caution:"This is day one. No previous public votes exist. Saying I cannot draw conclusions from votes is acknowledging missing evidence, not evading it. Please identify a specific false statement.",
   explain_claim:"On day {day}, I claimed {role}. That was my statement, not official proof. Judge its consistency over time.",
   explain_report:"On day {day}, I reported {role} for {subject}. That report is on the record, but remains my claim until corroborated.",
   explain_vote:"On day {day}, I voted for {subject}. It was a judgment, not an inspection. Compare it with my statements then.",
@@ -2525,6 +2542,7 @@ var DEBATE_DIALOGUE={
  },reply:{
   explain:"公開発言と投票記録を参考にしました。占い結果として確定したものではありません。",
   explain_reason:"私の判断は公開発言と投票によります。新たに確認できた事実はありません。記録を確認してください。",
+  explain_caution:"今日は初日で過去の投票記録がありません。票から結論を出せないのは情報不足を認めているだけで、証拠から逃げているわけではありません。具体的な誤りを示してください。",
   explain_claim:"{day}日目に{role}とCOしました。これは自己申告であり確定証明ではありません。その後の一貫性を見てください。",
   explain_report:"{day}日目に{subject}へ{role}を出した記録があります。公開結果で確認されるまでは本人の主張です。",
   explain_vote:"{day}日目に{subject}へ投票しました。占い結果ではなく判断でした。当時の発言と照合してください。",
@@ -2545,8 +2563,9 @@ function debateLine(lang,part,item){
   ja:{seer:"占い師",guard:"騎士",villager:"村人",black:"黒判定",gold:"白判定"}
  };
  var vars={name:findName(item.targetId),subject:findName(info.subject),day:info.day||item.day,role:(roleNames[lang]||roleNames.zh)[role]||role};
- var key=part==="reply"&&item.kind==="explain"&&item.contradicted?"contradiction":item.kind;
- if(part==="reply"&&key==="explain"){
+ var key=part==="reply"&&item.kind==="explain"?
+  (item.contradicted?"contradiction":item.cautious?"explain_caution":"explain"):item.kind;
+ if(part==="reply"&&(key==="explain"||key==="explain_caution")){
   var detail=dict.reply["explain_"+(item.sourceKind||"reason")]||dict.reply.explain;
   return detail.replace(/\{(name|subject|day|role)\}/g,function(_,name){return vars[name]||""});
  }
@@ -2678,18 +2697,17 @@ function aiSuspicion(observer,target){
  /* Challenge and reply outcomes use public contradictions, not speech fluency. */
  (st.debateOutcomes||[]).forEach(function(outcome){
   if(outcome.id!==target.id)return;
-  if(outcome.kind==="silence")score+=.8;
-  else if(outcome.kind==="avoid")score+=.55;
-  else if(outcome.kind==="admit")score+=outcome.contradicted?.55:.05;
-  else if(outcome.kind==="explain")score+=outcome.contradicted?.6:-.18;
-  else if(outcome.kind==="counter")score+=outcome.contradicted?.4:0;
+  /* Being accused, declining an unsupported question, or having no first
+     day ballot to cite is not evidence of being a werewolf. */
+  if(!outcome.contradicted)return;
+  if(outcome.kind==="silence"||outcome.kind==="avoid")score+=.35;
+  else if(outcome.kind==="explain"||outcome.kind==="counter")score+=.55;
+  else if(outcome.kind==="admit")score+=.1;
  });
- (st.debateChallenges||[]).forEach(function(h){
-  if(h.targetId!==target.id||h.id===target.id)return;
-  var credibility=aiCredibility(observer,h.id);
-  /* A question is not proof: more weight only for a demonstrable conflict. */
-  score+=(debateContradiction(target.id,h.kind)?.45:.07)*credibility;
- });
+ /* Only objectively inconsistent public claims or checks affect suspicion.
+    Repeating baseless accusations has exactly zero effect. */
+ if(["claim","report"].some(function(kind){return debateContradiction(target.id,kind)}))
+  score+=1.0;
  var own=history.slice().reverse().find(function(h){return h.id===observer.id&&h.targetId===target.id});
  if(own){
   if(["black","suspect","suspectVote","challengeClaim"].includes(own.kind))score+=.45;
