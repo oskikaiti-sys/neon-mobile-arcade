@@ -1418,6 +1418,48 @@ body.game-active .night-dialogue-counter{
  body.game-active .night-dialogue-title{font-size:13px}
 }
 
+
+/* End-of-game role reveal: visible only after the host's ended snapshot. */
+.endgame-overlay{position:fixed;inset:0;z-index:190;display:flex;align-items:center;
+ justify-content:center;padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));
+ background:rgba(9,13,27,.97);overflow:auto;overscroll-behavior:contain}
+.endgame-overlay[hidden]{display:none!important}
+.endgame-panel{width:min(100%,480px);max-height:calc(100dvh - 24px);overflow-y:auto;
+ box-sizing:border-box;padding:15px 14px 13px!important;min-width:0}
+.endgame-head{display:flex;gap:12px;align-items:start;justify-content:space-between}
+.endgame-head h2{margin:3px 0 0;font:600 clamp(21px,5vw,27px)/1.2 Georgia,"STSong",serif;color:var(--gold)}
+.endgame-eyebrow{font-size:10px;letter-spacing:1.8px;color:var(--muted)}
+.endgame-close{flex:none;width:48px;height:48px;min-height:48px;padding:0;
+ border:1px solid rgba(232,200,114,.42);border-radius:8px;
+ background:rgba(20,28,58,.8);color:var(--ink);font-size:25px}
+.endgame-winner{margin:11px 0 0;padding:8px 10px;border-radius:7px;
+ border:1px solid rgba(232,200,114,.4);background:rgba(232,200,114,.08);
+ color:var(--gold);font-size:15px;font-weight:700;text-align:center;line-height:1.5}
+.endgame-explainer{margin:8px 0 12px;color:var(--muted);font-size:12px;line-height:1.45}
+.endgame-roster{display:grid;grid-template-columns:1fr;gap:6px}
+.endgame-row{display:flex;align-items:center;gap:9px;min-width:0;padding:6px 9px;
+ border:1px solid rgba(232,200,114,.22);border-radius:8px;background:rgba(20,28,58,.55)}
+.endgame-row.is-wolf{border-color:rgba(225,112,120,.58);background:rgba(80,32,52,.26)}
+.endgame-row .avatar.face-frame{flex:0 0 42px;width:42px;height:42px;min-width:42px;max-width:42px}
+.endgame-row .endgame-person{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+.endgame-person-name{font-size:13px;font-weight:700;color:var(--ink);
+ overflow-wrap:anywhere;line-height:1.3}
+.endgame-person-status{font-size:10px;color:var(--muted)}
+.endgame-person-role{flex:0 1 auto;white-space:nowrap;color:var(--gold);font-weight:700;font-size:12px}
+.endgame-row.is-wolf .endgame-person-role{color:#ffa6ad}
+.endgame-done{width:100%;min-height:48px;margin-top:12px;border:1px solid rgba(232,200,114,.5);
+ border-radius:8px;background:rgba(232,200,114,.14);color:var(--gold);font-size:14px;font-weight:700}
+.endgame-close:focus-visible,.endgame-done:focus-visible{outline:2px solid var(--gold)}
+body.game-active #players .player .reveal-role-tag{display:block;max-width:100%;
+ color:var(--gold);font-size:10px;font-weight:700;line-height:1.2;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.game-active #players .player .reveal-role-tag.is-wolf{color:#ffa6ad}
+@media(max-width:370px){.endgame-panel{padding:11px 9px!important}
+ .endgame-row{padding:5px 6px;gap:6px}
+ .endgame-row .avatar.face-frame{flex-basis:36px;width:36px;height:36px;min-width:36px;max-width:36px}
+ .endgame-person-name{font-size:12px}
+ .endgame-person-role{font-size:11px}}
+
 </style>
 </head>
 <body>
@@ -1537,6 +1579,15 @@ body.game-active .night-dialogue-counter{
   <p class="rules-detail" data-i18n="helpWinDetail">The village wins when the werewolf is eliminated. The werewolf wins if living werewolves equal or outnumber living villagers. In this short game, surviving past day 12 also gives the werewolf victory.</p>
   <p class="rules-note" data-i18n="helpTimerDetail">Night, discussion and voting each have a two-minute limit. No action means you skip the ability, pass your speech or abstain from voting. Tied votes eliminate nobody.</p>
   <button type="button" data-do="closeHelp" class="rules-done" data-i18n="helpDone">Understood</button>
+ </div>
+</div>
+<div id="endgameOverlay" class="endgame-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="endgameRevealTitle">
+ <div class="endgame-panel panel">
+  <div class="endgame-head"><div><div class="endgame-eyebrow" data-i18n="revealEyebrow">THE FINAL REVEAL</div><h2 id="endgameRevealTitle" data-i18n="revealTitle">All identities revealed</h2></div><button type="button" data-do="closeReveal" class="endgame-close" aria-label="Close results">×</button></div>
+  <p id="endgameWinner" class="endgame-winner"></p>
+  <p class="endgame-explainer" data-i18n="revealSubtitle">Every player's secret role is now public.</p>
+  <div id="endgameRoster" class="endgame-roster" role="list"></div>
+  <button type="button" data-do="closeReveal" class="endgame-done" data-i18n="revealDone">Return to game results</button>
  </div>
 </div>
 <div id="settingsOverlay" class="settings-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
