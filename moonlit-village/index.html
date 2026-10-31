@@ -1867,7 +1867,10 @@ function armNightTurn(){
  var role=NIGHT_ROLES[st.nightStage],actor=live().find(function(p){return p.role===role});
  var game=st.gameNo,day=st.day,turn=st.nightStage,nonce=phaseNonce;
  var humanActor=!!(actor&&!actor.bot);
- if(actor&&!humanActor&&!st.night[actor.id])st.night[actor.id]=botNight(actor);
+ if(actor&&!humanActor&&!st.night[actor.id]){
+  st.night[actor.id]=botNight(actor);
+  if(role==="seer"&&st.night[actor.id])recordInspection(actor,person(st.night[actor.id]));
+ }
  /* Fixed-length multiplayer turns do not depend on whether the role is human,
     AI or already eliminated. The match mode is frozen at the game start. */
  if(!st.multiplayerNight&&humanActor){st.deadlineAt=0;return}
@@ -1975,7 +1978,7 @@ function person(id){return st.players.find(function(p){return p.id===id})}
 function live(){return st.players.filter(function(p){return p.alive})}
 function targetList(id){return live().filter(function(p){return p.id!==id})}
 function log(t,kind){st.logs.push({text:t,kind:kind||"news"});if(st.logs.length>60)st.logs.shift()}
-function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},logs:[],winner:"",dealReady:{},phaseStartAt:0,deadlineAt:0,nightStage:0,multiplayerNight:false};myId="h";log("村庄正在等待玩家加入。")}
+function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},nightFeedback:{},logs:[],winner:"",dealReady:{},phaseStartAt:0,deadlineAt:0,nightStage:0,multiplayerNight:false};myId="h";log("村庄正在等待玩家加入。")}
 function snapshot(id){var me=person(id);
  var human=st.players.filter(function(p){return !p.bot});
  return {phase:st.phase,day:st.day,gameNo:st.gameNo,
@@ -1986,6 +1989,8 @@ function snapshot(id){var me=person(id);
   phaseElapsed:st.phaseStartAt?Math.max(0,Date.now()-st.phaseStartAt):0,
   nightStage:st.phase==="night"?st.nightStage:null,
   nightFixed:!!st.multiplayerNight,
+  /* A target and role are shared only with the player who acted. */
+  privateNightFeedback:st.nightFeedback&&st.nightFeedback[id]&&st.phase!=="lobby"&&st.phase!=="deal"?Object.assign({},st.nightFeedback[id]):null,
   me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:me&&me.role==="seer"?(st.known[id]||[]).map(function(k){return {id:k.id,name:k.name,role:k.role,night:k.night,evil:k.evil}}):[],messages:st.logs.slice(-25),winner:st.winner}}
 function broadcast(){if(!st)return;view=snapshot("h");render();for(var it of connections.entries()){var id=it[0],c=it[1];if(c.open){try{c.send({type:"state",state:snapshot(id)})}catch(e){}}}}
 function makeSolo(){if(avatarPending)return;solo=true;isHost=true;room="";makeState();enter();startGame()}
@@ -2067,7 +2072,7 @@ function startGame(){
  var used=st.players.length;for(var i=used;i<6;i++)st.players.push({id:"bot"+i,name:["雾鸦","薇拉","灰石","伊莎","松风","星砂"][i],bot:true,alive:true,role:null,avatar:null,portrait:randomPortrait(st.players)});
  st.players.forEach(function(p,i){p.seat=i+1;p.alive=true});
  var roles=shuffle(["wolf","seer","guard","villager","villager","villager"]);st.players.forEach(function(p,i){p.role=roles[i]});
- st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.logs=[];st.phase="deal";st.dealReady={};log("请所有真人玩家翻开并确认身份牌。","news");broadcast()
+ st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.nightFeedback={};st.logs=[];st.phase="deal";st.dealReady={};log("请所有真人玩家翻开并确认身份牌。","news");broadcast()
 }
 function winCheck(){
  var wolves=live().filter(function(p){return p.role==="wolf"}).length;
@@ -2077,7 +2082,7 @@ function winCheck(){
  if(st.day>12){cancelPhaseTimer();st.winner="狼人阵营";st.phase="ended";log("月夜持续太久，狼人占据了村庄。");return true}
  return false
 }
-function beginNight(){nightSerial++;st.phase="night";st.nightStage=0;st.night={};st.votes={};st.speeches={};armNightTurn();log("第 "+st.day+" 夜：夜间行动开始。")}
+function beginNight(){nightSerial++;st.phase="night";st.nightStage=0;st.night={};st.nightFeedback={};st.votes={};st.speeches={};armNightTurn();log("第 "+st.day+" 夜：夜间行动开始。")}
 function stepBots(){
  if(!st||st.phase==="ended"||st.phase==="lobby")return;
  if(st.phase==="night"){return;}else if(st.phase==="talk"){
@@ -2088,6 +2093,12 @@ function stepBots(){
   if(live().every(function(p){return !!st.votes[p.id]}))finishVote();
  }
 }
+function recordInspection(seer,target){
+ if(!seer||seer.role!=="seer"||!target)return;
+ if(!st.known[seer.id])st.known[seer.id]=[];
+ if(st.known[seer.id].some(function(k){return k.night===st.day&&k.id===target.id}))return;
+ st.known[seer.id].push({name:target.name,id:target.id,role:target.role,evil:target.role==="wolf",night:st.day});
+}
 function botNight(p){
  var choices=(p.role==="wolf"?live().filter(function(x){return x.role!=="wolf"}):live().filter(function(x){return x.id!==p.id}));
  if(p.role==="guard")choices=live();
@@ -2097,11 +2108,7 @@ function botNight(p){
 function finishNight(){
  var wolf=live().find(function(p){return p.role==="wolf"}),seer=live().find(function(p){return p.role==="seer"}),guard=live().find(function(p){return p.role==="guard"});
  var target=wolf?st.night[wolf.id]:null,save=guard?st.night[guard.id]:null;
- if(seer&&st.night[seer.id]){
-  var checked=person(st.night[seer.id]);
-  if(!st.known[seer.id])st.known[seer.id]=[];
-  st.known[seer.id].push({name:checked.name,id:checked.id,role:checked.role,evil:checked.role==="wolf",night:st.day});
- }
+ /* Seer results were already recorded at the moment of inspection. */
  if(target&&target!==save){person(target).alive=false;log("天亮了，昨夜 "+person(target).name+" 遇袭出局。","news")}
  else log("天亮了，昨夜是平安夜。","news");
  if(winCheck())return;
@@ -2153,8 +2160,18 @@ function accept(id,action,target,speech){
   if(NIGHT_ROLES[st.nightStage]!==p.role||st.night[id])return;
   var t=person(target);if(!t||!t.alive||((p.role==="wolf"||p.role==="seer")&&id===target)||p.role==="wolf"&&t.role==="wolf")return;
   st.night[id]=target;
-  /* Multiplayer always waits for the host-controlled 10-second cutoff. */
-  if(!st.multiplayerNight)advanceNightTurn();
+  if(p.role==="seer")recordInspection(p,t);
+  st.nightFeedback[id]={day:st.day,targetId:t.id,targetName:t.name,skill:p.role,
+   inspectedRole:p.role==="seer"?t.role:null};
+  /* Multiplayer always keeps its 10-second stage. Solo shows the target
+     effect for 1.4 seconds before advancing to the next night turn. */
+  if(!st.multiplayerNight){
+   var game=st.gameNo,day=st.day,turn=st.nightStage,nonce=phaseNonce;
+   hostPhaseTimer=setTimeout(function(){
+    if(st&&st.phase==="night"&&st.gameNo===game&&st.day===day&&
+       st.nightStage===turn&&phaseNonce===nonce){advanceNightTurn();broadcast()}
+   },1400);
+  }
  }else if(st.phase==="talk"&&action==="speech"){
   if(st.speeches[id]||!["suspect","trust","clue","pass"].includes(speech))return;
   if(["suspect","trust"].includes(speech)&&!targetList(id).some(function(t){return t.id===target}))return;
@@ -2175,7 +2192,7 @@ function restart(){
  if(!isHost||!st||st.phase!=="ended")return;
  nightSerial++;cancelPhaseTimer();
  st.players=st.players.filter(function(p){return !p.bot}).map(function(p){return {id:p.id,name:p.name,bot:false,alive:true,role:null,portrait:p.portrait,avatar:safeAvatar(p.avatar)}});
- st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.known={};st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
+ st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.nightFeedback={};st.known={};st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
 }
 function button(label,action,target,speech,cls){
  return '<button class="'+(cls||"")+'" data-do="'+action+'" '+(target?'data-target="'+escapeHtml(target)+'" ':'')+(speech?'data-speech="'+speech+'" ':'')+'>'+escapeHtml(label)+'</button>'
