@@ -3413,13 +3413,27 @@ function aiChooseSpeech(p){
      return k.evil&&person(k.id)&&person(k.id).alive;
     });
     if(knownWolf)return {kind:"black",targetId:knownWolf.id,reason:"private-confirmed-wolf"};
+    var rivalClaim=aiPublicRoleClaimers("seer").find(function(q){return q.id!==p.id});
+    if(rivalClaim&&!aiClaimFor(p.id))
+     return {kind:"claimSeer",targetId:null,reason:"counter-unsupported-seer"};
+    var checkedGood=aiUnreportedCheck(p);
+    if(checkedGood&&!checkedGood.evil&&person(checkedGood.id)&&person(checkedGood.id).alive&&
+      (st.day>=3||live().length<=4||!!rivalClaim))
+     return {kind:"gold",targetId:checkedGood.id,reason:"private-confirmed-clear"};
+   }
+   if(p.role==="guard"){
+    var blackOnMe=history.slice().reverse().find(function(h){
+     return h.targetId===p.id&&h.kind==="black"&&person(h.id)&&person(h.id).alive;
+    });
+    if(blackOnMe&&!aiClaimFor(p.id))
+     return {kind:"claimGuard",targetId:null,reason:"defend-real-guard"};
    }
    if(enough&&exposure){
     if(exposure.reasons.includes("changed-role")||exposure.reasons.includes("conflicting-report"))
      return {kind:"suspect",targetId:first.id,reason:"world-conflicting-claims"};
     if(exposure.reasons.includes("voted-own-clear"))
      return {kind:"suspect",targetId:first.id,reason:"world-contradictory-ballot"};
-    if(aiClaimFor(first.id))return {kind:"challengeClaim",targetId:first.id,reason:"world-role-claim-inconsistent"};
+    if(aiClaimFor(first.id))return {kind:"suspect",targetId:first.id,reason:"world-posterior-leading"};
     return {kind:"suspect",targetId:first.id,reason:"world-posterior-leading"};
    }
    if((st.voteHistory||[]).length&&
