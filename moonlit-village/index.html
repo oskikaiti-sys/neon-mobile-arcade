@@ -3474,7 +3474,27 @@ function speechMenuCard(kind,v){
  var markup=modernAction(line[0],spec.target?"pickSpeech":"say",null,kind,icon,line[1]);
  return enabled?markup:markup.replace('<button type="button"','<button type="button" disabled aria-disabled="true"');
 }
-function rpgTargets(v){return speechKind&&SPEECH_OPTIONS[speechKind]?eligibleSpeechTargets(v,speechKind):v.players.filter(function(p){return p.alive&&p.id!==v.me})}
+function clientDebateEvidence(v,id,kind){
+ if(kind==="reason")return true;
+ if(kind==="claim")return (v.publicHistory||[]).some(function(h){return h.id===id&&roleClaim(h.kind)});
+ if(kind==="report")return (v.publicHistory||[]).some(function(h){return h.id===id&&["gold","black"].includes(h.kind)});
+ if(kind==="vote")return !!lastVote(v.voteHistory||[],id);
+ return false;
+}
+function eligibleDebateTargets(v){
+ return (v.players||[]).filter(function(p){return p.id!==v.me&&p.alive&&clientDebateEvidence(v,p.id,debateKind)});
+}
+function updateDebateTargetPrompt(v){
+ if(!v||v.phase!=="debate"||v.debateStage!=="challenge"||!debateKind)return;
+ var target=eligibleDebateTargets(v).find(function(p){return p.id===rpgSpeechTarget});
+ var label=tr({reason:"debateReason",claim:"debateClaim",report:"debateReport",vote:"debateVote"}[debateKind]);
+ $("actionTitle").textContent=target?tr("debateConfirm",{name:displayName(target.name),kind:label}):
+  tr("debateCardPick",{kind:label});
+ $("notice").textContent=target?tr("speechTargetHelp"):tr("speechPickCardHint");
+ var submit=$("actions").querySelector('[data-do="confirmChallenge"]');
+ if(submit){submit.disabled=!target;submit.setAttribute("aria-disabled",target?"false":"true")}
+}
+function rpgTargets(v){return debateKind&&v.phase==="debate"?eligibleDebateTargets(v):speechKind&&SPEECH_OPTIONS[speechKind]?eligibleSpeechTargets(v,speechKind):v.players.filter(function(p){return p.alive&&p.id!==v.me})}
 function rpgHighlightTargets(){
  var selected=rpgSpeechTarget;
  $("players").querySelectorAll("[data-rpg-target]").forEach(function(tile){
@@ -3495,21 +3515,28 @@ function updateSpeechTargetPrompt(v){
  if(confirm){confirm.disabled=!target;confirm.setAttribute("aria-disabled",target?"false":"true")}
 }
 function rpgSelectTarget(id){
- if(!view||view.phase!=="talk"||view.submitted||!speechKind)return;
- if(!eligibleSpeechTargets(view,speechKind).some(function(p){return p.id===id}))return;
+ if(!view||view.submitted)return;
+ if(view.phase==="debate"&&debateKind&&view.debateStage==="challenge"){
+  if(!eligibleDebateTargets(view).some(function(p){return p.id===id}))return;
+  rpgSpeechTarget=id;rpgHighlightTargets();updateDebateTargetPrompt(view);playSfx("cursor");return;
+ }
+ if(view.phase!=="talk"||!speechKind||!eligibleSpeechTargets(view,speechKind).some(function(p){return p.id===id}))return;
  rpgSpeechTarget=id;rpgHighlightTargets();updateSpeechTargetPrompt(view);playSfx("cursor");
 }
 function rpgActivateMenu(){
  var menu=$("actions");
- var isTalk=view&&view.phase==="talk"&&view.myAlive&&!view.submitted;
- menu.classList.toggle("rpg-menu",!!(isTalk&&!speechKind));
- menu.classList.toggle("rpg-target-menu",!!(isTalk&&speechKind));
- if(isTalk&&!speechKind){
+ var isTalk=view&&view.myAlive&&!view.submitted&&
+  (view.phase==="talk"||(view.phase==="debate"&&view.debateStage==="challenge"));
+ var selecting=(view.phase==="talk"&&speechKind)||(view.phase==="debate"&&debateKind);
+ menu.classList.toggle("rpg-menu",!!(isTalk&&!selecting));
+ menu.classList.toggle("rpg-target-menu",!!(isTalk&&selecting));
+ if(isTalk&&!selecting){
   var opts=Array.from(menu.querySelectorAll("button[data-do]:not([disabled])"));
   if(opts.length)rpgMenuIndex=Math.min(rpgMenuIndex,opts.length-1);
   opts.forEach(function(btn,i){btn.classList.toggle("cursor",i===rpgMenuIndex);btn.setAttribute("aria-current",i===rpgMenuIndex?"true":"false")});
- }else if(isTalk&&speechKind){
-  var b=menu.querySelector('[data-do="'+(rpgSpeechTarget?"confirmTarget":"back")+'"]');
+ }else if(isTalk&&selecting){
+  var action=view.phase==="debate"?(rpgSpeechTarget?"confirmChallenge":"backDebate"):(rpgSpeechTarget?"confirmTarget":"back");
+  var b=menu.querySelector('[data-do="'+action+'"]');
   if(b)b.classList.add("cursor");
  }
 }
@@ -3738,8 +3765,8 @@ function render(){
  });
  $("leftPlayers").innerHTML=playerTiles.slice(0,3).join("");
  $("rightPlayers").innerHTML=playerTiles.slice(3,6).join("");
- if(v.phase==="talk"&&speechKind&&v.myAlive&&!v.submitted){
-  var available=eligibleSpeechTargets(v,speechKind);
+ if(((v.phase==="talk"&&speechKind)||(v.phase==="debate"&&v.debateStage==="challenge"&&debateKind))&&v.myAlive&&!v.submitted){
+  var available=v.phase==="debate"?eligibleDebateTargets(v):eligibleSpeechTargets(v,speechKind);
   if(!available.some(function(p){return p.id===rpgSpeechTarget}))rpgSpeechTarget=null;
   $("players").querySelectorAll(".player").forEach(function(tile,i){
    var p=v.players[i];
@@ -3851,6 +3878,8 @@ function render(){
  $("seerNotesButton").textContent=tr("seerNotesButton");
  rpgActivateMenu();
  $("notice").textContent=notice;
+ if(v.phase==="debate"&&debateKind)updateDebateTargetPrompt(v);
+ else if(v.phase==="talk"&&speechKind)updateSpeechTargetPrompt(v);
  $("gameScreen").classList.toggle("action-waiting",!a);
  $("gameScreen").classList.toggle("is-lobby",v.phase==="lobby");
  notifyGameSounds(v);
