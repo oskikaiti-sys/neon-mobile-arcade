@@ -2683,6 +2683,17 @@ function aiSeerSlotContradiction(observer,claimer){
  return {claimerId:claimer.id,goldIds:[...new Set(clears.map(function(h){return h.targetId}))],
   reason:"no-wolf-slot",possibleWolfSlots:0};
 }
+/* In a three-person endgame, a Seer claim which clears every other
+   living candidate should be opposed immediately. Good humans could
+   technically bluff, but giving a fake clear to the only possible wolf
+   is a strategically disastrous move, not a good default hypothesis.
+   This is a tactical decision, not a peek at anyone else's role. */
+function aiEndgameRefutedClaimant(observer){
+ if(!observer||observer.role==="wolf"||live().length!==3)return null;
+ return targetList(observer.id).find(function(q){
+  return aiSeerSlotContradiction(observer,q)!==null;
+ })||null;
+}
 function aiSeerStoryRefuted(observer,target){
  return !!aiSeerSlotContradiction(observer,target);
 }
@@ -3216,18 +3227,22 @@ function aiChooseSpeech(p){
   if(knownWolf)return choose("suspect",knownWolf,"private-verified-wolf");
  }
  if(p.role==="wolf"){
+  /* The single wolf knows every other survivor is good. A new Seer+gold
+     bluff in a three-seat endgame is refutable by both good survivors.
+     Human wolves can still attempt it, but bot wolves avoid this trap. */
+  var unsafeFreshSeerClear=left===3;
   var pressure=(history||[]).filter(function(h){return h.targetId===p.id&&["black","suspect","suspectVote"].includes(h.kind)}).length;
   var accuser=history.slice().reverse().find(function(h){
    return h.targetId===p.id&&h.kind==="black"&&person(h.id)&&person(h.id).alive;
   });
   var counter=accuser&&person(accuser.id)||rival;
   if(accuser&&(!existing||existing==="seer")&&roll<.86){
-   if(!existing&&roll<.44)return choose("claimSeer",null,"counterclaim");
+   if(!existing&&roll<.44&&!unsafeFreshSeerClear)return choose("claimSeer",null,"counterclaim");
    if(counter&&!aiReportsBy(p.id).some(function(h){return h.targetId===counter.id&&h.kind==="gold"}))
     return choose(aiFalseReport(p,counter,"black"),counter,"counter-accusation");
   }
   if(!existing&&left<=4&&roll<.32)return choose("claimGuard",null,"emergency-guardian-cover");
-  if(!existing&&roll<.22){
+  if(!existing&&roll<.22&&!unsafeFreshSeerClear){
    var victim=threat||targetList(p.id)[0];
    if(victim)return choose(aiFalseReport(p,victim,pressure>0?"black":"gold"),victim,"crafted-seer-bluff");
   }
@@ -3312,6 +3327,10 @@ function aiVotingEvidence(observer,target){
  return 0;
 }
 function botVote(p){
+ /* Logical contradiction comes before weighted suspicions, personality
+    and own previous words. Don't randomize away a decisive endgame. */
+ var refuted=aiEndgameRefutedClaimant(p);
+ if(refuted)return refuted.id;
  var brain=aiState(p),ranked=aiRanking(p);
  if(!ranked.length)return "__abstain__";
  if(p.role!=="wolf"&&!ranked.some(function(x){return aiVotingEvidence(p,x.p)>=2}))
