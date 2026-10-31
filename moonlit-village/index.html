@@ -748,6 +748,23 @@ body.game-active #notice{font-size:11px;line-height:1.3;margin:4px 0 0}
  body.game-active #gameScreen>.panel:nth-child(4) h2{margin:0 0 3px}
 }
 
+
+/* UI 3 follow-up: cap very long action menus so history remains readable on phones. */
+body.game-active #gameScreen>.panel:nth-child(4){
+ max-height:min(34dvh,215px);min-height:0;overflow:hidden;
+}
+body.game-active #actions,
+body.game-active #actions.targets,
+body.game-active #actions.rpg-menu,
+body.game-active #actions.rpg-target-menu{
+ flex:1!important;min-height:0!important;overflow-y:auto;overflow-x:hidden;
+ overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+ align-content:start;scrollbar-width:thin;scrollbar-color:rgba(154,163,199,.38) transparent;
+}
+body.game-active #gameScreen>.panel.log-surface{flex:1;min-height:0}
+@media(max-height:650px){
+ body.game-active #gameScreen>.panel:nth-child(4){max-height:min(37dvh,190px)}
+}
 </style>
 </head>
 <body>
