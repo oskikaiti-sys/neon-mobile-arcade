@@ -1,0 +1,47 @@
+# 月下疑云 / Moonlit Village
+
+轻量六人狼人杀。静态 HTML + CSS + JavaScript；房主通过 PeerJS 与加入的好友同步公开选项、行动阶段和结果。无账户、无构建步骤。原有游戏规则与 AI 逻辑不因界面改动而调整。
+
+## 第一阶段：日系 RPG 窗口与对话（2026-10-30）
+
+本阶段修改 `moonlit-village/index.html` 的展示层，新增：
+
+- `.window`：通用 RPG 蓝色渐变窗口、双层描边和阴影。
+- `.rpg-narrator` / `.rpg-dialogue` / `.rpg-nameplate`：系统旁白与角色对话分开显示。
+- `.rpg-portrait`：144 × 144 内联 SVG 人像占位，经 CSS 缩放到适合手机的尺寸；阶段二才制作可替换 PNG 脸图。
+- `.rpg-spoken` / `.rpg-next`：仅最新的角色发言有逐字显示与 ▼ 提示。点击正在播放的对话可立即显示全部内容。
+- `.rpg-menu` / `.cursor`：公开发言改为带 ▶ 光标的纵向菜单，支持方向键与回车。
+- `.rpg-selectable` / `.rpg-selected`：怀疑与信任操作在上方居民栏选目标，支持点选、方向键、回车及返回。
+
+浏览器开启 `prefers-reduced-motion: reduce` 后关闭光标闪烁、打字机和其他 CSS 动画。
+
+### 渲染与规则代码边界
+
+当前全部页面位于单文件 `index.html` 中；游戏运行逻辑和展示仍然耦合，因此采用 **叠加视觉样式 + 独立 UI 辅助函数** 的改造方式，暂不搬动底层状态机。
+
+- `render()`：主 UI，绘制房间信息、居民、身份、公告、行动菜单。
+- `button()`：普通操作按钮 HTML。
+- `rpgRenderMessages()`：公告与对话的单独渲染。
+- `rpgActivateMenu()`、`rpgSelectTarget()`、`rpgHighlightTargets()`：光标菜单及居民选择。
+- `showRoleDeal()`：现有开局抽身份牌视觉呈现。
+- `handleTimeScene()`：现有昼夜场景的展示层动画。
+- `startGame()`、`beginNight()`、`stepBots()`、`botNight()`、`finishNight()`、`botSpeech()`、`botVote()`、`finishVote()`、`winCheck()`、`accept()`、`snapshot()`：规则、玩家状态与 AI，第一阶段未修改。
+
+### 在手机上验收
+
+1. iPhone Safari 打开 [月下疑云](https://oskikaiti-sys.github.io/neon-mobile-arcade/moonlit-village/)，创建单人局。
+2. 抽取身份牌，检查公告是否使用 RPG 对话窗口、系统消息是否居中。
+3. 发言阶段检查四个纵向选项是否完整可点；点击「我怀疑某人」再点存活居民，确认上方选中状态与「确认选中的居民」。
+4. 投票、下一夜和结算；滚动公告，确认旧消息没有消失。
+5. 用桌面键盘测试上下箭头、回车和返回；在系统设置中开启减少动态效果，确认无打字机和闪烁。
+6. 在两台设备中创建房间、加入、公开发言并核对同步。
+
+### 字体与许可证说明
+
+- **Zpix**（SolidZORO）：其 [官方说明](https://github.com/SolidZORO/zpix-pixel-font) 规定个人/教育用途免费，商业用途按产品付费授权；在未取得适用授权前，不将其字库复制进本参赛项目。
+- **DotGothic16**（Fontworks / DotGothic16 Project Authors）：根据 [上游仓库](https://github.com/fontworks-fonts/DotGothic16)，采用 **SIL Open Font License 1.1**，版权归原作者。此阶段 CSS 列出了 DotGothic16 作为优先字体，但字体**尚未作为本地文件打包**，缺失时退回设备的等宽字体。未引入外链字体 CDN。这是字体交付项尚未完成的部分，不能宣称字体文件已经入库。
+- 若后续嵌入 DotGothic16 本地字体文件，应同时附带上游的完整 `OFL.txt` 授权文本；不得把 Zpix 无授权文件混入仓库。
+
+## 先做阶段 1
+
+阶段 2 的头像 PNG、死亡标签、队伍状态栏和阶段 3 的新音效均 **未提前实施**。本项目既有昼夜过场及合成背景音乐继续保留，不作为本阶段新增功能。
