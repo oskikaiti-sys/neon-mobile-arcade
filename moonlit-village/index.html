@@ -1665,6 +1665,7 @@ translations.en.nightWolfRound="Waiting for the werewolf";translations.zh.nightW
 translations.en.nightSeerRound="Waiting for the seer";translations.zh.nightSeerRound="等待预言家行动";translations.ja.nightSeerRound="占い師の行動を待っています";
 translations.en.nightGuardRound="Waiting for the guardian";translations.zh.nightGuardRound="等待守卫行动";translations.ja.nightGuardRound="騎士の行動を待っています";
 translations.en.nightWaitRound="Waiting for remaining night choices";translations.zh.nightWaitRound="等待剩余夜间行动";translations.ja.nightWaitRound="残りの夜の行動を待っています";
+translations.en.nightYourTurn="It is your turn to act";translations.zh.nightYourTurn="轮到自己行动了";translations.ja.nightYourTurn="あなたの行動の番です";
 translations.en.nightCueCountdown="{seconds}s · {turn}/3";translations.zh.nightCueCountdown="剩余{seconds}秒 · {turn}/3";translations.ja.nightCueCountdown="残り{seconds}秒 · {turn}/3";
 translations.en.logNightStart="Night {day}: The village is asleep.";translations.zh.logNightStart="第 {day} 夜：夜间行动开始。";translations.ja.logNightStart="{day}日目の夜：夜の行動が始まります。";
 translations.en.clockLabel="Time remaining";translations.zh.clockLabel="剩余时间";translations.ja.clockLabel="残り時間";
@@ -2513,7 +2514,12 @@ function updatePhaseHud(){
   var interval=v.deadlineActive?NIGHT_PROMPT_MS:SOLO_NIGHT_PROMPT_MS;
   var index=Math.floor(nightMs/interval);
   var keys=["nightWolfRound","nightSeerRound","nightGuardRound"];
-  $("nightTurnLabel").textContent=tr(keys[index]||"nightWaitRound");
+  var roles=["wolf","seer","guard"];
+  /* Show all public role cues even when those roles have been eliminated.
+     Only the current player sees a personalized cue for their pending action. */
+  var ownActionPending=v.myAlive&&!v.submitted&&roles.includes(v.myRole);
+  var ownTurn=ownActionPending&&(roles[index]===v.myRole||index>=roles.length);
+  $("nightTurnLabel").textContent=tr(ownTurn?"nightYourTurn":(keys[index]||"nightWaitRound"));
   if(index<3){
    var seconds=Math.max(1,Math.ceil((interval-nightMs%interval)/1000));
    $("nightTurnCount").textContent=tr("nightCueCountdown",{seconds:seconds,turn:index+1});
