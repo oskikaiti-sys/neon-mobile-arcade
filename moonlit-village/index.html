@@ -1835,6 +1835,9 @@ translations.en.nightYourTurn="It is your turn to act";translations.zh.nightYour
 translations.en.nightWaitYourTurn="Wait until your role is called.";translations.zh.nightWaitYourTurn="请等待轮到你的身份行动。";translations.ja.nightWaitYourTurn="自分の役職の番までお待ちください。";
 translations.en.nightChoiceSaved="Choice submitted. Waiting for this turn to end.";translations.zh.nightChoiceSaved="已完成行动，等待本轮结束。";translations.ja.nightChoiceSaved="行動を確定しました。このターンの終了を待っています。";
 translations.en.nightCuePosition="Turn {turn}/3";translations.zh.nightCuePosition="第 {turn}/3 轮";translations.ja.nightCuePosition="{turn}/3 ターン";
+translations.en.debateLogStart="Discussion finished. Everyone may challenge once.";translations.zh.debateLogStart="公开发言结束，开始质疑。";translations.ja.debateLogStart="発言が終わり、質疑を始めます。";
+translations.en.debateLogReplies="Each challenged player gets one reply.";translations.zh.debateLogReplies="质疑结束，被质疑者集中回应。";translations.ja.debateLogReplies="質疑を受けた人が返答します。";
+translations.en.debateLogVote="Debate complete. Time to vote.";translations.zh.debateLogVote="辩论结束，开始投票。";translations.ja.debateLogVote="討論が終わり、投票開始です。";
 translations.en.debatePhase="Challenge and reply";translations.zh.debatePhase="质疑与回应";translations.ja.debatePhase="質疑と返答";
 translations.en.debateChallengeTitle="Challenge a statement";translations.zh.debateChallengeTitle="质疑一个人的说法";translations.ja.debateChallengeTitle="発言を問いただす";
 translations.en.debateReplyTitle="Respond to the challenges";translations.zh.debateReplyTitle="回应针对你的质疑";translations.ja.debateReplyTitle="質疑に返答する";
@@ -2139,6 +2142,10 @@ function localizeSpeech(raw){
 function parseSpeech(message){
  var m=message.kind==="choice"?message.text.match(/^(.+?)：「([\s\S]*)」$/):null;
  if(!m)return null;
+ if(message.debateData){
+  return {rawSpeaker:m[1],speaker:displayName(m[1]),
+   text:debateLine(selectedLanguage,message.debateData.part,message.debateData.item)};
+ }
  if(message.speechData){
   var data=Object.assign({},message.speechData);
   ["name","related","speaker"].forEach(function(key){if(data[key])data[key]=displayName(data[key])});
@@ -2157,6 +2164,9 @@ function localizeLog(message){
  if((m=value.match(/^第 (\d+) 夜：夜间行动开始。$/)))return tr("logNightStart",{day:m[1]});
  if((m=value.match(/^第 (\d+) 夜：等待狼人、预言家和守卫行动。$/)))return tr("logNight",{day:m[1]});
  if((m=value.match(/^第 (\d+) 天：请选择一句公开发言。$/)))return tr("logDay",{day:m[1]});
+ if(value==="公开发言结束，进入质疑阶段。")return tr("debateLogStart");
+ if(value==="质疑结束，被质疑者获得一次回应机会。")return tr("debateLogReplies");
+ if(value==="辩论结束，开始投票。")return tr("debateLogVote");
  if((m=value.match(/^天亮了，昨夜 (.+) 遇袭出局。$/)))return tr("logAttack",{name:displayName(m[1])});
  if((m=value.match(/^投票结果：(.+) 被放逐，身份是「(狼人|好人)」。$/)))return tr("logExile",{name:displayName(m[1]),alignment:tr(m[2]==="狼人"?"roleWolfShort":"roleGoodShort")});
  if((m=value.match(/^(.+) 投票给 (.+)。$/)))return tr("logVote",{name:displayName(m[1]),target:displayName(m[2])});
@@ -3159,7 +3169,7 @@ function accept(id,action,target,speech){
  stepBots();broadcast()
 }
 function sendAction(action,target,speech){
- speechKind="";speechGroup="";
+ speechKind="";speechGroup="";debateKind="";
  if(isHost)accept("h",action,target,speech);
  else if(conn&&conn.open)conn.send({type:"action",action:action,target:target,speech:speech});
  else $("notice").textContent=tr("errActionDisconnected")
@@ -3586,7 +3596,7 @@ function updatePhaseHud(){
  if(clockSnapshot!==v){clockSnapshot=v;clockSeenAt=Date.now()}
  var elapsed=Math.max(0,Date.now()-clockSeenAt);
  var ownNightTurn=v.phase==="night"&&v.myAlive&&!v.submitted&&NIGHT_ROLES[v.nightStage]===v.myRole;
-  var timed=!!v.deadlineActive&&(["talk","vote"].includes(v.phase)||ownNightTurn);
+  var timed=!!v.deadlineActive&&(["talk","debate","vote"].includes(v.phase)||ownNightTurn);
  clock.hidden=!timed;
  if(timed){
   var remaining=Math.max(0,Math.ceil((Math.max(0,v.deadlineRemaining||0)-elapsed)/1000));
@@ -4132,6 +4142,11 @@ document.addEventListener("click",function(e){
   navigator.clipboard.writeText(link.toString()).then(function(){$("notice").textContent=tr("copySuccess",{code:room})}).catch(function(){$("notice").textContent=tr("copyFail",{code:room})});
  }else if(action==="night")sendAction("night",target,null);
  else if(action==="vote")sendAction("vote",target,null);
+ else if(action==="debatePick"){if(view&&view.phase==="debate"&&view.debateStage==="challenge"&&!view.submitted&&["reason","claim","report","vote"].includes(speech)){debateKind=speech;rpgSpeechTarget=null;rpgMenuIndex=0;render()}}
+ else if(action==="backDebate"){debateKind="";rpgSpeechTarget=null;rpgMenuIndex=0;render()}
+ else if(action==="confirmChallenge"){if(debateKind&&rpgSpeechTarget)sendAction("challenge",rpgSpeechTarget,debateKind)}
+ else if(action==="debatePass")sendAction("challenge",null,"pass");
+ else if(action==="debateReply")sendAction("reply",null,speech);
  else if(action==="speechGroup"){if(SPEECH_GROUPS[speech]){speechGroup=speech;speechKind="";rpgSpeechTarget=null;rpgMenuIndex=0;render()}}
  else if(action==="pickSpeech"){if(SPEECH_OPTIONS[speech]&&SPEECH_OPTIONS[speech].target){speechKind=speech;rpgSpeechTarget=null;render()}}
  else if(action==="selectSpeechTarget")rpgSelectTarget(target);
@@ -4169,11 +4184,11 @@ document.addEventListener("keydown",function(e){
   }
  }
  if(e.key==="Escape"&&!$("nightFeedbackPopup").hidden){e.preventDefault();closeNightFeedback();return;}
- if(!view||view.phase!=="talk"||!view.myAlive||view.submitted||!$("roleOverlay").hidden)return;
+ if(!view||!["talk","debate"].includes(view.phase)||!view.myAlive||view.submitted||!$("roleOverlay").hidden)return;
  if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||""))return;
- if(speechKind){
+ if(speechKind||debateKind){
   var options=rpgTargets(view);
-  if(e.key==="Escape"){e.preventDefault();playSfx("cancel");speechKind="";rpgSpeechTarget=null;render();return}
+  if(e.key==="Escape"){e.preventDefault();playSfx("cancel");speechKind="";debateKind="";rpgSpeechTarget=null;render();return}
   var card=e.target&&e.target.closest?e.target.closest("[data-rpg-target]"):null;
   if(card&&(e.key==="Enter"||e.key===" ")){
    e.preventDefault();rpgSelectTarget(card.getAttribute("data-rpg-target"));return;
@@ -4187,7 +4202,7 @@ document.addEventListener("keydown",function(e){
   if(e.key==="Enter"&&e.target&&e.target.closest&&e.target.closest("button[data-do]"))return;
   if(e.key==="Enter"&&rpgSpeechTarget){
    e.preventDefault();
-   var confirm=$("actions").querySelector('[data-do="confirmTarget"]:not([disabled])');
+   var confirm=$("actions").querySelector(view.phase==="debate"?'[data-do="confirmChallenge"]:not([disabled])':'[data-do="confirmTarget"]:not([disabled])');
    if(confirm)confirm.click();
   }
   return;
