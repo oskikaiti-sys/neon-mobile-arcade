@@ -2477,6 +2477,25 @@ function botChallenge(p){
  /* Only challenge an actual claim, report, vote or expressed accusation.
     First-day absence of voting records is not a suspicious statement. */
  var history=st.publicHistory||[];
+ if(st.day>=2&&p.role!=="wolf"){
+  var model=aiWorldAnalysis(p);
+  if(model&&model.worlds.length){
+   var suspects=targetList(p.id).slice().sort(function(a,b){
+    return (model.wolf[b.id]||0)-(model.wolf[a.id]||0);
+   }),top=suspects[0],runner=suspects[1];
+   if(top){
+    var high=model.wolf[top.id]||0,second=runner?model.wolf[runner.id]||0:0;
+    if(high>=.58&&high-second>=.13||live().length===3&&high>=.5){
+     var kind=debateEvidence(top.id,"report")?"report":
+      debateEvidence(top.id,"claim")?"claim":
+      debateEvidence(top.id,"vote")?"vote":
+      history.some(function(h){return h.id===top.id&&h.targetId})?"reason":null;
+     if(kind){recordChallenge(p.id,top.id,kind);return}
+    }
+   }
+  }
+ }
+
  if(p.role!=="wolf"){
   var refuted=targetList(p.id).find(function(q){return aiSeerStoryRefuted(p,q)});
   if(refuted){
@@ -2962,7 +2981,7 @@ function aiWolfProbabilities(p){
 function aiRanking(p,exclude){
  var brain=aiState(p),world=aiWorldAnalysis(p);
  var chosen=targetList(p.id).filter(function(q){return !exclude||!exclude.includes(q.id)});
- if(st.day>=2&&world&&world.worlds.length){
+ if(st.day>=2&&p.role!=="wolf"&&world&&world.worlds.length){
   return chosen.map(function(q){
    var probability=world.wolf[q.id]||0;
    /* Keep the .score interface, but make it mean a posterior probability
@@ -3355,6 +3374,43 @@ function aiChooseSpeech(p){
   var refuted=targetList(p.id).find(function(q){return aiSeerStoryRefuted(p,q)});
   if(refuted)return {kind:"suspect",targetId:refuted.id,reason:"impossible-seer-clear"};
  }
+ /* On day two and beyond, possible-world analysis takes precedence over
+    generic style-dependent attitudes. Strong conclusions create actions;
+    ambiguous evidence creates a public request for clarification.
+    Exact private Seer knowledge is handled by the Seer block below. */
+ if(st.day>=2&&p.role!=="wolf"){
+  var model=aiWorldAnalysis(p);
+  if(model&&model.worlds.length){
+   var options=targetList(p.id).slice().sort(function(a,b){
+    return (model.wolf[b.id]||0)-(model.wolf[a.id]||0);
+   });
+   var first=options[0],second=options[1],high=first?(model.wolf[first.id]||0):0,
+    next=second?(model.wolf[second.id]||0):0;
+   var exposure=first?aiWorldCase(p,first):null;
+   var enough=!!first&&(high>=.64&&high-next>=.17||
+    live().length===3&&high>=.52&&high-next>=.09);
+   if(p.role==="seer"){
+    var knownWolf=(st.known[p.id]||[]).find(function(k){
+     return k.evil&&person(k.id)&&person(k.id).alive;
+    });
+    if(knownWolf)return {kind:"black",targetId:knownWolf.id,reason:"private-confirmed-wolf"};
+   }
+   if(enough&&exposure){
+    if(exposure.reasons.includes("changed-role")||exposure.reasons.includes("conflicting-report"))
+     return {kind:"suspect",targetId:first.id,reason:"world-conflicting-claims"};
+    if(exposure.reasons.includes("voted-own-clear"))
+     return {kind:"suspect",targetId:first.id,reason:"world-contradictory-ballot"};
+    if(aiClaimFor(first.id))return {kind:"challengeClaim",targetId:first.id,reason:"world-role-claim-inconsistent"};
+    return {kind:"suspect",targetId:first.id,reason:"world-posterior-leading"};
+   }
+   if((st.voteHistory||[]).length&&
+    (st.day%2===0||!((st.publicHistory||[]).some(function(h){return roleClaim(h.kind)}))))
+    return {kind:"analyseVotes",targetId:null,reason:"world-investigate-votes"};
+   if((st.publicHistory||[]).some(function(h){return roleClaim(h.kind)}))
+    return {kind:"analyseClaims",targetId:null,reason:"world-investigate-claims"};
+   return {kind:"clue",targetId:null,reason:"world-insufficient-evidence"};
+  }
+ }
  /* These stable temperaments affect risk-taking, but never grant new facts. */
  var styleShift={cautious:.14,analytical:.04,assertive:-.07,opportunist:-.12};
  var roll=Math.max(.001,Math.min(.999,Math.random()+(styleShift[brain.temperament]||0)));
@@ -3461,6 +3517,24 @@ function speak(id,kind,targetId){
    villagers or the Guardian. */
 function aiVotingEvidence(observer,target){
  if(!target||observer.id===target.id)return 0;
+ if(st.day>=2&&observer.role!=="wolf"){
+  var a=aiWorldAnalysis(observer);
+  if(a&&a.worlds.length){
+   var probability=a.wolf[target.id]||0;
+   if(probability<=0.000001)return -10;
+   var known=aiObservedInspection(observer,target.id);
+   if(known&&known.evil)return 10;
+   if(aiEndgameRefutedClaimant(observer)?.id===target.id)return 9;
+   /* A posterior is not the same thing as public proof. In ordinary
+      rounds require a sufficiently concentrated world distribution. */
+   var peers=targetList(observer.id).filter(function(q){return q.id!==target.id});
+   var runner=Math.max(0,...peers.map(function(q){return a.wolf[q.id]||0}));
+   if(live().length===3&&probability>=.5&&probability>=runner)return 3;
+   if(probability>=.64&&probability-runner>=.17)return 3;
+   return 0;
+  }
+ }
+
  if(aiSeerStoryRefuted(observer,target))return 7;
  var actual=aiObservedInspection(observer,target.id);
  if(actual)return actual.evil?10:-10;
@@ -3479,6 +3553,24 @@ function botVote(p){
     and own previous words. Don't randomize away a decisive endgame. */
  var refuted=aiEndgameRefutedClaimant(p);
  if(refuted)return refuted.id;
+ if(st.day>=2&&p.role!=="wolf"){
+  var model=aiWorldAnalysis(p);
+  if(model&&model.worlds.length){
+   var rankedWorld=targetList(p.id).slice().sort(function(a,b){
+    return (model.wolf[b.id]||0)-(model.wolf[a.id]||0);
+   });
+   var first=rankedWorld[0],second=rankedWorld[1];
+   if(first){
+    var top=model.wolf[first.id]||0,runner=second?(model.wolf[second.id]||0):0;
+    /* At three alive, passing the vote can hand a wolf an uncontested
+       night kill. Use the most justified remaining hypothesis, even when
+       confidence is imperfect. Earlier in the game, abstain rather than
+       execute on near-even evidence. */
+    if(live().length===3)return first.id;
+    return top>=.64&&top-runner>=.17?first.id:"__abstain__";
+   }
+  }
+ }
  var brain=aiState(p),ranked=aiRanking(p);
  if(!ranked.length)return "__abstain__";
  if(p.role!=="wolf"&&!ranked.some(function(x){return aiVotingEvidence(p,x.p)>=2}))
