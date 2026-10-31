@@ -1268,6 +1268,38 @@ body.game-active .game-header::after{
  body.game-active .game-header .header-actions{gap:2px}
 }
 
+
+/* Public 3-turn night announcement and synced host-enforced 2-minute clock. */
+body.game-active #gameScreen>.game-head{max-height:128px}
+body.game-active .game-head .night-turn{
+ display:flex;justify-content:space-between;align-items:center;gap:7px;
+ min-height:28px;margin:4px 0 0;padding:4px 8px;
+ border:1px solid rgba(232,200,114,.4);
+ background:rgba(10,15,31,.82);color:var(--gold);
+ border-radius:5px;font-size:12px;font-weight:650;line-height:1.35;
+}
+body.game-active .game-head .night-turn[hidden]{display:none!important}
+body.game-active .game-head .night-turn #nightTurnCount{flex:none;color:var(--muted);font-size:11px;letter-spacing:.3px}
+body.game-active #gameScreen>.game-actions .action-heading{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ min-height:20px;margin:0 0 6px;
+}
+body.game-active #gameScreen>.game-actions .action-heading h2{
+ flex:1;min-width:0;margin:0!important;
+}
+body.game-active .phase-clock{
+ flex:none;white-space:nowrap;
+ color:var(--gold);font-size:12px;font-weight:700;
+ font-variant-numeric:tabular-nums;padding:3px 7px;
+ border:1px solid rgba(232,200,114,.35);border-radius:5px;
+ background:rgba(10,15,31,.58);
+}
+body.game-active .phase-clock[hidden]{display:none!important}
+body.game-active .phase-clock.is-low{color:var(--danger);border-color:rgba(224,82,79,.6)}
+@media(max-height:700px){
+ body.game-active .game-head .night-turn{min-height:21px;padding:2px 5px;font-size:10px}
+ body.game-active #gameScreen>.game-head{max-height:112px}
+}
 </style>
 </head>
 <body>
@@ -1306,6 +1338,7 @@ body.game-active .game-header::after{
 <section id="gameScreen">
 <div class="panel game-head">
 <div class="topbar"><span class="pill" id="phaseTag" data-i18n="phaseLobby">Waiting for players</span><span id="roomInfo"></span></div>
+<div id="nightTurn" class="night-turn" hidden aria-live="off"><span id="nightTurnLabel"></span><span id="nightTurnCount"></span></div>
 <div id="myRole" class="role-chip" data-i18n="rolePending" aria-label="Your role">Awaiting role assignment</div>
 <div class="btns" id="shareBtns"></div>
 </div>
@@ -1326,7 +1359,7 @@ body.game-active .game-header::after{
     <div id="rightPlayers" class="character-rail character-rail-right" aria-label="村庄居民，四至六号"></div>
   </div>
 </div>
-<div class="panel game-actions"><h2 id="actionTitle" data-i18n="actionDefault"></h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
+<div class="panel game-actions"><div class="action-heading"><h2 id="actionTitle" data-i18n="actionDefault"></h2><span id="phaseClock" class="phase-clock" hidden aria-label="Time remaining">02:00</span></div><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
 </section>
 <div class="footer"><span data-i18n="footer1"></span><br><span data-i18n="footer2"></span><br>BGM：《不思議な村》— HiLi / <a href="https://conte-de-fees.com/bgm/238" target="_blank" rel="noopener noreferrer" style="color:inherit">こんとどぅふぇ</a></div>
 <div id="timeScene" class="time-scene" hidden aria-hidden="true">
@@ -1394,6 +1427,22 @@ translations.en.avatarRemoved="A random portrait will be used";translations.zh.a
 translations.en.avatarInvalid="Please choose a PNG, JPEG or WebP under 8 MB.";translations.zh.avatarInvalid="请选择小于 8 MB 的 PNG、JPEG 或 WebP 图片。";translations.ja.avatarInvalid="8 MB未満のPNG・JPEG・WebP画像を選んでください。";
 translations.en.avatarProcessing="Preparing avatar…";translations.zh.avatarProcessing="正在处理头像…";translations.ja.avatarProcessing="アイコンを処理中…";
 translations.en.avatarFailed="Could not read this image. Try another file.";translations.zh.avatarFailed="无法读取图片，请换一张重试。";translations.ja.avatarFailed="画像を読み込めません。別のファイルを試してください。";
+
+/* Round cues are public, identical for every participant, regardless of
+ * which powers are still alive. Guardian is the actual role in this game. */
+translations.en.phaseDeal="Draw your role";translations.zh.phaseDeal="抽取身份牌";translations.ja.phaseDeal="役職カードを引く";
+translations.en.dealWaitTitle="Waiting for identity cards";translations.zh.dealWaitTitle="等待所有人确认身份";translations.ja.dealWaitTitle="役職確認待ち";
+translations.en.dealWaitOthers="Confirmed {ready}/{total}. Waiting for the other players.";translations.zh.dealWaitOthers="已确认 {ready}/{total}，等待其他玩家完成抽牌。";translations.ja.dealWaitOthers="{ready}/{total}人が確認済み。ほかのプレイヤーを待っています。";
+translations.en.dealPleaseConfirm="Confirmed {ready}/{total}. Draw your role card and tap Enter the village.";translations.zh.dealPleaseConfirm="已确认 {ready}/{total}，请翻开身份牌并点击进入村庄。";translations.ja.dealPleaseConfirm="{ready}/{total}人が確認済み。カードを確認して村へ進んでください。";
+translations.en.logRoleCards="Everyone must reveal and confirm their secret role before the first night.";translations.zh.logRoleCards="请所有真人玩家翻开并确认身份牌。";translations.ja.logRoleCards="全員が役職カードを確認すると最初の夜が始まります。";
+translations.en.nightWolfRound="Werewolf turn";translations.zh.nightWolfRound="狼人行动轮次";translations.ja.nightWolfRound="人狼の行動時間";
+translations.en.nightSeerRound="Seer turn";translations.zh.nightSeerRound="预言家行动轮次";translations.ja.nightSeerRound="占い師の行動時間";
+translations.en.nightGuardRound="Guardian turn";translations.zh.nightGuardRound="守卫行动轮次";translations.ja.nightGuardRound="騎士の行動時間";
+translations.en.nightWaitRound="Night decisions are open";translations.zh.nightWaitRound="等待夜间行动结束";translations.ja.nightWaitRound="夜の行動を待機中";
+translations.en.clockLabel="Time remaining";translations.zh.clockLabel="剩余时间";translations.ja.clockLabel="残り時間";
+translations.en.logVoteAbstain="{name} abstained from voting.";translations.zh.logVoteAbstain="{name} 弃权投票。";translations.ja.logVoteAbstain="{name} は投票を棄権しました。";
+translations.en.nightTimeLimit="Each phase lasts up to two minutes.";translations.zh.nightTimeLimit="各行动阶段最长两分钟。";translations.ja.nightTimeLimit="各行動フェーズの制限時間は2分です。";
+
 var selectedLanguage="en";
 translations.en.languageAria="Language";translations.zh.languageAria="语言";translations.ja.languageAria="言語";
 function tr(key,values){
@@ -1515,13 +1564,15 @@ function localizeLog(message){
  var exact={"村庄正在等待玩家加入。":"logWait","新的村庄正在等待开局。":"logNewLobby","月亮升起，所有人闭上眼睛。":"logMoon",
  "天亮了，昨夜是平安夜。":"logSafe","所有人发言完毕，开始投票。":"logTalkDone","投票平局，今天无人被放逐。":"logTie",
  "🏆 好人胜利！狼人已经出局。":"logGoodWin","🐺 狼人胜利！狼人的人数已不低于好人。":"logWolfWin",
- "月夜持续太久，狼人占据了村庄。":"logLongNight"};
+ "月夜持续太久，狼人占据了村庄。":"logLongNight",
+ "请所有真人玩家翻开并确认身份牌。":"logRoleCards"};
  if(exact[value])return tr(exact[value]);
  if((m=value.match(/^第 (\d+) 夜：等待狼人、预言家和守卫行动。$/)))return tr("logNight",{day:m[1]});
  if((m=value.match(/^第 (\d+) 天：请选择一句公开发言。$/)))return tr("logDay",{day:m[1]});
  if((m=value.match(/^天亮了，昨夜 (.+) 遇袭出局。$/)))return tr("logAttack",{name:displayName(m[1])});
  if((m=value.match(/^投票结果：(.+) 被放逐，身份是「(狼人|好人)」。$/)))return tr("logExile",{name:displayName(m[1]),alignment:tr(m[2]==="狼人"?"roleWolfShort":"roleGoodShort")});
  if((m=value.match(/^(.+) 投票给 (.+)。$/)))return tr("logVote",{name:displayName(m[1]),target:displayName(m[2])});
+ if((m=value.match(/^(.+) 弃权投票。$/)))return tr("logVoteAbstain",{name:displayName(m[1])});
  if((m=value.match(/^(.+) 加入了村庄。$/)))return tr("logJoin",{name:displayName(m[1])});
  if((m=value.match(/^(.+) 离开了房间。$/)))return tr("logLeave",{name:displayName(m[1])});
  if((m=value.match(/^(.+) 掉线，已由电脑接管。$/)))return tr("logDisconnect",{name:displayName(m[1])});
