@@ -1148,6 +1148,21 @@ body.game-active header h1{max-width:calc(100% - 215px)!important}
 .settings-status{color:var(--gold);min-height:14px}
 @media(max-width:380px){body.game-active header h1{max-width:calc(100% - 195px)!important;font-size:14px}}
 @media(prefers-reduced-motion:reduce){.settings-toggle,.settings-panel{animation:none!important}}
+
+/* Pre-game avatar selection: the character is chosen alongside the name.
+   The sound settings modal intentionally does not include this control. */
+.home-avatar-picker{margin:14px 0 16px;padding:12px 12px 9px;border:1px solid rgba(232,200,114,.28);
+ border-radius:10px;background:rgba(20,28,58,.45)}
+.home-avatar-heading{font-size:14px;font-weight:700;color:var(--gold);margin:0 0 10px}
+.home-avatar-picker .settings-avatar-preview{width:76px;height:76px;flex-basis:76px}
+.home-avatar-picker .settings-avatar-buttons{gap:7px}
+.home-avatar-picker .settings-help{margin-top:9px}
+.home-avatar-picker .settings-status:empty{display:none}
+.home-avatar-picker .settings-upload:focus-within{outline:2px solid var(--gold);outline-offset:2px}
+.home-avatar-picker .settings-upload.is-pending,
+.home-avatar-picker .settings-remove:disabled{opacity:.55;cursor:wait}
+#homeScreen .btns button:disabled{opacity:.45;cursor:wait;pointer-events:none}
+@media(max-width:390px){.home-avatar-picker{padding:10px}.home-avatar-picker .settings-avatar-preview{width:68px;height:68px;flex-basis:68px}}
 </style>
 </head>
 <body>
@@ -1159,6 +1174,22 @@ body.game-active header h1{max-width:calc(100% - 215px)!important}
 <h2 data-i18n="homeTitle"></h2>
 <label for="myName" data-i18n="nameLabel"></label>
 <input id="myName" maxlength="15" value="Traveler" autocomplete="nickname">
+<div class="home-avatar-picker">
+ <div class="home-avatar-heading" data-i18n="avatarLabel">Your avatar</div>
+ <div class="settings-avatar-row">
+  <div id="avatarPreview" class="settings-avatar-preview">
+   <img id="avatarPreviewImage" alt="" hidden>
+   <span id="avatarPreviewPlaceholder" aria-hidden="true">✦</span>
+  </div>
+  <div class="settings-avatar-buttons">
+   <label class="settings-upload" for="avatarUpload" data-i18n="uploadAvatar">Choose an image</label>
+   <input type="file" id="avatarUpload" accept="image/png,image/jpeg,image/webp" class="settings-file-input">
+   <button type="button" data-do="removeAvatar" class="settings-remove" data-i18n="removeAvatar">Random preset portrait</button>
+  </div>
+ </div>
+ <p class="settings-help" data-i18n="avatarHelp">Choose a portrait before entering the village.</p>
+ <p id="avatarStatus" class="settings-status" aria-live="polite"></p>
+</div>
 <div class="btns"><button class="primary" data-do="solo" data-i18n="solo"></button><button data-do="create" data-i18n="create"></button></div>
 <div class="divider"></div>
 <label for="roomInput" data-i18n="roomLabel"></label>
@@ -1232,13 +1263,6 @@ body.game-active header h1{max-width:calc(100% - 215px)!important}
    <label for="effectsVolume" data-i18n="effectsVolume">Sound effects volume</label>
    <div class="settings-range"><input id="effectsVolume" type="range" min="0" max="100" step="1" value="100"><output id="effectsVolumeValue" for="effectsVolume">100%</output></div>
   </div>
-  <div class="settings-field avatar-field">
-   <span class="settings-field-label" data-i18n="avatarLabel">Your avatar</span>
-   <div class="settings-avatar-row"><div id="avatarPreview" class="settings-avatar-preview"><img id="avatarPreviewImage" alt="" hidden><span id="avatarPreviewPlaceholder" aria-hidden="true">✦</span></div>
-   <div class="settings-avatar-buttons"><label class="settings-upload" for="avatarUpload" data-i18n="uploadAvatar">Choose an image</label><input type="file" id="avatarUpload" accept="image/png,image/jpeg,image/webp" class="settings-file-input"><button type="button" data-do="removeAvatar" class="settings-remove" data-i18n="removeAvatar">Use a random portrait</button></div></div>
-   <p class="settings-help" data-i18n="avatarHelp">Pictures are resized to a small square before sharing with other players. No server uploads.</p>
-   <p id="avatarStatus" class="settings-status" aria-live="polite"></p>
-  </div>
   <button type="button" class="settings-done" data-do="closeSettings" data-i18n="settingsDone">Done</button>
  </div>
 </div>
@@ -1258,8 +1282,8 @@ translations.en.bgmVolume="Music volume";translations.zh.bgmVolume="背景音乐
 translations.en.effectsVolume="Sound effects volume";translations.zh.effectsVolume="操作音效音量";translations.ja.effectsVolume="効果音の音量";
 translations.en.avatarLabel="Your avatar";translations.zh.avatarLabel="你的头像";translations.ja.avatarLabel="自分のアイコン";
 translations.en.uploadAvatar="Choose an image";translations.zh.uploadAvatar="上传图片";translations.ja.uploadAvatar="画像を選ぶ";
-translations.en.removeAvatar="Use a random portrait";translations.zh.removeAvatar="改用随机预设头像";translations.ja.removeAvatar="ランダムな初期アイコンに戻す";
-translations.en.avatarHelp="Human players can choose a picture from their computer or keep a random preset. Images are resized locally and shared within the room. AI uses presets.";translations.zh.avatarHelp="真人玩家可从电脑硬盘选择图片，或使用随机预设头像。图片会在本机缩小并同步给房间其他玩家；AI 使用预设头像。";translations.ja.avatarHelp="人間のプレイヤーはPCから画像を選ぶか、ランダムな初期画像を使用できます。画像は端末で縮小し、ルーム内のほかのプレイヤーと共有されます。AIは初期画像を使います。";
+translations.en.removeAvatar="Random preset portrait";translations.zh.removeAvatar="随机预设头像";translations.ja.removeAvatar="ランダムな初期アイコン";
+translations.en.avatarHelp="Choose your portrait before starting or joining a game. The selected image is shared with other players in the room; AI players use presets.";translations.zh.avatarHelp="开始单人游戏、创建或加入房间前选择头像。自定义图片会分享给房间内其他玩家；AI 玩家使用预设头像。";translations.ja.avatarHelp="ソロ開始・部屋作成・参加の前にアイコンを選んでください。設定した画像はルーム内のほかのプレイヤーに共有されます。AIは初期画像を使います。";
 translations.en.avatarReady="Custom avatar ready";translations.zh.avatarReady="自定义头像已准备好";translations.ja.avatarReady="アイコンを設定しました";
 translations.en.avatarRemoved="A random portrait will be used";translations.zh.avatarRemoved="将使用随机预设头像";translations.ja.avatarRemoved="ランダムな初期アイコンを使用します";
 translations.en.avatarInvalid="Please choose a PNG, JPEG or WebP under 8 MB.";translations.zh.avatarInvalid="请选择小于 8 MB 的 PNG、JPEG 或 WebP 图片。";translations.ja.avatarInvalid="8 MB未満のPNG・JPEG・WebP画像を選んでください。";
