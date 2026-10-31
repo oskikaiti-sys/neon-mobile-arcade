@@ -1536,10 +1536,12 @@ translations.en.dealWaitTitle="Waiting for identity cards";translations.zh.dealW
 translations.en.dealWaitOthers="Confirmed {ready}/{total}. Waiting for the other players.";translations.zh.dealWaitOthers="已确认 {ready}/{total}，等待其他玩家完成抽牌。";translations.ja.dealWaitOthers="{ready}/{total}人が確認済み。ほかのプレイヤーを待っています。";
 translations.en.dealPleaseConfirm="Confirmed {ready}/{total}. Draw your role card and tap Enter the village.";translations.zh.dealPleaseConfirm="已确认 {ready}/{total}，请翻开身份牌并点击进入村庄。";translations.ja.dealPleaseConfirm="{ready}/{total}人が確認済み。カードを確認して村へ進んでください。";
 translations.en.logRoleCards="Everyone must reveal and confirm their secret role before the first night.";translations.zh.logRoleCards="请所有真人玩家翻开并确认身份牌。";translations.ja.logRoleCards="全員が役職カードを確認すると最初の夜が始まります。";
-translations.en.nightWolfRound="Werewolf turn";translations.zh.nightWolfRound="狼人行动轮次";translations.ja.nightWolfRound="人狼の行動時間";
-translations.en.nightSeerRound="Seer turn";translations.zh.nightSeerRound="预言家行动轮次";translations.ja.nightSeerRound="占い師の行動時間";
-translations.en.nightGuardRound="Guardian turn";translations.zh.nightGuardRound="守卫行动轮次";translations.ja.nightGuardRound="騎士の行動時間";
-translations.en.nightWaitRound="Night decisions are open";translations.zh.nightWaitRound="等待夜间行动结束";translations.ja.nightWaitRound="夜の行動を待機中";
+translations.en.nightWolfRound="Waiting for the werewolf";translations.zh.nightWolfRound="等待狼人行动";translations.ja.nightWolfRound="人狼の行動を待っています";
+translations.en.nightSeerRound="Waiting for the seer";translations.zh.nightSeerRound="等待预言家行动";translations.ja.nightSeerRound="占い師の行動を待っています";
+translations.en.nightGuardRound="Waiting for the guardian";translations.zh.nightGuardRound="等待守卫行动";translations.ja.nightGuardRound="騎士の行動を待っています";
+translations.en.nightWaitRound="Waiting for remaining night choices";translations.zh.nightWaitRound="等待剩余夜间行动";translations.ja.nightWaitRound="残りの夜の行動を待っています";
+translations.en.nightCueCountdown="{seconds}s · {turn}/3";translations.zh.nightCueCountdown="剩余{seconds}秒 · {turn}/3";translations.ja.nightCueCountdown="残り{seconds}秒 · {turn}/3";
+translations.en.logNightStart="Night {day}: The village is asleep.";translations.zh.logNightStart="第 {day} 夜：夜间行动开始。";translations.ja.logNightStart="{day}日目の夜：夜の行動が始まります。";
 translations.en.clockLabel="Time remaining";translations.zh.clockLabel="剩余时间";translations.ja.clockLabel="残り時間";
 translations.en.logVoteAbstain="{name} abstained from voting.";translations.zh.logVoteAbstain="{name} 弃权投票。";translations.ja.logVoteAbstain="{name} は投票を棄権しました。";
 translations.en.nightTimeLimit="Each phase lasts up to two minutes.";translations.zh.nightTimeLimit="各行动阶段最长两分钟。";translations.ja.nightTimeLimit="各行動フェーズの制限時間は2分です。";
@@ -1648,6 +1650,7 @@ var peer=null,conn=null,isHost=false,solo=false,st=null,view=null,room="",myId="
 var mark=0, shownIdentityGame=0, previousScenePhase=null, lastSceneDay=0, pendingScene=null, sceneTimer=null, nightSerial=0;
 var hostPhaseTimer=null,phaseNonce=0;
 var CHOICE_LIMIT_MS=120000,NIGHT_MIN_MS=12000,NIGHT_PROMPT_MS=4000;
+var SOLO_NIGHT_MIN_MS=6000,SOLO_NIGHT_PROMPT_MS=2000;
 function cancelPhaseTimer(){
  phaseNonce++;
  if(hostPhaseTimer!==null){clearTimeout(hostPhaseTimer);hostPhaseTimer=null}
@@ -1657,7 +1660,7 @@ function armPhaseTimer(phase){
  if(!st||!isHost)return;
  cancelPhaseTimer();
  /* Solo and one-human rooms have no decision deadline. Keep phaseStartAt
-    for public night announcements and the minimum 12-second night scene. */
+    for public night announcements, which last 6 seconds with one human. */
  st.phaseStartAt=Date.now();
  if(st.players.filter(function(p){return !p.bot}).length<=1){
   st.deadlineAt=0;return;
@@ -1726,6 +1729,7 @@ function localizeLog(message){
  "月夜持续太久，狼人占据了村庄。":"logLongNight",
  "请所有真人玩家翻开并确认身份牌。":"logRoleCards"};
  if(exact[value])return tr(exact[value]);
+ if((m=value.match(/^第 (\d+) 夜：夜间行动开始。$/)))return tr("logNightStart",{day:m[1]});
  if((m=value.match(/^第 (\d+) 夜：等待狼人、预言家和守卫行动。$/)))return tr("logNight",{day:m[1]});
  if((m=value.match(/^第 (\d+) 天：请选择一句公开发言。$/)))return tr("logDay",{day:m[1]});
  if((m=value.match(/^天亮了，昨夜 (.+) 遇袭出局。$/)))return tr("logAttack",{name:displayName(m[1])});
@@ -1864,7 +1868,7 @@ function winCheck(){
  if(st.day>12){cancelPhaseTimer();st.winner="狼人阵营";st.phase="ended";log("月夜持续太久，狼人占据了村庄。");return true}
  return false
 }
-function beginNight(){nightSerial++;st.phase="night";st.nightResolving=false;st.night={};st.votes={};st.speeches={};armPhaseTimer("night");log("第 "+st.day+" 夜：等待狼人、预言家和守卫行动。");stepBots()}
+function beginNight(){nightSerial++;st.phase="night";st.nightResolving=false;st.night={};st.votes={};st.speeches={};armPhaseTimer("night");log("第 "+st.day+" 夜：夜间行动开始。");stepBots()}
 function stepBots(){
  if(!st||st.phase==="ended"||st.phase==="lobby")return;
  if(st.phase==="night"){
@@ -1874,7 +1878,8 @@ function stepBots(){
   if(!st.nightResolving&&live().filter(function(p){return ["wolf","seer","guard"].includes(p.role)}).every(function(p){return !!st.night[p.id]})){
    st.nightResolving=true;var serial=nightSerial;
    var elapsed=Date.now()-(st.phaseStartAt||Date.now());
-   setTimeout(function(){if(st&&st.phase==="night"&&st.nightResolving&&nightSerial===serial){finishNight();broadcast()}},Math.max(1500,NIGHT_MIN_MS-elapsed));
+   var minWait=st.deadlineAt?NIGHT_MIN_MS:SOLO_NIGHT_MIN_MS;
+   setTimeout(function(){if(st&&st.phase==="night"&&st.nightResolving&&nightSerial===serial){finishNight();broadcast()}},Math.max(0,minWait-elapsed));
   }
  }else if(st.phase==="talk"){
   live().filter(function(p){return p.bot&&!st.speeches[p.id]}).forEach(function(p){botSpeech(p)});
@@ -2330,10 +2335,14 @@ function updatePhaseHud(){
  round.hidden=v.phase!=="night";
  if(v.phase==="night"){
   var nightMs=Math.max(0,(v.phaseElapsed||0)+elapsed);
-  var index=Math.floor(nightMs/NIGHT_PROMPT_MS);
+  var interval=v.deadlineActive?NIGHT_PROMPT_MS:SOLO_NIGHT_PROMPT_MS;
+  var index=Math.floor(nightMs/interval);
   var keys=["nightWolfRound","nightSeerRound","nightGuardRound"];
   $("nightTurnLabel").textContent=tr(keys[index]||"nightWaitRound");
-  $("nightTurnCount").textContent=index<3?(index+1)+"/3":"";
+  if(index<3){
+   var seconds=Math.max(1,Math.ceil((interval-nightMs%interval)/1000));
+   $("nightTurnCount").textContent=tr("nightCueCountdown",{seconds:seconds,turn:index+1});
+  }else $("nightTurnCount").textContent="";
  }
 }
 
