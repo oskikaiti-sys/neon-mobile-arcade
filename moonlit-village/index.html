@@ -2247,7 +2247,7 @@ var SPEECH_GROUPS={
  support:["trust","trustVote","followSeer"],
  identity:["claimSeer","claimGuard","claimVillager"],
  report:["gold","black"],
- analysis:["question","analyseVotes","analyseClaims","defend","pass"]
+ analysis:["question","analyseVotes","analyseClaims","defend","clue","pass"]
 };
 var SPEECH_LINES={
  zh:{
@@ -2419,7 +2419,7 @@ function botSpeech(p){
  if(!people.length){speak(p.id,"pass",null);return}
  var history=st.publicHistory||[],votes=st.voteHistory||[];
  var hasClaim=history.some(function(h){return h.id===p.id&&roleClaim(h.kind)});
- var known=(st.known[p.id]||[]).slice().reverse().find(function(k){return person(k.id)&&person(k.id).alive&&k.id!==p.id});
+ var known=(st.known[p.id]||[]).slice().reverse().find(function(k){return k.night===st.day&&person(k.id)&&person(k.id).alive&&k.id!==p.id});
  var seerClaim=history.slice().reverse().find(function(h){return h.id!==p.id&&roleClaim(h.kind)==="seer"&&person(h.id)&&person(h.id).alive});
  var claimant=people.find(function(q){return lastClaim(history,q.id,false)});
  var voteTarget=people.find(function(q){return lastVote(votes,q.id)});
@@ -2771,7 +2771,7 @@ function stageAdvanceQueue(){
   $("speakerName").textContent=localized?localized.speaker:displayName(match[1]);
   $("speakerLine").textContent=localized?localized.text:match[2];
   $("speakerOverlay").hidden=false;
-  stageTimer=setTimeout(stageFinishSpeech,Math.min(3000,Math.max(1600,1250+Array.from(match[2]).length*45)));
+  stageTimer=setTimeout(stageFinishSpeech,Math.min(5000,Math.max(1900,1300+Array.from(match[2]).length*55)));
   return;
  }
  $("speakerOverlay").hidden=true;
