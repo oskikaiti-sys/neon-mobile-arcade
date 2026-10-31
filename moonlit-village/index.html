@@ -2300,6 +2300,95 @@ function winCheck(){
  return false
 }
 function beginNight(){nightSerial++;st.phase="night";st.nightStage=0;st.night={};st.nightFeedback={};st.votes={};st.speeches={};armNightTurn();log("第 "+st.day+" 夜：夜间行动开始。")}
+
+/* Public evidence-only confrontation; a claim is never automatic proof. */
+var DEBATE_KINDS=["reason","claim","report","vote","pass"],DEBATE_REPLIES=["explain","counter","admit","avoid","silence"];
+function debateEvidence(id,kind){
+ if(kind==="reason")return {day:st.day};
+ if(kind==="claim"){
+  var a=(st.publicHistory||[]).filter(function(h){return h.id===id&&roleClaim(h.kind)});
+  var h=a[a.length-1];return h?{day:h.day,role:roleClaim(h.kind)}:null;
+ }
+ if(kind==="report"){
+  var a=aiReportsBy(id),h=a[a.length-1];
+  return h?{day:h.day,subject:h.targetId,report:h.kind}:null;
+ }
+ if(kind==="vote"){var v=lastVote(st.voteHistory||[],id);return v?{day:v.day,subject:v.targetId}:null}
+ return null;
+}
+function debateContradiction(id,kind){
+ if(kind==="claim"){
+  return new Set((st.publicHistory||[]).filter(function(h){return h.id===id&&roleClaim(h.kind)})
+    .map(function(h){return roleClaim(h.kind)})).size>1;
+ }
+ if(kind==="report"){
+  var seen={};
+  return aiReportsBy(id).some(function(h){
+   var conflict=seen[h.targetId]&&seen[h.targetId]!==h.kind;
+   seen[h.targetId]=h.kind;
+   var shown=aiVisibleAlignment(h.targetId);
+   return conflict||!!(shown&&((h.kind==="black")!==(shown==="wolf")));
+  });
+ }
+ return false;
+}
+function recordChallenge(id,targetId,kind){
+ if(st.debateChoices[id]!==undefined||!DEBATE_KINDS.includes(kind))return;
+ var p=person(id),target=targetId&&person(targetId);
+ if(!p||!p.alive)return;
+ if(kind==="pass"){st.debateChoices[id]={kind:kind};return}
+ if(!target||!target.alive||targetId===id)return;
+ var evidence=debateEvidence(targetId,kind);if(!evidence)return;
+ var h={day:st.day,id:id,targetId:targetId,kind:kind,evidence:evidence};
+ st.debateChoices[id]=h;st.debateChallenges.push(h);
+ publicEvent("challenge",id,targetId,{kind:kind,evidence:evidence});
+ log(p.name+"：「"+debateLine("zh","challenge",h)+"」","choice");
+ st.logs[st.logs.length-1].debateData={part:"challenge",item:h};
+}
+function recordReply(id,kind){
+ if(st.debateReplies[id]!==undefined||!st.debateTargets.includes(id)||!DEBATE_REPLIES.includes(kind))return;
+ var p=person(id);if(!p||!p.alive)return;
+ var challenged=st.debateChallenges.filter(function(h){return h.targetId===id});
+ var contradicted=challenged.some(function(h){return debateContradiction(id,h.kind)});
+ var h={day:st.day,id:id,kind:kind,contradicted:contradicted};
+ st.debateReplies[id]=h;st.debateOutcomes.push(h);
+ publicEvent("reply",id,null,{kind:kind,contradicted:contradicted});
+ if(kind==="silence")return;
+ log(p.name+"：「"+debateLine("zh","reply",h)+"」","choice");
+ st.logs[st.logs.length-1].debateData={part:"reply",item:h};
+}
+function beginDebate(){
+ st.phase="debate";st.debateStage="challenge";st.debateChoices={};st.debateReplies={};st.debateTargets=[];st.debateChallenges=[];
+ log("公开发言结束，进入质疑阶段。","news");armPhaseTimer("debate");stepBots();
+}
+function beginReplies(){
+ st.debateTargets=[...new Set(st.debateChallenges.map(function(h){return h.targetId}))].filter(function(id){return person(id)&&person(id).alive});
+ if(!st.debateTargets.length){beginVoteAfterDebate();return}
+ st.debateStage="reply";st.debateReplies={};
+ log("质疑结束，被质疑者获得一次回应机会。","news");armPhaseTimer("debate");stepBots();
+}
+function beginVoteAfterDebate(){
+ st.phase="vote";st.debateStage=null;armPhaseTimer("vote");log("辩论结束，开始投票。","news");stepBots();
+}
+function botChallenge(p){
+ var ranked=aiRanking(p),top=ranked[0];
+ if(!top||top.score<.4){recordChallenge(p.id,null,"pass");return}
+ var target=top.p;
+ var kinds=["report","claim","vote"].filter(function(k){return !!debateEvidence(target.id,k)});
+ var kind=kinds.find(function(k){return debateContradiction(target.id,k)})||kinds[0]||"reason";
+ if(p.role==="wolf"){
+  var competitor=aiPublicRoleClaimers("seer").find(function(q){return q.id!==p.id});
+  if(competitor&&Math.random()<.55){target=competitor;kind=debateEvidence(target.id,"report")?"report":"claim"}
+ }
+ recordChallenge(p.id,target.id,kind);
+}
+function botReply(p){
+ var challenged=st.debateChallenges.filter(function(h){return h.targetId===p.id});
+ var contradictory=challenged.some(function(h){return debateContradiction(p.id,h.kind)});
+ var temperament=aiState(p).temperament;
+ recordReply(p.id,contradictory?(temperament==="opportunist"?"counter":"admit"):
+  temperament==="assertive"?"counter":"explain");
+}
 function stepBots(){
  if(!st||st.phase==="ended"||st.phase==="lobby")return;
  if(st.phase==="night"){return;}else if(st.phase==="talk"){
