@@ -652,6 +652,102 @@ body.game-active #gameScreen>.panel.log-surface #feed{
  padding:30px 4px 6px;
 }
 
+
+/* UI 3/3 — give the scrollable dialogue log all flexible height.
+   Four compact actions form 2x2 rows at 390px; the role remains visible in the resident header. */
+body.game-active main{padding-bottom:max(10px,env(safe-area-inset-bottom))!important}
+body.game-active #gameScreen{
+ grid-template-rows:38px minmax(0,1fr) 114px auto!important;
+ gap:6px;min-height:0;overflow:hidden;
+}
+body.game-active #gameScreen.is-lobby{
+ grid-template-rows:94px minmax(0,1fr) 114px auto!important
+}
+body.game-active #gameScreen>.panel:nth-child(1){grid-row:1}
+body.game-active #gameScreen>.panel.log-surface{grid-row:2;min-height:0;overflow:hidden}
+body.game-active #gameScreen>.residents-panel{grid-row:3;min-height:0;overflow:hidden}
+body.game-active #gameScreen>.panel:nth-child(4){grid-row:4;min-height:0;overflow:hidden}
+body.game-active #gameScreen>.role-panel-retired{display:none!important}
+body.game-active #gameScreen>.residents-panel h2.residents-heading{
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.65fr);
+ align-items:center;gap:7px;margin:0 0 5px;
+ min-height:25px;max-height:50px;line-height:1.2;font-weight:600;
+}
+body.game-active .residents-heading-title{font-size:11px;letter-spacing:.2px;white-space:nowrap;min-width:0}
+body.game-active #countInfo{font-size:9px;font-weight:400}
+body.game-active #myRole.role-chip{
+ display:block;min-width:0;max-width:100%;overflow:hidden;
+ padding:2px 6px;border-left:1px solid rgba(232,200,114,.5);
+ background:rgba(232,200,114,.06);text-align:right;
+ color:var(--gold);font-size:10px;line-height:1.3;
+}
+body.game-active #myRole.role-chip strong{font-size:10px;font-weight:650}
+body.game-active #myRole.role-chip .small{font-size:9px;line-height:1.2;color:var(--muted)}
+body.game-active #gameScreen>.residents-panel #players{
+ flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr));
+}
+body.game-active #gameScreen>.panel.log-surface #feed{
+ flex:1;min-height:0;max-height:none;overflow-y:auto;
+}
+body.game-active #gameScreen>.panel:nth-child(4){padding:8px 9px!important}
+body.game-active #gameScreen>.panel:nth-child(4) h2{
+ font-size:12px;line-height:1.2;margin:0 0 6px
+}
+body.game-active #actions,
+body.game-active #actions.targets,
+body.game-active #actions.rpg-menu,
+body.game-active #actions.rpg-target-menu{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ grid-auto-rows:minmax(56px,auto)!important;gap:5px!important;min-height:0;
+}
+body.game-active #actions>button,
+body.game-active #actions.rpg-menu>button,
+body.game-active #actions.rpg-target-menu>button{
+ height:auto;min-height:56px!important;max-height:none!important;
+ padding:6px 7px!important;align-items:center;
+}
+body.game-active #actions .action-icon{
+ flex:0 0 25px;width:25px;height:25px;margin-right:6px;
+}
+body.game-active #actions .action-icon svg{width:17px;height:17px}
+body.game-active #actions .action-target-face{
+ flex:0 0 27px;width:27px;height:27px;margin-right:5px;
+}
+body.game-active #actions .action-name,
+body.game-active #actions.targets .action-name{
+ color:var(--ink);font-size:16px;font-weight:600;line-height:1.22;
+}
+body.game-active #actions .action-desc,
+body.game-active #actions.targets .action-desc{
+ color:var(--muted);font-size:12px;line-height:1.15;
+}
+body.game-active #actions .action-copy{gap:2px;min-width:0}
+body.game-active #actions .action-chevron{margin-left:3px;font-size:14px}
+body.game-active #notice{font-size:11px;line-height:1.3;margin:4px 0 0}
+@media(max-width:430px){
+ body.game-active #gameScreen{grid-template-rows:36px minmax(0,1fr) 112px auto!important;gap:5px}
+ body.game-active #gameScreen.is-lobby{grid-template-rows:93px minmax(0,1fr) 112px auto!important}
+ body.game-active #gameScreen>.residents-panel{padding:5px 7px!important}
+ body.game-active #gameScreen>.residents-panel h2.residents-heading{min-height:24px;gap:4px;margin-bottom:4px}
+ body.game-active #myRole.role-chip{font-size:9px;padding:2px 4px}
+ body.game-active #myRole.role-chip strong{font-size:9px}
+ body.game-active #actions>button,
+ body.game-active #actions.rpg-menu>button,
+ body.game-active #actions.rpg-target-menu>button{padding:5px 6px!important}
+ body.game-active #actions .action-chevron{display:none}
+}
+@media(max-width:350px){
+ body.game-active #actions .action-icon{flex-basis:21px;width:21px;height:21px;margin-right:4px}
+ body.game-active #actions .action-name{font-size:14px}
+ body.game-active #actions .action-desc{font-size:11px}
+}
+@media(max-height:650px){
+ body.game-active #gameScreen{grid-template-rows:33px minmax(0,1fr) 102px auto!important}
+ body.game-active #gameScreen.is-lobby{grid-template-rows:90px minmax(0,1fr) 102px auto!important}
+ body.game-active #gameScreen>.panel:nth-child(4){padding:5px 7px!important}
+ body.game-active #gameScreen>.panel:nth-child(4) h2{margin:0 0 3px}
+}
+
 </style>
 </head>
 <body>
@@ -675,8 +771,8 @@ body.game-active #gameScreen>.panel.log-surface #feed{
 <div class="topbar"><span class="pill" id="phaseTag">准备开始</span><span id="roomInfo"></span></div>
 <div class="btns" id="shareBtns"></div>
 </div>
-<div class="panel"><h2>村庄居民 <span class="small" id="countInfo"></span></h2><div id="players" class="players"></div></div>
-<div class="panel"><h2>你的身份</h2><div id="myRole" class="role">等待身份分配</div></div>
+<div class="panel residents-panel"><h2 class="residents-heading"><span class="residents-heading-title">村庄居民 <span class="small" id="countInfo"></span></span><span id="myRole" class="role-chip" aria-label="你的身份">等待身份分配</span></h2><div id="players" class="players"></div></div>
+<div class="role-panel-retired" hidden aria-hidden="true"></div>
 <div class="panel"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
 <div class="panel log-surface"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
 </section>
