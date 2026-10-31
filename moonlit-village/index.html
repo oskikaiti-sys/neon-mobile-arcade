@@ -2477,6 +2477,13 @@ function botChallenge(p){
  /* Only challenge an actual claim, report, vote or expressed accusation.
     First-day absence of voting records is not a suspicious statement. */
  var history=st.publicHistory||[];
+ if(p.role!=="wolf"){
+  var refuted=targetList(p.id).find(function(q){return aiSeerStoryRefuted(p,q)});
+  if(refuted){
+   recordChallenge(p.id,refuted.id,"report");
+   return;
+  }
+ }
  var options=aiRanking(p).map(function(x){
   var q=x.p;
   var types=["report","claim","vote"].filter(function(k){return !!debateEvidence(q.id,k)});
@@ -2649,9 +2656,54 @@ function aiNoise(a,b){
  for(var i=0;i<textId.length;i++)hash=(hash*33+textId.charCodeAt(i))|0;
  return (Math.abs(hash%1000)/1000)-.5;
 }
+
+/* One living wolf is a hard game invariant; role and Seer reports are
+   HYPOTHESES, not facts. Refute impossible combinations without reading
+   concealed roles. In particular, a good player knows their own alignment.
+   A refuted Seer story is NOT proof the storyteller is the wolf: even good
+   residents can bluff. */
+function aiSeerSlotContradiction(observer,claimer){
+ if(!observer||observer.role==="wolf"||!claimer||claimer.id===observer.id||
+    !claimer.alive||aiClaimFor(claimer.id)!=="seer")return null;
+ var alive=live();
+ if(alive.length<3)return null;
+ var clears=aiReportsBy(claimer.id).filter(function(h){
+  return h.kind==="gold"&&h.targetId&&person(h.targetId)&&person(h.targetId).alive;
+ });
+ if(!clears.length)return null;
+ var excluded=new Set([observer.id,claimer.id]);
+ /* Under the hypothesis that this person is a truthful Seer, all their
+    publicly cleared living players are also non-wolves. */
+ clears.forEach(function(h){excluded.add(h.targetId)});
+ (st.known[observer.id]||[]).forEach(function(k){
+  if(observer.role==="seer"&&!k.evil&&person(k.id)&&person(k.id).alive)excluded.add(k.id);
+ });
+ var wolfSlots=alive.filter(function(q){return !excluded.has(q.id)});
+ if(wolfSlots.length)return null;
+ return {claimerId:claimer.id,goldIds:[...new Set(clears.map(function(h){return h.targetId}))],
+  reason:"no-wolf-slot",possibleWolfSlots:0};
+}
+function aiSeerStoryRefuted(observer,target){
+ return !!aiSeerSlotContradiction(observer,target);
+}
+function aiPositiveTrustBasis(observer,target){
+ if(!target||target.id===observer.id)return false;
+ /* A wolf may deliberately build social cover, but only after someone has
+    actually spoken; no random unconditional first-day endorsements. */
+ if(observer.role==="wolf")return (st.publicHistory||[]).some(function(h){return h.id===target.id});
+ var known=aiObservedInspection(observer,target.id);
+ if(known)return !known.evil;
+ /* Matching a *publicly verified* historical report provides some basis
+    for cautious trust, though it is never proof of Seer identity. */
+ return st.day>1&&aiClaimFor(target.id)==="seer"&&
+  aiReportsBy(target.id).some(function(h){
+   return h.kind==="gold"&&aiVisibleAlignment(h.targetId)==="good";
+  })&&!aiSeerStoryRefuted(observer,target);
+}
 function aiCredibility(observer,id){
  var history=st.publicHistory||[],claims=history.filter(function(h){return h.id===id&&roleClaim(h.kind)});
  var confidence=1,distinct={};
+ if(aiSeerStoryRefuted(observer,person(id)))confidence-=1.0;
  claims.forEach(function(h){distinct[roleClaim(h.kind)]=true});
  if(Object.keys(distinct).length>1)confidence-=.65;
  var reports=aiReportsBy(id),seen={};
@@ -2669,6 +2721,9 @@ function aiCredibility(observer,id){
 function aiSuspicion(observer,target){
  if(!target||observer.id===target.id)return -99;
  var score=.7+aiNoise(observer.id,target.id)*.38;
+ /* Hard deduction precedes soft heuristic evidence. It proves that the
+    claimant's Seer+clear story is impossible, not their exact hidden role. */
+ if(aiSeerStoryRefuted(observer,target))score+=8.0;
  var history=st.publicHistory||[],allVotes=st.voteHistory||[];
  var ownKnowledge=aiObservedInspection(observer,target.id);
  if(ownKnowledge)return ownKnowledge.evil?20:-15;
@@ -2870,6 +2925,7 @@ var SPEECH_GROUPS={
 };
 var SPEECH_LINES={
  zh:{
+  suspectNoWolfSlot:"{name}自称预言家，还给{related}发了金水。但我知道自己不是狼人，如果这两句话都是真的，所有存活的人就都不是狼。游戏仍在进行，说明这套身份与查验说法不可能同时成立。请解释这个矛盾。",
  analyseDualSeer:"目前{speaker}和{related}都公开跳了预言家。六人局只有一个真正的预言家，应检查双方查验日期、金水、查杀和已揭晓的身份，不能同时相信两人。",
  counterClaimSeer:"我也跳预言家。{speaker}自称预言家并不能证明是真的，现在是对跳局面，请大家核对双方查验记录和公开票型。",
  suspectFalseBlack:"{name}之前查杀了{related}，可公开结果已经证明对方是好人。这是直接矛盾，需要解释。",
@@ -2905,6 +2961,7 @@ var SPEECH_LINES={
  defendNone:"有人怀疑我可以提出依据，我会回应。但现阶段别把没有来源的猜测说成已经查验过。"
  },
  en:{
+  suspectNoWolfSlot:"{name} claims Seer and gave a clear to {related}. I know I am not a werewolf. If both claims were true, none of the living players could be the wolf—yet the game continues. This Seer story is logically inconsistent. Explain it.",
  analyseDualSeer:"Both {speaker} and {related} have claimed Seer. Only one true Seer exists in this six-person game. Compare their inspection dates, clears, accusations, and public reveals.",
  counterClaimSeer:"I also claim Seer. {speaker}'s claim alone is not proof. We have competing claims: compare our inspections and the public ballots.",
  suspectFalseBlack:"{name} accused {related} of being a werewolf, but the public result confirmed they were good. That contradiction needs an explanation.",
@@ -2940,6 +2997,7 @@ var SPEECH_LINES={
  defendNone:"I'm willing to answer questions. But a suspicion without a source is not an inspection result."
  },
  ja:{
+  suspectNoWolfSlot:"{name}は占い師COし、{related}に白を出しました。私は自分が人狼ではないと知っています。その2つの主張が両方正しければ、生存者に人狼が一人もいなくなります。ゲームが続いている以上、この説明は矛盾しています。説明してください。",
  analyseDualSeer:"{speaker}と{related}がともに占い師COをしています。この6人村の本物は1人だけです。占い日時、白黒判定、公開された結果を比べましょう。",
  counterClaimSeer:"私も占い師COです。{speaker}のCOだけでは本物と証明できません。対抗COになったので、結果と票型を比べてください。",
  suspectFalseBlack:"{name}は{related}に黒を出しましたが、公開結果ではその人は村側でした。この矛盾の説明が必要です。",
@@ -3031,6 +3089,13 @@ function speechRecord(p,kind,target){
   }
  }
  if(p.bot&&kind==="suspect"&&target){
+  var slot=aiSeerSlotContradiction(p,target);
+  if(slot){
+   data.kind="suspectNoWolfSlot";
+   var latest=slot.goldIds.map(function(id){return person(id)}).filter(Boolean);
+   data.related=latest.map(function(q){return q.name}).join("、");
+   return data;
+  }
   var falseBlack=history.slice().reverse().find(function(h){
    return h.id===target.id&&h.kind==="black"&&h.targetId&&aiVisibleAlignment(h.targetId)==="good";
   });
@@ -3099,7 +3164,8 @@ function aiUnreportedCheck(p){
  })||null;
 }
 function aiBestAlly(p){
- var ranked=aiRanking(p).slice().sort(function(a,b){return a.score-b.score});
+ var ranked=aiRanking(p).filter(function(x){return aiPositiveTrustBasis(p,x.p)});
+ ranked.sort(function(a,b){return a.score-b.score});
  return ranked.length&&ranked[0].score<1.55?ranked[0].p:null;
 }
 function aiStrongestRivalSeer(p){
@@ -3119,6 +3185,12 @@ function aiChooseSpeech(p){
  var threat=lead&&lead.score>1.15?lead.p:null;
  var ally=aiBestAlly(p),rival=aiStrongestRivalSeer(p);
  var existing=aiClaimFor(p.id),left=live().length;
+ /* Refute claims that leave no possible wolf, before considering style,
+    random speech options or routine probability scores. */
+ if(p.role!=="wolf"){
+  var refuted=targetList(p.id).find(function(q){return aiSeerStoryRefuted(p,q)});
+  if(refuted)return {kind:"suspect",targetId:refuted.id,reason:"impossible-seer-clear"};
+ }
  /* These stable temperaments affect risk-taking, but never grant new facts. */
  var styleShift={cautious:.14,analytical:.04,assertive:-.07,opportunist:-.12};
  var roll=Math.max(.001,Math.min(.999,Math.random()+(styleShift[brain.temperament]||0)));
@@ -3174,7 +3246,7 @@ function aiChooseSpeech(p){
  if(threat&&lead.score>2.0&&roll<.77)return choose("suspect",threat,"evidence-led-pressure");
  if(threat&&lastVote(votes,threat.id)&&roll<.69)
   return choose("suspectVote",threat,"ballot-accountability");
- if(rival&&aiCredibility(p,rival.id)>.5&&aiSuspicion(p,rival)<1.1&&roll<.57)
+ if(rival&&aiPositiveTrustBasis(p,rival)&&aiCredibility(p,rival.id)>.5&&aiSuspicion(p,rival)<1.1&&roll<.57)
   return choose("followSeer",rival,"conditional-seer-trust");
  if(ally&&roll<.35)return choose("trust",ally,"support-public-ally");
  if(threat&&aiClaimFor(threat.id)&&roll<.48)return choose("challengeClaim",threat,"test-claim");
@@ -3221,6 +3293,7 @@ function speak(id,kind,targetId){
    villagers or the Guardian. */
 function aiVotingEvidence(observer,target){
  if(!target||observer.id===target.id)return 0;
+ if(aiSeerStoryRefuted(observer,target))return 7;
  var actual=aiObservedInspection(observer,target.id);
  if(actual)return actual.evil?10:-10;
  if(observer.role==="seer"&&aiClaimFor(target.id)==="seer")return 5;
