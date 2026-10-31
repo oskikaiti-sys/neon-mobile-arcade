@@ -1372,7 +1372,7 @@ function playTimeScene(type){
  $("sceneSubtitle").textContent=type==="night"?"村庄陷入沉睡":"新的一天已经开始";
  /* restart animation if an earlier phase change is still playing */
  void el.offsetWidth;
- sceneTimer=setTimeout(function(){el.hidden=true;el.className="time-scene";sceneTimer=null},type==="night"?1450:1550);
+ sceneTimer=setTimeout(function(){el.hidden=true;el.className="time-scene";sceneTimer=null;stageAdvanceQueue()},type==="night"?1450:1550);
 }
 function handleTimeScene(v){
  var phase=v.phase;
@@ -1424,29 +1424,79 @@ document.addEventListener("error",function(e){
  }
 },true);
 function rpgFinishTyping(){ /* Legacy compatibility: typing animation removed by design. */ }
-function rpgRenderMessages(v){
- var feed=$("feed"),fingerprint=JSON.stringify(v.messages);
- if(fingerprint===rpgLogFingerprint)return;
- var oldCount=feed.querySelectorAll(".rpg-line").length;
- var previousLast=feed.getAttribute("data-last-message")||"";
- var incomingLast=v.messages.length?JSON.stringify(v.messages[v.messages.length-1]):"";
- feed.setAttribute("data-last-message",incomingLast);
- rpgLogFingerprint=fingerprint;
- var messages=v.messages.map(function(m){
+/* Speech presentation queue: show the speaker centrally, then archive that
+ * message into history. Read-only snapshots: no AI, rules, or sync mutations. */
+var stageHistory=[],stageQueue=[],stageCurrent=null,stageTimer=null,
+ stageSeenMessages=[],stageGameNo=null,stageFingerprint="";
+function stageReducedMotion(){
+ return !!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+function stagePaintHistory(){
+ var feed=$("feed");if(!feed)return;
+ feed.innerHTML=stageHistory.map(function(m){
   var spoken=m.kind==="choice"?String(m.text).match(/^(.+?)：「([\s\S]*)」$/):null;
-  if(spoken)return {speaker:spoken[1],text:spoken[2],spoken:true,danger:false};
-  return {speaker:null,text:m.text,spoken:false,danger:/遇袭|出局|被放逐|死亡|KO/.test(m.text)};
- });
- feed.innerHTML=messages.map(function(m,i){
-  var appear=i===messages.length-1&&incomingLast!==previousLast?" is-new":"";
-  if(!m.spoken)return '<div class="rpg-line rpg-narrator'+(m.danger?' is-danger':'')+appear+'">'+
-   (m.danger?'<span aria-hidden="true">☾ </span>':'')+escapeHtml(m.text)+'</div>';
-  return '<div class="rpg-line rpg-dialogue'+appear+'">'
-   +rpgPortraitMarkup(m.speaker)
-   +'<div class="rpg-line-content"><span class="rpg-nameplate">'+escapeHtml(m.speaker)+'</span>'
-   +'<span class="rpg-spoken">'+escapeHtml(m.text)+'</span></div></div>';
+  if(spoken)return '<div class="rpg-line rpg-dialogue">'
+   +rpgPortraitMarkup(spoken[1])
+   +'<div class="rpg-line-content"><span class="rpg-nameplate">'+escapeHtml(spoken[1])+'</span>'
+   +'<span class="rpg-spoken">'+escapeHtml(spoken[2])+'</span></div></div>';
+  var danger=/遇袭|出局|被放逐|死亡|KO/.test(m.text);
+  return '<div class="rpg-line rpg-narrator'+(danger?' is-danger':'')+'">'
+   +(danger?'<span aria-hidden="true">☾ </span>':'')+escapeHtml(m.text)+'</div>';
  }).join("");
  feed.scrollTop=feed.scrollHeight;
+}
+function stageFinishSpeech(){
+ if(stageTimer!==null){clearTimeout(stageTimer);stageTimer=null}
+ if(!stageCurrent)return;
+ stageHistory.push(stageCurrent);
+ if(stageHistory.length>60)stageHistory.shift();
+ stageCurrent=null;
+ $("speakerOverlay").hidden=true;
+ stagePaintHistory();
+ stageAdvanceQueue();
+}
+function stageAdvanceQueue(){
+ if(stageCurrent)return;
+ if(!$("roleOverlay").hidden||!$("timeScene").hidden)return;
+ while(stageQueue.length){
+  var next=stageQueue.shift();
+  var match=next.kind==="choice"?String(next.text).match(/^(.+?)：「([\s\S]*)」$/):null;
+  if(!match||stageReducedMotion()){
+   stageHistory.push(next);
+   if(stageHistory.length>60)stageHistory.shift();
+   continue;
+  }
+  stagePaintHistory();
+  stageCurrent=next;
+  $("speakerPortrait").innerHTML=rpgPortraitMarkup(match[1]);
+  $("speakerName").textContent=match[1];
+  $("speakerLine").textContent=match[2];
+  $("speakerOverlay").hidden=false;
+  stageTimer=setTimeout(stageFinishSpeech,Math.min(3000,Math.max(1600,1250+Array.from(match[2]).length*45)));
+  return;
+ }
+ $("speakerOverlay").hidden=true;
+ stagePaintHistory();
+}
+function rpgRenderMessages(v){
+ var messages=v.messages||[],fingerprint=JSON.stringify(messages);
+ if(stageGameNo!==v.gameNo){
+  if(stageTimer!==null){clearTimeout(stageTimer);stageTimer=null}
+  stageGameNo=v.gameNo;stageHistory=[];stageQueue=[];stageCurrent=null;stageSeenMessages=[];stageFingerprint="";
+  $("speakerOverlay").hidden=true;
+ }
+ if(fingerprint===stageFingerprint)return;
+ stageFingerprint=fingerprint;
+ var incoming=messages.map(function(m){return JSON.stringify(m)});
+ var overlap=0,max=Math.min(stageSeenMessages.length,incoming.length);
+ for(var len=max;len>0;len--){
+  var fits=true;
+  for(var i=0;i<len;i++)if(stageSeenMessages[stageSeenMessages.length-len+i]!==incoming[i]){fits=false;break}
+  if(fits){overlap=len;break}
+ }
+ stageSeenMessages=incoming;
+ for(var j=overlap;j<messages.length;j++)stageQueue.push(messages[j]);
+ stageAdvanceQueue();
 }
 function rpgTargets(v){return v.players.filter(function(p){return p.alive&&p.id!==v.me})}
 function rpgHighlightTargets(){
@@ -1773,6 +1823,7 @@ document.addEventListener("click",function(e){
  var b=e.target.closest("button[data-do]");if(!b)return;
  if(b.classList){b.classList.add("is-activated");}
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
+ if(action==="skipSpeech"){playSfx("cursor");stageFinishSpeech();return;}
  if(action==="musicToggle"){unlockSfx();toggleMusic();return;}
  unlockSfx();
  var clickSound={back:"cancel",pickSpeech:"cursor",create:"confirm",join:"confirm",
@@ -1782,7 +1833,7 @@ document.addEventListener("click",function(e){
  if(clickSound)playSfx(clickSound);
  ensureMusic();
  if(action==="flipRole"){if(!$("roleOverlay").classList.contains("revealed")){$("roleOverlay").classList.add("revealed");$("roleContinue").hidden=false;$("roleCard").disabled=true;$("drawHint").textContent="身份已经揭晓，准备进入村庄";}}
- else if(action==="closeRole"){$("roleOverlay").hidden=true;if(pendingScene){playTimeScene(pendingScene);pendingScene=null;}}
+ else if(action==="closeRole"){$("roleOverlay").hidden=true;if(pendingScene){playTimeScene(pendingScene);pendingScene=null;}else stageAdvanceQueue();}
  else if(action==="solo")makeSolo();
  else if(action==="create")makeRoom();
  else if(action==="join")joinRoom();
