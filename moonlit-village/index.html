@@ -1106,13 +1106,55 @@ body.game-active #gameScreen>.game-actions{max-height:min(42dvh,290px)}
 body.game-active .speaker-card-line{overflow-wrap:anywhere}
 @media(max-width:375px){.lang-control select{width:67px;font-size:11px;padding-left:5px;padding-right:16px}.lang-control:after{right:4px}
  body.game-active header h1{max-width:calc(100% - 150px);font-size:15px}}
+
+/* Accessible settings overlay: visible 40px gears, 48px touch area. */
+body.game-active header h1{max-width:calc(100% - 215px)!important}
+.settings-toggle{position:absolute;right:48px;top:50%;transform:translateY(-50%);z-index:6;
+ width:48px;height:48px;min-width:48px!important;min-height:48px!important;
+ display:grid;place-items:center;border:0!important;border-radius:50%;padding:0!important;
+ background:transparent!important;color:var(--gold)}
+.settings-toggle::before{content:"";position:absolute;width:40px;height:40px;border-radius:50%;
+ border:1px solid rgba(232,200,114,.35);background:rgba(20,28,58,.6)}
+.settings-toggle svg{position:relative;z-index:1;width:21px;height:21px}
+.settings-toggle:focus-visible{outline:2px solid var(--gold)}
+.settings-overlay{position:fixed;inset:0;z-index:150;display:grid;place-items:center;
+ padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));
+ background:rgba(10,15,31,.94);overflow:auto}
+.settings-overlay[hidden]{display:none!important}
+.settings-panel{width:min(100%,420px);max-height:calc(100dvh - 32px);overflow-y:auto;
+ padding:18px 16px!important;box-sizing:border-box}
+.settings-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.settings-panel-head h2{color:var(--gold);margin:0;font-size:20px}
+.settings-close{width:48px;height:48px;min-height:48px;border:1px solid rgba(232,200,114,.3);
+ background:rgba(20,28,58,.6);color:var(--ink);font-size:26px;border-radius:10px}
+.settings-field{margin-top:15px}
+.settings-field>label,.settings-field-label{display:block;font-size:14px;font-weight:600;margin:0 0 8px;color:var(--ink)}
+.settings-range{display:flex;gap:14px;align-items:center}
+.settings-range input[type=range]{flex:1;width:100%;min-width:0;min-height:48px;accent-color:var(--gold)}
+.settings-range output{width:48px;text-align:right;color:var(--gold);font-variant-numeric:tabular-nums;font-size:13px}
+.settings-avatar-row{display:flex;align-items:center;gap:13px}
+.settings-avatar-preview{flex:0 0 72px;width:72px;height:72px;display:grid;place-items:center;overflow:hidden;
+ border:1px solid rgba(232,200,114,.5);border-radius:50%;color:var(--gold);background:rgba(20,28,58,.8)}
+.settings-avatar-preview img{width:100%;height:100%;object-fit:cover}
+.settings-avatar-preview img[hidden]{display:none!important}
+.settings-avatar-buttons{min-width:0;flex:1;display:flex;flex-direction:column;gap:6px}
+.settings-upload,.settings-remove,.settings-done{display:grid;place-items:center;box-sizing:border-box;
+ border:1px solid rgba(232,200,114,.4);border-radius:8px;background:rgba(20,28,58,.7);
+ color:var(--ink);font-size:13px;min-height:48px!important;padding:7px 9px;text-align:center;cursor:pointer}
+.settings-upload{color:var(--gold)}
+.settings-done{width:100%;margin-top:14px;background:rgba(232,200,114,.16);font-weight:700}
+.settings-file-input{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.settings-help,.settings-status{font-size:11px;line-height:1.45;color:var(--muted);margin:7px 0 0}
+.settings-status{color:var(--gold);min-height:14px}
+@media(max-width:380px){body.game-active header h1{max-width:calc(100% - 195px)!important;font-size:14px}}
+@media(prefers-reduced-motion:reduce){.settings-toggle,.settings-panel{animation:none!important}}
 </style>
 </head>
 <body>
 <div id="ambientSky" class="ambient-sky" aria-hidden="true"><div class="moon-glow"></div><div class="ambient-stars"><span class="ambient-star" style="--x:8%;--y:8%;--dur:17s;--delay:-0s"></span><span class="ambient-star" style="--x:17%;--y:19%;--dur:22s;--delay:-2s"></span><span class="ambient-star" style="--x:29%;--y:9%;--dur:26s;--delay:-4s"></span><span class="ambient-star" style="--x:39%;--y:24%;--dur:20s;--delay:-1s"></span><span class="ambient-star" style="--x:53%;--y:7%;--dur:24s;--delay:-3s"></span><span class="ambient-star" style="--x:66%;--y:18%;--dur:19s;--delay:-5s"></span><span class="ambient-star" style="--x:77%;--y:7%;--dur:21s;--delay:-2s"></span><span class="ambient-star" style="--x:91%;--y:14%;--dur:27s;--delay:-4s"></span><span class="ambient-star" style="--x:4%;--y:39%;--dur:24s;--delay:-6s"></span><span class="ambient-star" style="--x:15%;--y:50%;--dur:20s;--delay:-2s"></span><span class="ambient-star" style="--x:25%;--y:36%;--dur:23s;--delay:-5s"></span><span class="ambient-star" style="--x:36%;--y:54%;--dur:18s;--delay:-1s"></span><span class="ambient-star" style="--x:47%;--y:41%;--dur:25s;--delay:-6s"></span><span class="ambient-star" style="--x:59%;--y:56%;--dur:21s;--delay:-3s"></span><span class="ambient-star" style="--x:70%;--y:36%;--dur:28s;--delay:-4s"></span><span class="ambient-star" style="--x:82%;--y:47%;--dur:20s;--delay:-2s"></span><span class="ambient-star" style="--x:94%;--y:33%;--dur:26s;--delay:-5s"></span><span class="ambient-star" style="--x:7%;--y:78%;--dur:22s;--delay:-3s"></span><span class="ambient-star" style="--x:18%;--y:69%;--dur:27s;--delay:-1s"></span><span class="ambient-star" style="--x:31%;--y:87%;--dur:19s;--delay:-6s"></span><span class="ambient-star" style="--x:43%;--y:74%;--dur:24s;--delay:-4s"></span><span class="ambient-star" style="--x:56%;--y:90%;--dur:21s;--delay:-2s"></span><span class="ambient-star" style="--x:65%;--y:71%;--dur:26s;--delay:-5s"></span><span class="ambient-star" style="--x:78%;--y:84%;--dur:20s;--delay:-0s"></span><span class="ambient-star" style="--x:89%;--y:68%;--dur:23s;--delay:-3s"></span><span class="ambient-star" style="--x:96%;--y:92%;--dur:25s;--delay:-2s"></span></div></div>
 <audio id="bgmPlayer" src="assets/audio/contedefees_0016.mp3" preload="auto" loop playsinline></audio>
 <main>
-<header><label class="lang-control"><span class="sr-only" data-i18n="languageAria">Language</span><select id="languageSelect" aria-label="Language"><option value="en">EN</option><option value="zh">中文</option><option value="ja">日本語</option></select></label><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐" title="音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="19" rx="3" ry="2"/><ellipse cx="18" cy="17" rx="3" ry="2"/></svg></button><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1 data-i18n="title">Moonlit Village</h1><div class="subtitle" data-i18n="subtitle"></div></header>
+<header><button type="button" id="settingsToggle" class="settings-toggle" data-do="openSettings" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20h-2.55v-.11a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.17 15a1.7 1.7 0 0 0-1.55-1H6.5v-2.55h.12a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V5.5h2.55v.12a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1h.11v2.55h-.11a1.7 1.7 0 0 0-1.55 1Z"/></svg></button><label class="lang-control"><span class="sr-only" data-i18n="languageAria">Language</span><select id="languageSelect" aria-label="Language"><option value="en">EN</option><option value="zh">中文</option><option value="ja">日本語</option></select></label><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐" title="音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="19" rx="3" ry="2"/><ellipse cx="18" cy="17" rx="3" ry="2"/></svg></button><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1 data-i18n="title">Moonlit Village</h1><div class="subtitle" data-i18n="subtitle"></div></header>
 <section id="homeScreen" class="panel">
 <h2 data-i18n="homeTitle"></h2>
 <label for="myName" data-i18n="nameLabel"></label>
@@ -1179,6 +1221,27 @@ body.game-active .speaker-card-line{overflow-wrap:anywhere}
     <button class="primary" data-do="closeRole" id="roleContinue" data-i18n="enterVillage" hidden></button>
   </div>
 </div>
+<div id="settingsOverlay" class="settings-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+ <div class="settings-panel panel">
+  <div class="settings-panel-head"><h2 id="settingsTitle" data-i18n="settingsTitle">Settings</h2><button type="button" class="settings-close" data-do="closeSettings" aria-label="Close settings">×</button></div>
+  <div class="settings-field">
+   <label for="bgmVolume" data-i18n="bgmVolume">Music volume</label>
+   <div class="settings-range"><input id="bgmVolume" type="range" min="0" max="100" step="1" value="38"><output id="bgmVolumeValue" for="bgmVolume">38%</output></div>
+  </div>
+  <div class="settings-field">
+   <label for="effectsVolume" data-i18n="effectsVolume">Sound effects volume</label>
+   <div class="settings-range"><input id="effectsVolume" type="range" min="0" max="100" step="1" value="100"><output id="effectsVolumeValue" for="effectsVolume">100%</output></div>
+  </div>
+  <div class="settings-field avatar-field">
+   <span class="settings-field-label" data-i18n="avatarLabel">Your avatar</span>
+   <div class="settings-avatar-row"><div id="avatarPreview" class="settings-avatar-preview"><img id="avatarPreviewImage" alt="" hidden><span id="avatarPreviewPlaceholder" aria-hidden="true">✦</span></div>
+   <div class="settings-avatar-buttons"><label class="settings-upload" for="avatarUpload" data-i18n="uploadAvatar">Choose an image</label><input type="file" id="avatarUpload" accept="image/png,image/jpeg,image/webp" class="settings-file-input"><button type="button" data-do="removeAvatar" class="settings-remove" data-i18n="removeAvatar">Use a random portrait</button></div></div>
+   <p class="settings-help" data-i18n="avatarHelp">Pictures are resized to a small square before sharing with other players. No server uploads.</p>
+   <p id="avatarStatus" class="settings-status" aria-live="polite"></p>
+  </div>
+  <button type="button" class="settings-done" data-do="closeSettings" data-i18n="settingsDone">Done</button>
+ </div>
+</div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 <script>
@@ -1187,6 +1250,21 @@ body.game-active .speaker-card-line{overflow-wrap:anywhere}
 var $=function(id){return document.getElementById(id)};
 /* Client-local language dictionaries; multiplayer state remains language-neutral. */
 var translations={"en":{"title":"Moonlit Village","subtitle":"Six-player social deduction · Solo or with friends · Choice-based dialogue","homeTitle":"Enter the Moonlit Village","nameLabel":"Your nickname · no account needed","defaultName":"Traveler","solo":"Solo game · AI fills empty seats","create":"Create a friends room","roomLabel":"Enter your friend's 6-character room code","codePlaceholder":"e.g. A7BC29","join":"Join room","homeHint":"No install or account needed. Public speech and votes sync across players; nighttime roles and abilities remain private. The host must stay connected.","footer1":"Moonlit Village · A six-player social deduction game","footer2":"For 1–6 players · AI fills empty seats · Casual play","story":"Village Chronicle","leftRail":"Residents one to three","rightRail":"Residents four to six","musicOn":"Mute music and sound effects","musicOff":"Enable music and sound effects","musicTitle":"Sound","rolePending":"Awaiting role assignment","skip":"Continue","skipAria":"Continue and save this speech to the log","drawAria":"Draw your secret role card","dealTitle":"The cards are being shuffled","dealHint":"Tap the card to reveal your secret role","dealHintAfter":"Your role is revealed. Enter the village when ready.","cardBack":"Card of Fate","roleMystery":"Secret Role","enterVillage":"Enter the village","sceneNight":"Night falls","sceneNightSub":"The village falls asleep","sceneDay":"Dawn breaks","sceneDaySub":"A new day begins","phaseLobby":"Waiting for players","phaseNight":"Night {day} · Moonrise","phaseTalk":"Day {day} · Discussion","phaseVote":"Day {day} · Vote","phaseEnded":"Game over","soloInfo":"Solo game","roomInfo":"Room code: {code}","playersCount":"{humans} humans / {total} residents","you":"You","alive":"Alive","out":"Eliminated","speakerNow":"Speaking","roleWolf":"Werewolf","roleSeer":"Seer","roleGuard":"Guardian","roleVillager":"Villager","roleWolfDesc":"Attack one player at night","roleSeerDesc":"Inspect one player each night","roleGuardDesc":"Protect one player each night","roleVillagerDesc":"Identify the werewolf during the day","roleGood":"Village team","roleWolfTeam":"Werewolf team","roleGoodShort":"villager","roleWolfShort":"werewolf","roleUnassigned":"Your secret role appears here once the game starts.","inspection":"Night {night}: {name} is {alignment}","actionDefault":"Make a decision","actionLobby":"Ready to start","actionNight":"Night action","actionTalk":"Choose what to say","actionSuspectTarget":"Who do you suspect?","actionTrustTarget":"Who do you trust?","actionVote":"Cast your vote","actionResult":"Final result: {winner}","start":"Start game · AI fills empty seats","copy":"Copy invite link","again":"Play again","waitHostStart":"Waiting for the host to start.","spectate":"You have been eliminated. Watch the game.","nightNoAction":"You have no night action. Wait for dawn.","nightSubmitted":"Night choice submitted. Waiting for others.","talkOut":"You have been eliminated and cannot speak.","talkSubmitted":"Your statement has been sent. Waiting for others.","voteOut":"You have been eliminated and cannot vote.","voteSubmitted":"Vote submitted. Waiting for others.","waitHostAgain":"Waiting for the host to start another game.","attack":"Attack","inspect":"Inspect","protect":"Protect","nightTarget":"Choose a target","voteTarget":"Vote to eliminate","confirmTarget":"Confirm selection","confirmDesc":"Submit your choice","back":"Go back","backDesc":"Choose another statement","suspect":"I suspect someone","suspectDesc":"Name a suspicious resident","trust":"I trust someone","trustDesc":"Show your support","clue":"I have a clue","clueDesc":"Share a clue publicly","pass":"I'll stay quiet","passDesc":"Make no accusation","select":"Select {name}","portrait":"Portrait of {name}","logWait":"The village is waiting for players.","logNewLobby":"A new game is waiting to begin.","logJoin":"{name} joined the village.","logLeave":"{name} left the room.","logDisconnect":"{name} disconnected; AI takes over.","logMoon":"The moon rises. Everyone closes their eyes.","logNight":"Night {day}: The werewolf, seer and guardian make their choices.","logAttack":"Dawn breaks. {name} was attacked and eliminated overnight.","logSafe":"Dawn breaks. Nobody was harmed last night.","logDay":"Day {day}: Choose a public statement.","logTalkDone":"Everyone has spoken. Voting begins.","logVote":"{name} voted for {target}.","logTie":"The vote is tied. Nobody is eliminated today.","logExile":"Vote result: {name} is eliminated. Their alignment was {alignment}.","logGoodWin":"🏆 The village wins! The werewolf is gone.","logWolfWin":"🐺 The werewolf wins! The werewolves are no longer outnumbered.","logLongNight":"The long night ends with the werewolf taking over the village.","speechSuspect":"I suspect {name}.","speechTrust":"I trust {name}.","speechClue":"I have some clues.","speechPass":"I have nothing to add.","bot0":"Mist Raven","bot1":"Vera","bot2":"Graystone","bot3":"Isa","bot4":"Pinewind","bot5":"Star Sand","errPeer":"Multiplayer library failed to load. Check your internet connection.","errFull":"The room has started or is full.","errCreating":"Creating your room…","errCreate":"Could not create room: {reason}. Please refresh and try again.","errCode":"Enter a six-character room code.","errConnecting":"Connecting to room…","errDisconnected":"Room connection lost. Return home and rejoin.","errJoin":"Unable to join that room.","errHost":"Cannot reach the host. Check the room code or try another network.","errConnect":"Connection failed: {reason}.","errActionDisconnected":"Connection lost. Please rejoin.","copySuccess":"Invite link copied! You can also share room code {code}.","copyFail":"Could not copy automatically. Share room code {code}.","inviteDetected":"Invitation detected. Enter your name and tap Join room."},"zh":{"title":"月下疑云","subtitle":"六人迷你狼人杀 · 一个人也能开局 · 选项式发言","homeTitle":"踏入月下村庄","nameLabel":"你的昵称（无需注册）","defaultName":"旅人","solo":"单人挑战 · AI补位","create":"创建好友房间","roomLabel":"输入好友分享的六位房间码","codePlaceholder":"例如 A7BC29","join":"加入房间","homeHint":"无需安装或注册。公开发言与投票会同步；夜间身份和技能选择不会泄露。房主必须保持在线。","footer1":"月下疑云 · 原创轻量六人社交推理游戏","footer2":"适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐","story":"村庄公告","leftRail":"村庄居民，一至三号","rightRail":"村庄居民，四至六号","musicOn":"关闭音乐与音效","musicOff":"开启音乐与音效","musicTitle":"声音","rolePending":"等待身份分配","skip":"继续","skipAria":"结束发言动画并归档","drawAria":"翻开你的身份牌","dealTitle":"命运正在洗牌","dealHint":"轻触中央的牌，揭晓只有你能看见的身份","dealHintAfter":"身份已经揭晓，准备进入村庄","cardBack":"命运之牌","roleMystery":"神秘身份","enterVillage":"进入村庄","sceneNight":"夜幕降临","sceneNightSub":"村庄陷入沉睡","sceneDay":"黎明破晓","sceneDaySub":"新的一天已经开始","phaseLobby":"等待入场","phaseNight":"第 {day} 夜 · 夜幕","phaseTalk":"第 {day} 天 · 发言","phaseVote":"第 {day} 天 · 投票","phaseEnded":"游戏结束","soloInfo":"单人练习","roomInfo":"房间码：{code}","playersCount":"{humans} 位真人 / {total} 位居民","you":"你","alive":"在场","out":"已出局","speakerNow":"正在发言","roleWolf":"狼人","roleSeer":"预言家","roleGuard":"守卫","roleVillager":"村民","roleWolfDesc":"夜晚袭击一人","roleSeerDesc":"每晚查验一人","roleGuardDesc":"每晚保护一人","roleVillagerDesc":"白天找出狼人","roleGood":"好人阵营","roleWolfTeam":"狼人阵营","roleGoodShort":"好人","roleWolfShort":"狼人","roleUnassigned":"身份尚未分配，开局后仅你自己能看到。","inspection":"第 {night} 夜查验：{name} 是{alignment}","actionDefault":"做出决定","actionLobby":"准备开局","actionNight":"夜间行动","actionTalk":"选择公开发言","actionSuspectTarget":"选择怀疑对象","actionTrustTarget":"选择信任对象","actionVote":"投票放逐","actionResult":"最终结果：{winner}","start":"开始游戏 · 空位自动补电脑","copy":"复制邀请链接","again":"重新开局","waitHostStart":"等待房主点击开始。","spectate":"你已经出局，正在旁观。","nightNoAction":"今晚你无需行动，等待天亮。","nightSubmitted":"已提交夜间选择，等待其他玩家。","talkOut":"你已经出局，不能发言。","talkSubmitted":"发言已同步，等待其他玩家。","voteOut":"你已经出局，不能投票。","voteSubmitted":"你已投票，等待其他玩家。","waitHostAgain":"等待房主发起下一局。","attack":"袭击","inspect":"查验","protect":"保护","nightTarget":"选择目标","voteTarget":"投票放逐","confirmTarget":"确认这名居民","confirmDesc":"提交当前选择","back":"返回上一层","backDesc":"重新选择发言","suspect":"我怀疑某人","suspectDesc":"指出可疑的居民","trust":"我相信某人","trustDesc":"表达你的信任","clue":"我有线索","clueDesc":"公开透露线索","pass":"暂不表态","passDesc":"保留本轮意见","select":"选择 {name}","portrait":"{name} 的头像","logWait":"村庄正在等待玩家加入。","logNewLobby":"新的村庄正在等待开局。","logJoin":"{name} 加入了村庄。","logLeave":"{name} 离开了房间。","logDisconnect":"{name} 掉线，已由电脑接管。","logMoon":"月亮升起，所有人闭上眼睛。","logNight":"第 {day} 夜：等待狼人、预言家和守卫行动。","logAttack":"天亮了，昨夜 {name} 遇袭出局。","logSafe":"天亮了，昨夜是平安夜。","logDay":"第 {day} 天：请选择一句公开发言。","logTalkDone":"所有人发言完毕，开始投票。","logVote":"{name} 投票给 {target}。","logTie":"投票平局，今天无人被放逐。","logExile":"投票结果：{name} 被放逐，身份是「{alignment}」。","logGoodWin":"🏆 好人胜利！狼人已经出局。","logWolfWin":"🐺 狼人胜利！狼人的人数已不低于好人。","logLongNight":"月夜持续太久，狼人占据了村庄。","speechSuspect":"我怀疑 {name}。","speechTrust":"我相信 {name}。","speechClue":"我掌握了一些线索。","speechPass":"我暂不表态。","bot0":"雾鸦","bot1":"薇拉","bot2":"灰石","bot3":"伊莎","bot4":"松风","bot5":"星砂","errPeer":"联机库未加载。请检查网络连接。","errFull":"房间已经开始或人数已满。","errCreating":"正在创建房间…","errCreate":"创建房间失败：{reason}。可以刷新后再试。","errCode":"请输入六位房间码。","errConnecting":"正在连接房间…","errDisconnected":"房间连接已断开；请返回首页重新加入。","errJoin":"无法加入该房间。","errHost":"无法连接房主；请核对房间码，或尝试更换网络。","errConnect":"连接失败：{reason}","errActionDisconnected":"连接已断开，请重新加入。","copySuccess":"邀请链接已复制！也可以把房间码 {code} 发给朋友。","copyFail":"无法自动复制，请发送房间码：{code}","inviteDetected":"已识别邀请房间，填写昵称后点击加入房间。"},"ja":{"title":"月下の謎","subtitle":"6人の人狼ゲーム · ソロプレイ対応 · 選択式の発言","homeTitle":"月下の村へようこそ","nameLabel":"プレイヤー名（登録不要）","defaultName":"旅人","solo":"ソロプレイ · AIが補充","create":"友達用の部屋を作成","roomLabel":"友達から届いた6文字のルームコード","codePlaceholder":"例：A7BC29","join":"部屋に参加","homeHint":"インストール・登録不要。発言と投票は全員に同期し、夜の役職と行動は非公開です。ホストが退出すると部屋も終了します。","footer1":"月下の謎 · 6人用の人狼ゲーム","footer2":"1〜6人対応 · 空席はAIが補充 · カジュアルプレイ","story":"村の記録","leftRail":"村人1〜3","rightRail":"村人4〜6","musicOn":"音楽と効果音をオフ","musicOff":"音楽と効果音をオン","musicTitle":"サウンド","rolePending":"役職の割り当て待ち","skip":"続ける","skipAria":"発言演出を終了して履歴に保存","drawAria":"役職カードをめくる","dealTitle":"運命のカードをシャッフル中","dealHint":"カードをタップして自分だけの役職を確認","dealHintAfter":"役職を確認しました。村へ進みましょう。","cardBack":"運命のカード","roleMystery":"秘密の役職","enterVillage":"村へ入る","sceneNight":"夜が訪れる","sceneNightSub":"村は眠りにつく","sceneDay":"夜が明ける","sceneDaySub":"新しい一日が始まる","phaseLobby":"参加者を待っています","phaseNight":"{day}日目の夜","phaseTalk":"{day}日目 · 話し合い","phaseVote":"{day}日目 · 投票","phaseEnded":"ゲーム終了","soloInfo":"ソロプレイ","roomInfo":"ルームコード：{code}","playersCount":"人間 {humans}人 / 村人 {total}人","you":"自分","alive":"生存","out":"脱落","speakerNow":"発言中","roleWolf":"人狼","roleSeer":"占い師","roleGuard":"騎士","roleVillager":"村人","roleWolfDesc":"夜に一人を襲撃する","roleSeerDesc":"毎晩一人の正体を調べる","roleGuardDesc":"毎晩一人を守る","roleVillagerDesc":"昼に人狼を見つける","roleGood":"村人陣営","roleWolfTeam":"人狼陣営","roleGoodShort":"村人陣営","roleWolfShort":"人狼","roleUnassigned":"開始すると、あなたにだけ役職が表示されます。","inspection":"{night}日目の夜の占い：{name} は {alignment}","actionDefault":"行動を選択","actionLobby":"ゲームの準備","actionNight":"夜の行動","actionTalk":"発言を選ぶ","actionSuspectTarget":"疑う相手を選ぶ","actionTrustTarget":"信じる相手を選ぶ","actionVote":"追放投票","actionResult":"結果：{winner}","start":"ゲーム開始 · 空席はAIが補充","copy":"招待リンクをコピー","again":"もう一度プレイ","waitHostStart":"ホストの開始を待っています。","spectate":"脱落しました。観戦中です。","nightNoAction":"今夜の行動はありません。朝を待ちましょう。","nightSubmitted":"夜の行動を送信しました。ほかのプレイヤーを待機中。","talkOut":"脱落したため発言できません。","talkSubmitted":"発言を送信しました。ほかのプレイヤーを待機中。","voteOut":"脱落したため投票できません。","voteSubmitted":"投票しました。ほかのプレイヤーを待機中。","waitHostAgain":"ホストが次のゲームを始めるまでお待ちください。","attack":"襲撃","inspect":"占う","protect":"守る","nightTarget":"対象を選択","voteTarget":"追放に投票","confirmTarget":"この人に決定","confirmDesc":"選択を確定","back":"戻る","backDesc":"発言を選び直す","suspect":"誰かを疑う","suspectDesc":"怪しい村人を指名","trust":"誰かを信じる","trustDesc":"信頼を表明","clue":"手がかりがある","clueDesc":"手がかりを公開","pass":"発言を控える","passDesc":"意見を保留","select":"{name} を選択","portrait":"{name} のアイコン","logWait":"村は参加者を待っています。","logNewLobby":"新しいゲームの開始を待っています。","logJoin":"{name} が村に参加しました。","logLeave":"{name} が部屋を退出しました。","logDisconnect":"{name} の接続が切れ、AIが操作を引き継ぎました。","logMoon":"月が昇り、全員が目を閉じます。","logNight":"{day}日目の夜：人狼・占い師・騎士が行動します。","logAttack":"朝になりました。昨夜、{name} が襲撃され脱落しました。","logSafe":"朝になりました。昨夜は誰も襲われませんでした。","logDay":"{day}日目：発言を選んでください。","logTalkDone":"全員の発言が終わりました。投票を始めます。","logVote":"{name} は {target} に投票しました。","logTie":"票が同数のため、今日は誰も追放されません。","logExile":"投票結果：{name} が追放されました。陣営は「{alignment}」でした。","logGoodWin":"🏆 村人陣営の勝利！人狼は追放されました。","logWolfWin":"🐺 人狼陣営の勝利！人狼の数が村人以上になりました。","logLongNight":"長い夜の末、人狼が村を支配しました。","speechSuspect":"{name} が怪しいと思います。","speechTrust":"{name} を信じます。","speechClue":"手がかりがあります。","speechPass":"今は発言を控えます。","bot0":"霧烏","bot1":"ヴェラ","bot2":"灰岩","bot3":"イサ","bot4":"松風","bot5":"星砂","errPeer":"通信ライブラリを読み込めません。ネット接続を確認してください。","errFull":"部屋が開始済み、または満員です。","errCreating":"部屋を作成中…","errCreate":"部屋の作成に失敗：{reason}。再読み込みしてください。","errCode":"6文字のルームコードを入力してください。","errConnecting":"部屋に接続中…","errDisconnected":"接続が切れました。ホームから入り直してください。","errJoin":"部屋に参加できません。","errHost":"ホストに接続できません。コードやネットワークを確認してください。","errConnect":"接続に失敗：{reason}","errActionDisconnected":"接続が切れました。入り直してください。","copySuccess":"招待リンクをコピーしました！ルームコード {code} も共有できます。","copyFail":"コピーできませんでした。ルームコード：{code}","inviteDetected":"招待コードを確認しました。名前を入力して部屋に参加してください。"}};
+translations.en.settingsTitle="Settings";translations.zh.settingsTitle="设置";translations.ja.settingsTitle="設定";
+translations.en.settingsButton="Open settings";translations.zh.settingsButton="打开设置";translations.ja.settingsButton="設定を開く";
+translations.en.settingsDone="Done";translations.zh.settingsDone="完成";translations.ja.settingsDone="完了";
+translations.en.settingsClose="Close settings";translations.zh.settingsClose="关闭设置";translations.ja.settingsClose="設定を閉じる";
+translations.en.bgmVolume="Music volume";translations.zh.bgmVolume="背景音乐音量";translations.ja.bgmVolume="BGMの音量";
+translations.en.effectsVolume="Sound effects volume";translations.zh.effectsVolume="操作音效音量";translations.ja.effectsVolume="効果音の音量";
+translations.en.avatarLabel="Your avatar";translations.zh.avatarLabel="你的头像";translations.ja.avatarLabel="自分のアイコン";
+translations.en.uploadAvatar="Choose an image";translations.zh.uploadAvatar="上传图片";translations.ja.uploadAvatar="画像を選ぶ";
+translations.en.removeAvatar="Use a random portrait";translations.zh.removeAvatar="改用随机预设头像";translations.ja.removeAvatar="ランダムな初期アイコンに戻す";
+translations.en.avatarHelp="Images are resized locally before being shared with room members. No separate image server is used.";translations.zh.avatarHelp="图片会在手机上缩小，然后直接发送给房间玩家，不经过独立图片服务器。";translations.ja.avatarHelp="画像は端末内で縮小し、同じ部屋のプレイヤーに直接共有します。画像専用サーバーには保存しません。";
+translations.en.avatarReady="Custom avatar ready";translations.zh.avatarReady="自定义头像已准备好";translations.ja.avatarReady="アイコンを設定しました";
+translations.en.avatarRemoved="A random portrait will be used";translations.zh.avatarRemoved="将使用随机预设头像";translations.ja.avatarRemoved="ランダムな初期アイコンを使用します";
+translations.en.avatarInvalid="Please choose a PNG, JPEG or WebP under 8 MB.";translations.zh.avatarInvalid="请选择小于 8 MB 的 PNG、JPEG 或 WebP 图片。";translations.ja.avatarInvalid="8 MB未満のPNG・JPEG・WebP画像を選んでください。";
+translations.en.avatarProcessing="Preparing avatar…";translations.zh.avatarProcessing="正在处理头像…";translations.ja.avatarProcessing="アイコンを処理中…";
+translations.en.avatarFailed="Could not read this image. Try another file.";translations.zh.avatarFailed="无法读取图片，请换一张重试。";translations.ja.avatarFailed="画像を読み込めません。別のファイルを試してください。";
 var selectedLanguage="en";
 translations.en.languageAria="Language";translations.zh.languageAria="语言";translations.ja.languageAria="言語";
 function tr(key,values){
@@ -1215,6 +1293,7 @@ function applyStaticLanguage(){
  $("speakerOverlay").querySelector(".speaker-skip").setAttribute("aria-label",tr("skipAria"));
  $("roleCard").setAttribute("aria-label",tr("drawAria"));
  updateMusicButton();
+ updateSettingsUI();
 }
 function setLanguage(next){
  if(!translations[next])return;
@@ -1788,6 +1867,31 @@ function render(){
 /* Conte de Fées samples: prefetch and decode once; instant AudioBufferSource playback.
  * No delayed queue: an unready first cue is skipped instead of lagging behind the UI.
  * iOS Safari's AudioContext is resumed synchronously in the user gesture. */
+
+/* User-adjustable levels. Persisted locally; mute remains a separate switch. */
+var bgmLevel=38,effectsLevel=100;
+function readVolumePreference(key,def){
+ try{var raw=localStorage.getItem(key);if(raw!==null&&raw!==""){
+  var value=Number(raw);if(Number.isFinite(value))return Math.max(0,Math.min(100,Math.round(value)));
+ }}catch(e){}
+ return def;
+}
+function updateSettingsUI(){
+ var btn=$("settingsToggle");if(!btn)return;
+ btn.setAttribute("aria-label",tr("settingsButton"));btn.setAttribute("title",tr("settingsTitle"));
+ $("settingsOverlay").querySelector(".settings-close").setAttribute("aria-label",tr("settingsClose"));
+ $("bgmVolume").value=String(bgmLevel);$("effectsVolume").value=String(effectsLevel);
+ $("bgmVolumeValue").textContent=bgmLevel+"%";$("effectsVolumeValue").textContent=effectsLevel+"%";
+ $("bgmPlayer").volume=bgmLevel/100;
+ if(sfxOutput)sfxOutput.gain.value=.8*(effectsLevel/100);
+}
+function setVolume(kind,value){
+ var level=Math.max(0,Math.min(100,Math.round(Number(value)||0)));
+ if(kind==="bgm"){bgmLevel=level;try{localStorage.setItem("moonlit-bgm-level",level)}catch(e){}}
+ else{effectsLevel=level;try{localStorage.setItem("moonlit-sfx-level",level)}catch(e){}}
+ updateSettingsUI();
+}
+
 var sfxSources={
  cursor:"assets/audio/sfx/cursor.mp3",confirm:"assets/audio/sfx/confirm.mp3",
  cancel:"assets/audio/sfx/cancel.mp3",damage:"assets/audio/sfx/damage.mp3",
@@ -1804,7 +1908,7 @@ function getSfxContext(){
   try{sfxContext=new Creator({latencyHint:"interactive"})}
   catch(e){sfxContext=new Creator()}
   sfxOutput=sfxContext.createGain();
-  sfxOutput.gain.value=.8;
+  sfxOutput.gain.value=.8*(effectsLevel/100);
   sfxOutput.connect(sfxContext.destination);
  }catch(err){sfxContext=null;sfxOutput=null}
  return sfxContext;
@@ -1875,7 +1979,7 @@ function playSfx(kind){
  if(!sfxContext&&sfxFallback[kind]){
   try{
    var audio=sfxFallback[kind];audio.pause();audio.currentTime=0;
-   audio.volume=sfxVolumes[kind]||.25;
+   audio.volume=(sfxVolumes[kind]||.25)*(effectsLevel/100);
    var promise=audio.play();if(promise&&promise.catch)promise.catch(function(){});
    sfxLastAt[kind]=now;
   }catch(err){}
@@ -1918,7 +2022,7 @@ function ensureMusic(){
  if(!musicWanted)return;
  var audio=$("bgmPlayer");
  if(!audio||typeof audio.play!=="function")return;
- audio.volume=0.38;
+ audio.volume=bgmLevel/100;
  if(audio.paused){
   var promise=audio.play();
   if(promise&&typeof promise.catch==="function"){
@@ -1959,6 +2063,8 @@ document.addEventListener("click",function(e){
  if(b.classList){b.classList.add("is-activated");}
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
  if(action==="skipSpeech"){playSfx("cursor");stageFinishSpeech();return;}
+ if(action==="openSettings"){$("settingsOverlay").hidden=false;updateSettingsUI();return;}
+ if(action==="closeSettings"){$("settingsOverlay").hidden=true;return;}
  if(action==="musicToggle"){unlockSfx();toggleMusic();return;}
  unlockSfx();
  var clickSound={back:"cancel",pickSpeech:"cursor",create:"confirm",join:"confirm",
@@ -2013,6 +2119,10 @@ document.addEventListener("keydown",function(e){
   e.preventDefault();menu[rpgMenuIndex].click();
  }
 });
+bgmLevel=readVolumePreference("moonlit-bgm-level",38);
+effectsLevel=readVolumePreference("moonlit-sfx-level",100);
+$("bgmVolume").addEventListener("input",function(){setVolume("bgm",this.value)});
+$("effectsVolume").addEventListener("input",function(){setVolume("sfx",this.value)});
 $("languageSelect").addEventListener("change",function(){setLanguage(this.value)});
 $("myName").addEventListener("input",function(){this.dataset.userEdited="1"});
 try{
