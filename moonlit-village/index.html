@@ -1666,6 +1666,8 @@ translations.en.nightSeerRound="Waiting for the seer";translations.zh.nightSeerR
 translations.en.nightGuardRound="Waiting for the guardian";translations.zh.nightGuardRound="等待守卫行动";translations.ja.nightGuardRound="騎士の行動を待っています";
 translations.en.nightWaitRound="Waiting for remaining night choices";translations.zh.nightWaitRound="等待剩余夜间行动";translations.ja.nightWaitRound="残りの夜の行動を待っています";
 translations.en.nightYourTurn="It is your turn to act";translations.zh.nightYourTurn="轮到自己行动了";translations.ja.nightYourTurn="あなたの行動の番です";
+translations.en.nightWaitYourTurn="Wait until your role is called.";translations.zh.nightWaitYourTurn="请等待轮到你的身份行动。";translations.ja.nightWaitYourTurn="自分の役職の番までお待ちください。";
+translations.en.nightCuePosition="Turn {turn}/3";translations.zh.nightCuePosition="第 {turn}/3 轮";translations.ja.nightCuePosition="{turn}/3 ターン";
 translations.en.nightCueCountdown="{seconds}s · {turn}/3";translations.zh.nightCueCountdown="剩余{seconds}秒 · {turn}/3";translations.ja.nightCueCountdown="残り{seconds}秒 · {turn}/3";
 translations.en.logNightStart="Night {day}: The village is asleep.";translations.zh.logNightStart="第 {day} 夜：夜间行动开始。";translations.ja.logNightStart="{day}日目の夜：夜の行動が始まります。";
 translations.en.clockLabel="Time remaining";translations.zh.clockLabel="剩余时间";translations.ja.clockLabel="残り時間";
@@ -1686,7 +1688,7 @@ translations.en.helpRoundTitle="How a round works";
 translations.en.helpRoundDetail="At night, the werewolf attacks, the seer investigates and the guardian protects. By day, living players make one public statement and vote to eliminate a suspect. All three night-turn prompts appear even if a role has been eliminated.";
 translations.en.helpWinTitle="Winning and losing";
 translations.en.helpWinDetail="The village wins when the werewolf is eliminated. The werewolf wins when the number of living werewolves equals or exceeds the number of other living players. The werewolf also wins if the game passes day 12.";
-translations.en.helpTimerDetail="Multiplayer: night actions, discussion and voting each have a shared two-minute limit; no response means skipping, passing or abstaining. Solo: no decision timer; each public night prompt counts down for two seconds. Ties and no votes eliminate nobody.";
+translations.en.helpTimerDetail="Multiplayer: each human night role gets up to two minutes to act; discussion and voting get two minutes each. Timeouts skip the action. Solo: your own night choice is unlimited; the other role turns each count down two seconds. Ties and no votes eliminate nobody.";
 translations.en.helpDone="Understood";
 translations.zh.helpButton="玩法与身份说明";
 translations.zh.helpClose="关闭身份说明";
@@ -1702,7 +1704,7 @@ translations.zh.helpRoundTitle="回合流程";
 translations.zh.helpRoundDetail="夜晚由狼人袭击、预言家查验、守卫保护；白天每位存活玩家公开发言一句，然后投票放逐可疑对象。即使某职业已经出局，夜间仍会展示完整的三个行动提示。";
 translations.zh.helpWinTitle="胜负条件";
 translations.zh.helpWinDetail="狼人被淘汰时，好人阵营获胜。存活狼人数不少于其他存活玩家时，狼人获胜。如果游戏超过第 12 天，狼人也获胜。";
-translations.zh.helpTimerDetail="多人游戏：夜间、发言、投票三个阶段各共用两分钟期限，超时视为不行动、暂不表态或弃票。单人游戏：选择不限时，夜间每个公开等待提示倒计时2秒。票数并列或无人投票时无人出局。";
+translations.zh.helpTimerDetail="多人游戏：每个真人夜间身份轮次最多2分钟，白天发言和投票分别限时2分钟；超时视为放弃该次行动。单人游戏：自己的夜间选择不限时，其他身份轮次各等待2秒。票数并列或无人投票时无人出局。";
 translations.zh.helpDone="明白了";
 translations.ja.helpButton="遊び方と役職の説明";
 translations.ja.helpClose="役職ガイドを閉じる";
@@ -1718,7 +1720,7 @@ translations.ja.helpRoundTitle="1日の流れ";
 translations.ja.helpRoundDetail="夜は人狼の襲撃・占い師の調査・騎士の護衛、昼は生存者全員の発言と追放投票を行います。役職が脱落していても、夜の3つの案内は必ず表示されます。";
 translations.ja.helpWinTitle="勝利条件";
 translations.ja.helpWinDetail="人狼を追放すると村人陣営の勝利。生存中の人狼の数がほかの生存者以上になると人狼の勝利です。12日目を超えても人狼の勝利になります。";
-translations.ja.helpTimerDetail="複数人プレイ：夜の行動・発言・投票は各2分間で、未回答は行動なし・発言なし・棄権扱いです。ソロ：選択の時間制限はなく、夜の各案内は2秒のカウントダウンです。同数票や投票なしの場合は追放されません。";
+translations.ja.helpTimerDetail="複数人プレイ：夜は各プレイヤーの役職行動に2分、昼の発言と投票にもそれぞれ2分の制限があります。時間切れは行動を見送ります。ソロ：自分の夜の選択は無制限で、ほかの役職の案内のみ2秒ずつ表示します。同数票や投票なしの場合は追放されません。";
 translations.ja.helpDone="わかりました";
 translations.en.revealEyebrow="THE FINAL REVEAL";
 translations.en.revealTitle="All identities revealed";
@@ -2512,7 +2514,8 @@ function updatePhaseHud(){
  }
  if(clockSnapshot!==v){clockSnapshot=v;clockSeenAt=Date.now()}
  var elapsed=Math.max(0,Date.now()-clockSeenAt);
- var timed=!!v.deadlineActive&&["night","talk","vote"].includes(v.phase);
+ var ownNightTurn=v.phase==="night"&&v.myAlive&&!v.submitted&&NIGHT_ROLES[v.nightStage]===v.myRole;
+  var timed=!!v.deadlineActive&&(["talk","vote"].includes(v.phase)||ownNightTurn);
  clock.hidden=!timed;
  if(timed){
   var remaining=Math.max(0,Math.ceil((Math.max(0,v.deadlineRemaining||0)-elapsed)/1000));
@@ -2523,20 +2526,20 @@ function updatePhaseHud(){
  }
  round.hidden=v.phase!=="night";
  if(v.phase==="night"){
-  var nightMs=Math.max(0,(v.phaseElapsed||0)+elapsed);
-  var interval=v.deadlineActive?NIGHT_PROMPT_MS:SOLO_NIGHT_PROMPT_MS;
-  var index=Math.floor(nightMs/interval);
+  var index=Math.max(0,Math.min(2,v.nightStage||0));
   var keys=["nightWolfRound","nightSeerRound","nightGuardRound"];
-  var roles=["wolf","seer","guard"];
-  /* Show all public role cues even when those roles have been eliminated.
-     Only the current player sees a personalized cue for their pending action. */
-  var ownActionPending=v.myAlive&&!v.submitted&&roles.includes(v.myRole);
-  var ownTurn=ownActionPending&&(roles[index]===v.myRole||index>=roles.length);
-  $("nightTurnLabel").textContent=tr(ownTurn?"nightYourTurn":(keys[index]||"nightWaitRound"));
-  if(index<3){
-   var seconds=Math.max(1,Math.ceil((interval-nightMs%interval)/1000));
+  $("nightTurnLabel").textContent=tr(ownNightTurn?"nightYourTurn":keys[index]);
+  if(ownNightTurn){
+   /* Your own choice is open; no fake two-second waiting countdown. */
+   $("nightTurnCount").textContent="";
+  }else if(v.deadlineActive){
+   /* The active player has a real decision timer, not a 2s auto-stage. */
+   $("nightTurnCount").textContent=tr("nightCuePosition",{turn:index+1});
+  }else{
+   var duration=v.players.filter(function(p){return !p.bot}).length>1?NIGHT_PROMPT_MS:SOLO_NIGHT_PROMPT_MS;
+   var seconds=Math.max(0,Math.ceil((duration-(v.phaseElapsed||0)-elapsed)/1000));
    $("nightTurnCount").textContent=tr("nightCueCountdown",{seconds:seconds,turn:index+1});
-  }else $("nightTurnCount").textContent="";
+  }
  }
 }
 
@@ -2676,6 +2679,7 @@ function render(){
   if(!v.myAlive)notice=tr("spectate");
   else if(!["wolf","seer","guard"].includes(v.myRole))notice=tr("nightNoAction");
   else if(v.submitted)notice=tr("nightSubmitted");
+   else if(NIGHT_ROLES[v.nightStage]!==v.myRole)notice=tr("nightWaitYourTurn");
   else {
    var r=tr({wolf:"attack",seer:"inspect",guard:"protect"}[v.myRole]);
    a=v.players.filter(function(p){return p.alive&&(v.myRole==="guard"||p.id!==v.me)}).map(function(p){return modernTarget(p,r+" · "+tr("nightTarget"),"night","night")}).join("");
