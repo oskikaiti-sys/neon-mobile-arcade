@@ -803,6 +803,33 @@ body.day-mode .ambient-stars{opacity:.25}
  .moon-glow,.ambient-stars,body::before{transition:none!important}
 }
 
+
+/* UI 5: one reusable face renderer for residents, dialogue and target cards. */
+.face-frame{
+ position:relative;display:grid;place-items:center;flex-shrink:0;overflow:hidden;
+ background:rgba(20,28,58,.8);border:1px solid var(--face-ring,#e8c872);
+ border-radius:50%;color:var(--face-ring,#e8c872);isolation:isolate;
+}
+.face-silhouette{width:100%;height:100%;display:block;fill:currentColor;opacity:.82;pointer-events:none}
+.face-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1;pointer-events:none}
+.face-image[hidden]{display:none!important}
+body.game-active #players .avatar.face-frame{
+ grid-row:1/3;grid-column:1;align-self:center;justify-self:center;
+ width:28px;height:28px;font-size:initial;line-height:normal;min-width:0;min-height:0;
+ border:1px solid var(--face-ring,#e8c872);border-radius:50%;
+}
+body.game-active #feed .rpg-portrait.face-frame{
+ width:39px;height:39px;flex:0 0 39px;border:1px solid var(--face-ring,#e8c872);border-radius:50%
+}
+body.game-active #actions .action-target-face.face-frame{
+ width:31px;height:31px;flex:0 0 31px;border:1px solid var(--face-ring,#e8c872);border-radius:50%;
+ margin-right:6px
+}
+@media(max-width:430px){
+ body.game-active #players .avatar.face-frame{width:27px;height:27px}
+ body.game-active #actions .action-target-face.face-frame{width:28px;height:28px;flex-basis:28px}
+}
+
 </style>
 </head>
 <body>
@@ -1092,14 +1119,40 @@ function handleTimeScene(v){
 
 /* Stage 1 presentation layer. This never writes to st, votes, roles or AI logic. */
 function rpgReducedMotion(){return !!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)}
-function rpgPortraitMarkup(name){
- /* 144×144 editable vector placeholder. Stage 2 can replace it with face images. */
- return '<div class="rpg-portrait" role="img" aria-label="'+escapeHtml(name)+' 头像占位">'
- +'<svg viewBox="0 0 144 144" width="144" height="144" aria-hidden="true" focusable="false">'
- +'<circle cx="72" cy="49" r="27" fill="currentColor" opacity=".8"/>'
- +'<path d="M25 138 Q27 88 72 88 Q117 88 119 138Z" fill="currentColor" opacity=".8"/>'
- +'</svg></div>';
+/* Public avatar presentation only: ring colors correspond to public seat slots,
+ * not secret role alignment. Assets are optional 512x512 PNGs; missing files
+ * fall back to a consistent silhouette. */
+var faceConfig={
+ basePath:"assets/faces/",
+ expressions:["normal","suspect","out"],
+ seatRings:["#e8c872","#9aa3c7","#91a4d0","#c0a9cc","#b8bcd2","#d4b794"]
+};
+var missingFaces={};
+function faceMarkup(player,expression,seat,context){
+ var id=player&&player.id!=null?String(player.id):"unknown";
+ var name=player&&player.name!=null?String(player.name):"居民";
+ var emotion=faceConfig.expressions.includes(expression)?expression:"normal";
+ var src=faceConfig.basePath+encodeURIComponent(id)+"_"+emotion+".png";
+ var tone=faceConfig.seatRings[Math.abs(seat||0)%faceConfig.seatRings.length];
+ var role=context==="log"?"rpg-portrait":context==="target"?"action-target-face":"avatar";
+ var markup='<span class="'+role+' face-frame" style="--face-ring:'+tone+'" role="img" aria-label="'+escapeHtml(name)+' 的头像">'
+  +'<svg class="face-silhouette" viewBox="0 0 144 144" aria-hidden="true" focusable="false"><circle cx="72" cy="48" r="25"/><path d="M22 140c2-34 19-52 50-52s48 18 50 52Z"/></svg>';
+ if(!missingFaces[src])markup+='<img class="face-image" src="'+escapeHtml(src)+'" alt="" draggable="false" decoding="async">';
+ return markup+'</span>';
 }
+function rpgPortraitMarkup(name){
+ var players=view&&view.players||[];
+ var ix=players.findIndex(function(p){return p.name===name});
+ var p=ix>=0?players[ix]:{id:"unknown",name:name};
+ return faceMarkup(p,p&&p.alive===false?"out":"normal",ix<0?0:ix,"log");
+}
+document.addEventListener("error",function(e){
+ var el=e.target;
+ if(el&&el.tagName==="IMG"&&el.classList&&el.classList.contains("face-image")){
+  missingFaces[el.getAttribute("src")]=true;
+  el.hidden=true;
+ }
+},true);
 function rpgFinishTyping(){ /* Legacy compatibility: typing animation removed by design. */ }
 function rpgRenderMessages(v){
  var feed=$("feed"),fingerprint=JSON.stringify(v.messages);
@@ -1177,13 +1230,14 @@ function modernAction(label,action,target,speech,icon,detail){
  +'<span class="action-chevron" aria-hidden="true">›</span></button>';
 }
 function modernTarget(p,prefix,action,icon){
+ var seat=view?view.players.findIndex(function(x){return x.id===p.id}):0;
  return '<button type="button" class="action-card action-card--target" data-do="'+escapeHtml(action)+
- '" data-target="'+escapeHtml(p.id)+'"><span class="action-target-face" aria-hidden="true">'+
- '<svg viewBox="0 0 40 40"><circle cx="20" cy="14" r="8"/><path d="M6 37q2-15 14-15t14 15"/></svg></span>'+
+ '" data-target="'+escapeHtml(p.id)+'">'+faceMarkup(p,p.alive?"normal":"out",seat,"target")+
  '<span class="action-copy"><span class="action-name">'+escapeHtml(p.name)+'</span>'+
  '<span class="action-desc">'+escapeHtml(prefix)+'</span></span>'+
  '<span class="action-chevron" aria-hidden="true">›</span></button>';
 }
+
 function render(){
  if(!view)return;
  var v=view;
@@ -1195,7 +1249,7 @@ function render(){
  $("shareBtns").innerHTML=(!v.solo&&v.room&&v.phase==="lobby")?button("复制邀请链接","copy",null,null,"ghost"):"";
  $("countInfo").textContent=v.players.filter(function(p){return !p.bot}).length+" 位真人 / "+v.players.length+" 位居民";
  $("players").innerHTML=v.players.map(function(p,i){
-  return '<div class="player '+(!p.alive?'dead ':'')+(p.id===v.me?'me':'')+'"><div class="avatar">'+icons[i%icons.length]+'</div><div class="name">'+(i+1)+'. '+escapeHtml(p.name)+'</div><div class="tag">'+(!p.alive?'已出局':p.id===v.me?'你自己':p.bot?'电脑玩家':'在线玩家')+(v.phase==="ended"?' · '+({wolf:"狼人",seer:"预言家",guard:"守卫",villager:"村民"}[p.role]||""):'')+'</div></div>'
+  return '<div class="player '+(!p.alive?'dead ':'')+(p.id===v.me?'me':'')+'">'+faceMarkup(p,p.alive?"normal":"out",i,"resident")+'<div class="name">'+(i+1)+'. '+escapeHtml(p.name)+'</div><div class="tag">'+(!p.alive?'已出局':p.id===v.me?'你自己':p.bot?'电脑玩家':'在线玩家')+(v.phase==="ended"?' · '+({wolf:"狼人",seer:"预言家",guard:"守卫",villager:"村民"}[p.role]||""):'')+'</div></div>'
  }).join("");
  if(v.phase==="talk"&&speechKind&&v.myAlive&&!v.submitted){
   var available=rpgTargets(v);
