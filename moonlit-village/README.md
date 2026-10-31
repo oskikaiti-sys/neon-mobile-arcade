@@ -1,5 +1,13 @@
 # 月下疑云 / Moonlit Village
 
+### 音效延迟修复（2026-10-30）
+
+以前每种音效首次触发时才通过 `new Audio(path)` 建立播放器，并在后续每次触发时执行 `pause() → currentTime=0 → play()`，在移动 Safari 上容易出现明显的解码或音频管线启动延迟。
+
+现在页面加载时通过 `fetch() + AudioContext.decodeAudioData()` 预取、解码六个音效，常规点击直接用 `AudioBufferSourceNode.start(0)` 播放。首次触摸时尝试解锁 iOS AudioContext；音效尚未准备好时跳过当次，不在玩家进入下一步之后补播。对 cursor、confirm、cancel、damage 做轻量前置静音检测和处理（最多扫描 280ms），避免原始音效里的开头静音造成“慢一拍”。没有修改音效的艺术内容。
+
+右上角开关依旧同时控制 BGM 和 SFX，并立即停止当前正在发声的节点。浏览器缺少 AudioContext 时使用预加载的 HTML Audio 作为兼容回退。实际触屏响应速度仍受设备、浏览器与系统音频输出延迟影响。
+
 ## 游戏音效（Conte de Fées / こんとどぅふぇ）
 
 已将以下音效作为游戏素材托管在 `assets/audio/sfx/`，并在 `index.html` 的展示层使用。作品内的 MP3 不得作为独立音效素材另行发布或出售。
