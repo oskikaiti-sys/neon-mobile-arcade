@@ -3394,7 +3394,7 @@ function speechRecord(p,kind,target,detail){
   }
  }
  if(kind==="suspect"||kind==="trust"){
-  if(detail&&Object.prototype.hasOwnProperty.call(detail,"evidenceSeq")){
+  if(!p.bot&&detail&&Object.prototype.hasOwnProperty.call(detail,"evidenceSeq")){
    data.kind=kind+"NoEvidence";return data;
   }
   /* A cautious judgment is grounded in this person's actual prior speech,
