@@ -1478,6 +1478,75 @@ body.game-active .seer-notes-button{min-height:30px!important;
  color:var(--gold);font-size:11px;font-weight:700;cursor:pointer}
 body.game-active .endgame-panel .face-frame .face-image{object-fit:cover}
 
+/* Night actions: feedback is drawn only in the acting player's local UI. */
+body.game-active #players .character-rail .player.night-skill-hit{--skill-glow:#a892e9;isolation:isolate}
+body.game-active #players .character-rail .player.night-skill-wolf{--skill-glow:#ed8190}
+body.game-active #players .character-rail .player.night-skill-seer{--skill-glow:#ac9dfd}
+body.game-active #players .character-rail .player.night-skill-guard{--skill-glow:#83d7c7}
+body.game-active #players .character-rail .player.night-skill-hit::before{
+ content:"";position:absolute;z-index:4;inset:3px;pointer-events:none;
+ border:2px solid var(--skill-glow);border-radius:8px;
+ animation:night-skill-ring 1.9s ease-out both
+}
+body.game-active #players .night-skill-hit .avatar.face-frame{
+ box-shadow:0 0 0 2px var(--skill-glow),0 0 19px var(--skill-glow);
+ animation:night-skill-face 1.9s ease-out both
+}
+body.game-active #players .night-skill-sigil{
+ position:absolute;z-index:6;top:7%;left:50%;
+ display:grid;place-items:center;pointer-events:none;
+ width:29px;height:29px;border-radius:50%;
+ background:rgba(15,20,43,.95);border:1px solid var(--skill-glow);
+ box-shadow:0 0 15px var(--skill-glow);color:var(--skill-glow);font-size:21px;
+ animation:night-skill-sigil-in 1.9s ease-out both
+}
+@keyframes night-skill-ring{
+ 0%{opacity:0;transform:scale(.72)}18%{opacity:1;transform:scale(1.06)}
+ 52%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.07)}
+}
+@keyframes night-skill-face{
+ 0%{filter:brightness(1);transform:scale(1)}
+ 26%{filter:brightness(1.55);transform:scale(1.08)}
+ 70%{filter:brightness(1.2);transform:scale(1)}100%{filter:brightness(1);transform:scale(1)}
+}
+@keyframes night-skill-sigil-in{
+ 0%{opacity:0;transform:translate(-50%,12px) scale(.45)}
+ 22%{opacity:1;transform:translate(-50%,-6px) scale(1.1)}
+ 65%{opacity:1;transform:translate(-50%,-8px) scale(1)}
+ 100%{opacity:0;transform:translate(-50%,-19px) scale(.82)}
+}
+body.game-active .night-feedback-popup{
+ position:absolute;z-index:20;inset:33px 3px 2px;
+ display:flex;align-items:center;justify-content:center;padding:6px;
+ pointer-events:none
+}
+body.game-active .night-feedback-popup[hidden]{display:none!important}
+body.game-active .night-feedback-card{
+ position:relative;pointer-events:auto;
+ width:100%;max-width:282px;max-height:100%;overflow-y:auto;
+ border:1px solid rgba(172,157,253,.73);border-radius:11px;
+ padding:15px 12px 12px;text-align:center;
+ background:linear-gradient(145deg,rgba(27,31,63,.98),rgba(13,17,35,.98));
+ box-shadow:0 9px 34px rgba(0,0,0,.5),0 0 20px rgba(172,157,253,.14);
+ animation:night-feedback-arrive .28s ease-out both
+}
+body.game-active .night-feedback-popup[data-skill="wolf"] .night-feedback-card{border-color:rgba(236,122,141,.75)}
+body.game-active .night-feedback-popup[data-skill="guard"] .night-feedback-card{border-color:rgba(131,215,199,.75)}
+body.game-active .night-feedback-symbol{font-size:25px;line-height:1.2;color:var(--gold);margin-bottom:5px}
+body.game-active .night-feedback-title{color:var(--gold);font-size:15px;font-weight:750;line-height:1.3}
+body.game-active .night-feedback-message{font-size:13px;line-height:1.6;color:var(--ink);margin:7px 0 10px;overflow-wrap:anywhere}
+body.game-active .night-feedback-dismiss{
+ min-width:100px;min-height:36px!important;padding:6px 14px;
+ border:1px solid rgba(232,200,114,.5);border-radius:7px;
+ background:rgba(232,200,114,.1);color:var(--gold);font-size:12px
+}
+@keyframes night-feedback-arrive{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){
+ body.game-active #players .night-skill-hit .avatar.face-frame{
+  box-shadow:0 0 0 3px var(--skill-glow),0 0 14px var(--skill-glow)
+ }
+ body.game-active #players .night-skill-sigil{opacity:1;animation:none}
+}
 </style>
 </head>
 <body>
@@ -1531,6 +1600,14 @@ body.game-active .endgame-panel .face-frame .face-image{object-fit:cover}
           <span class="night-dialogue-symbol" aria-hidden="true">☾</span>
           <span class="night-dialogue-title" id="nightTurnLabel" aria-live="polite" aria-atomic="true"></span>
           <span class="night-dialogue-counter" id="nightTurnCount" aria-live="off"></span>
+        </div>
+      </div>
+      <div id="nightFeedbackPopup" class="night-feedback-popup" data-skill="" hidden role="status" aria-live="polite" aria-atomic="true">
+        <div class="night-feedback-card">
+          <div id="nightFeedbackSymbol" class="night-feedback-symbol" aria-hidden="true">✦</div>
+          <div id="nightFeedbackTitle" class="night-feedback-title"></div>
+          <p id="nightFeedbackMessage" class="night-feedback-message"></p>
+          <button type="button" class="night-feedback-dismiss" data-do="closeNightFeedback" data-i18n="nightFeedbackDone">Got it</button>
         </div>
       </div>
       <div id="speakerOverlay" class="speaker-overlay" hidden>
@@ -1669,6 +1746,13 @@ translations.en.nightYourTurn="It is your turn to act";translations.zh.nightYour
 translations.en.nightWaitYourTurn="Wait until your role is called.";translations.zh.nightWaitYourTurn="请等待轮到你的身份行动。";translations.ja.nightWaitYourTurn="自分の役職の番までお待ちください。";
 translations.en.nightChoiceSaved="Choice submitted. Waiting for this turn to end.";translations.zh.nightChoiceSaved="已完成行动，等待本轮结束。";translations.ja.nightChoiceSaved="行動を確定しました。このターンの終了を待っています。";
 translations.en.nightCuePosition="Turn {turn}/3";translations.zh.nightCuePosition="第 {turn}/3 轮";translations.ja.nightCuePosition="{turn}/3 ターン";
+translations.en.nightFeedbackDone="Got it";translations.zh.nightFeedbackDone="知道了";translations.ja.nightFeedbackDone="確認";
+translations.en.skillWolfTitle="Attack confirmed";translations.zh.skillWolfTitle="袭击目标已锁定";translations.ja.skillWolfTitle="襲撃先を確定";
+translations.en.skillWolfDetail="You targeted {name}. Whether the attack succeeds will be revealed at dawn.";translations.zh.skillWolfDetail="已选择袭击 {name}。袭击是否成功将在天亮后揭晓。";translations.ja.skillWolfDetail="{name} を襲撃対象に選びました。成功したかどうかは朝に判明します。";
+translations.en.skillGuardTitle="Protection confirmed";translations.zh.skillGuardTitle="守护目标已锁定";translations.ja.skillGuardTitle="護衛先を確定";
+translations.en.skillGuardDetail="You protected {name}. Whether it stopped the attack will be revealed at dawn.";translations.zh.skillGuardDetail="已选择保护 {name}。是否成功挡下袭击将在天亮后揭晓。";translations.ja.skillGuardDetail="{name} を護衛対象に選びました。結果は朝に判明します。";
+translations.en.skillSeerTitle="Inspection result";translations.zh.skillSeerTitle="查验结果";translations.ja.skillSeerTitle="占いの結果";
+translations.en.skillSeerDetail="{name}'s true role is: {role}.";translations.zh.skillSeerDetail="{name} 的真实身份是：{role}。";translations.ja.skillSeerDetail="{name} の正体は「{role}」です。";
 translations.en.nightCueCountdown="{seconds}s · {turn}/3";translations.zh.nightCueCountdown="剩余{seconds}秒 · {turn}/3";translations.ja.nightCueCountdown="残り{seconds}秒 · {turn}/3";
 translations.en.logNightStart="Night {day}: The village is asleep.";translations.zh.logNightStart="第 {day} 夜：夜间行动开始。";translations.ja.logNightStart="{day}日目の夜：夜の行動が始まります。";
 translations.en.clockLabel="Time remaining";translations.zh.clockLabel="剩余时间";translations.ja.clockLabel="残り時間";
@@ -2645,9 +2729,52 @@ function closeSeerNotes(){
  notesPreviousFocus=null;
 }
 
+/* Private results are acknowledged once per action. A popup is never a
+   phase gate: it expires automatically even during multiplayer turns. */
+var privateNightFx=null,privateNightFxTimer=null,nightFeedbackSeen="",nightFeedbackDismissTimer=null;
+function closeNightFeedback(){
+ $("nightFeedbackPopup").hidden=true;
+ if(nightFeedbackDismissTimer!==null){clearTimeout(nightFeedbackDismissTimer);nightFeedbackDismissTimer=null}
+}
+function localizeNightFeedback(f){
+ var popup=$("nightFeedbackPopup");
+ popup.dataset.skill=f.skill;
+ $("nightFeedbackSymbol").textContent={wolf:"☾",seer:"✦",guard:"◇"}[f.skill];
+ $("nightFeedbackTitle").textContent=tr({wolf:"skillWolfTitle",seer:"skillSeerTitle",guard:"skillGuardTitle"}[f.skill]);
+ $("nightFeedbackMessage").textContent=f.skill==="seer"&&["wolf","seer","guard","villager"].includes(f.inspectedRole)
+  ?tr("skillSeerDetail",{name:displayName(f.targetName),role:roleName(f.inspectedRole)})
+  :tr(f.skill==="wolf"?"skillWolfDetail":"skillGuardDetail",{name:displayName(f.targetName)});
+}
+function acceptPrivateNightFeedback(v){
+ var f=v.privateNightFeedback;
+ if(!f||!["wolf","seer","guard"].includes(f.skill)||!v.players.some(function(p){return p.id===f.targetId}))return;
+ if(f.skill!==v.myRole)return;
+ var key=v.gameNo+":"+f.day+":"+f.skill+":"+f.targetId;
+ if(nightFeedbackSeen===key){
+  if(!$("nightFeedbackPopup").hidden)localizeNightFeedback(f);
+  return;
+ }
+ nightFeedbackSeen=key;
+ privateNightFx={targetId:f.targetId,skill:f.skill,until:Date.now()+2100};
+ if(privateNightFxTimer!==null)clearTimeout(privateNightFxTimer);
+ privateNightFxTimer=setTimeout(function(){
+  privateNightFx=null;privateNightFxTimer=null;
+  $("players").querySelectorAll(".night-skill-hit").forEach(function(tile){
+   tile.classList.remove("night-skill-hit","night-skill-wolf","night-skill-seer","night-skill-guard");
+   var sigil=tile.querySelector(".night-skill-sigil");if(sigil)sigil.remove();
+  });
+ },2100);
+ closeNightFeedback();
+ localizeNightFeedback(f);
+ $("nightFeedbackPopup").hidden=false;
+ /* 3.2s for the role reveal, 2.4s for ordinary confirmation.
+    None of these timers modifies nightStage or its 10-second clock. */
+ nightFeedbackDismissTimer=setTimeout(closeNightFeedback,f.skill==="seer"?3200:2400);
+}
 function render(){
  if(!view)return;
  var v=view;
+ acceptPrivateNightFeedback(v);
  showRoleDeal(v);
  handleTimeScene(v);
  var titles={lobby:tr("phaseLobby"),deal:tr("phaseDeal"),night:tr("phaseNight",{day:v.day}),talk:tr("phaseTalk",{day:v.day}),vote:tr("phaseVote",{day:v.day}),ended:tr("phaseEnded")};
@@ -2659,8 +2786,12 @@ function render(){
  var lastSpeaker=currentSpeaker&&currentSpeaker[1];
  var playerTiles=v.players.map(function(p,i){
   var speaking=lastSpeaker===p.name;
-  return '<div class="player'+(!p.alive?' dead':'')+(p.id===v.me?' me':'')+(speaking?' rpg-speaking':'')+'" data-seat="'+i+'">'
+  var skillHit=privateNightFx&&privateNightFx.until>Date.now()&&privateNightFx.targetId===p.id;
+  var skill=skillHit?privateNightFx.skill:null;
+  return '<div class="player'+(!p.alive?' dead':'')+(p.id===v.me?' me':'')+
+   (speaking?' rpg-speaking':'')+(skillHit?' night-skill-hit night-skill-'+skill:'')+'" data-seat="'+i+'">'
    +faceMarkup(p,p.alive?"normal":"out",i,"resident")
+   +(skillHit?'<span class="night-skill-sigil" aria-hidden="true">'+({wolf:"☾",seer:"✦",guard:"◇"}[skill])+'</span>':"")
    +(p.id===v.me?'<span class="player-you">'+escapeHtml(tr("you"))+'</span>':'')
    +'<div class="name" title="'+escapeHtml(displayName(p.name))+'">'+escapeHtml(displayName(p.name))+'</div>'
    +((function(){
@@ -2965,6 +3096,7 @@ document.addEventListener("click",function(e){
  if(action==="closeHelp"){playSfx("cancel");closeRoleGuide();return;}
  if(action==="openReveal"){playSfx("confirm");openEndgameReveal(b);return;}
  if(action==="closeReveal"){playSfx("cancel");closeEndgameReveal();return;}
+ if(action==="closeNightFeedback"){playSfx("cancel");closeNightFeedback();return;}
  if(action==="openSeerNotes"){playSfx("cursor");openSeerNotes(b);return;}
  if(action==="closeSeerNotes"){playSfx("cancel");closeSeerNotes();return;}
  if(action==="skipSpeech"){playSfx("cursor");stageFinishSpeech();return;}
@@ -3025,6 +3157,7 @@ document.addEventListener("keydown",function(e){
    return;
   }
  }
+ if(e.key==="Escape"&&!$("nightFeedbackPopup").hidden){e.preventDefault();closeNightFeedback();return;}
  if(!view||view.phase!=="talk"||!view.myAlive||view.submitted||!$("roleOverlay").hidden)return;
  if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||""))return;
  if(speechKind){
