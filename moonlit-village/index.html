@@ -2252,7 +2252,7 @@ var SPEECH_GROUPS={
 var SPEECH_LINES={
  zh:{
  suspectNoEvidence:"我暂时关注{name}，因为还没听到足够的公开解释。没有查验或票型证据，不能直接判定是狼人。",
- trustNoEvidence:"目前还没有针对{name}的明确公开指控，我愿意暂时留出信任空间，但不等于确认身份。",
+ trustNoEvidence:"我暂时愿意给{name}解释立场的空间。即使有人提出指控，也得先核对依据，不能因此确认其身份。",
  suspectRoleClaim:"{name}刚公开自称{role}，我仍怀疑其说法，因为尚缺乏可供核对的查验或票型依据。",
  trustRoleClaim:"{name}刚自称{role}，我愿意听其后续说明，但身份宣称本身不能证明真假。",
  suspectReaction:"{name}刚才的发言涉及{related}。我想知道这个判断基于什么，暂时不能直接采信。",
@@ -2282,7 +2282,7 @@ var SPEECH_LINES={
  },
  en:{
  suspectNoEvidence:"I'm watching {name} because we haven't heard enough to judge yet. There's no confirmed check or voting evidence.",
- trustNoEvidence:"There is no concrete public accusation against {name} so far, so I'll give them some benefit of the doubt; their role remains unverified.",
+ trustNoEvidence:"I'll give {name} a chance to explain. Even if someone has accused them, we should verify the reasons rather than assume their role.",
  suspectRoleClaim:"{name} claimed {role}. I'm skeptical until that claim is supported by a consistent report or publicly verifiable evidence.",
  trustRoleClaim:"{name} publicly claimed {role}. I'll hear more, but a claim by itself cannot establish the truth.",
  suspectReaction:"{name} previously mentioned {related}. I want to know the basis of that judgment before relying on it.",
@@ -2312,7 +2312,7 @@ var SPEECH_LINES={
  },
  ja:{
  suspectNoEvidence:"{name}の説明はまだ少ないので様子を見ています。占いや票型による確証はありません。",
- trustNoEvidence:"{name}への具体的な公開告発がないので、今は暫定的に信頼しますが役職は未確認です。",
+ trustNoEvidence:"{name}にはまず説明する機会を与えたいです。告発があっても、その根拠を確認するまで役職は確定できません。",
  suspectRoleClaim:"{name}は{role}とCOしましたが、公開情報での裏付けが足りないと思います。",
  trustRoleClaim:"{name}は{role}と名乗りました。後の説明を聞きますが、CO自体は証明になりません。",
  suspectReaction:"{name}は先ほど{related}に言及しました。その判断の根拠を確認したいです。",
@@ -2444,6 +2444,7 @@ function botSpeech(p){
  else if(roll<.51){kind="analyseVotes";target=null}
  else if(roll<.65){kind="analyseClaims";target=null}
  else if(roll<.75){kind="defend";target=null}
+ else if(roll<.85){kind="clue";target=null}
  if(SPEECH_OPTIONS[kind].target&&!target)target=people[0];
  if(SPEECH_OPTIONS[kind].evidence&&!speechHasEvidence(history,votes,kind,target.id))kind="suspect";
  speak(p.id,kind,target?target.id:null);
