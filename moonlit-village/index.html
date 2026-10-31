@@ -1445,7 +1445,7 @@ var icons=["🧑","👩","🧔","👨","👩‍🦰","🧑‍🦳"];
 var peer=null,conn=null,isHost=false,solo=false,st=null,view=null,room="",myId="",connections=new Map(),speechKind="",busy=false;
 var mark=0, shownIdentityGame=0, previousScenePhase=null, lastSceneDay=0, pendingScene=null, sceneTimer=null, nightSerial=0;
 var hostPhaseTimer=null,phaseNonce=0;
-var CHOICE_LIMIT_MS=120000,NIGHT_MIN_MS=9000;
+var CHOICE_LIMIT_MS=120000,NIGHT_MIN_MS=12000,NIGHT_PROMPT_MS=4000;
 function cancelPhaseTimer(){
  phaseNonce++;
  if(hostPhaseTimer!==null){clearTimeout(hostPhaseTimer);hostPhaseTimer=null}
@@ -1568,7 +1568,7 @@ function snapshot(id){var me=person(id);
   readyCount:human.filter(function(p){return !!st.dealReady[p.id]}).length,
   readyTotal:human.length,readyMe:!!st.dealReady[id],
   deadlineRemaining:st.deadlineAt?Math.max(0,st.deadlineAt-Date.now()):0,
-  phaseStartAt:st.phaseStartAt||0,
+  phaseElapsed:st.phaseStartAt?Math.max(0,Date.now()-st.phaseStartAt):0,
   me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
 function broadcast(){if(!st)return;view=snapshot("h");render();for(var it of connections.entries()){var id=it[0],c=it[1];if(c.open){try{c.send({type:"state",state:snapshot(id)})}catch(e){}}}}
 function makeSolo(){if(avatarPending)return;solo=true;isHost=true;room="";makeState();enter();startGame()}
@@ -1721,11 +1721,12 @@ function finishVote(){
  var high=Math.max.apply(null,Object.values(counts));
  var leaders=Object.keys(counts).filter(function(id){return counts[id]===high});
  if(leaders.length!==1){log("投票平局，今天无人被放逐。","news")}
- else {var gone=person(leaders[0]);gone.alive=false;log("投票结果："+gone.name+" 被放逐，身份是「"+(gone.role==="wolf"?"狼人":"好人")+"」。","news")}
+ else {var gone=person(leaders[0]);if(gone){gone.alive=false;log("投票结果："+gone.name+" 被放逐，身份是「"+(gone.role==="wolf"?"狼人":"好人")+"」。","news")}}
  if(winCheck())return;st.day++;beginNight()
 }
 function accept(id,action,target,speech){
  if(!isHost||!st||st.phase==="ended")return;
+ if(st.deadlineAt&&Date.now()>=st.deadlineAt)return;
  var p=person(id);if(!p||p.bot||!p.alive)return;
  if(st.phase==="night"&&action==="night"){
   if(!["wolf","seer","guard"].includes(p.role)||st.night[id])return;
