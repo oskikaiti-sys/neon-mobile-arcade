@@ -2389,6 +2389,60 @@ function botReply(p){
  recordReply(p.id,contradictory?(temperament==="opportunist"?"counter":"admit"):
   temperament==="assertive"?"counter":"explain");
 }
+
+/* Literal debates carry structured source records, not inferred roles. */
+var DEBATE_DIALOGUE={
+ zh:{challenge:{
+  reason:"我质疑{name}：你刚才的判断究竟依据哪条公开信息？",
+  claim:"{name}在第{day}天跳了{role}，请解释身份宣称的依据。",
+  report:"第{day}天{name}对{subject}报了{role}。能否说明查验依据？",
+  vote:"第{day}天{name}投了{subject}。请解释这一票。"
+ },reply:{
+  explain:"我的依据是公开发言和投票记录。这不等于我有系统确认的查验。",
+  contradiction:"我的说法与已经确认的公开记录出现矛盾，目前无法给出可验证的解释。",
+  counter:"质疑者也应该提供具体证据，单纯被质疑并不能证明我是狼人。",
+  admit:"我承认之前的判断可能错了，但一次判断失误并不足以证明身份。",
+  avoid:"暂时不回应，先观察其他人的表态。"
+ }},
+ en:{challenge:{
+  reason:"I challenge {name}: what specific public evidence supports your judgment?",
+  claim:"{name} claimed {role} on day {day}. Why should we believe the claim?",
+  report:"On day {day}, {name} reported {role} for {subject}. What evidence supports it?",
+  vote:"On day {day}, {name} voted for {subject}. Why?"
+ },reply:{
+  explain:"My reasoning comes from public statements and ballots. That is not a verified inspection.",
+  contradiction:"My story conflicts with verified public records. I cannot support the inconsistency yet.",
+  counter:"My accuser must show concrete evidence. Being challenged is not proof of a hidden role.",
+  admit:"I may have made an incorrect judgment, but one mistake alone does not establish my role.",
+  avoid:"I won't address this yet. I'll hear the other statements first."
+ }},
+ ja:{challenge:{
+  reason:"{name}に質問します。その判断にはどんな公開された根拠がありますか？",
+  claim:"{name}は{day}日目に{role}をCOしました。根拠は何ですか？",
+  report:"{day}日目に{name}は{subject}に{role}を出しました。根拠を説明してください。",
+  vote:"{day}日目に{name}は{subject}へ投票しました。理由は何ですか？"
+ },reply:{
+  explain:"公開発言と投票記録を参考にしました。占い結果として確定したものではありません。",
+  contradiction:"自分の発言が公開された確定記録と矛盾しています。まだ説明できません。",
+  counter:"疑う側も具体的な証拠を示すべきです。疑われただけで役職は確定しません。",
+  admit:"以前の判断が間違っていた可能性はありますが、それだけで人狼とは限りません。",
+  avoid:"今は回答を控え、ほかの発言を聞きます。"
+ }}
+};
+function debateLine(lang,part,item){
+ var dict=DEBATE_DIALOGUE[lang]||DEBATE_DIALOGUE.zh;
+ var info=item.evidence||{},players=(view&&view.players)||(st&&st.players)||[];
+ var findName=function(id){var p=players.find(function(x){return x.id===id});return p?displayName(p.name):""};
+ var role=info.role||info.report||"";
+ var roleNames={
+  zh:{seer:"预言家",guard:"守卫",villager:"村民",black:"查杀",gold:"金水"},
+  en:{seer:"Seer",guard:"Guardian",villager:"Villager",black:"werewolf accusation",gold:"clear"},
+  ja:{seer:"占い師",guard:"騎士",villager:"村人",black:"黒判定",gold:"白判定"}
+ };
+ var vars={name:findName(item.targetId),subject:findName(info.subject),day:info.day||item.day,role:(roleNames[lang]||roleNames.zh)[role]||role};
+ var key=part==="reply"&&item.kind==="explain"&&item.contradicted?"contradiction":item.kind;
+ return (dict[part][key]||"").replace(/\{(name|subject|day|role)\}/g,function(_,name){return vars[name]||""});
+}
 function stepBots(){
  if(!st||st.phase==="ended"||st.phase==="lobby")return;
  if(st.phase==="night"){return;}else if(st.phase==="talk"){
@@ -2512,12 +2566,40 @@ function aiSuspicion(observer,target){
    else if(exposed==="wolf")score-=1.25;
   });
  });
+ /* Challenge and reply outcomes use public contradictions, not speech fluency. */
+ (st.debateOutcomes||[]).forEach(function(outcome){
+  if(outcome.id!==target.id)return;
+  if(outcome.kind==="silence")score+=.8;
+  else if(outcome.kind==="avoid")score+=.55;
+  else if(outcome.kind==="admit")score+=outcome.contradicted?.55:.05;
+  else if(outcome.kind==="explain")score+=outcome.contradicted?.6:-.18;
+  else if(outcome.kind==="counter")score+=outcome.contradicted?.4:0;
+ });
  var own=history.slice().reverse().find(function(h){return h.id===observer.id&&h.targetId===target.id});
  if(own){
   if(["black","suspect","suspectVote","challengeClaim"].includes(own.kind))score+=.45;
   if(["gold","trust","trustVote","followSeer"].includes(own.kind))score-=.6;
  }
  return Math.max(-12,Math.min(24,score));
+}
+/* Known wolf count is exactly one. Unknown suspicion weights are
+   normalized over living, unconfirmed suspects rather than independent
+   unbounded scores (MIT deepwolf-inspired inference). */
+function aiWolfProbabilities(p){
+ var targets=targetList(p.id),found=null,weights={},total=0;
+ targets.forEach(function(q){
+  var check=aiObservedInspection(p,q.id);
+  if(check&&check.evil)found=q.id;
+ });
+ if(found){targets.forEach(function(q){weights[q.id]=q.id===found?1:0});return weights}
+ targets.forEach(function(q){
+  var check=aiObservedInspection(p,q.id);
+  if(check&&!check.evil){weights[q.id]=0;return}
+  var weight=Math.exp(Math.max(-5,Math.min(5,aiSuspicion(p,q)))*.42);
+  weights[q.id]=weight;total+=weight;
+ });
+ targets.forEach(function(q){weights[q.id]=total?weights[q.id]/total:0});
+ return weights;
 }
 function aiRanking(p,exclude){
  var brain=aiState(p);
