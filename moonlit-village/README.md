@@ -8,6 +8,20 @@
 
 右上角开关依旧同时控制 BGM 和 SFX，并立即停止当前正在发声的节点。浏览器缺少 AudioContext 时使用预加载的 HTML Audio 作为兼容回退。实际触屏响应速度仍受设备、浏览器与系统音频输出延迟影响。
 
+## 六人双侧站位与中央发言（2026-10-30）
+
+`moonlit-village/index.html` 已取消需要横向滑动才能看见所有居民的卡条。现在 `#players.player-layout` 固定采用三列：左侧 `#leftPlayers.character-rail` 放 1–3 号、中间 `.story-column` 显示文字历史、右侧 `#rightPlayers.character-rail` 放 4–6 号。所有六名居民（包括出局者）始终保留座位。原来的居民点击选目标及键盘方向键/回车操作保持不变。
+
+- **`#speakerOverlay` / `.speaker-card`**：新的公开发言先居中显示头像、姓名和内容；展示结束后自动写入 `#feed`，也可以点击「继续」跳过这条发言。
+- **`rpgRenderMessages()` / `stageAdvanceQueue()` / `stageFinishSpeech()`**：只消费已公开的 `snapshot().messages`，将新发言按先后顺序展示，其他公告保持与发言一致的历史顺序；不改变角色、策略、投票和同步协议。
+- **`stageHighlightSpeaker()`**：金色呼吸光圈跟随中央正在展示的发言者，显示完成后取消该高亮。
+- 开启 **减少动态效果** 时不播放独立发言动画，发言直接进入历史。
+- 手机屏高很低时头像与内边距会缩小，避免必须滑动六人座位；公告和行动菜单仍可分别纵向滚动。
+
+### 验证
+
+在约 390px 宽的 iPhone Safari 中检查六名居民是否同时可见，并完成：单人开局、身份翻牌、夜晚行动、天亮、中央公开发言、发言自动/手动归档、怀疑/信任目标选择、投票、下一夜和胜负结算。再打开两台设备验证公开记录同步，确保不同设备只展示各自的秘密身份。
+
 ## UI 3–7 优化（2026-10-30）
 
 改动集中在 `moonlit-village/index.html`，原有 `startGame()` / `stepBots()` / `finishNight()` / `finishVote()` / `winCheck()`、联机状态同步和 BGM 均保持不变。
