@@ -1547,6 +1547,14 @@ body.game-active .night-feedback-dismiss{
  }
  body.game-active #players .night-skill-sigil{opacity:1;animation:none}
 }
+/* Long multi-step discussion menus scroll independently of the resident rails. */
+body.game-active #gameScreen>.game-actions{min-height:0;overflow:hidden}
+body.game-active #actions.rpg-menu,body.game-active #actions.rpg-target-menu{
+ overflow-y:auto;overscroll-behavior:contain;flex:1;min-height:0;scrollbar-width:thin;align-content:start;
+ grid-auto-rows:minmax(48px,auto)!important
+}
+body.game-active #actions.rpg-menu>button:disabled{opacity:.43;cursor:not-allowed}
+body.game-active #actions.rpg-target-menu>button.rpg-selected{border-color:var(--gold)!important;background:rgba(232,200,114,.14)!important}
 </style>
 </head>
 <body>
@@ -1746,6 +1754,11 @@ translations.en.nightYourTurn="It is your turn to act";translations.zh.nightYour
 translations.en.nightWaitYourTurn="Wait until your role is called.";translations.zh.nightWaitYourTurn="请等待轮到你的身份行动。";translations.ja.nightWaitYourTurn="自分の役職の番までお待ちください。";
 translations.en.nightChoiceSaved="Choice submitted. Waiting for this turn to end.";translations.zh.nightChoiceSaved="已完成行动，等待本轮结束。";translations.ja.nightChoiceSaved="行動を確定しました。このターンの終了を待っています。";
 translations.en.nightCuePosition="Turn {turn}/3";translations.zh.nightCuePosition="第 {turn}/3 轮";translations.ja.nightCuePosition="{turn}/3 ターン";
+translations.en.speechChooseTarget="Choose a person · {kind}";translations.zh.speechChooseTarget="选择发言对象 · {kind}";translations.ja.speechChooseTarget="対象を選ぶ · {kind}";
+translations.en.speechMenuHelp="Choose a speaking strategy. Role claims and inspection reports can be bluffs.";translations.zh.speechMenuHelp="选择发言方向。跳身份、金水与查杀都只是个人公开宣称，可能是假话。";translations.ja.speechMenuHelp="発言内容を選びます。COや占い結果は嘘の可能性があります。";
+translations.en.speechTargetHelp="Tap a resident to select, then confirm. Evidence-based choices require a public record.";translations.zh.speechTargetHelp="点击居民选中，再确认。与票型或身份有关的质疑必须有公开记录。";translations.ja.speechTargetHelp="対象を選んで確定。投票や役職COの根拠には公開記録が必要です。";
+translations.en.speechEvidenceVote="Day {day}: voted for {name}";translations.zh.speechEvidenceVote="第{day}天投给了{name}";translations.ja.speechEvidenceVote="{day}日目に{name}へ投票";
+translations.en.speechEvidenceClaim="Claimed {role}";translations.zh.speechEvidenceClaim="公开自称{role}";translations.ja.speechEvidenceClaim="{role}とCO";
 translations.en.nightFeedbackDone="Got it";translations.zh.nightFeedbackDone="知道了";translations.ja.nightFeedbackDone="確認";
 translations.en.skillWolfTitle="Attack confirmed";translations.zh.skillWolfTitle="袭击目标已锁定";translations.ja.skillWolfTitle="襲撃先を確定";
 translations.en.skillWolfDetail="You targeted {name}. Whether the attack succeeds will be revealed at dawn.";translations.zh.skillWolfDetail="已选择袭击 {name}。袭击是否成功将在天亮后揭晓。";translations.ja.skillWolfDetail="{name} を襲撃対象に選びました。成功したかどうかは朝に判明します。";
@@ -2741,7 +2754,36 @@ function rpgRenderMessages(v){
  for(var j=overlap;j<messages.length;j++)stageQueue.push(messages[j]);
  stageAdvanceQueue();
 }
-function rpgTargets(v){return v.players.filter(function(p){return p.alive&&p.id!==v.me})}
+/* Grouped speech menu. Labels never determine a player's true role. */
+var SPEECH_UI={"zh":{"groups":{"doubt":["怀疑与质疑","质疑公开发言、身份宣称和过去的投票"],"support":["信任与站边","表达暂时的信任，讨论谁值得跟随"],"identity":["公开跳身份","任何身份都能自称预言家、守卫或村民"],"report":["金水与查杀","自称预言家，公布一份声称的查验结果"],"analysis":["复盘与回应","讨论线索、票型、身份宣称或为自己辩解"]},"kinds":{"suspect":["提出怀疑","请对方解释立场，明确只是推测"],"suspectVote":["追问先前投票","引用真实的上一轮投票记录"],"challengeClaim":["质疑跳身份","要求自称有身份的人提供依据"],"trust":["暂时相信某人","表达倾向，不把猜测当成查验"],"trustVote":["根据票型站边","结合过去的投票谨慎判断"],"followSeer":["倾听自称预言家的人","支持听取查验顺序，不直接认定真假"],"claimSeer":["跳预言家","公开自称预言家，可以是真话或谎言"],"claimGuard":["跳守卫","自称守卫，但不透露夜间目标"],"claimVillager":["跳村民","自称没有夜间技能的村民"],"gold":["发金水","自称查验一人不是狼人"],"black":["报查杀","自称查验一人是狼人"],"question":["要求解释立场","询问信任或怀疑的理由"],"analyseVotes":["分析历史票型","依据此前真正发生的投票"],"analyseClaims":["梳理公开身份宣称","引用已有的身份说法"],"defend":["为自己辩解","回应质疑，或请对方拿出证据"],"clue":["整理公开线索","区分真实信息与主观推测"],"pass":["暂不表态","先听其他人说，不编造新线索"]}},"en":{"groups":{"doubt":["Doubt and challenge","Question public statements, claims, and earlier votes"],"support":["Trust and align","Explain tentative trust and alliances"],"identity":["Claim a role","Anyone can claim Seer, Guardian, or Villager"],"report":["Give a clear or accusation","Claim a Seer inspection result, true or false"],"analysis":["Review and respond","Discuss clues, ballots, claims, or defend yourself"]},"kinds":{"suspect":["Raise a suspicion","Ask for an explanation; not an inspection"],"suspectVote":["Question an earlier vote","Cite an actual recorded public ballot"],"challengeClaim":["Challenge a role claim","Ask a claimant to explain their evidence"],"trust":["Tentatively trust someone","Be clear that this is not verified"],"trustVote":["Consider an earlier vote","Make a provisional judgment from the record"],"followSeer":["Listen to a claimed Seer","Hear the inspection order before deciding"],"claimSeer":["Claim Seer","May be a true role or a bluff"],"claimGuard":["Claim Guardian","Do not disclose protection targets"],"claimVillager":["Claim Villager","Say you have no night power"],"gold":["Give a clear","Claim a non-werewolf inspection"],"black":["Give an accusation","Claim a werewolf inspection"],"question":["Ask for an explanation","Question someone's reasoning"],"analyseVotes":["Review voting records","Reference actual ballots, never invented votes"],"analyseClaims":["Review role claims","Distinguish claims from verified facts"],"defend":["Defend yourself","Reply to suspicion or request evidence"],"clue":["Organize public clues","Separate evidence from speculation"],"pass":["Stay quiet","Hear others without inventing information"]}},"ja":{"groups":{"doubt":["疑いと反論","公開発言・役職CO・投票を検討"],"support":["信頼と支持","暫定的な信頼について述べる"],"identity":["役職CO","誰でも占い師・騎士・村人を名乗れる"],"report":["白・黒判定を出す","占い師として結果を主張する"],"analysis":["考察・弁明","公開情報を整理し反論する"]},"kinds":{"suspect":["疑いを示す","推測と占い結果を分けて話す"],"suspectVote":["以前の投票を問う","実際の公開票を引用"],"challengeClaim":["役職COを疑う","証拠の説明を求める"],"trust":["暫定的に信頼","確定情報と混同しない"],"trustVote":["票型から考える","記録された投票を検討"],"followSeer":["占い師COを聞く","占い順を確認する"],"claimSeer":["占い師CO","本当の役職とは限らない"],"claimGuard":["騎士CO","護衛先は公開しない"],"claimVillager":["村人CO","夜の能力なしと主張"],"gold":["白を出す","人狼ではないと主張"],"black":["黒を出す","人狼だと主張"],"question":["根拠を聞く","疑いや信頼について質問"],"analyseVotes":["投票記録を整理","実際に記録された票を参照"],"analyseClaims":["役職COを整理","主張と事実を区別"],"defend":["弁明する","疑いに答える"],"clue":["公開情報を整理","推測と確定情報を分ける"],"pass":["発言を控える","手がかりを捏造しない"]}}};
+function speechUILine(type,id){
+ var dict=SPEECH_UI[selectedLanguage]||SPEECH_UI.zh;
+ return dict[type]&&dict[type][id]||SPEECH_UI.zh[type][id]||[id,""];
+}
+function eligibleSpeechTargets(v,kind){
+ return (v.players||[]).filter(function(p){return p.alive&&p.id!==v.me&&
+  speechHasEvidence(v.publicHistory||[],v.voteHistory||[],kind,p.id)});
+}
+function speechTargetDetail(v,kind,p){
+ var votes=v.voteHistory||[],history=v.publicHistory||[];
+ if(kind==="suspectVote"||kind==="trustVote"){
+  var vote=lastVote(votes,p.id),t=vote&&v.players.find(function(q){return q.id===vote.targetId});
+  if(t)return tr("speechEvidenceVote",{day:vote.day,name:displayName(t.name)});
+ }
+ if(kind==="challengeClaim"||kind==="followSeer"){
+  var c=lastClaim(history,p.id,kind==="followSeer");
+  if(c)return tr("speechEvidenceClaim",{role:roleName(roleClaim(c.kind))});
+ }
+ return speechUILine("kinds",kind)[1];
+}
+function speechMenuCard(kind,v){
+ var spec=SPEECH_OPTIONS[kind],line=speechUILine("kinds",kind);
+ var enabled=!spec.target||eligibleSpeechTargets(v,kind).length>0;
+ var icon={doubt:"suspect",support:"trust",identity:"clue",report:"clue",analysis:"clue"}[spec.group];
+ var markup=modernAction(line[0],spec.target?"pickSpeech":"say",null,kind,icon,line[1]);
+ return enabled?markup:markup.replace('<button type="button"','<button type="button" disabled aria-disabled="true"');
+}
+function rpgTargets(v){return speechKind&&SPEECH_OPTIONS[speechKind]?eligibleSpeechTargets(v,speechKind):v.players.filter(function(p){return p.alive&&p.id!==v.me})}
 function rpgHighlightTargets(){
  var selected=rpgSpeechTarget;
  $("players").querySelectorAll("[data-rpg-target]").forEach(function(tile){
