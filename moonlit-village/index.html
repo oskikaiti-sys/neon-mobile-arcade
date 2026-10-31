@@ -1362,6 +1362,21 @@ body.game-active .game-header .hero-copy h1{font-size:clamp(11px,3.1vw,16px)!imp
  color:var(--gold);font-size:14px;font-weight:700}
 @media(prefers-reduced-motion:reduce){.rules-overlay *,.deal-roster *{animation:none!important;transition:none!important}}
 
+
+/* At very narrow phone widths, move the game title to a second row rather
+ * than squeezing it between the language selector and three touch targets. */
+@media(max-width:375px){
+ body.game-active .game-header{
+  grid-template-columns:68px minmax(0,1fr) 151px!important;
+  grid-template-rows:48px 25px!important;
+  min-height:77px!important;
+  gap:2px 4px!important;
+ }
+ body.game-active .game-header .lang-control{grid-column:1;grid-row:1}
+ body.game-active .game-header .header-actions{grid-column:3;grid-row:1}
+ body.game-active .game-header .hero-copy{grid-column:1/-1;grid-row:2}
+ body.game-active .game-header .hero-copy h1{font-size:15px!important;letter-spacing:.2px!important}
+}
 </style>
 </head>
 <body>
