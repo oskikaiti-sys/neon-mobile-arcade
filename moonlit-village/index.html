@@ -2468,7 +2468,7 @@ function accept(id,action,target,speech){
  stepBots();broadcast()
 }
 function sendAction(action,target,speech){
- speechKind="";
+ speechKind="";speechGroup="";
  if(isHost)accept("h",action,target,speech);
  else if(conn&&conn.open)conn.send({type:"action",action:action,target:target,speech:speech});
  else $("notice").textContent=tr("errActionDisconnected")
@@ -2786,6 +2786,10 @@ function speechMenuCard(kind,v){
 function rpgTargets(v){return speechKind&&SPEECH_OPTIONS[speechKind]?eligibleSpeechTargets(v,speechKind):v.players.filter(function(p){return p.alive&&p.id!==v.me})}
 function rpgHighlightTargets(){
  var selected=rpgSpeechTarget;
+ $("actions").querySelectorAll('[data-do="selectSpeechTarget"]').forEach(function(btn){
+  var on=btn.getAttribute("data-target")===selected;
+  btn.classList.toggle("rpg-selected",on);btn.setAttribute("aria-pressed",on?"true":"false");
+ });
  $("players").querySelectorAll("[data-rpg-target]").forEach(function(tile){
   var on=tile.getAttribute("data-rpg-target")===selected;
   tile.classList.toggle("rpg-selected",on);
@@ -2803,7 +2807,7 @@ function rpgActivateMenu(){
  menu.classList.toggle("rpg-menu",!!(isTalk&&!speechKind));
  menu.classList.toggle("rpg-target-menu",!!(isTalk&&speechKind));
  if(isTalk&&!speechKind){
-  var opts=Array.from(menu.querySelectorAll("button[data-do]"));
+  var opts=Array.from(menu.querySelectorAll("button[data-do]:not([disabled])"));
   if(opts.length)rpgMenuIndex=Math.min(rpgMenuIndex,opts.length-1);
   opts.forEach(function(btn,i){btn.classList.toggle("cursor",i===rpgMenuIndex);btn.setAttribute("aria-current",i===rpgMenuIndex?"true":"false")});
  }else if(isTalk&&speechKind){
@@ -3056,6 +3060,7 @@ function render(){
  $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleName(v.myRole)+" · "+roleDescription(v.myRole))+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):tr("roleUnassigned");
  rpgRenderMessages(v);
  var a="",title=tr("actionDefault"),notice="";
+ if(v.phase!=="talk"||v.submitted){speechGroup="";speechKind="";rpgSpeechTarget=null;}
  if(v.phase==="lobby"){
   title=tr("actionLobby");
   if(v.host)a=button(tr("start"),"start",null,null,"primary full");
@@ -3077,11 +3082,27 @@ function render(){
   title=tr("actionTalk");
   if(!v.myAlive)notice=tr("talkOut");
   else if(v.submitted)notice=tr("talkSubmitted");
-  else if(speechKind==="suspect"||speechKind==="trust"){
-   title=tr(speechKind==="suspect"?"actionSuspectTarget":"actionTrustTarget");
-   a=modernAction(tr("confirmTarget"),"confirmTarget",null,null,"confirm",tr("confirmDesc"))+modernAction(tr("back"),"back",null,null,"back",tr("backDesc"));
+  else if(speechKind&&SPEECH_OPTIONS[speechKind]&&SPEECH_OPTIONS[speechKind].target){
+   title=tr("speechChooseTarget",{kind:speechUILine("kinds",speechKind)[0]});
+   var availableTargets=eligibleSpeechTargets(v,speechKind);
+   if(!availableTargets.some(function(p){return p.id===rpgSpeechTarget}))
+    rpgSpeechTarget=availableTargets.length?availableTargets[0].id:null;
+   a=availableTargets.map(function(p){return modernTarget(p,speechTargetDetail(v,speechKind,p),"selectSpeechTarget","speech")}).join("");
+   a+=modernAction(tr("confirmTarget"),"confirmTarget",null,null,"confirm",tr("confirmDesc"));
+   a+=modernAction(tr("back"),"back",null,null,"back",tr("backDesc"));
+   notice=tr("speechTargetHelp");
+  }else if(speechGroup&&SPEECH_GROUPS[speechGroup]){
+   title=speechUILine("groups",speechGroup)[0];
+   a=SPEECH_GROUPS[speechGroup].map(function(kind){return speechMenuCard(kind,v)}).join("");
+   a+=modernAction(tr("back"),"back",null,null,"back",tr("backDesc"));
+   notice=speechUILine("groups",speechGroup)[1];
   }else{
-   a=modernAction(tr("suspect"),"pickSpeech",null,"suspect","suspect",tr("suspectDesc"))+modernAction(tr("trust"),"pickSpeech",null,"trust","trust",tr("trustDesc"))+modernAction(tr("clue"),"say",null,"clue","clue",tr("clueDesc"))+modernAction(tr("pass"),"say",null,"pass","pass",tr("passDesc"));
+   a=Object.keys(SPEECH_GROUPS).map(function(group){
+    var line=speechUILine("groups",group);
+    var icon={doubt:"suspect",support:"trust",identity:"clue",report:"clue",analysis:"clue"}[group];
+    return modernAction(line[0],"speechGroup",null,group,icon,line[1]);
+   }).join("");
+   notice=tr("speechMenuHelp");
   }
  }else if(v.phase==="vote"){
   title=tr("actionVote");
@@ -3095,8 +3116,9 @@ function render(){
   else notice=tr("waitHostAgain");
  }
  $("actionTitle").textContent=title;
- $("actions").className="actions"+((v.phase==="night"||v.phase==="vote"||(v.phase==="talk"&&speechKind))?" targets":"");
+ $("actions").className="actions"+((v.phase==="night"||v.phase==="vote")?" targets":"");
  $("actions").innerHTML=a;
+ if(v.phase==="talk"&&speechKind)rpgHighlightTargets();
  $("seerNotesButton").hidden=!(v.myRole==="seer"&&["night","talk","vote","ended"].includes(v.phase));
  $("seerNotesButton").textContent=tr("seerNotesButton");
  rpgActivateMenu();
@@ -3353,9 +3375,11 @@ document.addEventListener("click",function(e){
   navigator.clipboard.writeText(link.toString()).then(function(){$("notice").textContent=tr("copySuccess",{code:room})}).catch(function(){$("notice").textContent=tr("copyFail",{code:room})});
  }else if(action==="night")sendAction("night",target,null);
  else if(action==="vote")sendAction("vote",target,null);
- else if(action==="pickSpeech"){speechKind=speech;rpgSpeechTarget=null;render()}
- else if(action==="back"){speechKind="";rpgSpeechTarget=null;render()}
- else if(action==="confirmTarget"){if(rpgSpeechTarget)sendAction("speech",rpgSpeechTarget,speechKind)} 
+ else if(action==="speechGroup"){if(SPEECH_GROUPS[speech]){speechGroup=speech;speechKind="";rpgSpeechTarget=null;rpgMenuIndex=0;render()}}
+ else if(action==="pickSpeech"){if(SPEECH_OPTIONS[speech]&&SPEECH_OPTIONS[speech].target){speechKind=speech;rpgSpeechTarget=null;render()}}
+ else if(action==="selectSpeechTarget")rpgSelectTarget(target);
+ else if(action==="back"){if(speechKind){speechKind="";rpgSpeechTarget=null}else speechGroup="";rpgMenuIndex=0;render()}
+ else if(action==="confirmTarget"){if(rpgSpeechTarget)sendAction("speech",rpgSpeechTarget,speechKind)}
  else if(action==="speakTarget")sendAction("speech",target,speechKind);
  else if(action==="say")sendAction("speech",null,speech);
 });
@@ -3402,7 +3426,8 @@ document.addEventListener("keydown",function(e){
   if(e.key==="Enter"&&rpgSpeechTarget){e.preventDefault();sendAction("speech",rpgSpeechTarget,speechKind)}
   return;
  }
- var menu=Array.from($("actions").querySelectorAll("button[data-do]"));
+ if(e.key==="Escape"&&speechGroup){e.preventDefault();speechGroup="";rpgMenuIndex=0;render();return;}
+ var menu=Array.from($("actions").querySelectorAll("button[data-do]:not([disabled])"));
  if(!menu.length)return;
  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
   e.preventDefault();rpgMenuIndex=(rpgMenuIndex+(e.key==="ArrowDown"?1:-1)+menu.length)%menu.length;
