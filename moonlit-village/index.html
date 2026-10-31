@@ -3884,7 +3884,15 @@ function botSpeech(p){
  var brainPlan={day:st.day,kind:choice.kind,targetId:choice.targetId,reason:choice.reason};
  brain.plan=brainPlan;
  brain.dayOfDecision=st.day;
- speak(p.id,choice.kind,choice.targetId);
+ var reportDetail=null;
+ if(["gold","black"].includes(choice.kind)){
+  var real=(p.role==="seer"?(st.known[p.id]||[]):[]).find(function(k){
+   return k.id===choice.targetId&&!!k.evil===(choice.kind==="black");
+  });
+  var fake=brain.fakeReports&&brain.fakeReports[choice.targetId];
+  reportDetail={reportNight:real?real.night:fake?fake.night:st.day};
+ }
+ speak(p.id,choice.kind,choice.targetId,reportDetail);
 }
 /* Never treat a cited public record as evidence of its truth. */
 function publicCitation(targetId,evidenceSeq){
