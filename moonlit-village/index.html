@@ -168,11 +168,72 @@ body.game-active #gameScreen{grid-template-rows:30px 29px minmax(0,.9fr) 28px mi
 body.game-active #gameScreen>.panel:nth-child(5){padding:3px 7px!important}
 body.game-active #feed{max-height:24px}
 }
+
+/* One-screen mobile layout v3: readable history and compact actions */
+header{position:relative}
+#musicToggle{position:absolute;right:0;top:3px;border:1px solid #7c6b77;border-radius:99px;background:#29273c;color:#dfcda9;min-height:34px;padding:5px 9px;font-size:11px;z-index:4}
+#musicToggle[aria-pressed="false"]{opacity:.72;color:#b0adbb}
+body.game-active main{height:100dvh;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+body.game-active #gameScreen{flex:1;min-height:0;display:grid!important;grid-template-rows:49px minmax(0,1fr) minmax(128px,150px) auto auto;gap:6px}
+body.game-active #gameScreen>.panel{min-height:0;margin:0;overflow:hidden;border-radius:11px}
+body.game-active #gameScreen>.panel:nth-child(1){grid-row:1;padding:7px 11px}
+body.game-active #gameScreen>.panel:nth-child(5){grid-row:2;display:flex;flex-direction:column;padding:8px 10px;overflow:hidden}
+body.game-active #gameScreen>.panel:nth-child(2){grid-row:3;padding:7px 10px;display:flex;flex-direction:column}
+body.game-active #gameScreen>.panel:nth-child(3){grid-row:4;padding:5px 9px}
+body.game-active #gameScreen>.panel:nth-child(4){grid-row:5;padding:7px 10px;display:flex;flex-direction:column}
+body.game-active #gameScreen>.panel:nth-child(5) h2{display:block;font-size:12px;margin:0 0 6px}
+body.game-active #feed{display:flex;flex-direction:column;flex:1;min-height:0;max-height:none;overflow-y:auto;overflow-x:hidden;justify-content:flex-start;gap:5px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#6f617b transparent;padding-right:3px}
+body.game-active #feed .entry,
+body.game-active #gameScreen>.panel:nth-child(5) #feed .entry{display:block!important;flex:none;min-height:auto;max-height:none;overflow:visible;white-space:normal;-webkit-line-clamp:unset;font-size:12px;line-height:1.35;padding:6px 8px;overflow-wrap:anywhere;border-radius:6px}
+body.game-active #players{flex:1;min-height:0;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:5px}
+body.game-active .player{min-height:0;padding:2px 2px;border-radius:9px}
+body.game-active .avatar{font-size:clamp(19px,3.5vh,26px);line-height:1}
+body.game-active .player .name{font-size:11px;margin-top:2px}
+body.game-active .player .tag{font-size:9px;margin-top:1px}
+body.game-active #gameScreen>.panel:nth-child(2) h2{font-size:12px;margin-bottom:5px}
+body.game-active #myRole{border-radius:7px;padding:5px 8px;font-size:11px;line-height:1.35;max-height:48px}
+body.game-active #gameScreen>.panel:nth-child(3) h2{display:none}
+body.game-active #gameScreen>.panel:nth-child(4) h2{font-size:12px;line-height:1.2;margin:0 0 6px}
+body.game-active #actions,body.game-active #actions.targets{flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:44px;gap:6px;min-height:0}
+body.game-active #actions.targets{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.game-active #actions>button{min-height:44px;max-height:44px;font-size:12px;padding:4px 6px;line-height:1.2;border-radius:9px}
+body.game-active #notice{font-size:11px;line-height:1.25;max-height:35px;margin:4px 0 0}
+body.game-active #gameScreen.action-waiting>.panel:nth-child(4){padding:6px 9px}
+body.game-active #gameScreen.action-waiting>.panel:nth-child(4) h2{display:none}
+body.game-active #gameScreen.action-waiting #notice{margin:0;padding:4px 0}
+body.game-active #gameScreen>.panel:nth-child(1) #phaseHelp{font-size:10px;line-height:1.2;margin:4px 0 0}
+@media(max-width:700px){
+body.game-active main{padding:max(4px,env(safe-area-inset-top)) 8px max(5px,env(safe-area-inset-bottom))}
+body.game-active header{margin:0 0 5px}
+body.game-active header h1{font-size:21px;margin:2px 0}
+body.game-active #gameScreen{grid-template-rows:43px minmax(0,1fr) minmax(128px,145px) auto auto;gap:5px}
+body.game-active #gameScreen>.panel:nth-child(1){padding:5px 9px}
+body.game-active #gameScreen>.panel:nth-child(5){padding:7px 9px}
+body.game-active #gameScreen>.panel:nth-child(2){padding:6px 9px}
+body.game-active #gameScreen>.panel:nth-child(3){padding:5px 8px}
+body.game-active #gameScreen>.panel:nth-child(4){padding:7px 9px}
+body.game-active #feed .entry,body.game-active #gameScreen>.panel:nth-child(5) #feed .entry{font-size:11px;padding:6px 7px;line-height:1.35}
+}
+@media(max-height:650px){
+body.game-active header{margin-bottom:3px}
+body.game-active header h1{font-size:19px}
+body.game-active #gameScreen{grid-template-rows:33px minmax(0,1fr) 116px auto auto;gap:4px}
+body.game-active #gameScreen>.panel:nth-child(1) #phaseHelp{display:none}
+body.game-active #gameScreen>.panel:nth-child(2) h2{margin:0 0 3px}
+body.game-active #gameScreen>.panel:nth-child(5) h2{margin:0 0 3px}
+body.game-active #gameScreen>.panel:nth-child(3){padding:3px 8px}
+body.game-active #myRole{padding:3px 6px}
+body.game-active #actions,body.game-active #actions.targets{grid-auto-rows:42px}
+body.game-active #actions>button{min-height:42px;max-height:42px}
+body.game-active #gameScreen>.panel:nth-child(4){padding:5px 8px}
+}
+@media(max-height:530px){body.game-active #gameScreen{grid-template-rows:31px minmax(0,1fr) 98px auto auto}body.game-active .avatar{font-size:18px}body.game-active #gameScreen>.panel:nth-child(5) h2{display:none}}
+
 </style>
 </head>
 <body>
 <main>
-<header><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1>月下疑云</h1><div class="subtitle">六人迷你狼人杀 · 一个人也能开局 · 选项式发言</div></header>
+<header><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐">♫ 音乐开</button><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1>月下疑云</h1><div class="subtitle">六人迷你狼人杀 · 一个人也能开局 · 选项式发言</div></header>
 <section id="homeScreen" class="panel">
 <h2>踏入月下村庄</h2>
 <label for="myName">你的昵称（不会要求注册）</label>
@@ -427,8 +488,9 @@ function render(){
  }).join("");
  var tips=v.knowledge.slice(-4).map(function(k){return '第 '+k.night+' 夜查验：'+k.name+' 是'+(k.evil?'狼人':'好人')}).join("；");
  $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleText[v.myRole])+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):'身份尚未分配，开局后仅你自己能看到。';
- $("feed").innerHTML=v.messages.slice(-2).map(function(m){return '<div class="entry '+(m.kind==="choice"?"choice":"news")+'">'+escapeHtml(m.text)+'</div>'}).join("");
- $("feed").scrollTop=$("feed").scrollHeight;
+ var feed=$("feed"),atBottom=(feed.scrollHeight-feed.clientHeight-feed.scrollTop)<42,scrollBefore=feed.scrollTop;
+ feed.innerHTML=v.messages.map(function(m){return '<div class="entry '+(m.kind==="choice"?"choice":"news")+'">'+escapeHtml(m.text)+'</div>'}).join("");
+ if(atBottom)feed.scrollTop=feed.scrollHeight;else feed.scrollTop=scrollBefore;
  var a="",title="做出决定",notice="";
  if(v.phase==="lobby"){
   title="准备开局";
@@ -467,10 +529,95 @@ function render(){
  $("actions").className="actions"+((v.phase==="night"||v.phase==="vote"||(v.phase==="talk"&&speechKind))?" targets":"");
  $("actions").innerHTML=a;
  $("notice").textContent=notice;
+ $("gameScreen").classList.toggle("action-waiting",!a);
 }
+
+/* Original procedural ambient soundtrack. Starts only after a user gesture (iOS requirement). */
+var musicWanted=true,musicContext=null,musicMaster=null,musicTimer=null,musicStep=0,musicAt=0;
+var musicHarmony=[
+ [48,55,60,63],[44,51,56,60],[51,58,63,67],[46,53,58,62],
+ [41,48,53,56],[43,50,55,59],[48,55,60,63],[43,50,55,59]
+];
+var musicMelody=[
+ [72,null,75,74,72,null,67,null],
+ [68,null,72,70,68,null,63,null],
+ [67,null,70,72,75,74,72,null],
+ [70,null,74,75,77,75,74,null],
+ [72,null,75,77,75,72,70,null],
+ [71,null,74,76,74,71,67,null],
+ [72,null,75,79,77,75,72,null],
+ [71,null,74,67,71,null,72,null]
+];
+function noteFrequency(midi){return 440*Math.pow(2,(midi-69)/12)}
+function musicTone(note,when,duration,peak,wave,attack){
+ if(!musicContext||!musicMaster)return;
+ var osc=musicContext.createOscillator(),env=musicContext.createGain();
+ osc.type=wave||"sine";osc.frequency.setValueAtTime(noteFrequency(note),when);
+ env.gain.setValueAtTime(.00001,when);
+ env.gain.linearRampToValueAtTime(peak,when+(attack||.045));
+ env.gain.exponentialRampToValueAtTime(.00002,when+duration);
+ osc.connect(env);env.connect(musicMaster);
+ osc.start(when);osc.stop(when+duration+.04);
+ osc.onended=function(){try{osc.disconnect();env.disconnect()}catch(e){}};
+}
+function scheduleMusic(){
+ if(!musicContext||!musicWanted||musicContext.state!=="running")return;
+ var halfBeat=60/82/2;
+ if(musicAt<musicContext.currentTime-.6)musicAt=musicContext.currentTime+.08;
+ var count=0;
+ while(musicAt<musicContext.currentTime+.8&&count++<12){
+  var bar=Math.floor(musicStep/8)%musicHarmony.length,beat=musicStep%8,t=musicAt,melody=musicMelody[bar][beat];
+  if(beat===0){
+   musicHarmony[bar].forEach(function(note,i){musicTone(note,t,halfBeat*7.8,.0075,i%2?"sine":"triangle",.3)});
+   musicTone(musicHarmony[bar][0]-12,t,halfBeat*5.8,.019,"sine",.08);
+  }
+  if(beat===4)musicTone(musicHarmony[bar][1]-12,t,halfBeat*3.2,.012,"sine",.065);
+  if(melody!==null)musicTone(melody,t,halfBeat*.86,.033,"sine",.024);
+  musicStep++;musicAt+=halfBeat;
+ }
+}
+function ensureMusic(){
+ if(!musicWanted)return;
+ try{
+  if(!musicContext){
+   var AudioCtor=window.AudioContext||window.webkitAudioContext;
+   if(!AudioCtor)return;
+   musicContext=new AudioCtor();
+   musicMaster=musicContext.createGain();
+   musicMaster.gain.value=.43;
+   musicMaster.connect(musicContext.destination);
+   musicAt=musicContext.currentTime+.12;
+  }
+  if(musicContext.state!=="running"){
+   musicContext.resume().then(function(){musicAt=musicContext.currentTime+.1;scheduleMusic()}).catch(function(){});
+  }
+  if(!musicTimer)musicTimer=setInterval(scheduleMusic,170);
+  scheduleMusic();
+ }catch(e){ /* Music must never block game interaction. */ }
+}
+function updateMusicButton(){
+ var btn=$("musicToggle");
+ btn.textContent=musicWanted?"♫ 音乐开":"♫ 音乐关";
+ btn.setAttribute("aria-pressed",musicWanted?"true":"false");
+ btn.setAttribute("aria-label",musicWanted?"关闭背景音乐":"开启背景音乐");
+}
+function toggleMusic(){
+ musicWanted=!musicWanted;
+ updateMusicButton();
+ if(!musicWanted){
+  if(musicMaster&&musicContext)musicMaster.gain.setTargetAtTime(0,musicContext.currentTime,.05);
+  if(musicTimer){clearInterval(musicTimer);musicTimer=null}
+ }else{
+  if(musicMaster&&musicContext)musicMaster.gain.setTargetAtTime(.43,musicContext.currentTime,.08);
+  ensureMusic();
+ }
+}
+
 document.addEventListener("click",function(e){
  var b=e.target.closest("button[data-do]");if(!b)return;
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
+ if(action==="musicToggle"){toggleMusic();return;}
+ ensureMusic();
  if(action==="flipRole"){if(!$("roleOverlay").classList.contains("revealed")){$("roleOverlay").classList.add("revealed");$("roleContinue").hidden=false;$("roleCard").disabled=true;$("drawHint").textContent="身份已经揭晓，准备进入村庄";}}
  else if(action==="closeRole"){$("roleOverlay").hidden=true;}
  else if(action==="solo")makeSolo();
