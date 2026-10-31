@@ -2393,7 +2393,16 @@ function stepBots(){
  if(!st||st.phase==="ended"||st.phase==="lobby")return;
  if(st.phase==="night"){return;}else if(st.phase==="talk"){
   live().filter(function(p){return p.bot&&!st.speeches[p.id]}).forEach(function(p){botSpeech(p)});
-  if(live().every(function(p){return !!st.speeches[p.id]})){st.phase="vote";armPhaseTimer("vote");log("所有人发言完毕，开始投票。");stepBots()}
+  if(live().every(function(p){return !!st.speeches[p.id]}))beginDebate()
+ }else if(st.phase==="debate"){
+  if(st.debateStage==="challenge"){
+   live().filter(function(p){return p.bot&&st.debateChoices[p.id]===undefined}).forEach(botChallenge);
+   if(live().every(function(p){return st.debateChoices[p.id]!==undefined}))beginReplies();
+  }else if(st.debateStage==="reply"){
+   st.debateTargets.filter(function(id){return st.debateReplies[id]===undefined&&person(id).bot})
+    .forEach(function(id){botReply(person(id))});
+   if(st.debateTargets.every(function(id){return st.debateReplies[id]!==undefined}))beginVoteAfterDebate();
+  }
  }else if(st.phase==="vote"){
   live().filter(function(p){return p.bot&&!st.votes[p.id]}).forEach(function(p){var t=botVote(p);st.votes[p.id]=t;log(p.name+" 投票给 "+person(t).name+"。","choice")});
   if(live().every(function(p){return !!st.votes[p.id]}))finishVote();
@@ -2588,7 +2597,7 @@ function finishNight(){
  var wolf=live().find(function(p){return p.role==="wolf"}),seer=live().find(function(p){return p.role==="seer"}),guard=live().find(function(p){return p.role==="guard"});
  var target=wolf?st.night[wolf.id]:null,save=guard?st.night[guard.id]:null;
  /* Seer results were already recorded at the moment of inspection. */
- if(target&&target!==save){person(target).alive=false;st.revealed.push({id:target,day:st.day,source:"night",alignment:"good"});log("天亮了，昨夜 "+person(target).name+" 遇袭出局。","news")}
+ if(target&&target!==save){person(target).alive=false;st.revealed.push({id:target,day:st.day,source:"night",alignment:"good"});publicEvent("death",null,target,{alignment:"good"});log("天亮了，昨夜 "+person(target).name+" 遇袭出局。","news")}
  else log("天亮了，昨夜是平安夜。","news");
  if(winCheck())return;
  st.phase="talk";armPhaseTimer("talk");log("第 "+st.day+" 天：请选择一句公开发言。");stepBots()
@@ -2954,6 +2963,7 @@ function speak(id,kind,targetId){
  var data=speechRecord(p,kind,t);
  st.speeches[id]={speech:kind,target:targetId||null};
  st.publicHistory.push({day:st.day,id:id,name:p.name,kind:kind,targetId:targetId||null,targetName:t?t.name:null});
+ publicEvent("statement",id,targetId,{kind:kind});
  log(p.name+"：「"+speechText("zh",data)+"」","choice");
  st.logs[st.logs.length-1].speechData=data;
  if(p.bot){
@@ -2995,12 +3005,13 @@ function botVote(p){
 }
 function finishVote(){
  st.voteHistory.push({day:st.day,votes:Object.keys(st.votes).map(function(id){return {voterId:id,targetId:st.votes[id]}})});
+ st.voteHistory[st.voteHistory.length-1].votes.forEach(function(v){publicEvent("vote",v.voterId,v.targetId,null)});
  var counts={};Object.keys(st.votes).forEach(function(id){var target=st.votes[id];counts[target]=(counts[target]||0)+1});
  delete counts["__abstain__"];
  var high=Math.max.apply(null,Object.values(counts));
  var leaders=Object.keys(counts).filter(function(id){return counts[id]===high});
  if(leaders.length!==1){log("投票平局，今天无人被放逐。","news")}
- else {var gone=person(leaders[0]);if(gone){gone.alive=false;st.revealed.push({id:gone.id,day:st.day,source:"vote",alignment:gone.role==="wolf"?"wolf":"good"});log("投票结果："+gone.name+" 被放逐，身份是「"+(gone.role==="wolf"?"狼人":"好人")+"」。","news")}}
+ else {var gone=person(leaders[0]);if(gone){gone.alive=false;st.revealed.push({id:gone.id,day:st.day,source:"vote",alignment:gone.role==="wolf"?"wolf":"good"});publicEvent("exile",null,gone.id,{alignment:gone.role==="wolf"?"wolf":"good"});log("投票结果："+gone.name+" 被放逐，身份是「"+(gone.role==="wolf"?"狼人":"好人")+"」。","news")}}
  if(winCheck())return;st.day++;beginNight()
 }
 function accept(id,action,target,speech){
@@ -3030,7 +3041,17 @@ function accept(id,action,target,speech){
   if(!opt.target&&target)return;
   if(opt.evidence&&!speechHasEvidence(st.publicHistory,st.voteHistory,speech,target))return;
   speak(id,speech,target);
- }else if(st.phase==="vote"&&action==="vote"){
+ }else if(st.phase==="debate"&&action==="challenge"){
+   if(st.debateStage!=="challenge"||st.debateChoices[id]!==undefined)return;
+   if(speech==="pass")recordChallenge(id,null,"pass");
+   else{
+    if(!["reason","claim","report","vote"].includes(speech)||!targetList(id).some(function(q){return q.id===target})||!debateEvidence(target,speech))return;
+    recordChallenge(id,target,speech);
+   }
+  }else if(st.phase==="debate"&&action==="reply"){
+   if(st.debateStage!=="reply"||!st.debateTargets.includes(id)||st.debateReplies[id]!==undefined||!DEBATE_REPLIES.includes(speech))return;
+   recordReply(id,speech);
+  }else if(st.phase==="vote"&&action==="vote"){
   if(st.votes[id]||!targetList(id).some(function(t){return t.id===target}))return;
   st.votes[id]=target;log(p.name+" 投票给 "+person(target).name+"。","choice");
  }else return;
