@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10121c">
+<title>月下疑云 · Moonlit Village</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(ellipse 90% 40% at 50% -10%,#383452 0%,#171b2b 52%,#0b1020 100%);color:#ede8e3}
+body:before{content:"";position:fixed;pointer-events:none;inset:0;background:radial-gradient(circle at 84% 9%,#d8d5ce20 0 40px,transparent 42px),linear-gradient(135deg,transparent 60%,#6b719009);opacity:.8}
+main{position:relative;max-width:850px;margin:auto;padding:max(22px,env(safe-area-inset-top)) 16px max(60px,env(safe-area-inset-bottom))}
+header{text-align:center;margin:12px auto 20px}
+.eyebrow{font-size:11px;letter-spacing:4px;color:#d9be9e;font-weight:800}
+h1{font-size:clamp(34px,9vw,55px);margin:7px 0 2px;font-family:Georgia,"STSong",serif;font-weight:600;letter-spacing:4px}
+.subtitle{color:#aeb0c4;font-size:13px;line-height:1.6}
+.panel{border:1px solid #49445c;border-radius:17px;padding:18px;background:linear-gradient(150deg,#222438e8,#171d2ddd);box-shadow:0 16px 40px #07091065;margin:12px 0}
+.panel h2{font-size:17px;margin:0 0 12px;color:#efddc9}
+input{background:#111725;border:1px solid #666178;border-radius:10px;color:#fff;padding:13px;font-size:16px;width:100%;margin:6px 0 12px;outline:none}
+input:focus{border-color:#c8ad7b}
+label{font-size:12px;color:#b5b4c5}
+button{cursor:pointer;touch-action:manipulation;border:1px solid #7c7486;color:#eee9e1;background:#343348;border-radius:11px;padding:12px 14px;font-size:14px;font-weight:700;min-height:44px;transition:background .15s,transform .15s}
+button:hover{background:#504b66}button:active{transform:scale(.98)}button:disabled{cursor:not-allowed;opacity:.45}
+button.primary{background:linear-gradient(120deg,#ead5ab,#b58b61);border:0;color:#211b20}
+button.primary:hover{filter:brightness(1.1)}
+button.ghost{background:#22273a}
+button.danger{border-color:#9b5365;color:#ffc0cb}
+.btns{display:flex;flex-wrap:wrap;gap:9px}
+.btns>button{flex:1;min-width:120px}
+.small{font-size:12px;color:#aeb0c4;line-height:1.7}.muted{color:#aeb0c4}.gold{color:#e4c494}.divider{height:1px;background:#48455b;margin:16px 0}
+#gameScreen{display:none}
+.topbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+.pill{display:inline-block;border:1px solid #7a6b69;border-radius:99px;color:#ead0af;font-weight:700;padding:5px 11px;font-size:12px;letter-spacing:1px}
+#roomInfo{font-size:13px;color:#c3b9a9}
+.players{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.player{position:relative;text-align:center;background:#171c2d;border:1px solid #4b4b62;border-radius:13px;padding:14px 5px;min-width:0}
+.player.dead{opacity:.45;filter:grayscale(1)}
+.player.me{border-color:#ddbc88}
+.avatar{font-size:32px;filter:drop-shadow(0 3px 6px #0009)}
+.player .name{font-weight:800;font-size:13px;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.player .tag{font-size:10px;color:#c1b6ba;margin-top:3px;min-height:15px}
+.role{border:1px solid #937b70;background:#312939;color:#ffdebf;padding:12px;border-radius:12px;font-size:14px;line-height:1.7}
+#feed{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.entry{background:#191e2e;border-left:2px solid #79728b;border-radius:6px;padding:10px 11px;font-size:13px;line-height:1.5}
+.entry.news{border-color:#dbb781}.entry.choice{border-color:#85a9cb}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.actions>button{min-width:0;word-break:break-word;min-height:51px}
+.actions>button.full{grid-column:1/-1}
+#notice{min-height:25px;font-size:12px;color:#f1c3a4;margin:8px 0}
+.footer{text-align:center;margin:24px 0 0;color:#9896a9;font-size:11px;line-height:1.8}
+@media(max-width:460px){.panel{padding:14px}.players{gap:6px}.player{padding:10px 3px}.avatar{font-size:26px}.player .name{font-size:12px}h1{letter-spacing:2px}.actions>button{font-size:12px;padding:10px 6px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1>月下疑云</h1><div class="subtitle">六人迷你狼人杀 · 一个人也能开局 · 选项式发言</div></header>
+<section id="homeScreen" class="panel">
+<h2>踏入月下村庄</h2>
+<label for="myName">你的昵称（不会要求注册）</label>
+<input id="myName" maxlength="15" value="旅人" autocomplete="nickname">
+<div class="btns"><button class="primary" data-do="solo">单人挑战 · AI补位</button><button data-do="create">创建好友房间</button></div>
+<div class="divider"></div>
+<label for="roomInput">输入好友分享的六位房间码</label>
+<input id="roomInput" maxlength="6" placeholder="例如 A7BC29" autocapitalize="characters" spellcheck="false">
+<div class="btns"><button data-do="join">加入房间</button></div>
+<p class="small">无需安装，无需注册。公开发言与投票会同步到其他玩家屏幕；夜晚身份和技能选择不会泄露。联机采用浏览器之间的直接连接，房主关闭页面后房间也会结束。</p>
+<div id="homeNotice" class="small" aria-live="polite"></div>
+</section>
+<section id="gameScreen">
+<div class="panel">
+<div class="topbar"><span class="pill" id="phaseTag">准备开始</span><span id="roomInfo"></span></div>
+<p class="small" id="phaseHelp"></p>
+<div class="btns" id="shareBtns"></div>
+</div>
+<div class="panel"><h2>村庄居民 <span class="small" id="countInfo"></span></h2><div id="players" class="players"></div></div>
+<div class="panel"><h2>你的身份</h2><div id="myRole" class="role">等待身份分配</div></div>
+<div class="panel"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
+<div class="panel"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
+</section>
+<div class="footer">月下疑云 · 原创轻量六人社交推理游戏<br>适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script>
+"use strict";
+(function(){
+var $=function(id){return document.getElementById(id)};
+var roleText={wolf:"狼人 · 夜晚袭击一人",seer:"预言家 · 每晚查验一人",guard:"守卫 · 每晚保护一人",villager:"村民 · 白天找出狼人"};
+var icons=["🧑","👩","🧔","👨","👩‍🦰","🧑‍🦳"];
+var peer=null,conn=null,isHost=false,solo=false,st=null,view=null,room="",myId="",connections=new Map(),speechKind="",busy=false;
+var mark=0;
+var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
+var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+function report(t){$("homeNotice").textContent=t;$("notice").textContent=t}
+function getName(){return ($("myName").value.trim().slice(0,15)||"旅人")}
+function enter(){ $("homeScreen").style.display="none";$("gameScreen").style.display="block"; render() }
+function person(id){return st.players.find(function(p){return p.id===id})}
+function live(){return st.players.filter(function(p){return p.alive})}
+function targetList(id){return live().filter(function(p){return p.id!==id})}
+function log(t,kind){st.logs.push({text:t,kind:kind||"news"});if(st.logs.length>60)st.logs.shift()}
+function makeState(){st={phase:"lobby",day:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null}],votes:{},speeches:{},night:{},known:{},logs:[],winner:""};myId="h";log("村庄正在等待玩家加入。")}
+function snapshot(id){var me=person(id);return {phase:st.phase,day:st.day,me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
+function broadcast(){if(!st)return;view=snapshot("h");render();for(var it of connections.entries()){var id=it[0],c=it[1];if(c.open){try{c.send({type:"state",state:snapshot(id)})}catch(e){}}}}
+function makeSolo(){solo=true;isHost=true;room="";makeState();enter();startGame()}
+function makeRoom(){
+ if(typeof Peer==="undefined"){report("联机库未加载。请检查网络连接。");return}
+ solo=false;isHost=true;room=rand(6);makeState();report("正在创建房间…");peer=new Peer("moonlit-"+room);
+ peer.on("open",function(){enter();broadcast()});
+ peer.on("connection",function(c){
+  var assigned=null;
+  c.on("data",function(m){
+   if(!m||typeof m!=="object")return;
+   if(!assigned&&m.type==="hello"){
+    if(st.phase!=="lobby"||st.players.length>=6){c.send({type:"error",message:"房间已经开始或人数已满。"});setTimeout(function(){c.close()},400);return}
+    assigned="p"+rand(9);var name=String(m.name||"旅人").slice(0,15).trim()||"旅人";
+    st.players.push({id:assigned,name:name,bot:false,alive:true,role:null});connections.set(assigned,c);log(name+" 加入了村庄。");broadcast();return;
+   }
+   if(assigned&&m.type==="action")accept(assigned,m.action,m.target,m.speech);
+  });
+  c.on("close",function(){
+   if(!assigned||!st)return;connections.delete(assigned);var p=person(assigned);if(!p)return;
+   if(st.phase==="lobby"){st.players=st.players.filter(function(x){return x.id!==assigned});log(p.name+" 离开了房间。")}
+   else if(st.phase!=="ended"){p.bot=true;log(p.name+" 掉线，已由电脑接管。");stepBots()}
+   broadcast();
+  });
+ });
+ peer.on("error",function(e){report("创建房间失败："+(e&&e.type||"连接故障")+"。可以刷新后再试。")});
+}
+function joinRoom(){
+ if(typeof Peer==="undefined"){report("联机库未加载，请检查网络。");return}
+ var code=$("roomInput").value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+ if(code.length!==6){report("请输入六位房间码。");return}
+ room=code;isHost=false;solo=false;report("正在连接房间…");peer=new Peer();
+ peer.on("open",function(){
+  conn=peer.connect("moonlit-"+room,{reliable:true});
+  conn.on("open",function(){conn.send({type:"hello",name:getName()})});
+  conn.on("data",function(m){
+   if(m&&m.type==="error"){report(m.message);return}
+   if(m&&m.type==="state"){view=m.state;myId=view.me;enter();render()}
+  });
+  conn.on("close",function(){conn=null;if(view){$("notice").textContent="房间连接已断开；请返回首页重新加入。"}else report("无法加入该房间。")});
+  conn.on("error",function(){report("无法连接房主；请核对房间码，或尝试更换网络。")});
+ });
+ peer.on("error",function(e){report("连接失败："+(e&&e.type||"网络故障"))});
+}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function startGame(){
+ if(!isHost||!st||st.phase!=="lobby")return;
+ var used=st.players.length;for(var i=used;i<6;i++)st.players.push({id:"bot"+i,name:["雾鸦","薇拉","灰石","伊莎","松风","星砂"][i],bot:true,alive:true,role:null});
+ st.players.forEach(function(p,i){p.seat=i+1;p.alive=true});
+ var roles=shuffle(["wolf","seer","guard","villager","villager","villager"]);st.players.forEach(function(p,i){p.role=roles[i]});
+ st.day=1;st.known={};st.logs=[];log("月亮升起，所有人闭上眼睛。","news");beginNight();broadcast()
+}
+function winCheck(){
+ var wolves=live().filter(function(p){return p.role==="wolf"}).length;
+ var good=live().length-wolves;
+ if(wolves===0){st.winner="好人阵营";st.phase="ended";log("🏆 好人胜利！狼人已经出局。");return true}
+ if(wolves>=good){st.winner="狼人阵营";st.phase="ended";log("🐺 狼人胜利！狼人的人数已不低于好人。");return true}
+ if(st.day>12){st.winner="狼人阵营";st.phase="ended";log("月夜持续太久，狼人占据了村庄。");return true}
+ return false
+}
+function beginNight(){st.phase="night";st.night={};st.votes={};st.speeches={};log("第 "+st.day+" 夜：等待狼人、预言家和守卫行动。");stepBots()}
+function stepBots(){
+ if(!st||st.phase==="ended"||st.phase==="lobby")return;
+ if(st.phase==="night"){
+  live().filter(function(p){return p.bot&&["wolf","seer","guard"].includes(p.role)}).forEach(function(p){
+   if(!st.night[p.id])st.night[p.id]=botNight(p);
+  });
+  if(live().filter(function(p){return ["wolf","seer","guard"].includes(p.role)}).every(function(p){return !!st.night[p.id]}))finishNight();
+ }else if(st.phase==="talk"){
+  live().filter(function(p){return p.bot&&!st.speeches[p.id]}).forEach(function(p){botSpeech(p)});
+  if(live().every(function(p){return !!st.speeches[p.id]})){st.phase="vote";log("所有人发言完毕，开始投票。");stepBots()}
+ }else if(st.phase==="vote"){
+  live().filter(function(p){return p.bot&&!st.votes[p.id]}).forEach(function(p){var t=botVote(p);st.votes[p.id]=t;log(p.name+" 投票给 "+person(t).name+"。","choice")});
+  if(live().every(function(p){return !!st.votes[p.id]}))finishVote();
+ }
+}
+function botNight(p){
+ var choices=(p.role==="wolf"?live().filter(function(x){return x.role!=="wolf"}):live().filter(function(x){return x.id!==p.id}));
+ if(p.role==="guard")choices=live();
+ if(!choices.length)return null;
+ return choices[Math.floor(Math.random()*choices.length)].id
+}
+function finishNight(){
+ var wolf=live().find(function(p){return p.role==="wolf"}),seer=live().find(function(p){return p.role==="seer"}),guard=live().find(function(p){return p.role==="guard"});
+ var target=wolf?st.night[wolf.id]:null,save=guard?st.night[guard.id]:null;
+ if(seer&&st.night[seer.id]){
+  var checked=person(st.night[seer.id]);
+  if(!st.known[seer.id])st.known[seer.id]=[];
+  st.known[seer.id].push({name:checked.name,id:checked.id,evil:checked.role==="wolf",night:st.day});
+ }
+ if(target&&target!==save){person(target).alive=false;log("天亮了，昨夜 "+person(target).name+" 遇袭出局。","news")}
+ else log("天亮了，昨夜是平安夜。","news");
+ if(winCheck())return;
+ st.phase="talk";log("第 "+st.day+" 天：请选择一句公开发言。");stepBots()
+}
+function botSpeech(p){
+ var choices=targetList(p.id);if(!choices.length){st.speeches[p.id]={speech:"pass",target:null};return}
+ var knows=(st.known[p.id]||[]).find(function(k){return k.evil&&person(k.id)&&person(k.id).alive});
+ var t=knows?person(knows.id):choices[Math.floor(Math.random()*choices.length)];
+ var kind=knows?"suspect":["suspect","trust","pass","clue"][Math.floor(Math.random()*4)];
+ speak(p.id,kind,kind==="suspect"||kind==="trust"?t.id:null)
+}
+function speak(id,kind,target){
+ var p=person(id),t=target?person(target):null;
+ st.speeches[id]={speech:kind,target:target};
+ var msg=kind==="suspect"?"我怀疑 "+t.name+"。":kind==="trust"?"我相信 "+t.name+"。":kind==="clue"?"我掌握了一些线索。":"我暂不表态。";
+ log(p.name+"：「"+msg+"」","choice")
+}
+function botVote(p){
+ var choices=targetList(p.id);
+ if(!choices.length)return p.id;
+ var known=(st.known[p.id]||[]).find(function(k){return k.evil&&person(k.id)&&person(k.id).alive});
+ if(known)return known.id;
+ if(p.role==="wolf")choices=choices.filter(function(q){return q.role!=="wolf"});
+ var scores=choices.map(function(q){
+  var s=1+Math.random()*2;
+  Object.keys(st.speeches).forEach(function(id){
+   var v=st.speeches[id];if(v.speech==="suspect"&&v.target===q.id)s+=.8;
+   if(v.speech==="trust"&&v.target===q.id)s-=.35;
+  });
+  return {id:q.id,score:Math.max(.05,s)};
+ });
+ scores.sort(function(a,b){return b.score-a.score});return scores[0].id
+}
+function finishVote(){
+ var counts={};Object.keys(st.votes).forEach(function(id){var target=st.votes[id];counts[target]=(counts[target]||0)+1});
+ var high=Math.max.apply(null,Object.values(counts));
+ var leaders=Object.keys(counts).filter(function(id){return counts[id]===high});
+ if(leaders.length!==1){log("投票平局，今天无人被放逐。","news")}
+ else {var gone=person(leaders[0]);gone.alive=false;log("投票结果："+gone.name+" 被放逐，身份是「"+(gone.role==="wolf"?"狼人":"好人")+"」。","news")}
+ if(winCheck())return;st.day++;beginNight()
+}
+function accept(id,action,target,speech){
+ if(!isHost||!st||st.phase==="ended")return;
+ var p=person(id);if(!p||p.bot||!p.alive)return;
+ if(st.phase==="night"&&action==="night"){
+  if(!["wolf","seer","guard"].includes(p.role)||st.night[id])return;
+  var t=person(target);if(!t||!t.alive||((p.role==="wolf"||p.role==="seer")&&id===target)||p.role==="wolf"&&t.role==="wolf")return;
+  st.night[id]=target;
+ }else if(st.phase==="talk"&&action==="speech"){
+  if(st.speeches[id]||!["suspect","trust","clue","pass"].includes(speech))return;
+  if(["suspect","trust"].includes(speech)&&!targetList(id).some(function(t){return t.id===target}))return;
+  speak(id,speech,target);
+ }else if(st.phase==="vote"&&action==="vote"){
+  if(st.votes[id]||!targetList(id).some(function(t){return t.id===target}))return;
+  st.votes[id]=target;log(p.name+" 投票给 "+person(target).name+"。","choice");
+ }else return;
+ stepBots();broadcast()
+}
+function sendAction(action,target,speech){
+ speechKind="";
+ if(isHost)accept("h",action,target,speech);
+ else if(conn&&conn.open)conn.send({type:"action",action:action,target:target,speech:speech});
+ else $("notice").textContent="连接已断开，请重新加入。"
+}
+function restart(){
+ if(!isHost||!st||st.phase!=="ended")return;
+ st.players=st.players.filter(function(p){return !p.bot}).map(function(p){return {id:p.id,name:p.name,bot:false,alive:true,role:null}});
+ st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.known={};st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
+}
+function button(label,action,target,speech,cls){
+ return '<button class="'+(cls||"")+'" data-do="'+action+'" '+(target?'data-target="'+escapeHtml(target)+'" ':'')+(speech?'data-speech="'+speech+'" ':'')+'>'+escapeHtml(label)+'</button>'
+}
+function render(){
+ if(!view)return;
+ var v=view;
+ var titles={lobby:"等待入场",night:"🌙 第 "+v.day+" 夜",talk:"☀️ 第 "+v.day+" 天 · 发言",vote:"🗳️ 第 "+v.day+" 天 · 投票",ended:"🏆 游戏结束"};
+ $("phaseTag").textContent=titles[v.phase];
+ $("phaseHelp").textContent=v.phase==="lobby"?"房主准备后即可开局；不足六人的位置会由电脑补齐。":v.phase==="night"?"夜间行动属于私人信息，不会显示给其他玩家。":v.phase==="talk"?"每人选择一句发言，其他玩家会即时看到。":v.phase==="vote"?"选择一名玩家放逐；每张投票都会同步展示。":"胜利阵营："+v.winner+"。";
+ $("roomInfo").textContent=v.solo?"单人练习":v.room?"房间码："+v.room:"";
+ $("shareBtns").innerHTML=(!v.solo&&v.room&&v.phase==="lobby")?button("复制邀请链接","copy",null,null,"ghost"):"";
+ $("countInfo").textContent=v.players.filter(function(p){return !p.bot}).length+" 位真人 / "+v.players.length+" 位居民";
+ $("players").innerHTML=v.players.map(function(p,i){
+  return '<div class="player '+(!p.alive?'dead ':'')+(p.id===v.me?'me':'')+'"><div class="avatar">'+icons[i%icons.length]+'</div><div class="name">'+(i+1)+'. '+escapeHtml(p.name)+'</div><div class="tag">'+(!p.alive?'已出局':p.id===v.me?'你自己':p.bot?'电脑玩家':'在线玩家')+(v.phase==="ended"?' · '+({wolf:"狼人",seer:"预言家",guard:"守卫",villager:"村民"}[p.role]||""):'')+'</div></div>'
+ }).join("");
+ var tips=v.knowledge.slice(-4).map(function(k){return '第 '+k.night+' 夜查验：'+k.name+' 是'+(k.evil?'狼人':'好人')}).join("；");
+ $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleText[v.myRole])+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):'身份尚未分配，开局后仅你自己能看到。';
+ $("feed").innerHTML=v.messages.map(function(m){return '<div class="entry '+(m.kind==="choice"?"choice":"news")+'">'+escapeHtml(m.text)+'</div>'}).join("");
+ $("feed").scrollTop=$("feed").scrollHeight;
+ var a="",title="做出决定",notice="";
+ if(v.phase==="lobby"){
+  title="准备开局";
+  if(v.host)a=button("开始游戏 · 空位自动补电脑","start",null,null,"primary full");
+  else notice="等待房主点击开始。";
+ }else if(v.phase==="night"){
+  title="夜间行动";
+  if(!v.myAlive)notice="你已经出局，正在旁观。";
+  else if(!["wolf","seer","guard"].includes(v.myRole))notice="今晚你无需行动，等待天亮。";
+  else if(v.submitted)notice="已提交夜间选择，等待其他玩家。";
+  else {
+   var r={wolf:"袭击",seer:"查验",guard:"保护"}[v.myRole];
+   a=v.players.filter(function(p){return p.alive&&(v.myRole==="guard"||p.id!==v.me)}).map(function(p,i){return button(r+" "+p.name,"night",p.id)}).join("");
+  }
+ }else if(v.phase==="talk"){
+  title="选择公开发言";
+  if(!v.myAlive)notice="你已经出局，不能发言。";
+  else if(v.submitted)notice="发言已同步，等待其他玩家。";
+  else if(speechKind==="suspect"||speechKind==="trust"){
+   a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return button((speechKind==="suspect"?"怀疑 ":"相信 ")+p.name,"speakTarget",p.id)}).join("");
+   a+=button("返回发言选项","back",null,null,"ghost full");
+  }else{
+   a=button("我怀疑某人","pickSpeech",null,"suspect")+button("我相信某人","pickSpeech",null,"trust")+button("我有线索","say",null,"clue")+button("暂不表态","say",null,"pass");
+  }
+ }else if(v.phase==="vote"){
+  title="投票放逐";
+  if(!v.myAlive)notice="你已经出局，不能投票。";
+  else if(v.submitted)notice="你已投票，等待其他玩家。";
+  else a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return button("投给 "+p.name,"vote",p.id)}).join("");
+ }else if(v.phase==="ended"){
+  title="最终结果："+v.winner;
+  if(v.host)a=button("重新开局","again",null,null,"primary full");
+  else notice="等待房主发起下一局。";
+ }
+ $("actionTitle").textContent=title;
+ $("actions").innerHTML=a;
+ $("notice").textContent=notice;
+}
+document.addEventListener("click",function(e){
+ var b=e.target.closest("button[data-do]");if(!b)return;
+ var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
+ if(action==="solo")makeSolo();
+ else if(action==="create")makeRoom();
+ else if(action==="join")joinRoom();
+ else if(action==="start")startGame();
+ else if(action==="again")restart();
+ else if(action==="copy"){
+  var link=new URL(location.href);link.searchParams.set("room",room);
+  navigator.clipboard.writeText(link.toString()).then(function(){$("notice").textContent="邀请链接已复制！也可以把房间码 "+room+" 发给朋友。"}).catch(function(){$("notice").textContent="无法自动复制，请发送房间码："+room});
+ }else if(action==="night")sendAction("night",target,null);
+ else if(action==="vote")sendAction("vote",target,null);
+ else if(action==="pickSpeech"){speechKind=speech;render()}
+ else if(action==="back"){speechKind="";render()}
+ else if(action==="speakTarget")sendAction("speech",target,speechKind);
+ else if(action==="say")sendAction("speech",null,speech);
+});
+var param=new URLSearchParams(location.search).get("room");if(param&&/^[A-Z0-9]{6}$/i.test(param)){$("roomInput").value=param.toUpperCase();$("homeNotice").textContent="已识别邀请房间，填写昵称后点击加入房间。"}
+})();
+</script>
+</body>
+</html>
