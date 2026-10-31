@@ -420,12 +420,100 @@ body.game-active #gameScreen.day-tint>.panel:nth-child(1){background:linear-grad
 }
 @media(prefers-reduced-motion:reduce){.time-scene.nightfall,.time-scene.sunrise{animation-duration:.2s}.time-scene *{animation-duration:.2s!important}}
 
+
+/* Stage 1: classic Japanese RPG window / dialogue system; gameplay rules unchanged. */
+:root{--rpg-blue:#1a2a6c;--rpg-night:#0d1440;--rpg-white:#fff;--rpg-gold:#ffd866;--rpg-danger:#e04848;--rpg-inner:#7a86c8}
+body,body.game-active{color:var(--rpg-white);background:linear-gradient(175deg,var(--rpg-blue),var(--rpg-night));font-family:"DotGothic16","Zpix",monospace}
+body:before{display:none}
+.window,body.game-active #gameScreen>.window,body.game-active #homeScreen.window{
+ background:linear-gradient(155deg,var(--rpg-blue),var(--rpg-night))!important;
+ border:2px solid #e8e8f0!important;border-radius:6px!important;
+ box-shadow:inset 0 0 0 2px var(--rpg-night),inset 0 0 0 3px var(--rpg-inner),0 4px 0 rgba(0,0,0,.5)!important;
+ color:var(--rpg-white);
+}
+body.game-active header{border:0;background:transparent;box-shadow:none}
+body.game-active header h1{font-family:"DotGothic16","Zpix",monospace;color:var(--rpg-white);font-size:20px;letter-spacing:4px;text-shadow:none}
+body.game-active #musicToggle{background:var(--rpg-night);border:2px solid var(--rpg-inner);border-radius:5px;color:var(--rpg-white)}
+body.game-active #gameScreen{grid-template-rows:39px minmax(112px,1fr) 112px auto auto;gap:7px}
+body.game-active #gameScreen>.panel:nth-child(1){background:linear-gradient(120deg,var(--rpg-blue),var(--rpg-night))!important}
+body.game-active #phaseTag{border:1px solid var(--rpg-gold);background:var(--rpg-night);color:var(--rpg-gold);border-radius:3px}
+body.game-active #gameScreen>.panel h2,body.game-active #gameScreen>.panel:nth-child(5) h2{color:var(--rpg-gold);font-size:12px}
+body.game-active #gameScreen>.panel:nth-child(5){padding:8px 9px}
+body.game-active #feed{flex:1;min-height:0;max-height:none;overflow-y:auto;overflow-x:hidden;gap:8px;padding:2px 4px 6px;scrollbar-color:var(--rpg-inner) transparent}
+body.game-active #feed .rpg-line{
+ display:flex!important;flex:none;position:relative;overflow:visible;border:1px solid var(--rpg-inner);
+ border-radius:3px;padding:9px 10px;margin:0;min-height:40px;white-space:normal;
+ font:400 12px/1.55 "DotGothic16","Zpix",monospace;letter-spacing:0;word-break:break-word;
+ background:linear-gradient(135deg,var(--rpg-blue),var(--rpg-night));color:var(--rpg-white);
+ box-shadow:inset 0 0 0 2px var(--rpg-night);
+}
+body.game-active #feed .rpg-narrator{justify-content:center;align-items:center;text-align:center}
+body.game-active #feed .rpg-line.is-danger{color:var(--rpg-danger);border-color:var(--rpg-danger)}
+body.game-active #feed .rpg-dialogue{gap:9px;align-items:flex-start;text-align:left;cursor:pointer;padding:12px 9px 13px}
+.rpg-portrait{width:49px;height:49px;flex:0 0 49px;display:grid;place-items:center;border:1px solid var(--rpg-inner);background:var(--rpg-night)}
+.rpg-portrait svg{width:100%;height:100%;display:block;color:var(--rpg-white)}
+.rpg-line-content{min-width:0;flex:1;position:relative;padding-top:7px}
+.rpg-nameplate{position:absolute;top:-18px;left:-2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ padding:2px 7px;background:var(--rpg-night);border:1px solid var(--rpg-gold);color:var(--rpg-gold);font-size:11px;line-height:1.3}
+.rpg-spoken{display:block;min-height:18px;overflow-wrap:anywhere}
+.rpg-next{display:inline-block;color:var(--rpg-gold);font-size:11px;margin-left:5px;animation:rpg-cursor-blink 1s steps(2) infinite}
+.rpg-line.is-typing .rpg-next{display:none}
+body.game-active #gameScreen>.panel:nth-child(2){padding:5px 8px}
+body.game-active #players .player{border-color:var(--rpg-inner);border-radius:3px;background:linear-gradient(150deg,var(--rpg-blue),var(--rpg-night))}
+body.game-active #players .player.me{border-color:var(--rpg-gold)}
+body.game-active #players .player .tag{color:var(--rpg-white)}
+body.game-active #gameScreen>.panel:nth-child(3){background:linear-gradient(120deg,var(--rpg-blue),var(--rpg-night))!important;border-color:#e8e8f0}
+body.game-active #myRole{color:var(--rpg-gold)}
+body.game-active #gameScreen>.panel:nth-child(4){padding:7px 9px}
+body.game-active #actions.rpg-menu,body.game-active #actions.rpg-target-menu{
+ display:grid;grid-template-columns:minmax(0,1fr)!important;grid-auto-rows:48px!important;gap:1px;flex:none;min-height:0}
+body.game-active #actions.rpg-menu>button,body.game-active #actions.rpg-target-menu>button{
+ position:relative;min-height:48px;max-height:none;height:48px;text-align:left;padding:6px 12px 6px 33px;
+ background:transparent!important;border:0!important;border-radius:0!important;color:var(--rpg-white);
+ font:400 13px/1.3 "DotGothic16","Zpix",monospace;
+ box-shadow:none;
+}
+body.game-active #actions.rpg-menu>button:focus-visible,body.game-active #actions.rpg-target-menu>button:focus-visible{outline:1px solid var(--rpg-gold);outline-offset:-2px}
+body.game-active #actions.rpg-menu>button.cursor,body.game-active #actions.rpg-target-menu>button.cursor{color:var(--rpg-gold)}
+body.game-active #actions.rpg-menu>button.cursor::before,body.game-active #actions.rpg-target-menu>button.cursor::before{
+ content:"▶";position:absolute;left:9px;top:50%;transform:translateY(-50%);animation:rpg-cursor-blink 1s steps(2) infinite;color:var(--rpg-gold)}
+body.game-active #actions.rpg-target-menu{grid-template-columns:1fr 1fr!important;grid-auto-rows:48px!important}
+body.game-active #actions.rpg-target-menu>button{font-size:12px}
+body.game-active #players .player.rpg-selectable{cursor:pointer;outline:1px solid var(--rpg-inner);outline-offset:-2px}
+body.game-active #players .player.rpg-selected{border:2px solid var(--rpg-gold);box-shadow:inset 0 0 0 1px var(--rpg-gold)}
+body.game-active #players .player.rpg-selected:before{content:"▶";position:absolute;top:1px;right:3px;font-size:10px;color:var(--rpg-gold);animation:rpg-cursor-blink 1s steps(2) infinite}
+body.game-active #players .player.rpg-selectable:focus-visible{outline:2px solid var(--rpg-gold)}
+body.game-active #actions:not(.rpg-menu):not(.rpg-target-menu)>button{
+ border:1px solid var(--rpg-inner);background:linear-gradient(110deg,var(--rpg-blue),var(--rpg-night));
+ color:var(--rpg-white);border-radius:3px;min-height:48px;max-height:none}
+body.game-active #actions:not(.rpg-menu):not(.rpg-target-menu)>button.primary{color:var(--rpg-gold)}
+body.game-active #gameScreen.night-tint>.panel:nth-child(1),body.game-active #gameScreen.day-tint>.panel:nth-child(1){background:linear-gradient(120deg,var(--rpg-blue),var(--rpg-night))!important}
+@keyframes rpg-cursor-blink{50%{opacity:0}}
+@media(max-width:700px){
+ body.game-active #gameScreen{grid-template-rows:36px minmax(112px,1fr) 111px auto auto;gap:5px}
+ body.game-active #gameScreen>.panel:nth-child(5){padding:7px 8px}
+ body.game-active #feed .rpg-line{font-size:12px;padding:8px}
+ body.game-active #actions.rpg-menu>button,body.game-active #actions.rpg-target-menu>button{font-size:12px}
+ body.game-active #players .player{grid-template-columns:21px minmax(0,1fr);column-gap:2px;padding:3px}
+ body.game-active #players .avatar{font-size:18px}
+ body.game-active #players .name{font-size:10px}
+}
+@media(max-height:700px){
+ body.game-active #gameScreen{grid-template-rows:33px minmax(90px,1fr) 105px auto auto}
+ body.game-active #actions.rpg-menu,body.game-active #actions.rpg-target-menu{grid-auto-rows:48px!important}
+ body.game-active #actions.rpg-menu>button,body.game-active #actions.rpg-target-menu>button{height:48px}
+ body.game-active header{min-height:28px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important}
+ .rpg-next,.cursor::before{animation:none!important}
+}
 </style>
 </head>
 <body>
 <main>
 <header><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐">♫ 音乐开</button><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1>月下疑云</h1><div class="subtitle">六人迷你狼人杀 · 一个人也能开局 · 选项式发言</div></header>
-<section id="homeScreen" class="panel">
+<section id="homeScreen" class="panel window">
 <h2>踏入月下村庄</h2>
 <label for="myName">你的昵称（不会要求注册）</label>
 <input id="myName" maxlength="15" value="旅人" autocomplete="nickname">
@@ -438,14 +526,14 @@ body.game-active #gameScreen.day-tint>.panel:nth-child(1){background:linear-grad
 <div id="homeNotice" class="small" aria-live="polite"></div>
 </section>
 <section id="gameScreen">
-<div class="panel">
+<div class="panel window">
 <div class="topbar"><span class="pill" id="phaseTag">准备开始</span><span id="roomInfo"></span></div>
 <div class="btns" id="shareBtns"></div>
 </div>
-<div class="panel"><h2>村庄居民 <span class="small" id="countInfo"></span></h2><div id="players" class="players"></div></div>
-<div class="panel"><h2>你的身份</h2><div id="myRole" class="role">等待身份分配</div></div>
-<div class="panel"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
-<div class="panel"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
+<div class="panel window"><h2>村庄居民 <span class="small" id="countInfo"></span></h2><div id="players" class="players"></div></div>
+<div class="panel window"><h2>你的身份</h2><div id="myRole" class="role">等待身份分配</div></div>
+<div class="panel window"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
+<div class="panel window"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
 </section>
 <div class="footer">月下疑云 · 原创轻量六人社交推理游戏<br>适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐</div>
 <div id="timeScene" class="time-scene" hidden aria-hidden="true">
@@ -486,6 +574,7 @@ var roleText={wolf:"狼人 · 夜晚袭击一人",seer:"预言家 · 每晚查�
 var icons=["🧑","👩","🧔","👨","👩‍🦰","🧑‍🦳"];
 var peer=null,conn=null,isHost=false,solo=false,st=null,view=null,room="",myId="",connections=new Map(),speechKind="",busy=false;
 var mark=0, shownIdentityGame=0, previousScenePhase=null, lastSceneDay=0, pendingScene=null, sceneTimer=null, nightSerial=0;
+var rpgSpeechTarget=null,rpgMenuIndex=0,rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
 var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
 var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 function report(t){$("homeNotice").textContent=t;$("notice").textContent=t}
@@ -703,6 +792,91 @@ function handleTimeScene(v){
  $("gameScreen").classList.toggle("night-tint",phase==="night");
  $("gameScreen").classList.toggle("day-tint",phase==="talk"||phase==="vote");
 }
+
+/* Stage 1 presentation layer. This never writes to st, votes, roles or AI logic. */
+function rpgReducedMotion(){return !!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)}
+function rpgPortraitMarkup(name){
+ /* 144×144 editable vector placeholder. Stage 2 can replace it with face images. */
+ return '<div class="rpg-portrait" role="img" aria-label="'+escapeHtml(name)+' 头像占位">'
+ +'<svg viewBox="0 0 144 144" width="144" height="144" aria-hidden="true" focusable="false">'
+ +'<circle cx="72" cy="49" r="27" fill="currentColor" opacity=".8"/>'
+ +'<path d="M25 138 Q27 88 72 88 Q117 88 119 138Z" fill="currentColor" opacity=".8"/>'
+ +'</svg></div>';
+}
+function rpgFinishTyping(){
+ if(rpgTypingTimer!==null){clearInterval(rpgTypingTimer);rpgTypingTimer=null}
+ if(rpgTypeComplete){rpgTypeComplete();rpgTypeComplete=null}
+}
+function rpgRenderMessages(v){
+ var feed=$("feed"),fingerprint=JSON.stringify(v.messages);
+ if(fingerprint===rpgLogFingerprint)return;
+ rpgFinishTyping();
+ rpgLogFingerprint=fingerprint;
+ var segments=v.messages.map(function(m){
+  var speech=m.kind==="choice"?String(m.text).match(/^(.+?)：「([\s\S]*)」$/):null;
+  if(speech){
+   return {speaker:speech[1],text:speech[2],spoken:true,source:m};
+  }
+  return {speaker:null,text:m.text,spoken:false,danger:/遇袭|出局|被放逐|死亡|KO/.test(m.text),source:m};
+ });
+ feed.innerHTML=segments.map(function(seg,i){
+  if(!seg.spoken){
+   return '<div class="rpg-line rpg-narrator'+(seg.danger?' is-danger':'')+'">'+escapeHtml(seg.text)+'</div>';
+  }
+  return '<div class="rpg-line rpg-dialogue" data-rpg-dialogue="'+i+'" tabindex="0" role="button" aria-label="点击跳过打字效果">'
+   +rpgPortraitMarkup(seg.speaker)
+   +'<div class="rpg-line-content"><span class="rpg-nameplate">'+escapeHtml(seg.speaker)+'</span>'
+   +'<span class="rpg-spoken">'+escapeHtml(seg.text)+'</span><span class="rpg-next" aria-hidden="true">▼</span></div></div>';
+ }).join("");
+ feed.scrollTop=feed.scrollHeight;
+ if(rpgReducedMotion()||segments.length===0)return;
+ var last=segments[segments.length-1];
+ if(!last.spoken)return;
+ var row=feed.querySelector('[data-rpg-dialogue="'+(segments.length-1)+'"]');
+ if(!row)return;
+ var textNode=row.querySelector(".rpg-spoken");
+ var characters=Array.from(last.text),offset=0;
+ if(characters.length===0)return;
+ row.classList.add("is-typing");
+ textNode.textContent="";
+ var finish=function(){textNode.textContent=last.text;row.classList.remove("is-typing");feed.scrollTop=feed.scrollHeight};
+ rpgTypeComplete=finish;
+ rpgTypingTimer=setInterval(function(){
+  if(!row.isConnected){rpgFinishTyping();return}
+  offset=Math.min(offset+2,characters.length);
+  textNode.textContent=characters.slice(0,offset).join("");
+  feed.scrollTop=feed.scrollHeight;
+  if(offset>=characters.length)rpgFinishTyping();
+ },42);
+}
+function rpgTargets(v){return v.players.filter(function(p){return p.alive&&p.id!==v.me})}
+function rpgHighlightTargets(){
+ var selected=rpgSpeechTarget;
+ $("players").querySelectorAll("[data-rpg-target]").forEach(function(tile){
+  var on=tile.getAttribute("data-rpg-target")===selected;
+  tile.classList.toggle("rpg-selected",on);
+  tile.setAttribute("aria-selected",on?"true":"false");
+ });
+}
+function rpgSelectTarget(id){
+ if(!view||!speechKind)return;
+ if(!rpgTargets(view).some(function(p){return p.id===id}))return;
+ rpgSpeechTarget=id;rpgHighlightTargets();
+}
+function rpgActivateMenu(){
+ var menu=$("actions");
+ var isTalk=view&&view.phase==="talk"&&view.myAlive&&!view.submitted;
+ menu.classList.toggle("rpg-menu",!!(isTalk&&!speechKind));
+ menu.classList.toggle("rpg-target-menu",!!(isTalk&&speechKind));
+ if(isTalk&&!speechKind){
+  var opts=Array.from(menu.querySelectorAll("button[data-do]"));
+  if(opts.length)rpgMenuIndex=Math.min(rpgMenuIndex,opts.length-1);
+  opts.forEach(function(btn,i){btn.classList.toggle("cursor",i===rpgMenuIndex);btn.setAttribute("aria-current",i===rpgMenuIndex?"true":"false")});
+ }else if(isTalk&&speechKind){
+  var b=menu.querySelector('[data-do="confirmTarget"]');if(b)b.classList.add("cursor");
+ }
+}
+
 function render(){
  if(!view)return;
  var v=view;
@@ -716,11 +890,24 @@ function render(){
  $("players").innerHTML=v.players.map(function(p,i){
   return '<div class="player '+(!p.alive?'dead ':'')+(p.id===v.me?'me':'')+'"><div class="avatar">'+icons[i%icons.length]+'</div><div class="name">'+(i+1)+'. '+escapeHtml(p.name)+'</div><div class="tag">'+(!p.alive?'已出局':p.id===v.me?'你自己':p.bot?'电脑玩家':'在线玩家')+(v.phase==="ended"?' · '+({wolf:"狼人",seer:"预言家",guard:"守卫",villager:"村民"}[p.role]||""):'')+'</div></div>'
  }).join("");
+ if(v.phase==="talk"&&speechKind&&v.myAlive&&!v.submitted){
+  var available=rpgTargets(v);
+  if(!available.some(function(p){return p.id===rpgSpeechTarget}))rpgSpeechTarget=available.length?available[0].id:null;
+  $("players").querySelectorAll(".player").forEach(function(tile,i){
+   var p=v.players[i];
+   if(available.some(function(x){return x.id===p.id})){
+    tile.classList.add("rpg-selectable");
+    tile.setAttribute("data-rpg-target",p.id);
+    tile.setAttribute("role","option");
+    tile.setAttribute("tabindex","0");
+    tile.setAttribute("aria-label","选择 "+p.name);
+   }
+  });
+  rpgHighlightTargets();
+ }
  var tips=v.knowledge.slice(-4).map(function(k){return '第 '+k.night+' 夜查验：'+k.name+' 是'+(k.evil?'狼人':'好人')}).join("；");
  $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleText[v.myRole])+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):'身份尚未分配，开局后仅你自己能看到。';
- var feed=$("feed"),atBottom=(feed.scrollHeight-feed.clientHeight-feed.scrollTop)<42,scrollBefore=feed.scrollTop;
- feed.innerHTML=v.messages.map(function(m){return '<div class="entry '+(m.kind==="choice"?"choice":"news")+'">'+escapeHtml(m.text)+'</div>'}).join("");
- if(atBottom)feed.scrollTop=feed.scrollHeight;else feed.scrollTop=scrollBefore;
+ rpgRenderMessages(v);
  var a="",title="做出决定",notice="";
  if(v.phase==="lobby"){
   title="准备开局";
@@ -740,8 +927,8 @@ function render(){
   if(!v.myAlive)notice="你已经出局，不能发言。";
   else if(v.submitted)notice="发言已同步，等待其他玩家。";
   else if(speechKind==="suspect"||speechKind==="trust"){
-   a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return button((speechKind==="suspect"?"怀疑 ":"相信 ")+p.name,"speakTarget",p.id)}).join("");
-   a+=button("返回发言选项","back",null,null,"ghost full");
+   title=(speechKind==="suspect"?"选择怀疑对象":"选择信任对象");
+   a=button("确认选中的居民","confirmTarget")+button("返回发言","back",null,null,"ghost");
   }else{
    a=button("我怀疑某人","pickSpeech",null,"suspect")+button("我相信某人","pickSpeech",null,"trust")+button("我有线索","say",null,"clue")+button("暂不表态","say",null,"pass");
   }
@@ -758,6 +945,7 @@ function render(){
  $("actionTitle").textContent=title;
  $("actions").className="actions"+((v.phase==="night"||v.phase==="vote"||(v.phase==="talk"&&speechKind))?" targets":"");
  $("actions").innerHTML=a;
+ rpgActivateMenu();
  $("notice").textContent=notice;
  $("gameScreen").classList.toggle("action-waiting",!a);
 }
@@ -844,6 +1032,10 @@ function toggleMusic(){
 }
 
 document.addEventListener("click",function(e){
+ var dialogue=e.target.closest(".rpg-dialogue.is-typing");
+ if(dialogue){rpgFinishTyping();return}
+ var resident=e.target.closest("[data-rpg-target]");
+ if(resident){rpgSelectTarget(resident.getAttribute("data-rpg-target"));return}
  var b=e.target.closest("button[data-do]");if(!b)return;
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
  if(action==="musicToggle"){toggleMusic();return;}
@@ -860,10 +1052,38 @@ document.addEventListener("click",function(e){
   navigator.clipboard.writeText(link.toString()).then(function(){$("notice").textContent="邀请链接已复制！也可以把房间码 "+room+" 发给朋友。"}).catch(function(){$("notice").textContent="无法自动复制，请发送房间码："+room});
  }else if(action==="night")sendAction("night",target,null);
  else if(action==="vote")sendAction("vote",target,null);
- else if(action==="pickSpeech"){speechKind=speech;render()}
- else if(action==="back"){speechKind="";render()}
+ else if(action==="pickSpeech"){speechKind=speech;rpgSpeechTarget=null;render()}
+ else if(action==="back"){speechKind="";rpgSpeechTarget=null;render()}
+ else if(action==="confirmTarget"){if(rpgSpeechTarget)sendAction("speech",rpgSpeechTarget,speechKind)} 
  else if(action==="speakTarget")sendAction("speech",target,speechKind);
  else if(action==="say")sendAction("speech",null,speech);
+});
+
+document.addEventListener("keydown",function(e){
+ if(!view||view.phase!=="talk"||!view.myAlive||view.submitted||!$("roleOverlay").hidden)return;
+ if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||""))return;
+ if(speechKind){
+  var options=rpgTargets(view);
+  if(e.key==="Escape"){e.preventDefault();speechKind="";rpgSpeechTarget=null;render();return}
+  if(e.key==="ArrowUp"||e.key==="ArrowLeft"||e.key==="ArrowDown"||e.key==="ArrowRight"){
+   e.preventDefault();if(!options.length)return;
+   var pos=options.findIndex(function(p){return p.id===rpgSpeechTarget});
+   pos=(pos+(e.key==="ArrowUp"||e.key==="ArrowLeft"?-1:1)+options.length)%options.length;
+   rpgSelectTarget(options[pos].id);return;
+  }
+  if(e.key==="Enter"&&rpgSpeechTarget){e.preventDefault();sendAction("speech",rpgSpeechTarget,speechKind)}
+  return;
+ }
+ var menu=Array.from($("actions").querySelectorAll("button[data-do]"));
+ if(!menu.length)return;
+ if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+  e.preventDefault();rpgMenuIndex=(rpgMenuIndex+(e.key==="ArrowDown"?1:-1)+menu.length)%menu.length;
+  menu.forEach(function(b,i){b.classList.toggle("cursor",i===rpgMenuIndex);b.setAttribute("aria-current",i===rpgMenuIndex?"true":"false")});
+  return;
+ }
+ if(e.key==="Enter"){
+  e.preventDefault();menu[rpgMenuIndex].click();
+ }
 });
 var param=new URLSearchParams(location.search).get("room");if(param&&/^[A-Z0-9]{6}$/i.test(param)){$("roomInput").value=param.toUpperCase();$("homeNotice").textContent="已识别邀请房间，填写昵称后点击加入房间。"}
 })();
