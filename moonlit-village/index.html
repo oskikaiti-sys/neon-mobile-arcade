@@ -141,6 +141,33 @@ body.game-active #gameScreen>.panel:nth-child(5) #feed .entry:not(:last-child){d
 }
 @media(max-height:570px){body.game-active #gameScreen{gap:3px;grid-template-rows:34px minmax(0,.9fr) 30px minmax(0,1.25fr) 45px}body.game-active #gameScreen>.panel{padding:3px 7px!important}body.game-active #myRole{padding:2px 6px}body.game-active #gameScreen>.panel:nth-child(5) h2{display:none}body.game-active #gameScreen>.panel:nth-child(2) h2{display:none}body.game-active .player .name{margin:1px 0 0}}
 @media(prefers-reduced-motion:reduce){.deal-stage,.deal-behind,.draw-card,#roleContinue{animation:none!important}.card-inner{transition:none}}
+
+/* Latest narrative immediately below the day/night indicator; no page scrolling. */
+body.game-active #gameScreen{grid-template-rows:auto auto minmax(0,1fr) auto minmax(0,1.12fr)}
+body.game-active #gameScreen>.panel:nth-child(5){grid-row:2;padding:7px 11px}
+body.game-active #gameScreen>.panel:nth-child(2){grid-row:3}
+body.game-active #gameScreen>.panel:nth-child(3){grid-row:4}
+body.game-active #gameScreen>.panel:nth-child(4){grid-row:5}
+body.game-active #feed{max-height:65px;gap:3px;overflow:hidden;justify-content:flex-start}
+body.game-active #feed .entry{font-size:11px;line-height:1.3;padding:4px 7px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;overflow:hidden;overflow-wrap:anywhere}
+.role-overlay.revealed .draw-card{opacity:1}
+@media(max-width:700px){
+body.game-active #gameScreen{grid-template-rows:auto auto minmax(0,1fr) auto minmax(0,1.2fr)}
+body.game-active #gameScreen>.panel:nth-child(5){padding:5px 8px}
+body.game-active #feed{max-height:53px}
+body.game-active #feed .entry{font-size:10px;line-height:1.25;padding:3px 6px}
+}
+@media(max-height:690px){
+body.game-active #gameScreen{grid-template-rows:34px auto minmax(0,1fr) 35px minmax(0,1.25fr)}
+body.game-active #gameScreen>.panel:nth-child(5) h2{display:none}
+body.game-active #feed{max-height:31px}
+body.game-active #feed .entry:not(:last-child){display:none}
+}
+@media(max-height:570px){
+body.game-active #gameScreen{grid-template-rows:30px 29px minmax(0,.9fr) 28px minmax(0,1.1fr)}
+body.game-active #gameScreen>.panel:nth-child(5){padding:3px 7px!important}
+body.game-active #feed{max-height:24px}
+}
 </style>
 </head>
 <body>
