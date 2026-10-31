@@ -3724,6 +3724,47 @@ function updateEndgameReveal(v){
   openEndgameReveal(null);
  }
 }
+/* Public ledger shows only events authorized in the seat's snapshot. */
+var evidencePreviousFocus=null;
+function renderEvidenceLedger(v){
+ var list=$("evidenceList");if(!list||!v)return;
+ var events=(v.publicEvents||[]).slice().reverse();
+ if(!events.length){list.innerHTML='<p class="evidence-empty">'+escapeHtml(tr("evidenceEmpty"))+'</p>';return}
+ list.innerHTML=events.map(function(item){
+  var name=function(id){var p=(v.players||[]).find(function(q){return q.id===id});return p?displayName(p.name):tr("evidenceNoTarget")};
+  var info=item.detail||{},label="",line="",kind=item.kind;
+  if(kind==="statement"){
+   label=speechUILine("kinds",info.kind||"clue")[0];
+   line=tr("evidenceSaid",{actor:name(item.actor),kind:label,target:item.target?" → "+name(item.target):""});
+  }else if(kind==="challenge"){
+   label=tr({reason:"debateReason",claim:"debateClaim",report:"debateReport",vote:"debateVote"}[info.kind]||"debateReason");
+   line=tr("evidenceChallenge",{actor:name(item.actor),target:name(item.target),kind:label});
+  }else if(kind==="reply"){
+   label=tr({explain:"debateExplain",counter:"debateCounter",admit:"debateAdmit",avoid:"debateAvoid",silence:"debateAvoid"}[info.kind]||"debateExplain");
+   line=tr("evidenceReply",{actor:name(item.actor),kind:label});
+  }else if(kind==="vote"){
+   label=tr("actionVote");line=tr("evidenceVote",{actor:name(item.actor),target:name(item.target)});
+  }else if(kind==="death"){
+   label=tr("phaseNight",{day:item.day});line=tr("evidenceDeath",{target:name(item.target)});
+  }else if(kind==="exile"){
+   label=tr("actionVote");line=tr("evidenceExile",{target:name(item.target),
+    alignment:tr(info.alignment==="wolf"?"roleWolfShort":"roleGoodShort")});
+  }else return "";
+  return '<div role="listitem" class="evidence-entry"><span class="evidence-day">'+
+   escapeHtml(tr("evidenceDay",{day:item.day,kind:label}))+'</span>'+escapeHtml(line)+'</div>';
+ }).join("");
+}
+function openEvidence(trigger){
+ if(!view||["lobby","deal"].includes(view.phase))return;
+ renderEvidenceLedger(view);evidencePreviousFocus=trigger||document.activeElement||null;
+ $("evidenceOverlay").hidden=false;
+ var close=$("evidenceOverlay").querySelector(".evidence-close");if(close&&close.focus)close.focus();
+}
+function closeEvidence(){
+ $("evidenceOverlay").hidden=true;
+ if(evidencePreviousFocus&&evidencePreviousFocus.focus)evidencePreviousFocus.focus();
+ evidencePreviousFocus=null;
+}
 function renderSeerNotes(v){
  if(!v||v.myRole!=="seer"||v.phase==="lobby"||v.phase==="deal"){
   $("seerNotesOverlay").hidden=true;return;
@@ -3939,6 +3980,8 @@ function render(){
  if(v.phase==="debate"&&debateKind){rpgHighlightTargets();updateDebateTargetPrompt(v)}
  $("seerNotesButton").hidden=!(v.myRole==="seer"&&["night","talk","debate","vote","ended"].includes(v.phase));
  $("seerNotesButton").textContent=tr("seerNotesButton");
+ $("evidenceButton").hidden=["lobby","deal"].includes(v.phase);
+ if(!$("evidenceOverlay").hidden)renderEvidenceLedger(v);
  rpgActivateMenu();
  $("notice").textContent=notice;
  if(v.phase==="debate"&&debateKind)updateDebateTargetPrompt(v);
@@ -4169,6 +4212,8 @@ document.addEventListener("click",function(e){
  if(action==="openReveal"){playSfx("confirm");openEndgameReveal(b);return;}
  if(action==="closeReveal"){playSfx("cancel");closeEndgameReveal();return;}
  if(action==="closeNightFeedback"){playSfx("cancel");closeNightFeedback();return;}
+ if(action==="openEvidence"){playSfx("cursor");openEvidence(b);return;}
+ if(action==="closeEvidence"){playSfx("cancel");closeEvidence();return;}
  if(action==="openSeerNotes"){playSfx("cursor");openSeerNotes(b);return;}
  if(action==="closeSeerNotes"){playSfx("cancel");closeSeerNotes();return;}
  if(action==="skipSpeech"){playSfx("cursor");stageFinishSpeech();return;}
@@ -4222,7 +4267,7 @@ document.addEventListener("keydown",function(e){
   }
   return;
  }
- for(var item of [{id:"endgameOverlay",close:closeEndgameReveal},{id:"seerNotesOverlay",close:closeSeerNotes}]){
+ for(var item of [{id:"endgameOverlay",close:closeEndgameReveal},{id:"seerNotesOverlay",close:closeSeerNotes},{id:"evidenceOverlay",close:closeEvidence}]){
   if(!$(item.id).hidden){
    if(e.key==="Escape"){e.preventDefault();item.close()}
    else if(e.key==="Tab"){
