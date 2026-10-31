@@ -3436,8 +3436,11 @@ function aiChooseSpeech(p){
     if(aiClaimFor(first.id))return {kind:"suspect",targetId:first.id,reason:"world-posterior-leading"};
     return {kind:"suspect",targetId:first.id,reason:"world-posterior-leading"};
    }
-   if((st.voteHistory||[]).length&&
-    (st.day%2===0||!((st.publicHistory||[]).some(function(h){return roleClaim(h.kind)}))))
+   var actualBallot=(st.voteHistory||[]).some(function(round){
+    return round.votes.some(function(v){return v.targetId&&v.targetId!=="__abstain__"});
+   });
+   if(actualBallot&&(st.day%2===0||
+    !((st.publicHistory||[]).some(function(h){return roleClaim(h.kind)}))))
     return {kind:"analyseVotes",targetId:null,reason:"world-investigate-votes"};
    if((st.publicHistory||[]).some(function(h){return roleClaim(h.kind)}))
     return {kind:"analyseClaims",targetId:null,reason:"world-investigate-claims"};
