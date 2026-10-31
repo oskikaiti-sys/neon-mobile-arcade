@@ -1300,13 +1300,75 @@ body.game-active .phase-clock.is-low{color:var(--danger);border-color:rgba(224,8
  body.game-active .game-head .night-turn{min-height:21px;padding:2px 5px;font-size:10px}
  body.game-active #gameScreen>.game-head{max-height:112px}
 }
+
+/* Role guide: always available in the top control row and when drawing a card. */
+.game-header .help-toggle{position:relative;flex:none;min-width:48px!important;min-height:48px!important;
+ width:48px;height:48px;display:grid;place-items:center;padding:0!important;border:0!important;
+ border-radius:50%;color:var(--gold);background:transparent!important;cursor:pointer}
+.game-header .help-toggle:before{content:"";position:absolute;width:40px;height:40px;border-radius:50%;
+ border:1px solid rgba(232,200,114,.35);background:rgba(20,28,58,.62)}
+.game-header .help-toggle span{position:relative;font:700 21px/1 Georgia,serif;z-index:1}
+.game-header .help-toggle:focus-visible,.deal-guide:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.game-header .header-actions{gap:3px!important}
+body.game-active .game-header{grid-template-columns:70px minmax(0,1fr) 151px!important;gap:4px!important}
+body.game-active .game-header .hero-copy h1{font-size:clamp(11px,3.1vw,16px)!important;letter-spacing:0!important}
+@media(max-width:370px){
+ body.game-active .game-header{grid-template-columns:66px minmax(0,1fr) 145px!important;gap:2px!important}
+ .game-header .help-toggle,.game-header .settings-toggle,.game-header #musicToggle{width:46px!important;min-width:46px!important;min-height:48px!important}
+ body.game-active .game-header .hero-copy h1{font-size:11px!important}
+}
+.deal-roster{display:grid;grid-template-columns:1fr 48px;grid-template-rows:auto auto;align-items:center;
+ gap:2px 7px;width:100%;max-width:360px;text-align:left;padding:8px 10px;
+ border:1px solid rgba(232,200,114,.38);border-radius:8px;background:rgba(20,28,58,.82)}
+.deal-roster-caption{grid-column:1;grid-row:1;font-size:11px;color:var(--gold);font-weight:700}
+.deal-roster-content{grid-column:1;grid-row:2;display:flex;flex-wrap:wrap;gap:3px 10px;
+ font-size:11px;line-height:1.55;color:var(--ink)}
+.deal-roster-content b{font-weight:500}
+.deal-guide{grid-column:2;grid-row:1/3;align-self:center;justify-self:center;
+ width:48px;height:48px;min-height:48px;border:1px solid rgba(232,200,114,.4);
+ border-radius:50%;background:rgba(10,15,31,.75);color:var(--gold);font-size:22px;font-weight:700}
+.role-overlay{overflow-y:auto!important;overscroll-behavior:contain}
+.deal-stage{flex:none;margin:auto;padding:6px 0}
+@media(max-height:700px){
+ .deal-stage{gap:7px!important}
+ .deal-deck{transform:scale(.80);height:214px!important;margin:-8px 0!important}
+ .deal-roster{padding:5px 8px}
+ .deal-stage h2{font-size:23px}
+}
+.rules-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+ padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));
+ background:rgba(10,15,31,.96);overflow:auto;overscroll-behavior:contain}
+.rules-overlay[hidden]{display:none!important}
+.rules-panel{width:min(100%,450px);max-height:calc(100dvh - 28px);overflow-y:auto;
+ padding:18px 16px!important;box-sizing:border-box;color:var(--ink)}
+.rules-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rules-head h2{font:600 25px/1.25 Georgia,"STSong",serif;color:var(--gold);margin:3px 0 0}
+.rules-eyebrow{font-size:10px;letter-spacing:2px;color:var(--muted)}
+.rules-close{flex:none;width:48px;height:48px;min-height:48px;border-radius:9px;
+ border:1px solid rgba(232,200,114,.4);background:rgba(20,28,58,.8);color:var(--ink);font-size:27px}
+.rules-intro,.rules-detail{color:var(--ink);font-size:13px;line-height:1.65;margin:10px 0 0}
+.rules-section-title{margin-top:17px;margin-bottom:8px;color:var(--gold);font-weight:700;font-size:13px}
+.rules-role-list{display:flex;flex-direction:column;gap:6px}
+.rules-role{display:grid;grid-template-columns:35px minmax(0,1fr);gap:10px;align-items:start;
+ padding:9px 10px;border:1px solid rgba(232,200,114,.22);border-radius:8px;background:rgba(20,28,58,.4)}
+.rules-role-symbol{color:var(--gold);font-size:24px;line-height:1.4;text-align:center}
+.rules-role h3{font-size:13px;font-weight:700;color:var(--ink);margin:0}
+.rules-count{font-size:12px;color:var(--gold);font-weight:600}
+.rules-role p{font-size:12px;color:var(--muted);line-height:1.5;margin:3px 0 0}
+.rules-note{font-size:12px;line-height:1.6;margin:14px 0 0;padding:10px;
+ border-left:2px solid var(--gold);background:rgba(20,28,58,.5)}
+.rules-done{display:block;min-height:48px;width:100%;margin:15px 0 0;
+ border:1px solid rgba(232,200,114,.55);border-radius:8px;background:rgba(232,200,114,.15);
+ color:var(--gold);font-size:14px;font-weight:700}
+@media(prefers-reduced-motion:reduce){.rules-overlay *,.deal-roster *{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
 <div id="ambientSky" class="ambient-sky" aria-hidden="true"><div class="moon-glow"></div><div class="ambient-stars"><span class="ambient-star" style="--x:8%;--y:8%;--dur:17s;--delay:-0s"></span><span class="ambient-star" style="--x:17%;--y:19%;--dur:22s;--delay:-2s"></span><span class="ambient-star" style="--x:29%;--y:9%;--dur:26s;--delay:-4s"></span><span class="ambient-star" style="--x:39%;--y:24%;--dur:20s;--delay:-1s"></span><span class="ambient-star" style="--x:53%;--y:7%;--dur:24s;--delay:-3s"></span><span class="ambient-star" style="--x:66%;--y:18%;--dur:19s;--delay:-5s"></span><span class="ambient-star" style="--x:77%;--y:7%;--dur:21s;--delay:-2s"></span><span class="ambient-star" style="--x:91%;--y:14%;--dur:27s;--delay:-4s"></span><span class="ambient-star" style="--x:4%;--y:39%;--dur:24s;--delay:-6s"></span><span class="ambient-star" style="--x:15%;--y:50%;--dur:20s;--delay:-2s"></span><span class="ambient-star" style="--x:25%;--y:36%;--dur:23s;--delay:-5s"></span><span class="ambient-star" style="--x:36%;--y:54%;--dur:18s;--delay:-1s"></span><span class="ambient-star" style="--x:47%;--y:41%;--dur:25s;--delay:-6s"></span><span class="ambient-star" style="--x:59%;--y:56%;--dur:21s;--delay:-3s"></span><span class="ambient-star" style="--x:70%;--y:36%;--dur:28s;--delay:-4s"></span><span class="ambient-star" style="--x:82%;--y:47%;--dur:20s;--delay:-2s"></span><span class="ambient-star" style="--x:94%;--y:33%;--dur:26s;--delay:-5s"></span><span class="ambient-star" style="--x:7%;--y:78%;--dur:22s;--delay:-3s"></span><span class="ambient-star" style="--x:18%;--y:69%;--dur:27s;--delay:-1s"></span><span class="ambient-star" style="--x:31%;--y:87%;--dur:19s;--delay:-6s"></span><span class="ambient-star" style="--x:43%;--y:74%;--dur:24s;--delay:-4s"></span><span class="ambient-star" style="--x:56%;--y:90%;--dur:21s;--delay:-2s"></span><span class="ambient-star" style="--x:65%;--y:71%;--dur:26s;--delay:-5s"></span><span class="ambient-star" style="--x:78%;--y:84%;--dur:20s;--delay:-0s"></span><span class="ambient-star" style="--x:89%;--y:68%;--dur:23s;--delay:-3s"></span><span class="ambient-star" style="--x:96%;--y:92%;--dur:25s;--delay:-2s"></span></div></div>
 <audio id="bgmPlayer" src="assets/audio/contedefees_0016.mp3" preload="auto" loop playsinline></audio>
 <main>
-<header class="game-header"><div class="header-controls"><label class="lang-control"><span class="sr-only" data-i18n="languageAria">Language</span><select id="languageSelect" aria-label="Language"><option value="en">EN</option><option value="zh">中文</option><option value="ja">日本語</option></select></label><div class="header-actions"><button type="button" id="settingsToggle" class="settings-toggle" data-do="openSettings" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20h-2.55v-.11a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.17 15a1.7 1.7 0 0 0-1.55-1H6.5v-2.55h.12a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V5.5h2.55v.12a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1h.11v2.55h-.11a1.7 1.7 0 0 0-1.55 1Z"/></svg></button><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐" title="音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="19" rx="3" ry="2"/><ellipse cx="18" cy="17" rx="3" ry="2"/></svg></button></div></div><div class="hero-copy"><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1 data-i18n="title">Moonlit Village</h1><div class="subtitle" data-i18n="subtitle"></div></div></header>
+<header class="game-header"><div class="header-controls"><label class="lang-control"><span class="sr-only" data-i18n="languageAria">Language</span><select id="languageSelect" aria-label="Language"><option value="en">EN</option><option value="zh">中文</option><option value="ja">日本語</option></select></label><div class="header-actions"><button type="button" id="helpToggle" class="help-toggle" data-do="openHelp" aria-label="How to play" title="How to play"><span aria-hidden="true">?</span></button><button type="button" id="settingsToggle" class="settings-toggle" data-do="openSettings" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20h-2.55v-.11a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.17 15a1.7 1.7 0 0 0-1.55-1H6.5v-2.55h.12a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V5.5h2.55v.12a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1h.11v2.55h-.11a1.7 1.7 0 0 0-1.55 1Z"/></svg></button><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐" title="音乐"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="19" rx="3" ry="2"/><ellipse cx="18" cy="17" rx="3" ry="2"/></svg></button></div></div><div class="hero-copy"><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1 data-i18n="title">Moonlit Village</h1><div class="subtitle" data-i18n="subtitle"></div></div></header>
 <section id="homeScreen" class="panel">
 <h2 data-i18n="homeTitle"></h2>
 <label for="myName" data-i18n="nameLabel"></label>
@@ -1377,6 +1439,11 @@ body.game-active .phase-clock.is-low{color:var(--danger);border-color:rgba(224,8
     <div class="deal-eyebrow">THE MOON CHOOSES</div>
     <h2 data-i18n="dealTitle"></h2>
     <p class="deal-tip" id="drawHint" data-i18n="dealHint">Tap the card to reveal your secret role</p>
+    <div class="deal-roster" aria-label="Roles in this match">
+ <span class="deal-roster-caption" data-i18n="roleRosterTitle">Roles in this match</span>
+ <div class="deal-roster-content"><span>1 × <b data-i18n="roleWolf">Werewolf</b></span><span>1 × <b data-i18n="roleSeer">Seer</b></span><span>1 × <b data-i18n="roleGuard">Guardian</b></span><span>3 × <b data-i18n="roleVillager">Villager</b></span></div>
+ <button type="button" class="deal-guide" data-do="openHelp" data-i18n-aria="helpButton" aria-label="Role guide"><span aria-hidden="true">?</span></button>
+</div>
     <div class="deal-deck">
       <div class="deal-behind a" aria-hidden="true"></div>
       <div class="deal-behind b" aria-hidden="true"></div>
@@ -1389,6 +1456,25 @@ body.game-active .phase-clock.is-low{color:var(--danger);border-color:rgba(224,8
     </div>
     <button class="primary" data-do="closeRole" id="roleContinue" data-i18n="enterVillage" hidden></button>
   </div>
+</div>
+<div id="helpOverlay" class="rules-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+ <div class="rules-panel panel">
+  <div class="rules-head"><div><div class="rules-eyebrow" data-i18n="helpEyebrow">QUICK START GUIDE</div><h2 id="helpTitle" data-i18n="helpTitle">How to play</h2></div><button type="button" data-do="closeHelp" class="rules-close" aria-label="Close role guide">×</button></div>
+  <p class="rules-intro" data-i18n="helpIntro">Six villagers are dealt one secret role each. Identify the werewolf before the village is outnumbered.</p>
+  <div class="rules-section-title" data-i18n="roleRosterTitle">Roles in this match</div>
+  <div class="rules-role-list">
+   <div class="rules-role"><span class="rules-role-symbol" aria-hidden="true">☾</span><div><h3><span class="rules-count">×1</span> <span data-i18n="roleWolf">Werewolf</span></h3><p data-i18n="helpWolf">At night, select someone to eliminate. You cannot attack yourself or another werewolf.</p></div></div>
+   <div class="rules-role"><span class="rules-role-symbol" aria-hidden="true">✦</span><div><h3><span class="rules-count">×1</span> <span data-i18n="roleSeer">Seer</span></h3><p data-i18n="helpSeer">Each night, privately inspect one other living player's alignment.</p></div></div>
+   <div class="rules-role"><span class="rules-role-symbol" aria-hidden="true">◇</span><div><h3><span class="rules-count">×1</span> <span data-i18n="roleGuard">Guardian</span></h3><p data-i18n="helpGuard">Each night, protect one living player, including yourself. A protected target survives the attack.</p></div></div>
+   <div class="rules-role"><span class="rules-role-symbol" aria-hidden="true">♧</span><div><h3><span class="rules-count">×3</span> <span data-i18n="roleVillager">Villager</span></h3><p data-i18n="helpVillager">You have no night action. Discuss clues, then vote during the day.</p></div></div>
+  </div>
+  <div class="rules-section-title" data-i18n="helpRoundTitle">Round flow</div>
+  <p class="rules-detail" data-i18n="helpRoundDetail">Night: the werewolf attacks, the seer investigates and the guardian protects. Day: everyone gives a statement, then votes to eliminate a suspect. The three night prompts still appear even if a role has been eliminated.</p>
+  <div class="rules-section-title" data-i18n="helpWinTitle">How to win</div>
+  <p class="rules-detail" data-i18n="helpWinDetail">The village wins when the werewolf is eliminated. The werewolf wins if living werewolves equal or outnumber living villagers. In this short game, surviving past day 12 also gives the werewolf victory.</p>
+  <p class="rules-note" data-i18n="helpTimerDetail">Night, discussion and voting each have a two-minute limit. No action means you skip the ability, pass your speech or abstain from voting. Tied votes eliminate nobody.</p>
+  <button type="button" data-do="closeHelp" class="rules-done" data-i18n="helpDone">Understood</button>
+ </div>
 </div>
 <div id="settingsOverlay" class="settings-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
  <div class="settings-panel panel">
