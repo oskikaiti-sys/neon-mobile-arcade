@@ -530,6 +530,7 @@ body.game-active #players .player.rpg-selectable{min-height:48px;touch-action:ma
 </style>
 </head>
 <body>
+<audio id="bgmPlayer" src="assets/audio/contedefees_0016.mp3" preload="auto" loop playsinline></audio>
 <main>
 <header><button type="button" id="musicToggle" data-do="musicToggle" aria-pressed="true" aria-label="关闭背景音乐">♫ 音乐开</button><div class="eyebrow">MOONLIT VILLAGE · SOCIAL DEDUCTION</div><h1>月下疑云</h1><div class="subtitle">六人迷你狼人杀 · 一个人也能开局 · 选项式发言</div></header>
 <section id="homeScreen" class="panel window">
@@ -554,7 +555,7 @@ body.game-active #players .player.rpg-selectable{min-height:48px;touch-action:ma
 <div class="panel window"><h2 id="actionTitle">做出决定</h2><div id="actions" class="actions"></div><div id="notice" aria-live="polite"></div></div>
 <div class="panel window"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
 </section>
-<div class="footer">月下疑云 · 原创轻量六人社交推理游戏<br>适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐</div>
+<div class="footer">月下疑云 · 原创轻量六人社交推理游戏<br>适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐<br>BGM：《不思議な村》— HiLi / <a href="https://conte-de-fees.com/bgm/238" target="_blank" rel="noopener noreferrer" style="color:inherit">こんとどぅふぇ</a></div>
 <div id="timeScene" class="time-scene" hidden aria-hidden="true">
   <div class="time-scene-sky">
     <div class="time-scene-sun"></div>
@@ -970,68 +971,24 @@ function render(){
  $("gameScreen").classList.toggle("is-lobby",v.phase==="lobby");
 }
 
-/* Original procedural ambient soundtrack. Starts only after a user gesture (iOS requirement). */
-var musicWanted=true,musicContext=null,musicMaster=null,musicTimer=null,musicStep=0,musicAt=0;
-var musicHarmony=[
- [48,55,60,63],[44,51,56,60],[51,58,63,67],[46,53,58,62],
- [41,48,53,56],[43,50,55,59],[48,55,60,63],[43,50,55,59]
-];
-var musicMelody=[
- [72,null,75,74,72,null,67,null],
- [68,null,72,70,68,null,63,null],
- [67,null,70,72,75,74,72,null],
- [70,null,74,75,77,75,74,null],
- [72,null,75,77,75,72,70,null],
- [71,null,74,76,74,71,67,null],
- [72,null,75,79,77,75,72,null],
- [71,null,74,67,71,null,72,null]
-];
-function noteFrequency(midi){return 440*Math.pow(2,(midi-69)/12)}
-function musicTone(note,when,duration,peak,wave,attack){
- if(!musicContext||!musicMaster)return;
- var osc=musicContext.createOscillator(),env=musicContext.createGain();
- osc.type=wave||"sine";osc.frequency.setValueAtTime(noteFrequency(note),when);
- env.gain.setValueAtTime(.00001,when);
- env.gain.linearRampToValueAtTime(peak,when+(attack||.045));
- env.gain.exponentialRampToValueAtTime(.00002,when+duration);
- osc.connect(env);env.connect(musicMaster);
- osc.start(when);osc.stop(when+duration+.04);
- osc.onended=function(){try{osc.disconnect();env.disconnect()}catch(e){}};
-}
-function scheduleMusic(){
- if(!musicContext||!musicWanted||musicContext.state!=="running")return;
- var halfBeat=60/82/2;
- if(musicAt<musicContext.currentTime-.6)musicAt=musicContext.currentTime+.08;
- var count=0;
- while(musicAt<musicContext.currentTime+.8&&count++<12){
-  var bar=Math.floor(musicStep/8)%musicHarmony.length,beat=musicStep%8,t=musicAt,melody=musicMelody[bar][beat];
-  if(beat===0){
-   musicHarmony[bar].forEach(function(note,i){musicTone(note,t,halfBeat*7.8,.0075,i%2?"sine":"triangle",.3)});
-   musicTone(musicHarmony[bar][0]-12,t,halfBeat*5.8,.019,"sine",.08);
-  }
-  if(beat===4)musicTone(musicHarmony[bar][1]-12,t,halfBeat*3.2,.012,"sine",.065);
-  if(melody!==null)musicTone(melody,t,halfBeat*.86,.033,"sine",.024);
-  musicStep++;musicAt+=halfBeat;
- }
-}
+/* BGM: "不思議な村" by HiLi (こんとどぅふぇ), used as an in-game track.
+ * Licensed for incorporation in games. Audio is hosted with the game;
+ * never hotlink the composer's server. Mobile browsers require a user gesture. */
+var musicWanted=true;
 function ensureMusic(){
  if(!musicWanted)return;
- try{
-  if(!musicContext){
-   var AudioCtor=window.AudioContext||window.webkitAudioContext;
-   if(!AudioCtor)return;
-   musicContext=new AudioCtor();
-   musicMaster=musicContext.createGain();
-   musicMaster.gain.value=.43;
-   musicMaster.connect(musicContext.destination);
-   musicAt=musicContext.currentTime+.12;
+ var audio=$("bgmPlayer");
+ if(!audio||typeof audio.play!=="function")return;
+ audio.volume=0.38;
+ if(audio.paused){
+  var promise=audio.play();
+  if(promise&&typeof promise.catch==="function"){
+   promise.catch(function(err){
+    /* Mobile Safari can reject autoplay. A subsequent user click retries. */
+    if(err&&err.name!=="NotAllowedError")console.warn("BGM playback failed",err);
+   });
   }
-  if(musicContext.state!=="running"){
-   musicContext.resume().then(function(){musicAt=musicContext.currentTime+.1;scheduleMusic()}).catch(function(){});
-  }
-  if(!musicTimer)musicTimer=setInterval(scheduleMusic,170);
-  scheduleMusic();
- }catch(e){ /* Music must never block game interaction. */ }
+ }
 }
 function updateMusicButton(){
  var btn=$("musicToggle");
@@ -1042,13 +999,11 @@ function updateMusicButton(){
 function toggleMusic(){
  musicWanted=!musicWanted;
  updateMusicButton();
+ var audio=$("bgmPlayer");
+ if(!audio)return;
  if(!musicWanted){
-  if(musicMaster&&musicContext)musicMaster.gain.setTargetAtTime(0,musicContext.currentTime,.05);
-  if(musicTimer){clearInterval(musicTimer);musicTimer=null}
- }else{
-  if(musicMaster&&musicContext)musicMaster.gain.setTargetAtTime(.43,musicContext.currentTime,.08);
-  ensureMusic();
- }
+  if(typeof audio.pause==="function")audio.pause();
+ }else ensureMusic();
 }
 
 document.addEventListener("click",function(e){
