@@ -2039,7 +2039,7 @@ var TALK_GUIDE={
  zh:{identity:"公开身份与查验",doubt:"指出嫌疑",support:"表达信任",pass:"暂不表态",
   doubtHelp:"选择对象并引用公开记录，也可以明确说明只是猜测。",
   supportHelp:"选择对象并引用公开记录，也可以明确说明只是倾向。",
-  evidenceTitle:"公开依据",evidenceIntuition:"仅凭推测（无可核实证据）",
+  evidenceTitle:"公开依据",evidenceIntuition:"仅凭推测（无可核实证据）",retracted:"（已撤回）",
   evidenceVote:"第{day}天：此人投给{target}",evidenceClaim:"第{day}天：此人跳身份",
   evidenceReport:"第{day}天：此人公开查验报告",
   chooseReportNight:"选择要公开的查验夜晚",nightLabel:"第{night}夜",
@@ -2047,7 +2047,7 @@ var TALK_GUIDE={
  en:{identity:"Role and inspections",doubt:"State a suspicion",support:"Express trust",pass:"Withhold judgment",
   doubtHelp:"Choose a player and cite a public event, or disclose that this is only a guess.",
   supportHelp:"Choose a player and cite a public event, or disclose that this is only an impression.",
-  evidenceTitle:"Public basis",evidenceIntuition:"Just an impression (no verifiable evidence)",
+  evidenceTitle:"Public basis",evidenceIntuition:"Just an impression (no verifiable evidence)",retracted:" (retracted)",
   evidenceVote:"Day {day}: this player voted for {target}",evidenceClaim:"Day {day}: this player claimed a role",
   evidenceReport:"Day {day}: this player reported an inspection",
   chooseReportNight:"Select the inspection night",nightLabel:"Night {night}",
@@ -2055,7 +2055,7 @@ var TALK_GUIDE={
  ja:{identity:"役職・占いを公開",doubt:"疑いを述べる",support:"信頼を表明",pass:"判断を保留",
   doubtHelp:"対象を選び、公開記録を引用するか推測のみと伝えます。",
   supportHelp:"対象を選び、公開記録を引用するか推測のみと伝えます。",
-  evidenceTitle:"公開根拠",evidenceIntuition:"推測のみ（検証できる証拠なし）",
+  evidenceTitle:"公開根拠",evidenceIntuition:"推測のみ（検証できる証拠なし）",retracted:"（撤回済み）",
   evidenceVote:"{day}日目：この人は{target}に投票",evidenceClaim:"{day}日目：この人は役職CO",
   evidenceReport:"{day}日目：この人は占い結果を発表",
   chooseReportNight:"公開する占いの夜を選択",nightLabel:"第{night}夜",
@@ -4200,11 +4200,15 @@ function visibleCitations(v,id){
  }).slice(-12).reverse();
 }
 function citationLabel(v,e){
+ var withdrawn=(v.publicHistory||[]).some(function(h){
+  return h.id===e.actor&&h.day===e.day&&h.retracted&&h.kind===((e.detail||{}).kind);
+ });
  if(e.kind==="vote"){
   var q=(v.players||[]).find(function(p){return p.id===e.target});
   return talkLabel("evidenceVote",{day:e.day,target:q?displayName(q.name):"?"});
  }
- return talkLabel(["gold","black"].includes(e.detail.kind)?"evidenceReport":"evidenceClaim",{day:e.day});
+ return talkLabel(["gold","black"].includes(e.detail.kind)?"evidenceReport":"evidenceClaim",{day:e.day})+
+  (withdrawn?talkLabel("retracted"):"");
 }
 function reportNightOptions(v,kind,id){
  if(v.myRole==="seer")
@@ -4275,7 +4279,9 @@ function speechMenuCard(kind,v){
 function clientDebateEvidence(v,id,kind){
  if(kind==="reason")return true;
  if(kind==="claim")return (v.publicHistory||[]).some(function(h){return h.id===id&&roleClaim(h.kind)});
- if(kind==="report")return (v.publicHistory||[]).some(function(h){return h.id===id&&["gold","black"].includes(h.kind)});
+ if(kind==="report")return (v.publicHistory||[]).some(function(h){
+  return h.id===id&&!h.retracted&&["gold","black"].includes(h.kind);
+ });
  if(kind==="vote")return !!lastVote(v.voteHistory||[],id);
  return false;
 }
