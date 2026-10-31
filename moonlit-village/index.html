@@ -2401,7 +2401,12 @@ function beginVoteAfterDebate(){
 }
 function botChallenge(p){
  var ranked=aiRanking(p),top=ranked[0];
- if(!top||top.score<.4){recordChallenge(p.id,null,"pass");return}
+ var temperament=aiState(p).temperament;
+ var threshold={cautious:1.4,analytical:1.2,assertive:.86,opportunist:1.08}[temperament]||1.1;
+ if((!top||top.score<threshold)&&Math.random()>.28){
+  recordChallenge(p.id,null,"pass");return;
+ }
+ if(!top){recordChallenge(p.id,null,"pass");return}
  var target=top.p;
  var kinds=["report","claim","vote"].filter(function(k){return !!debateEvidence(target.id,k)});
  var kind=kinds.find(function(k){return debateContradiction(target.id,k)})||kinds[0]||"reason";
@@ -2603,6 +2608,12 @@ function aiSuspicion(observer,target){
   else if(outcome.kind==="admit")score+=outcome.contradicted?.55:.05;
   else if(outcome.kind==="explain")score+=outcome.contradicted?.6:-.18;
   else if(outcome.kind==="counter")score+=outcome.contradicted?.4:0;
+ });
+ (st.debateChallenges||[]).forEach(function(h){
+  if(h.targetId!==target.id||h.id===target.id)return;
+  var credibility=aiCredibility(observer,h.id);
+  /* A question is not proof: more weight only for a demonstrable conflict. */
+  score+=(debateContradiction(target.id,h.kind)?.45:.07)*credibility;
  });
  var own=history.slice().reverse().find(function(h){return h.id===observer.id&&h.targetId===target.id});
  if(own){
@@ -3087,6 +3098,7 @@ function botVote(p){
  var brain=aiState(p),ranked=aiRanking(p);
  if(!ranked.length)return p.id;
  var plan=brain.plan&&brain.plan.day===st.day?brain.plan:null;
+ var posterior=p.role==="wolf"?null:aiWolfProbabilities(p);
  var options=ranked.map(function(x){
   var score=x.score,q=x.p;
   if(plan&&plan.targetId===q.id){
@@ -3108,6 +3120,7 @@ function botVote(p){
    var check=aiObservedInspection(p,q.id);
    if(check)score=check.evil?100:-100;
   }
+  if(posterior)score+=(posterior[q.id]||0)*1.1;
   score+=aiNoise(p.id+":"+st.day,q.id)*.21;
   return {id:q.id,score:score};
  });
