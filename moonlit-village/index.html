@@ -1183,6 +1183,7 @@ var $=function(id){return document.getElementById(id)};
 /* Client-local language dictionaries; multiplayer state remains language-neutral. */
 var translations={"en":{"title":"Moonlit Village","subtitle":"Six-player social deduction · Solo or with friends · Choice-based dialogue","homeTitle":"Enter the Moonlit Village","nameLabel":"Your nickname · no account needed","defaultName":"Traveler","solo":"Solo game · AI fills empty seats","create":"Create a friends room","roomLabel":"Enter your friend's 6-character room code","codePlaceholder":"e.g. A7BC29","join":"Join room","homeHint":"No install or account needed. Public speech and votes sync across players; nighttime roles and abilities remain private. The host must stay connected.","footer1":"Moonlit Village · A six-player social deduction game","footer2":"For 1–6 players · AI fills empty seats · Casual play","story":"Village Chronicle","leftRail":"Residents one to three","rightRail":"Residents four to six","musicOn":"Mute music and sound effects","musicOff":"Enable music and sound effects","musicTitle":"Sound","rolePending":"Awaiting role assignment","skip":"Continue","skipAria":"Continue and save this speech to the log","drawAria":"Draw your secret role card","dealTitle":"The cards are being shuffled","dealHint":"Tap the card to reveal your secret role","dealHintAfter":"Your role is revealed. Enter the village when ready.","cardBack":"Card of Fate","roleMystery":"Secret Role","enterVillage":"Enter the village","sceneNight":"Night falls","sceneNightSub":"The village falls asleep","sceneDay":"Dawn breaks","sceneDaySub":"A new day begins","phaseLobby":"Waiting for players","phaseNight":"Night {day} · Moonrise","phaseTalk":"Day {day} · Discussion","phaseVote":"Day {day} · Vote","phaseEnded":"Game over","soloInfo":"Solo game","roomInfo":"Room code: {code}","playersCount":"{humans} humans / {total} residents","you":"You","alive":"Alive","out":"Eliminated","speakerNow":"Speaking","roleWolf":"Werewolf","roleSeer":"Seer","roleGuard":"Guardian","roleVillager":"Villager","roleWolfDesc":"Attack one player at night","roleSeerDesc":"Inspect one player each night","roleGuardDesc":"Protect one player each night","roleVillagerDesc":"Identify the werewolf during the day","roleGood":"Village team","roleWolfTeam":"Werewolf team","roleGoodShort":"villager","roleWolfShort":"werewolf","roleUnassigned":"Your secret role appears here once the game starts.","inspection":"Night {night}: {name} is {alignment}","actionDefault":"Make a decision","actionLobby":"Ready to start","actionNight":"Night action","actionTalk":"Choose what to say","actionSuspectTarget":"Who do you suspect?","actionTrustTarget":"Who do you trust?","actionVote":"Cast your vote","actionResult":"Final result: {winner}","start":"Start game · AI fills empty seats","copy":"Copy invite link","again":"Play again","waitHostStart":"Waiting for the host to start.","spectate":"You have been eliminated. Watch the game.","nightNoAction":"You have no night action. Wait for dawn.","nightSubmitted":"Night choice submitted. Waiting for others.","talkOut":"You have been eliminated and cannot speak.","talkSubmitted":"Your statement has been sent. Waiting for others.","voteOut":"You have been eliminated and cannot vote.","voteSubmitted":"Vote submitted. Waiting for others.","waitHostAgain":"Waiting for the host to start another game.","attack":"Attack","inspect":"Inspect","protect":"Protect","nightTarget":"Choose a target","voteTarget":"Vote to eliminate","confirmTarget":"Confirm selection","confirmDesc":"Submit your choice","back":"Go back","backDesc":"Choose another statement","suspect":"I suspect someone","suspectDesc":"Name a suspicious resident","trust":"I trust someone","trustDesc":"Show your support","clue":"I have a clue","clueDesc":"Share a clue publicly","pass":"I'll stay quiet","passDesc":"Make no accusation","select":"Select {name}","portrait":"Portrait of {name}","logWait":"The village is waiting for players.","logNewLobby":"A new game is waiting to begin.","logJoin":"{name} joined the village.","logLeave":"{name} left the room.","logDisconnect":"{name} disconnected; AI takes over.","logMoon":"The moon rises. Everyone closes their eyes.","logNight":"Night {day}: The werewolf, seer and guardian make their choices.","logAttack":"Dawn breaks. {name} was attacked and eliminated overnight.","logSafe":"Dawn breaks. Nobody was harmed last night.","logDay":"Day {day}: Choose a public statement.","logTalkDone":"Everyone has spoken. Voting begins.","logVote":"{name} voted for {target}.","logTie":"The vote is tied. Nobody is eliminated today.","logExile":"Vote result: {name} is eliminated. Their alignment was {alignment}.","logGoodWin":"🏆 The village wins! The werewolf is gone.","logWolfWin":"🐺 The werewolf wins! The werewolves are no longer outnumbered.","logLongNight":"The long night ends with the werewolf taking over the village.","speechSuspect":"I suspect {name}.","speechTrust":"I trust {name}.","speechClue":"I have some clues.","speechPass":"I have nothing to add.","bot0":"Mist Raven","bot1":"Vera","bot2":"Graystone","bot3":"Isa","bot4":"Pinewind","bot5":"Star Sand","errPeer":"Multiplayer library failed to load. Check your internet connection.","errFull":"The room has started or is full.","errCreating":"Creating your room…","errCreate":"Could not create room: {reason}. Please refresh and try again.","errCode":"Enter a six-character room code.","errConnecting":"Connecting to room…","errDisconnected":"Room connection lost. Return home and rejoin.","errJoin":"Unable to join that room.","errHost":"Cannot reach the host. Check the room code or try another network.","errConnect":"Connection failed: {reason}.","errActionDisconnected":"Connection lost. Please rejoin.","copySuccess":"Invite link copied! You can also share room code {code}.","copyFail":"Could not copy automatically. Share room code {code}.","inviteDetected":"Invitation detected. Enter your name and tap Join room."},"zh":{"title":"月下疑云","subtitle":"六人迷你狼人杀 · 一个人也能开局 · 选项式发言","homeTitle":"踏入月下村庄","nameLabel":"你的昵称（无需注册）","defaultName":"旅人","solo":"单人挑战 · AI补位","create":"创建好友房间","roomLabel":"输入好友分享的六位房间码","codePlaceholder":"例如 A7BC29","join":"加入房间","homeHint":"无需安装或注册。公开发言与投票会同步；夜间身份和技能选择不会泄露。房主必须保持在线。","footer1":"月下疑云 · 原创轻量六人社交推理游戏","footer2":"适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐","story":"村庄公告","leftRail":"村庄居民，一至三号","rightRail":"村庄居民，四至六号","musicOn":"关闭音乐与音效","musicOff":"开启音乐与音效","musicTitle":"声音","rolePending":"等待身份分配","skip":"继续","skipAria":"结束发言动画并归档","drawAria":"翻开你的身份牌","dealTitle":"命运正在洗牌","dealHint":"轻触中央的牌，揭晓只有你能看见的身份","dealHintAfter":"身份已经揭晓，准备进入村庄","cardBack":"命运之牌","roleMystery":"神秘身份","enterVillage":"进入村庄","sceneNight":"夜幕降临","sceneNightSub":"村庄陷入沉睡","sceneDay":"黎明破晓","sceneDaySub":"新的一天已经开始","phaseLobby":"等待入场","phaseNight":"第 {day} 夜 · 夜幕","phaseTalk":"第 {day} 天 · 发言","phaseVote":"第 {day} 天 · 投票","phaseEnded":"游戏结束","soloInfo":"单人练习","roomInfo":"房间码：{code}","playersCount":"{humans} 位真人 / {total} 位居民","you":"你","alive":"在场","out":"已出局","speakerNow":"正在发言","roleWolf":"狼人","roleSeer":"预言家","roleGuard":"守卫","roleVillager":"村民","roleWolfDesc":"夜晚袭击一人","roleSeerDesc":"每晚查验一人","roleGuardDesc":"每晚保护一人","roleVillagerDesc":"白天找出狼人","roleGood":"好人阵营","roleWolfTeam":"狼人阵营","roleGoodShort":"好人","roleWolfShort":"狼人","roleUnassigned":"身份尚未分配，开局后仅你自己能看到。","inspection":"第 {night} 夜查验：{name} 是{alignment}","actionDefault":"做出决定","actionLobby":"准备开局","actionNight":"夜间行动","actionTalk":"选择公开发言","actionSuspectTarget":"选择怀疑对象","actionTrustTarget":"选择信任对象","actionVote":"投票放逐","actionResult":"最终结果：{winner}","start":"开始游戏 · 空位自动补电脑","copy":"复制邀请链接","again":"重新开局","waitHostStart":"等待房主点击开始。","spectate":"你已经出局，正在旁观。","nightNoAction":"今晚你无需行动，等待天亮。","nightSubmitted":"已提交夜间选择，等待其他玩家。","talkOut":"你已经出局，不能发言。","talkSubmitted":"发言已同步，等待其他玩家。","voteOut":"你已经出局，不能投票。","voteSubmitted":"你已投票，等待其他玩家。","waitHostAgain":"等待房主发起下一局。","attack":"袭击","inspect":"查验","protect":"保护","nightTarget":"选择目标","voteTarget":"投票放逐","confirmTarget":"确认这名居民","confirmDesc":"提交当前选择","back":"返回上一层","backDesc":"重新选择发言","suspect":"我怀疑某人","suspectDesc":"指出可疑的居民","trust":"我相信某人","trustDesc":"表达你的信任","clue":"我有线索","clueDesc":"公开透露线索","pass":"暂不表态","passDesc":"保留本轮意见","select":"选择 {name}","portrait":"{name} 的头像","logWait":"村庄正在等待玩家加入。","logNewLobby":"新的村庄正在等待开局。","logJoin":"{name} 加入了村庄。","logLeave":"{name} 离开了房间。","logDisconnect":"{name} 掉线，已由电脑接管。","logMoon":"月亮升起，所有人闭上眼睛。","logNight":"第 {day} 夜：等待狼人、预言家和守卫行动。","logAttack":"天亮了，昨夜 {name} 遇袭出局。","logSafe":"天亮了，昨夜是平安夜。","logDay":"第 {day} 天：请选择一句公开发言。","logTalkDone":"所有人发言完毕，开始投票。","logVote":"{name} 投票给 {target}。","logTie":"投票平局，今天无人被放逐。","logExile":"投票结果：{name} 被放逐，身份是「{alignment}」。","logGoodWin":"🏆 好人胜利！狼人已经出局。","logWolfWin":"🐺 狼人胜利！狼人的人数已不低于好人。","logLongNight":"月夜持续太久，狼人占据了村庄。","speechSuspect":"我怀疑 {name}。","speechTrust":"我相信 {name}。","speechClue":"我掌握了一些线索。","speechPass":"我暂不表态。","bot0":"雾鸦","bot1":"薇拉","bot2":"灰石","bot3":"伊莎","bot4":"松风","bot5":"星砂","errPeer":"联机库未加载。请检查网络连接。","errFull":"房间已经开始或人数已满。","errCreating":"正在创建房间…","errCreate":"创建房间失败：{reason}。可以刷新后再试。","errCode":"请输入六位房间码。","errConnecting":"正在连接房间…","errDisconnected":"房间连接已断开；请返回首页重新加入。","errJoin":"无法加入该房间。","errHost":"无法连接房主；请核对房间码，或尝试更换网络。","errConnect":"连接失败：{reason}","errActionDisconnected":"连接已断开，请重新加入。","copySuccess":"邀请链接已复制！也可以把房间码 {code} 发给朋友。","copyFail":"无法自动复制，请发送房间码：{code}","inviteDetected":"已识别邀请房间，填写昵称后点击加入房间。"},"ja":{"title":"月下の謎","subtitle":"6人の人狼ゲーム · ソロプレイ対応 · 選択式の発言","homeTitle":"月下の村へようこそ","nameLabel":"プレイヤー名（登録不要）","defaultName":"旅人","solo":"ソロプレイ · AIが補充","create":"友達用の部屋を作成","roomLabel":"友達から届いた6文字のルームコード","codePlaceholder":"例：A7BC29","join":"部屋に参加","homeHint":"インストール・登録不要。発言と投票は全員に同期し、夜の役職と行動は非公開です。ホストが退出すると部屋も終了します。","footer1":"月下の謎 · 6人用の人狼ゲーム","footer2":"1〜6人対応 · 空席はAIが補充 · カジュアルプレイ","story":"村の記録","leftRail":"村人1〜3","rightRail":"村人4〜6","musicOn":"音楽と効果音をオフ","musicOff":"音楽と効果音をオン","musicTitle":"サウンド","rolePending":"役職の割り当て待ち","skip":"続ける","skipAria":"発言演出を終了して履歴に保存","drawAria":"役職カードをめくる","dealTitle":"運命のカードをシャッフル中","dealHint":"カードをタップして自分だけの役職を確認","dealHintAfter":"役職を確認しました。村へ進みましょう。","cardBack":"運命のカード","roleMystery":"秘密の役職","enterVillage":"村へ入る","sceneNight":"夜が訪れる","sceneNightSub":"村は眠りにつく","sceneDay":"夜が明ける","sceneDaySub":"新しい一日が始まる","phaseLobby":"参加者を待っています","phaseNight":"{day}日目の夜","phaseTalk":"{day}日目 · 話し合い","phaseVote":"{day}日目 · 投票","phaseEnded":"ゲーム終了","soloInfo":"ソロプレイ","roomInfo":"ルームコード：{code}","playersCount":"人間 {humans}人 / 村人 {total}人","you":"自分","alive":"生存","out":"脱落","speakerNow":"発言中","roleWolf":"人狼","roleSeer":"占い師","roleGuard":"騎士","roleVillager":"村人","roleWolfDesc":"夜に一人を襲撃する","roleSeerDesc":"毎晩一人の正体を調べる","roleGuardDesc":"毎晩一人を守る","roleVillagerDesc":"昼に人狼を見つける","roleGood":"村人陣営","roleWolfTeam":"人狼陣営","roleGoodShort":"村人陣営","roleWolfShort":"人狼","roleUnassigned":"開始すると、あなたにだけ役職が表示されます。","inspection":"{night}日目の夜の占い：{name} は {alignment}","actionDefault":"行動を選択","actionLobby":"ゲームの準備","actionNight":"夜の行動","actionTalk":"発言を選ぶ","actionSuspectTarget":"疑う相手を選ぶ","actionTrustTarget":"信じる相手を選ぶ","actionVote":"追放投票","actionResult":"結果：{winner}","start":"ゲーム開始 · 空席はAIが補充","copy":"招待リンクをコピー","again":"もう一度プレイ","waitHostStart":"ホストの開始を待っています。","spectate":"脱落しました。観戦中です。","nightNoAction":"今夜の行動はありません。朝を待ちましょう。","nightSubmitted":"夜の行動を送信しました。ほかのプレイヤーを待機中。","talkOut":"脱落したため発言できません。","talkSubmitted":"発言を送信しました。ほかのプレイヤーを待機中。","voteOut":"脱落したため投票できません。","voteSubmitted":"投票しました。ほかのプレイヤーを待機中。","waitHostAgain":"ホストが次のゲームを始めるまでお待ちください。","attack":"襲撃","inspect":"占う","protect":"守る","nightTarget":"対象を選択","voteTarget":"追放に投票","confirmTarget":"この人に決定","confirmDesc":"選択を確定","back":"戻る","backDesc":"発言を選び直す","suspect":"誰かを疑う","suspectDesc":"怪しい村人を指名","trust":"誰かを信じる","trustDesc":"信頼を表明","clue":"手がかりがある","clueDesc":"手がかりを公開","pass":"発言を控える","passDesc":"意見を保留","select":"{name} を選択","portrait":"{name} のアイコン","logWait":"村は参加者を待っています。","logNewLobby":"新しいゲームの開始を待っています。","logJoin":"{name} が村に参加しました。","logLeave":"{name} が部屋を退出しました。","logDisconnect":"{name} の接続が切れ、AIが操作を引き継ぎました。","logMoon":"月が昇り、全員が目を閉じます。","logNight":"{day}日目の夜：人狼・占い師・騎士が行動します。","logAttack":"朝になりました。昨夜、{name} が襲撃され脱落しました。","logSafe":"朝になりました。昨夜は誰も襲われませんでした。","logDay":"{day}日目：発言を選んでください。","logTalkDone":"全員の発言が終わりました。投票を始めます。","logVote":"{name} は {target} に投票しました。","logTie":"票が同数のため、今日は誰も追放されません。","logExile":"投票結果：{name} が追放されました。陣営は「{alignment}」でした。","logGoodWin":"🏆 村人陣営の勝利！人狼は追放されました。","logWolfWin":"🐺 人狼陣営の勝利！人狼の数が村人以上になりました。","logLongNight":"長い夜の末、人狼が村を支配しました。","speechSuspect":"{name} が怪しいと思います。","speechTrust":"{name} を信じます。","speechClue":"手がかりがあります。","speechPass":"今は発言を控えます。","bot0":"霧烏","bot1":"ヴェラ","bot2":"灰岩","bot3":"イサ","bot4":"松風","bot5":"星砂","errPeer":"通信ライブラリを読み込めません。ネット接続を確認してください。","errFull":"部屋が開始済み、または満員です。","errCreating":"部屋を作成中…","errCreate":"部屋の作成に失敗：{reason}。再読み込みしてください。","errCode":"6文字のルームコードを入力してください。","errConnecting":"部屋に接続中…","errDisconnected":"接続が切れました。ホームから入り直してください。","errJoin":"部屋に参加できません。","errHost":"ホストに接続できません。コードやネットワークを確認してください。","errConnect":"接続に失敗：{reason}","errActionDisconnected":"接続が切れました。入り直してください。","copySuccess":"招待リンクをコピーしました！ルームコード {code} も共有できます。","copyFail":"コピーできませんでした。ルームコード：{code}","inviteDetected":"招待コードを確認しました。名前を入力して部屋に参加してください。"}};
 var selectedLanguage="en";
+translations.en.languageAria="Language";translations.zh.languageAria="语言";translations.ja.languageAria="言語";
 function tr(key,values){
  var entry=(translations[selectedLanguage]&&translations[selectedLanguage][key])||translations.en[key]||key;
  return entry.replace(/\{([A-Za-z0-9_]+)\}/g,function(_,name){return values&&values[name]!==undefined?String(values[name]):""});
@@ -1328,7 +1329,7 @@ function joinRoom(){
    if(m&&m.type==="error"){report(m.message);return}
    if(m&&m.type==="state"){view=m.state;myId=view.me;enter();render()}
   });
-  conn.on("close",function(){conn=null;if(view){$("notice").textContent="房间连接已断开；请返回首页重新加入。"}else report("无法加入该房间。")});
+  conn.on("close",function(){conn=null;if(view){$("notice").textContent=tr("errDisconnected")}else report("无法加入该房间。")});
   conn.on("error",function(){report("无法连接房主；请核对房间码，或尝试更换网络。")});
  });
  peer.on("error",function(e){report("连接失败："+(e&&e.type||"网络故障"))});
@@ -1445,7 +1446,7 @@ function sendAction(action,target,speech){
  speechKind="";
  if(isHost)accept("h",action,target,speech);
  else if(conn&&conn.open)conn.send({type:"action",action:action,target:target,speech:speech});
- else $("notice").textContent="连接已断开，请重新加入。"
+ else $("notice").textContent=tr("errActionDisconnected")
 }
 function restart(){
  if(!isHost||!st||st.phase!=="ended")return;
@@ -1684,21 +1685,21 @@ function render(){
  var v=view;
  showRoleDeal(v);
  handleTimeScene(v);
- var titles={lobby:"等待入场",night:"第 "+v.day+" 夜 · 夜幕",talk:"第 "+v.day+" 天 · 发言",vote:"第 "+v.day+" 天 · 投票",ended:"游戏结束"};
+ var titles={lobby:tr("phaseLobby"),night:tr("phaseNight",{day:v.day}),talk:tr("phaseTalk",{day:v.day}),vote:tr("phaseVote",{day:v.day}),ended:tr("phaseEnded")};
  $("phaseTag").textContent=titles[v.phase];
- $("roomInfo").textContent=v.solo?"单人练习":v.room?"房间码："+v.room:"";
- $("shareBtns").innerHTML=(!v.solo&&v.room&&v.phase==="lobby")?button("复制邀请链接","copy",null,null,"ghost"):"";
- $("countInfo").textContent=v.players.filter(function(p){return !p.bot}).length+" 位真人 / "+v.players.length+" 位居民";
+ $("roomInfo").textContent=v.solo?tr("soloInfo"):v.room?tr("roomInfo",{code:v.room}):"";
+ $("shareBtns").innerHTML=(!v.solo&&v.room&&v.phase==="lobby")?button(tr("copy"),"copy",null,null,"ghost"):"";
+ $("countInfo").textContent=tr("playersCount",{humans:v.players.filter(function(p){return !p.bot}).length,total:v.players.length});
  var currentSpeaker=stageCurrent&&stageCurrent.kind==="choice"?String(stageCurrent.text).match(/^(.+?)：「/):null;
  var lastSpeaker=currentSpeaker&&currentSpeaker[1];
  var playerTiles=v.players.map(function(p,i){
   var speaking=lastSpeaker===p.name;
   return '<div class="player'+(!p.alive?' dead':'')+(p.id===v.me?' me':'')+(speaking?' rpg-speaking':'')+'" data-seat="'+i+'">'
    +faceMarkup(p,p.alive?"normal":"out",i,"resident")
-   +(p.id===v.me?'<span class="player-you">你</span>':'')
-   +'<div class="name" title="'+escapeHtml(p.name)+'">'+escapeHtml(p.name)+'</div>'
+   +(p.id===v.me?'<span class="player-you">'+escapeHtml(tr("you"))+'</span>':'')
+   +'<div class="name" title="'+escapeHtml(displayName(p.name))+'">'+escapeHtml(displayName(p.name))+'</div>'
    +'<div class="player-status-line" aria-hidden="true"></div>'
-   +'<span class="sr-only">'+(p.alive?'在场':'已出局')+(speaking?'，最近发言':'')+'</span>'
+   +'<span class="sr-only">'+escapeHtml(tr(p.alive?"alive":"out"))+(speaking?', '+escapeHtml(tr("speakerNow")):"")+'</span>'
    +'</div>'
  });
  $("leftPlayers").innerHTML=playerTiles.slice(0,3).join("");
@@ -1713,47 +1714,47 @@ function render(){
     tile.setAttribute("data-rpg-target",p.id);
     tile.setAttribute("role","option");
     tile.setAttribute("tabindex","0");
-    tile.setAttribute("aria-label","选择 "+p.name);
+    tile.setAttribute("aria-label",tr("select",{name:displayName(p.name)}));
    }
   });
   rpgHighlightTargets();
  }
- var tips=v.knowledge.slice(-4).map(function(k){return '第 '+k.night+' 夜查验：'+k.name+' 是'+(k.evil?'狼人':'好人')}).join("；");
- $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleText[v.myRole])+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):'身份尚未分配，开局后仅你自己能看到。';
+ var tips=v.knowledge.slice(-4).map(function(k){return tr("inspection",{night:k.night,name:displayName(k.name),alignment:tr(k.evil?"roleWolfShort":"roleGoodShort")})}).join(selectedLanguage==="en"?"; ":"；");
+ $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleName(v.myRole)+" · "+roleDescription(v.myRole))+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):tr("roleUnassigned");
  rpgRenderMessages(v);
- var a="",title="做出决定",notice="";
+ var a="",title=tr("actionDefault"),notice="";
  if(v.phase==="lobby"){
-  title="准备开局";
-  if(v.host)a=button("开始游戏 · 空位自动补电脑","start",null,null,"primary full");
-  else notice="等待房主点击开始。";
+  title=tr("actionLobby");
+  if(v.host)a=button(tr("start"),"start",null,null,"primary full");
+  else notice=tr("waitHostStart");
  }else if(v.phase==="night"){
-  title="夜间行动";
-  if(!v.myAlive)notice="你已经出局，正在旁观。";
-  else if(!["wolf","seer","guard"].includes(v.myRole))notice="今晚你无需行动，等待天亮。";
-  else if(v.submitted)notice="已提交夜间选择，等待其他玩家。";
+  title=tr("actionNight");
+  if(!v.myAlive)notice=tr("spectate");
+  else if(!["wolf","seer","guard"].includes(v.myRole))notice=tr("nightNoAction");
+  else if(v.submitted)notice=tr("nightSubmitted");
   else {
-   var r={wolf:"袭击",seer:"查验",guard:"保护"}[v.myRole];
-   a=v.players.filter(function(p){return p.alive&&(v.myRole==="guard"||p.id!==v.me)}).map(function(p){return modernTarget(p,r+"目标","night","night")}).join("");
+   var r=tr({wolf:"attack",seer:"inspect",guard:"protect"}[v.myRole]);
+   a=v.players.filter(function(p){return p.alive&&(v.myRole==="guard"||p.id!==v.me)}).map(function(p){return modernTarget(p,r+" · "+tr("nightTarget"),"night","night")}).join("");
   }
  }else if(v.phase==="talk"){
-  title="选择公开发言";
-  if(!v.myAlive)notice="你已经出局，不能发言。";
-  else if(v.submitted)notice="发言已同步，等待其他玩家。";
+  title=tr("actionTalk");
+  if(!v.myAlive)notice=tr("talkOut");
+  else if(v.submitted)notice=tr("talkSubmitted");
   else if(speechKind==="suspect"||speechKind==="trust"){
-   title=(speechKind==="suspect"?"选择怀疑对象":"选择信任对象");
-   a=modernAction("确认这名居民","confirmTarget",null,null,"confirm","提交当前选择")+modernAction("返回上一层","back",null,null,"back","重新选择发言");
+   title=tr(speechKind==="suspect"?"actionSuspectTarget":"actionTrustTarget");
+   a=modernAction(tr("confirmTarget"),"confirmTarget",null,null,"confirm",tr("confirmDesc"))+modernAction(tr("back"),"back",null,null,"back",tr("backDesc"));
   }else{
-   a=modernAction("我怀疑某人","pickSpeech",null,"suspect","suspect","指出可疑的居民")+modernAction("我相信某人","pickSpeech",null,"trust","trust","表达你的信任")+modernAction("我有线索","say",null,"clue","clue","公开透露线索")+modernAction("暂不表态","say",null,"pass","pass","保留本轮意见");
+   a=modernAction(tr("suspect"),"pickSpeech",null,"suspect","suspect",tr("suspectDesc"))+modernAction(tr("trust"),"pickSpeech",null,"trust","trust",tr("trustDesc"))+modernAction(tr("clue"),"say",null,"clue","clue",tr("clueDesc"))+modernAction(tr("pass"),"say",null,"pass","pass",tr("passDesc"));
   }
  }else if(v.phase==="vote"){
-  title="投票放逐";
-  if(!v.myAlive)notice="你已经出局，不能投票。";
-  else if(v.submitted)notice="你已投票，等待其他玩家。";
-  else a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return modernTarget(p,"投票放逐","vote","vote")}).join("");
+  title=tr("actionVote");
+  if(!v.myAlive)notice=tr("voteOut");
+  else if(v.submitted)notice=tr("voteSubmitted");
+  else a=v.players.filter(function(p){return p.alive&&p.id!==v.me}).map(function(p){return modernTarget(p,tr("voteTarget"),"vote","vote")}).join("");
  }else if(v.phase==="ended"){
-  title="最终结果："+v.winner;
-  if(v.host)a=button("重新开局","again",null,null,"primary full");
-  else notice="等待房主发起下一局。";
+  title=tr("actionResult",{winner:teamName(v.winner)});
+  if(v.host)a=button(tr("again"),"again",null,null,"primary full");
+  else notice=tr("waitHostAgain");
  }
  $("actionTitle").textContent=title;
  $("actions").className="actions"+((v.phase==="night"||v.phase==="vote"||(v.phase==="talk"&&speechKind))?" targets":"");
@@ -1949,7 +1950,7 @@ document.addEventListener("click",function(e){
   copy:"confirm",flipRole:"confirm",closeRole:"confirm"}[action];
  if(clickSound)playSfx(clickSound);
  ensureMusic();
- if(action==="flipRole"){if(!$("roleOverlay").classList.contains("revealed")){$("roleOverlay").classList.add("revealed");$("roleContinue").hidden=false;$("roleCard").disabled=true;$("drawHint").textContent="身份已经揭晓，准备进入村庄";}}
+ if(action==="flipRole"){if(!$("roleOverlay").classList.contains("revealed")){$("roleOverlay").classList.add("revealed");$("roleContinue").hidden=false;$("roleCard").disabled=true;$("drawHint").textContent=tr("dealHintAfter");}}
  else if(action==="closeRole"){$("roleOverlay").hidden=true;if(pendingScene){playTimeScene(pendingScene);pendingScene=null;}else stageAdvanceQueue();}
  else if(action==="solo")makeSolo();
  else if(action==="create")makeRoom();
@@ -1958,7 +1959,7 @@ document.addEventListener("click",function(e){
  else if(action==="again")restart();
  else if(action==="copy"){
   var link=new URL(location.href);link.searchParams.set("room",room);
-  navigator.clipboard.writeText(link.toString()).then(function(){$("notice").textContent="邀请链接已复制！也可以把房间码 "+room+" 发给朋友。"}).catch(function(){$("notice").textContent="无法自动复制，请发送房间码："+room});
+  navigator.clipboard.writeText(link.toString()).then(function(){$("notice").textContent=tr("copySuccess",{code:room})}).catch(function(){$("notice").textContent=tr("copyFail",{code:room})});
  }else if(action==="night")sendAction("night",target,null);
  else if(action==="vote")sendAction("vote",target,null);
  else if(action==="pickSpeech"){speechKind=speech;rpgSpeechTarget=null;render()}
@@ -1995,7 +1996,7 @@ document.addEventListener("keydown",function(e){
   e.preventDefault();menu[rpgMenuIndex].click();
  }
 });
-var param=new URLSearchParams(location.search).get("room");if(param&&/^[A-Z0-9]{6}$/i.test(param)){$("roomInput").value=param.toUpperCase();$("homeNotice").textContent="已识别邀请房间，填写昵称后点击加入房间。"}
+var param=new URLSearchParams(location.search).get("room");if(param&&/^[A-Z0-9]{6}$/i.test(param)){$("roomInput").value=param.toUpperCase();$("homeNotice").textContent=tr("inviteDetected")}
 })();
 </script>
 </body>
