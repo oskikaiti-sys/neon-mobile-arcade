@@ -1555,6 +1555,63 @@ body.game-active #actions.rpg-menu,body.game-active #actions.rpg-target-menu{
 }
 body.game-active #actions.rpg-menu>button:disabled{opacity:.43;cursor:not-allowed}
 body.game-active #actions.rpg-target-menu>button.rpg-selected{border-color:var(--gold)!important;background:rgba(232,200,114,.14)!important}
+
+/* Discussion accessibility: the previous high-specificity game-actions grid
+   forced two narrow columns even after the menu became scrollable. */
+body.game-active #gameScreen>.game-actions #actions.rpg-menu,
+body.game-active #gameScreen>.game-actions #actions.rpg-target-menu{
+ display:grid!important;
+ grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr))!important;
+ grid-auto-rows:max-content!important;
+ align-content:start!important;
+ gap:7px!important;
+ min-height:0!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ padding:2px 3px 7px;
+ overscroll-behavior:contain;
+ -webkit-overflow-scrolling:touch;
+}
+body.game-active #gameScreen>.game-actions #actions.rpg-menu>button,
+body.game-active #gameScreen>.game-actions #actions.rpg-target-menu>button{
+ box-sizing:border-box;
+ width:100%;
+ height:auto!important;
+ min-height:65px!important;
+ max-height:none!important;
+ padding:9px 10px!important;
+ white-space:normal!important;
+ align-items:center;
+ overflow:hidden;
+}
+body.game-active #gameScreen>.game-actions #actions.rpg-menu .action-copy,
+body.game-active #gameScreen>.game-actions #actions.rpg-target-menu .action-copy{
+ flex:1 1 0;min-width:0;max-width:100%;
+}
+body.game-active #gameScreen>.game-actions #actions.rpg-menu .action-name,
+body.game-active #gameScreen>.game-actions #actions.rpg-target-menu .action-name{
+ display:block;max-width:100%;
+ font-size:clamp(13px,3.5vw,15px)!important;
+ font-weight:650;line-height:1.3;
+ white-space:normal;overflow-wrap:anywhere;word-break:normal;
+}
+body.game-active #gameScreen>.game-actions #actions.rpg-menu .action-desc,
+body.game-active #gameScreen>.game-actions #actions.rpg-target-menu .action-desc{
+ display:block;max-width:100%;
+ font-size:clamp(10px,2.65vw,12px)!important;
+ line-height:1.4;white-space:normal;
+ overflow-wrap:anywhere;word-break:normal;
+}
+body.game-active #gameScreen>.game-actions #actions.rpg-menu .action-icon,
+body.game-active #gameScreen>.game-actions #actions.rpg-target-menu .action-icon{
+ flex-shrink:0;align-self:center;
+}
+@media(max-width:700px){
+ body.game-active #gameScreen>.game-actions #actions.rpg-menu,
+ body.game-active #gameScreen>.game-actions #actions.rpg-target-menu{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+}
 </style>
 </head>
 <body>
