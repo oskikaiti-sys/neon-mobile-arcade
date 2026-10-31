@@ -1678,7 +1678,7 @@ translations.en.helpTitle="How to play";
 translations.en.helpIntro="Six players receive one secret role each. The identities stay private until the game ends.";
 translations.en.roleRosterTitle="Roles in this match";
 translations.en.helpWolf="Each night, attack one living player who is not a werewolf. You cannot attack yourself or another werewolf.";
-translations.en.helpSeer="Each night, privately learn whether one other living player is a werewolf. Only you see the result.";
+translations.en.helpSeer="Each night, privately learn the exact role of one other living player. Your inspection history is visible only to you.";
 translations.en.helpGuard="Each night, protect any one living player, including yourself. If the werewolf targets that player, the attack fails.";
 translations.en.helpVillager="You have no night power. Listen to the discussion and help vote out the werewolf.";
 translations.en.helpRoundTitle="How a round works";
@@ -1694,7 +1694,7 @@ translations.zh.helpTitle="狼人杀怎么玩";
 translations.zh.helpIntro="六名玩家各自获得一个秘密身份，游戏结束前不会公开其他人的职业。";
 translations.zh.roleRosterTitle="本局身份配置";
 translations.zh.helpWolf="每晚袭击一名存活的非狼人玩家。不能攻击自己，也不能攻击其他狼人。";
-translations.zh.helpSeer="每晚查验一名其他存活玩家，私下得知对方是否为狼人。查验结果只有预言家自己能看到。";
+translations.zh.helpSeer="每晚查验一名其他存活玩家的具体职业（狼人、预言家、守卫或村民）；查验记录只有预言家本人能看到。";
 translations.zh.helpGuard="每晚保护一名存活玩家，可以保护自己。如果狼人袭击的目标受到保护，该次袭击无效。";
 translations.zh.helpVillager="夜晚没有特殊技能。白天观察发言，参与讨论，并投票找出狼人。";
 translations.zh.helpRoundTitle="回合流程";
@@ -1710,7 +1710,7 @@ translations.ja.helpTitle="遊び方";
 translations.ja.helpIntro="6人に秘密の役職が1つずつ配られます。ゲーム終了までほかの人の役職は公開されません。";
 translations.ja.roleRosterTitle="今回の役職構成";
 translations.ja.helpWolf="毎晩、生存中の人狼以外のプレイヤーを1人襲撃します。自分やほかの人狼は襲撃できません。";
-translations.ja.helpSeer="毎晩、自分以外の生存者を1人占い、人狼かどうかを自分だけが確認できます。";
+translations.ja.helpSeer="毎晩、自分以外の生存者を1人占い、正確な役職を自分だけが確認できます。占いの履歴も本人にのみ表示されます。";
 translations.ja.helpGuard="毎晩、生存者を1人守ります。自分を守ることもできます。襲撃対象を守ると、その襲撃は失敗します。";
 translations.ja.helpVillager="夜の能力はありません。昼の発言を参考にして、人狼と思う相手に投票します。";
 translations.ja.helpRoundTitle="1日の流れ";
@@ -1909,7 +1909,7 @@ function snapshot(id){var me=person(id);
   deadlineActive:!!st.deadlineAt,
   deadlineRemaining:st.deadlineAt?Math.max(0,st.deadlineAt-Date.now()):0,
   phaseElapsed:st.phaseStartAt?Math.max(0,Date.now()-st.phaseStartAt):0,
-  me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
+  me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:me&&me.role==="seer"?(st.known[id]||[]).map(function(k){return {id:k.id,name:k.name,role:k.role,night:k.night,evil:k.evil}}):[],messages:st.logs.slice(-25),winner:st.winner}}
 function broadcast(){if(!st)return;view=snapshot("h");render();for(var it of connections.entries()){var id=it[0],c=it[1];if(c.open){try{c.send({type:"state",state:snapshot(id)})}catch(e){}}}}
 function makeSolo(){if(avatarPending)return;solo=true;isHost=true;room="";makeState();enter();startGame()}
 function makeRoom(){
@@ -2026,7 +2026,7 @@ function finishNight(){
  if(seer&&st.night[seer.id]){
   var checked=person(st.night[seer.id]);
   if(!st.known[seer.id])st.known[seer.id]=[];
-  st.known[seer.id].push({name:checked.name,id:checked.id,evil:checked.role==="wolf",night:st.day});
+  st.known[seer.id].push({name:checked.name,id:checked.id,role:checked.role,evil:checked.role==="wolf",night:st.day});
  }
  if(target&&target!==save){person(target).alive=false;log("天亮了，昨夜 "+person(target).name+" 遇袭出局。","news")}
  else log("天亮了，昨夜是平安夜。","news");
@@ -2510,7 +2510,9 @@ function render(){
   });
   rpgHighlightTargets();
  }
- var tips=v.knowledge.slice(-4).map(function(k){return tr("inspection",{night:k.night,name:displayName(k.name),alignment:tr(k.evil?"roleWolfShort":"roleGoodShort")})}).join(selectedLanguage==="en"?"; ":"；");
+ var tips=(v.myRole==="seer"?v.knowledge:[]).slice(-3).map(function(k){
+  return tr("inspection",{night:k.night,name:displayName(k.name),alignment:k.role?roleName(k.role):tr(k.evil?"roleWolfShort":"roleGoodShort")});
+ }).join(selectedLanguage==="en"?"; ":"；");
  $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleName(v.myRole)+" · "+roleDescription(v.myRole))+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):tr("roleUnassigned");
  rpgRenderMessages(v);
  var a="",title=tr("actionDefault"),notice="";
