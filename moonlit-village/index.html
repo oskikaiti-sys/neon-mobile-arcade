@@ -1377,6 +1377,47 @@ body.game-active .game-header .hero-copy h1{font-size:clamp(11px,3.1vw,16px)!imp
  body.game-active .game-header .hero-copy{grid-column:1/-1;grid-row:2}
  body.game-active .game-header .hero-copy h1{font-size:15px!important;letter-spacing:.2px!important}
 }
+
+/* Night announcements now live inside the CENTRAL dialogue window, which is
+ * where players read the story, rather than in the thin header above it.
+ * This is a presentation-only overlay over the log, never over actions. */
+body.game-active .story-column .night-dialogue{
+ position:absolute;inset:33px 2px 0;z-index:8;
+ display:flex;align-items:center;justify-content:center;
+ padding:12px 5px;
+ background:linear-gradient(180deg,rgba(10,15,31,.97),rgba(20,28,58,.96));
+ pointer-events:none;
+}
+body.game-active .story-column .night-dialogue[hidden]{display:none!important}
+body.game-active .story-column .night-dialogue-card{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:10px;min-width:0;width:100%;max-width:260px;min-height:150px;
+ padding:18px 9px;
+ border:1px solid rgba(232,200,114,.52);border-radius:9px;
+ background:rgba(20,28,58,.88);box-shadow:0 0 26px rgba(232,200,114,.09);
+ text-align:center;
+}
+body.game-active .night-dialogue-symbol{
+ display:block;color:var(--gold);font-size:32px;line-height:1;
+ text-shadow:0 0 15px rgba(232,200,114,.38);
+}
+body.game-active .night-dialogue-title{
+ display:block;max-width:100%;color:var(--ink);
+ font-size:clamp(13px,3.6vw,17px);font-weight:700;
+ line-height:1.5;overflow-wrap:anywhere;
+}
+body.game-active .night-dialogue-counter{
+ display:block;min-height:18px;color:var(--gold);
+ font-size:12px;font-variant-numeric:tabular-nums;
+ line-height:1.35;letter-spacing:.1px;
+}
+@media(max-height:680px){
+ body.game-active .story-column .night-dialogue{padding:5px 3px}
+ body.game-active .story-column .night-dialogue-card{min-height:108px;gap:6px;padding:10px 5px}
+ body.game-active .night-dialogue-symbol{font-size:25px}
+ body.game-active .night-dialogue-title{font-size:13px}
+}
+
 </style>
 </head>
 <body>
@@ -1415,7 +1456,7 @@ body.game-active .game-header .hero-copy h1{font-size:clamp(11px,3.1vw,16px)!imp
 <section id="gameScreen">
 <div class="panel game-head">
 <div class="topbar"><span class="pill" id="phaseTag" data-i18n="phaseLobby">Waiting for players</span><span id="roomInfo"></span></div>
-<div id="nightTurn" class="night-turn" hidden aria-live="off"><span id="nightTurnLabel"></span><span id="nightTurnCount"></span></div>
+
 <div id="myRole" class="role-chip" data-i18n="rolePending" aria-label="Your role">Awaiting role assignment</div>
 <div class="btns" id="shareBtns"></div>
 </div>
@@ -1425,6 +1466,13 @@ body.game-active .game-header .hero-copy h1{font-size:clamp(11px,3.1vw,16px)!imp
     <div class="story-column">
       <div class="story-heading"><h2 data-i18n="story"></h2><span class="small" id="countInfo"></span></div>
       <div id="feed" class="story-feed" aria-live="polite"></div>
+      <div id="nightTurn" class="night-turn night-dialogue" hidden aria-live="off">
+        <div class="night-dialogue-card">
+          <span class="night-dialogue-symbol" aria-hidden="true">☾</span>
+          <span class="night-dialogue-title" id="nightTurnLabel" aria-live="polite" aria-atomic="true"></span>
+          <span class="night-dialogue-counter" id="nightTurnCount" aria-live="off"></span>
+        </div>
+      </div>
       <div id="speakerOverlay" class="speaker-overlay" hidden>
         <div class="speaker-card" role="status" aria-live="polite">
           <div id="speakerPortrait" class="speaker-card-portrait"></div>
