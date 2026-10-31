@@ -309,6 +309,117 @@ body.game-active #players .tag{
   body.game-active #players .tag{font-size:8px;line-height:1.1}
 }
 
+
+/* Moonlit Village visual system, version 4: editorial nightscape and no clipped HUD */
+:root{--mv-ink:#090f19;--mv-panel:rgba(20,30,45,.95);--mv-border:rgba(170,164,155,.23);--mv-gold:#e8c795;--mv-gold-soft:#c7a87d;--mv-cream:#f4eadb;--mv-text:#d7dce4;--mv-muted:#9aa6b6}
+html{background:#080e18}
+body{color:var(--mv-text);background:radial-gradient(ellipse 110% 55% at 54% -16%,#354761 0%,#121c2b 47%,#080e18 100%)}
+body:before{opacity:.48;background:radial-gradient(1px 1px at 10% 16%,#f8f0dc 98%,transparent),radial-gradient(1px 1px at 68% 8%,#d4e1ef 98%,transparent),radial-gradient(2px 2px at 87% 23%,#f6e3b6 98%,transparent),radial-gradient(1px 1px at 26% 69%,#e5d7cc 98%,transparent)}
+button{font-family:inherit}
+body.game-active main{max-width:720px;padding:max(5px,env(safe-area-inset-top)) 10px max(6px,env(safe-area-inset-bottom))}
+body.game-active header{min-height:39px;display:flex;flex-direction:column;justify-content:center;align-items:center;margin:0 0 6px;border-bottom:1px solid rgba(224,196,153,.2);padding-bottom:6px}
+body.game-active header h1{font:600 24px/1.22 Georgia,"STSong","Songti SC",serif;letter-spacing:6px;color:var(--mv-cream);text-shadow:0 2px 18px #edcd9740;margin:0;padding-left:6px}
+body.game-active header .eyebrow,body.game-active header .subtitle{display:none}
+body.game-active #musicToggle{top:0;right:0;min-height:31px;padding:5px 9px;font-size:10px;border-color:#6e6673;background:#1d293a}
+body.game-active #gameScreen{grid-template-rows:40px minmax(0,1fr) 142px auto auto;gap:7px}
+body.game-active #gameScreen>.panel{background:var(--mv-panel);border:1px solid var(--mv-border);box-shadow:0 4px 19px #01050933;border-radius:12px;min-width:0}
+body.game-active #gameScreen>.panel:nth-child(1){grid-row:1;padding:6px 12px;background:linear-gradient(100deg,#293349,#1b2739)}
+body.game-active .topbar{height:100%;align-items:center;gap:5px}
+body.game-active #phaseTag{font-size:12px;padding:5px 10px;border-radius:100px;border-color:#806e5f;background:#352f37;color:#f4dbb4}
+body.game-active #roomInfo{color:#acb8c4;font-size:11px}
+body.game-active #gameScreen>.panel:nth-child(5){grid-row:2;display:flex;flex-direction:column;padding:10px 10px 7px}
+body.game-active #gameScreen>.panel:nth-child(5) h2{display:block;font-size:12px;line-height:1.1;font-weight:700;letter-spacing:.8px;color:var(--mv-gold);margin:0 0 7px}
+body.game-active #feed{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:5px;justify-content:flex-start;max-height:none;padding:0 3px 0 0;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#6b778a transparent}
+body.game-active #feed .entry,body.game-active #gameScreen>.panel:nth-child(5) #feed .entry{display:block!important;flex:none;overflow:visible;white-space:normal;-webkit-line-clamp:unset;font-size:12px;line-height:1.35;color:#cbd3df;padding:6px 9px;border:0;border-left:3px solid #b9a280;background:rgba(108,119,147,.09);border-radius:5px;overflow-wrap:anywhere}
+body.game-active #feed .entry.choice{border-left-color:#7a9bb2;background:rgba(72,118,147,.1)}
+body.game-active #feed .entry:last-child{color:#fff1d8;background:rgba(204,167,116,.13);border-left-color:#edca91}
+body.game-active #gameScreen>.panel:nth-child(2){grid-row:3;display:flex;flex-direction:column;padding:8px 9px}
+body.game-active #gameScreen>.panel:nth-child(2) h2{font-size:12px;line-height:1.2;margin:0 0 6px;color:#e6d2b1}
+body.game-active #countInfo{font-size:10px;color:#9aa5b4;font-weight:400}
+body.game-active #players{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:6px}
+body.game-active #players .player{background:linear-gradient(125deg,rgba(34,47,64,.8),rgba(20,32,46,.9));border:1px solid #394657;border-radius:9px;min-width:0;min-height:0;display:grid;grid-template-columns:26px minmax(0,1fr);grid-template-rows:auto auto;align-content:center;align-items:center;justify-items:stretch;column-gap:5px;row-gap:2px;padding:6px 5px;text-align:left;overflow:hidden}
+body.game-active #players .player.me{border-color:#d4b886;background:linear-gradient(130deg,#3d3540,#273344)}
+body.game-active #players .player.dead{opacity:.54;filter:grayscale(.6)}
+body.game-active #players .avatar{grid-row:1/3;grid-column:1;font-size:23px;line-height:1;justify-self:center}
+body.game-active #players .name{grid-row:1;grid-column:2;min-width:0;margin:0;line-height:1.15;font-size:11px;color:#f0ebea;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.game-active #players .tag{grid-row:2;grid-column:2;min-width:0;width:100%;margin:0;font-size:9px;line-height:1.2;white-space:normal;overflow-wrap:anywhere;color:#aebfcb}
+body.game-active #gameScreen>.panel:nth-child(3){grid-row:4;padding:5px 9px;border-color:rgba(213,177,121,.4);background:linear-gradient(95deg,#3b3040,#292b3a)}
+body.game-active #gameScreen>.panel:nth-child(3) h2{display:none}
+body.game-active #myRole{font-size:11px;line-height:1.3;max-height:none;padding:5px 8px;background:transparent;border:0;color:#eed9bb}
+body.game-active #myRole .small{white-space:normal;overflow-wrap:anywhere;color:#e9c68c;font-size:10px}
+body.game-active #gameScreen>.panel:nth-child(4){grid-row:5;display:flex;flex-direction:column;padding:8px 9px}
+body.game-active #gameScreen>.panel:nth-child(4) h2{font-size:12px;line-height:1.2;color:#efdfc7;margin:0 0 7px}
+body.game-active #actions,body.game-active #actions.targets{display:grid;flex:none;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(42px,auto);gap:7px}
+body.game-active #actions.targets{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.game-active #actions>button{min-height:42px;max-height:none;padding:7px 5px;font-size:12px;line-height:1.2;border-radius:8px;background:linear-gradient(125deg,#394356,#29394b);border:1px solid #627184;color:#f4ede1;font-weight:650}
+body.game-active #actions>button.primary{background:linear-gradient(110deg,#ead1a4,#cda572);color:#262432;border:0}
+body.game-active #actions>button.ghost{background:#222c3c;color:#c7ced9}
+body.game-active #actions>button:active{background:#4d5b70}
+body.game-active #notice{font-size:11px;color:#c7bbaf;line-height:1.3;margin:4px 0 0;max-height:none}
+body.game-active #gameScreen.action-waiting>.panel:nth-child(4) h2{display:block}
+body.game-active #gameScreen.action-waiting #notice{margin:3px 0 0}
+body.game-active #gameScreen.night-tint>.panel:nth-child(1){background:linear-gradient(110deg,#2a2548,#161e36)}
+body.game-active #gameScreen.night-tint>.panel:nth-child(5){border-color:#4f506f}
+body.game-active #gameScreen.day-tint>.panel:nth-child(1){background:linear-gradient(110deg,#3c3439,#263348)}
+.time-scene{position:fixed;inset:0;z-index:85;pointer-events:none;display:grid;place-items:center;background:#090f1b;opacity:0}
+.time-scene.nightfall{animation:night-cut 1.45s ease-in-out both}
+.time-scene.sunrise{animation:dawn-cut 1.55s ease-in-out both}
+.time-scene-sky{position:absolute;inset:0;overflow:hidden;background:linear-gradient(to bottom,#1b2841,#33445d 55%,#131c2b);animation:sky-dark 1.45s ease-in-out both}
+.time-scene.sunrise .time-scene-sky{background:linear-gradient(to bottom,#e3a16f,#eeb78c 43%,#52687d 78%,#192a3a);animation:sky-light 1.55s ease-in-out both}
+.time-scene-stars{position:absolute;inset:0;background:radial-gradient(circle at 13% 21%,#ffffffa8 0 1px,transparent 2px),radial-gradient(circle at 75% 14%,#ffedc5 0 1px,transparent 2px),radial-gradient(circle at 46% 32%,#e9f1ff 0 1px,transparent 2px),radial-gradient(circle at 82% 49%,#fff9eb 0 1px,transparent 2px);opacity:0;animation:stars-out 1.45s ease-in-out both}
+.time-scene.nightfall .time-scene-stars{animation:stars-in 1.45s ease-in-out both}
+.time-scene-moon,.time-scene-sun{position:absolute;left:50%;top:36%;width:110px;height:110px;border-radius:50%;transform:translate(-50%,10vh);opacity:0}
+.time-scene-moon{background:radial-gradient(circle at 33% 30%,#fff9d8,#c9d5d9 83%);box-shadow:0 0 50px #cfdeec65,0 0 130px #8faad941}
+.time-scene-sun{background:radial-gradient(circle at 35% 25%,#fff0bd,#f6b77c 80%);box-shadow:0 0 60px #ffd8a573,0 0 170px #ebb5777b}
+.time-scene.nightfall .time-scene-moon{animation:moon-rise 1.45s ease-out both}
+.time-scene.sunrise .time-scene-sun{animation:sun-rise 1.55s ease-out both}
+.time-scene-horizon{position:absolute;left:-10%;width:120%;bottom:0;height:42%;background:#121d2a;clip-path:polygon(0 47%,7% 54%,16% 42%,24% 53%,34% 26%,45% 49%,52% 44%,65% 22%,75% 48%,88% 37%,100% 56%,100% 100%,0 100%)}
+.time-scene-horizon.layer-back{background:#243549;height:35%;opacity:.9}
+.time-scene-horizon.layer-front{height:23%;background:#0c1723;clip-path:polygon(0 40%,13% 54%,25% 32%,39% 65%,52% 34%,62% 41%,76% 14%,91% 37%,100% 26%,100% 100%,0 100%)}
+.time-scene-copy{position:absolute;top:62%;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:9px;color:#fff6e6;text-shadow:0 2px 16px #0a0e1cd6;animation:scene-text 1.45s ease-in-out both}
+.time-scene-copy>span{font-size:30px}.time-scene-copy strong{font:600 31px Georgia,"Songti SC",serif;letter-spacing:5px}.time-scene-copy small{font-size:12px;letter-spacing:2px;color:#ede1d6}
+@keyframes night-cut{0%{opacity:0}20%{opacity:1}78%{opacity:1}100%{opacity:0}}
+@keyframes dawn-cut{0%{opacity:0}17%{opacity:1}82%{opacity:1}100%{opacity:0}}
+@keyframes moon-rise{0%{opacity:0;transform:translate(-50%,20vh)}45%{opacity:1}100%{opacity:1;transform:translate(-50%,-18vh)}}
+@keyframes sun-rise{0%{opacity:0;transform:translate(-50%,30vh)}40%{opacity:1}100%{opacity:1;transform:translate(-50%,-18vh)}}
+@keyframes sky-dark{0%{filter:brightness(1.6) hue-rotate(-10deg)}100%{filter:brightness(.67)}}
+@keyframes sky-light{0%{filter:brightness(.58)}100%{filter:brightness(1.2)}}
+@keyframes stars-in{0%{opacity:0}85%{opacity:1}100%{opacity:1}}
+@keyframes stars-out{0%{opacity:1}100%{opacity:0}}
+@keyframes scene-text{0%,100%{opacity:0;transform:translateY(15px)}25%,70%{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){
+ body.game-active main{padding:max(3px,env(safe-area-inset-top)) 8px max(6px,env(safe-area-inset-bottom))}
+ body.game-active header{min-height:34px;margin-bottom:5px;padding-bottom:4px}
+ body.game-active header h1{font-size:23px}
+ body.game-active #gameScreen{grid-template-rows:37px minmax(0,1fr) 138px auto auto;gap:5px}
+ body.game-active #gameScreen>.panel:nth-child(1){padding:3px 9px}
+ body.game-active #gameScreen>.panel:nth-child(5){padding:8px 9px 6px}
+ body.game-active #gameScreen>.panel:nth-child(2){padding:6px 8px}
+ body.game-active #gameScreen>.panel:nth-child(3){padding:4px 8px}
+ body.game-active #gameScreen>.panel:nth-child(4){padding:6px 8px}
+ body.game-active #feed .entry,body.game-active #gameScreen>.panel:nth-child(5) #feed .entry{font-size:11px;padding:6px 8px;line-height:1.32}
+ body.game-active #players .player{grid-template-columns:23px minmax(0,1fr);padding:4px;column-gap:3px}
+ body.game-active #players .avatar{font-size:21px}
+ body.game-active #players .name{font-size:10px}
+ body.game-active #players .tag{font-size:9px}
+ body.game-active #actions,body.game-active #actions.targets{grid-auto-rows:minmax(42px,auto);gap:6px}
+ body.game-active #actions>button{min-height:42px;max-height:none}
+}
+@media(max-height:650px){
+ body.game-active header{min-height:30px;margin-bottom:3px}
+ body.game-active #gameScreen{grid-template-rows:33px minmax(0,1fr) 124px auto auto;gap:4px}
+ body.game-active #gameScreen>.panel:nth-child(2) h2{margin-bottom:3px}
+ body.game-active #players .player{padding:2px 3px}
+ body.game-active #players .avatar{font-size:18px}
+ body.game-active #players .tag{font-size:8px}
+ body.game-active #gameScreen>.panel:nth-child(4) h2{margin-bottom:4px}
+}
+@media(max-height:540px){
+ body.game-active #gameScreen{grid-template-rows:30px minmax(0,1fr) 108px auto auto}
+ body.game-active #players .avatar{font-size:17px}
+}
+@media(prefers-reduced-motion:reduce){.time-scene.nightfall,.time-scene.sunrise{animation-duration:.2s}.time-scene *{animation-duration:.2s!important}}
+
 </style>
 </head>
 <body>
@@ -329,7 +440,6 @@ body.game-active #players .tag{
 <section id="gameScreen">
 <div class="panel">
 <div class="topbar"><span class="pill" id="phaseTag">准备开始</span><span id="roomInfo"></span></div>
-<p class="small" id="phaseHelp"></p>
 <div class="btns" id="shareBtns"></div>
 </div>
 <div class="panel"><h2>村庄居民 <span class="small" id="countInfo"></span></h2><div id="players" class="players"></div></div>
@@ -338,6 +448,16 @@ body.game-active #players .tag{
 <div class="panel"><h2>村庄公告</h2><div id="feed" aria-live="polite"></div></div>
 </section>
 <div class="footer">月下疑云 · 原创轻量六人社交推理游戏<br>适合 1–6 名玩家，单人模式由电脑补齐 · 仅供休闲娱乐</div>
+<div id="timeScene" class="time-scene" hidden aria-hidden="true">
+  <div class="time-scene-sky">
+    <div class="time-scene-sun"></div>
+    <div class="time-scene-moon"></div>
+    <div class="time-scene-stars"></div>
+    <div class="time-scene-horizon layer-back"></div>
+    <div class="time-scene-horizon layer-front"></div>
+    <div class="time-scene-copy"><span id="sceneIcon">☾</span><strong id="sceneTitle">夜幕降临</strong><small id="sceneSubtitle">村庄陷入沉睡</small></div>
+  </div>
+</div>
 <div id="roleOverlay" class="role-overlay" hidden role="dialog" aria-modal="true" aria-label="抽取你的身份牌">
   <div class="deal-stage">
     <div class="deal-eyebrow">THE MOON CHOOSES</div>
@@ -365,7 +485,7 @@ var $=function(id){return document.getElementById(id)};
 var roleText={wolf:"狼人 · 夜晚袭击一人",seer:"预言家 · 每晚查验一人",guard:"守卫 · 每晚保护一人",villager:"村民 · 白天找出狼人"};
 var icons=["🧑","👩","🧔","👨","👩‍🦰","🧑‍🦳"];
 var peer=null,conn=null,isHost=false,solo=false,st=null,view=null,room="",myId="",connections=new Map(),speechKind="",busy=false;
-var mark=0, shownIdentityGame=0;
+var mark=0, shownIdentityGame=0, previousScenePhase=null, lastSceneDay=0, pendingScene=null, sceneTimer=null, nightSerial=0;
 var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
 var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 function report(t){$("homeNotice").textContent=t;$("notice").textContent=t}
@@ -436,14 +556,17 @@ function winCheck(){
  if(st.day>12){st.winner="狼人阵营";st.phase="ended";log("月夜持续太久，狼人占据了村庄。");return true}
  return false
 }
-function beginNight(){st.phase="night";st.night={};st.votes={};st.speeches={};log("第 "+st.day+" 夜：等待狼人、预言家和守卫行动。");stepBots()}
+function beginNight(){nightSerial++;st.phase="night";st.nightResolving=false;st.night={};st.votes={};st.speeches={};log("第 "+st.day+" 夜：等待狼人、预言家和守卫行动。");stepBots()}
 function stepBots(){
  if(!st||st.phase==="ended"||st.phase==="lobby")return;
  if(st.phase==="night"){
   live().filter(function(p){return p.bot&&["wolf","seer","guard"].includes(p.role)}).forEach(function(p){
    if(!st.night[p.id])st.night[p.id]=botNight(p);
   });
-  if(live().filter(function(p){return ["wolf","seer","guard"].includes(p.role)}).every(function(p){return !!st.night[p.id]}))finishNight();
+  if(!st.nightResolving&&live().filter(function(p){return ["wolf","seer","guard"].includes(p.role)}).every(function(p){return !!st.night[p.id]})){
+   st.nightResolving=true;var serial=nightSerial;
+   setTimeout(function(){if(st&&st.phase==="night"&&st.nightResolving&&nightSerial===serial){finishNight();broadcast()}},1500);
+  }
  }else if(st.phase==="talk"){
   live().filter(function(p){return p.bot&&!st.speeches[p.id]}).forEach(function(p){botSpeech(p)});
   if(live().every(function(p){return !!st.speeches[p.id]})){st.phase="vote";log("所有人发言完毕，开始投票。");stepBots()}
@@ -533,6 +656,7 @@ function sendAction(action,target,speech){
 }
 function restart(){
  if(!isHost||!st||st.phase!=="ended")return;
+ nightSerial++;
  st.players=st.players.filter(function(p){return !p.bot}).map(function(p){return {id:p.id,name:p.name,bot:false,alive:true,role:null}});
  st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.known={};st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
 }
@@ -553,13 +677,39 @@ function showRoleDeal(v){
   $("roleCard").disabled=false;
   $("drawHint").textContent="轻触中央的牌，揭晓只有你能看见的身份";
 }
+
+function playTimeScene(type){
+ var el=$("timeScene");
+ if(!el)return;
+ if(sceneTimer){clearTimeout(sceneTimer);sceneTimer=null}
+ el.hidden=false;
+ el.className="time-scene "+(type==="night"?"nightfall":"sunrise");
+ $("sceneIcon").textContent=type==="night"?"☾":"☀";
+ $("sceneTitle").textContent=type==="night"?"夜幕降临":"黎明破晓";
+ $("sceneSubtitle").textContent=type==="night"?"村庄陷入沉睡":"新的一天已经开始";
+ /* restart animation if an earlier phase change is still playing */
+ void el.offsetWidth;
+ sceneTimer=setTimeout(function(){el.hidden=true;el.className="time-scene";sceneTimer=null},type==="night"?1450:1550);
+}
+function handleTimeScene(v){
+ var phase=v.phase;
+ if(v.phase==="night"&&previousScenePhase!=="night"){
+  if($("roleOverlay").hidden)playTimeScene("night");else pendingScene="night";
+ }else if(v.phase==="talk"&&previousScenePhase==="night"){
+  if($("roleOverlay").hidden)playTimeScene("day");else pendingScene="day";
+ }
+ previousScenePhase=phase;
+ lastSceneDay=v.day;
+ $("gameScreen").classList.toggle("night-tint",phase==="night");
+ $("gameScreen").classList.toggle("day-tint",phase==="talk"||phase==="vote");
+}
 function render(){
  if(!view)return;
  var v=view;
  showRoleDeal(v);
+ handleTimeScene(v);
  var titles={lobby:"等待入场",night:"🌙 第 "+v.day+" 夜",talk:"☀️ 第 "+v.day+" 天 · 发言",vote:"🗳️ 第 "+v.day+" 天 · 投票",ended:"🏆 游戏结束"};
  $("phaseTag").textContent=titles[v.phase];
- $("phaseHelp").textContent=v.phase==="lobby"?"房主准备后即可开局；不足六人的位置会由电脑补齐。":v.phase==="night"?"夜间行动属于私人信息，不会显示给其他玩家。":v.phase==="talk"?"每人选择一句发言，其他玩家会即时看到。":v.phase==="vote"?"选择一名玩家放逐；每张投票都会同步展示。":"胜利阵营："+v.winner+"。";
  $("roomInfo").textContent=v.solo?"单人练习":v.room?"房间码："+v.room:"";
  $("shareBtns").innerHTML=(!v.solo&&v.room&&v.phase==="lobby")?button("复制邀请链接","copy",null,null,"ghost"):"";
  $("countInfo").textContent=v.players.filter(function(p){return !p.bot}).length+" 位真人 / "+v.players.length+" 位居民";
@@ -699,7 +849,7 @@ document.addEventListener("click",function(e){
  if(action==="musicToggle"){toggleMusic();return;}
  ensureMusic();
  if(action==="flipRole"){if(!$("roleOverlay").classList.contains("revealed")){$("roleOverlay").classList.add("revealed");$("roleContinue").hidden=false;$("roleCard").disabled=true;$("drawHint").textContent="身份已经揭晓，准备进入村庄";}}
- else if(action==="closeRole"){$("roleOverlay").hidden=true;}
+ else if(action==="closeRole"){$("roleOverlay").hidden=true;if(pendingScene){playTimeScene(pendingScene);pendingScene=null;}}
  else if(action==="solo")makeSolo();
  else if(action==="create")makeRoom();
  else if(action==="join")joinRoom();
