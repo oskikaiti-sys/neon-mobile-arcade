@@ -1529,6 +1529,54 @@ translations.en.clockLabel="Time remaining";translations.zh.clockLabel="剩余�
 translations.en.logVoteAbstain="{name} abstained from voting.";translations.zh.logVoteAbstain="{name} 弃权投票。";translations.ja.logVoteAbstain="{name} は投票を棄権しました。";
 translations.en.nightTimeLimit="Each phase lasts up to two minutes.";translations.zh.nightTimeLimit="各行动阶段最长两分钟。";translations.ja.nightTimeLimit="各行動フェーズの制限時間は2分です。";
 
+translations.en.helpButton="How to play and role guide";
+translations.en.helpClose="Close role guide";
+translations.en.helpEyebrow="QUICK START GUIDE";
+translations.en.helpTitle="How to play";
+translations.en.helpIntro="Six players receive one secret role each. The identities stay private until the game ends.";
+translations.en.roleRosterTitle="Roles in this match";
+translations.en.helpWolf="Each night, attack one living player who is not a werewolf. You cannot attack yourself or another werewolf.";
+translations.en.helpSeer="Each night, privately learn whether one other living player is a werewolf. Only you see the result.";
+translations.en.helpGuard="Each night, protect any one living player, including yourself. If the werewolf targets that player, the attack fails.";
+translations.en.helpVillager="You have no night power. Listen to the discussion and help vote out the werewolf.";
+translations.en.helpRoundTitle="How a round works";
+translations.en.helpRoundDetail="At night, the werewolf attacks, the seer investigates and the guardian protects. By day, living players make one public statement and vote to eliminate a suspect. All three night-turn prompts appear even if a role has been eliminated.";
+translations.en.helpWinTitle="Winning and losing";
+translations.en.helpWinDetail="The village wins when the werewolf is eliminated. The werewolf wins when the number of living werewolves equals or exceeds the number of other living players. The werewolf also wins if the game passes day 12.";
+translations.en.helpTimerDetail="Night actions, discussion and voting each have a shared two-minute deadline. Missing a choice means skipping a night power, staying silent or abstaining from voting. If votes tie or nobody votes, no one is eliminated.";
+translations.en.helpDone="Understood";
+translations.zh.helpButton="玩法与身份说明";
+translations.zh.helpClose="关闭身份说明";
+translations.zh.helpEyebrow="新手入门";
+translations.zh.helpTitle="狼人杀怎么玩";
+translations.zh.helpIntro="六名玩家各自获得一个秘密身份，游戏结束前不会公开其他人的职业。";
+translations.zh.roleRosterTitle="本局身份配置";
+translations.zh.helpWolf="每晚袭击一名存活的非狼人玩家。不能攻击自己，也不能攻击其他狼人。";
+translations.zh.helpSeer="每晚查验一名其他存活玩家，私下得知对方是否为狼人。查验结果只有预言家自己能看到。";
+translations.zh.helpGuard="每晚保护一名存活玩家，可以保护自己。如果狼人袭击的目标受到保护，该次袭击无效。";
+translations.zh.helpVillager="夜晚没有特殊技能。白天观察发言，参与讨论，并投票找出狼人。";
+translations.zh.helpRoundTitle="回合流程";
+translations.zh.helpRoundDetail="夜晚由狼人袭击、预言家查验、守卫保护；白天每位存活玩家公开发言一句，然后投票放逐可疑对象。即使某职业已经出局，夜间仍会展示完整的三个行动提示。";
+translations.zh.helpWinTitle="胜负条件";
+translations.zh.helpWinDetail="狼人被淘汰时，好人阵营获胜。存活狼人数不少于其他存活玩家时，狼人获胜。如果游戏超过第 12 天，狼人也获胜。";
+translations.zh.helpTimerDetail="夜间、发言、投票三个阶段各共用两分钟期限。未提交即视为当夜不行动、发言暂不表态或投票弃权。票数并列或无人投票时，当天无人被放逐。";
+translations.zh.helpDone="明白了";
+translations.ja.helpButton="遊び方と役職の説明";
+translations.ja.helpClose="役職ガイドを閉じる";
+translations.ja.helpEyebrow="はじめての方へ";
+translations.ja.helpTitle="遊び方";
+translations.ja.helpIntro="6人に秘密の役職が1つずつ配られます。ゲーム終了までほかの人の役職は公開されません。";
+translations.ja.roleRosterTitle="今回の役職構成";
+translations.ja.helpWolf="毎晩、生存中の人狼以外のプレイヤーを1人襲撃します。自分やほかの人狼は襲撃できません。";
+translations.ja.helpSeer="毎晩、自分以外の生存者を1人占い、人狼かどうかを自分だけが確認できます。";
+translations.ja.helpGuard="毎晩、生存者を1人守ります。自分を守ることもできます。襲撃対象を守ると、その襲撃は失敗します。";
+translations.ja.helpVillager="夜の能力はありません。昼の発言を参考にして、人狼と思う相手に投票します。";
+translations.ja.helpRoundTitle="1日の流れ";
+translations.ja.helpRoundDetail="夜は人狼の襲撃・占い師の調査・騎士の護衛、昼は生存者全員の発言と追放投票を行います。役職が脱落していても、夜の3つの案内は必ず表示されます。";
+translations.ja.helpWinTitle="勝利条件";
+translations.ja.helpWinDetail="人狼を追放すると村人陣営の勝利。生存中の人狼の数がほかの生存者以上になると人狼の勝利です。12日目を超えても人狼の勝利になります。";
+translations.ja.helpTimerDetail="夜の行動、昼の発言、投票にはそれぞれ共通の2分間の制限時間があります。未回答は能力を使わない・発言を控える・投票を棄権する扱いです。同数票や投票なしの場合は誰も追放されません。";
+translations.ja.helpDone="わかりました";
 var selectedLanguage="en";
 translations.en.languageAria="Language";translations.zh.languageAria="语言";translations.ja.languageAria="言語";
 function tr(key,values){
@@ -1565,6 +1613,10 @@ function applyStaticLanguage(){
  $("roleCard").setAttribute("aria-label",tr("drawAria"));
  updateMusicButton();
  updateSettingsUI();
+ $("helpToggle").setAttribute("aria-label",tr("helpButton"));
+ $("helpToggle").setAttribute("title",tr("helpButton"));
+ $("helpOverlay").querySelector(".rules-close").setAttribute("aria-label",tr("helpClose"));
+ $("roleOverlay").querySelector(".deal-guide").setAttribute("aria-label",tr("helpButton"));
  localAvatarPreview();
 }
 function setLanguage(next){
@@ -2542,12 +2594,26 @@ function toggleMusic(){
 /* Preload tiny sound assets before a user touches a button. */
 prepareSfx();
 
+var helpReturnFocus=null;
+function openRoleGuide(trigger){
+ helpReturnFocus=trigger||document.activeElement||null;
+ $("helpOverlay").hidden=false;
+ var exit=$("helpOverlay").querySelector(".rules-close");
+ if(exit&&exit.focus)exit.focus();
+}
+function closeRoleGuide(){
+ $("helpOverlay").hidden=true;
+ if(helpReturnFocus&&helpReturnFocus.focus)helpReturnFocus.focus();
+ helpReturnFocus=null;
+}
 document.addEventListener("click",function(e){
  var resident=e.target.closest("[data-rpg-target]");
  if(resident){rpgSelectTarget(resident.getAttribute("data-rpg-target"));return}
  var b=e.target.closest("button[data-do]");if(!b)return;
  if(b.classList){b.classList.add("is-activated");}
  var action=b.dataset.do,target=b.dataset.target||null,speech=b.dataset.speech||null;
+ if(action==="openHelp"){playSfx("cursor");openRoleGuide(b);return;}
+ if(action==="closeHelp"){playSfx("cancel");closeRoleGuide();return;}
  if(action==="skipSpeech"){playSfx("cursor");stageFinishSpeech();return;}
  if(action==="openSettings"){$("settingsOverlay").hidden=false;updateSettingsUI();return;}
  if(action==="closeSettings"){$("settingsOverlay").hidden=true;return;}
@@ -2580,6 +2646,18 @@ document.addEventListener("click",function(e){
 });
 
 document.addEventListener("keydown",function(e){
+ if(!$("helpOverlay").hidden){
+  if(e.key==="Escape"){e.preventDefault();closeRoleGuide()}
+  else if(e.key==="Tab"){
+   var focusables=Array.from($("helpOverlay").querySelectorAll("button:not([disabled])"));
+   if(focusables.length){
+    var first=focusables[0],last=focusables[focusables.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+   }
+  }
+  return;
+ }
  if(!view||view.phase!=="talk"||!view.myAlive||view.submitted||!$("roleOverlay").hidden)return;
  if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||""))return;
  if(speechKind){
