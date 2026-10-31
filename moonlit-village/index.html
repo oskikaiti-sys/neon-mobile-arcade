@@ -1460,6 +1460,24 @@ body.game-active #players .player .reveal-role-tag.is-wolf{color:#ffa6ad}
  .endgame-person-name{font-size:12px}
  .endgame-person-role{font-size:11px}}
 
+
+/* Role notebook remains private to the seer's own client and roster snapshots. */
+.seer-notes-list{display:flex;flex-direction:column;gap:7px}
+.seer-note-row{display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:10px 9px;border:1px solid rgba(232,200,114,.25);
+ border-radius:7px;background:rgba(20,28,58,.5);font-size:13px;line-height:1.4}
+.seer-note-row .seer-note-name{min-width:0;flex:1;overflow-wrap:anywhere}
+.seer-note-row .seer-note-role{flex:none;color:var(--gold);font-weight:700}
+.seer-note-row .seer-note-night{font-size:10px;color:var(--muted)}
+.seer-note-row.is-wolf{border-color:rgba(225,112,120,.6)}
+.seer-note-row.is-wolf .seer-note-role{color:#ffa6ad}
+.seer-notes-empty{padding:22px 10px;text-align:center;color:var(--muted);font-size:13px}
+body.game-active .seer-notes-button{min-height:30px!important;
+ padding:5px 9px!important;border:1px solid rgba(232,200,114,.5);
+ border-radius:7px;background:rgba(232,200,114,.1);
+ color:var(--gold);font-size:11px;font-weight:700;cursor:pointer}
+body.game-active .endgame-panel .face-frame .face-image{object-fit:cover}
+
 </style>
 </head>
 <body>
@@ -1579,6 +1597,14 @@ body.game-active #players .player .reveal-role-tag.is-wolf{color:#ffa6ad}
   <p class="rules-detail" data-i18n="helpWinDetail">The village wins when the werewolf is eliminated. The werewolf wins if living werewolves equal or outnumber living villagers. In this short game, surviving past day 12 also gives the werewolf victory.</p>
   <p class="rules-note" data-i18n="helpTimerDetail">Night, discussion and voting each have a two-minute limit. No action means you skip the ability, pass your speech or abstain from voting. Tied votes eliminate nobody.</p>
   <button type="button" data-do="closeHelp" class="rules-done" data-i18n="helpDone">Understood</button>
+ </div>
+</div>
+<div id="seerNotesOverlay" class="endgame-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="seerNotesTitle">
+ <div class="endgame-panel panel">
+  <div class="endgame-head"><div><div class="endgame-eyebrow" data-i18n="seerNotesEyebrow">PRIVATE SEER NOTES</div><h2 id="seerNotesTitle" data-i18n="seerNotesTitle">Inspected identities</h2></div><button type="button" data-do="closeSeerNotes" class="endgame-close seer-notes-close" aria-label="Close inspected identities">×</button></div>
+  <p class="endgame-explainer" data-i18n="seerNotesIntro">Only you can see the exact roles of people you inspected.</p>
+  <div id="seerNotesList" class="seer-notes-list" role="list"></div>
+  <button type="button" data-do="closeSeerNotes" class="endgame-done" data-i18n="seerNotesDone">Back to game</button>
  </div>
 </div>
 <div id="endgameOverlay" class="endgame-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="endgameRevealTitle">
