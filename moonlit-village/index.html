@@ -1678,6 +1678,8 @@ body.game-active #actions.rpg-target-menu>button.rpg-selected{border-color:var(-
   </div>
   <div class="rules-section-title" data-i18n="helpRoundTitle">Round flow</div>
   <p class="rules-detail" data-i18n="helpRoundDetail">Night: the werewolf attacks, the seer investigates and the guardian protects. Day: everyone gives a statement, then votes to eliminate a suspect. The three night prompts still appear even if a role has been eliminated.</p>
+  <div class="rules-section-title" data-i18n="helpSpeechTitle">Public claims and bluffs</div>
+  <p class="rules-detail" data-i18n="helpSpeechDetail">Anyone can bluff a role. Clears and accusations are claims until corroborated; use public votes and contradictions.</p>
   <div class="rules-section-title" data-i18n="helpWinTitle">How to win</div>
   <p class="rules-detail" data-i18n="helpWinDetail">The village wins when the werewolf is eliminated. The werewolf wins if living werewolves equal or outnumber living villagers. In this short game, surviving past day 12 also gives the werewolf victory.</p>
   <p class="rules-note" data-i18n="helpTimerDetail">Night, discussion and voting each have a two-minute limit. No action means you skip the ability, pass your speech or abstain from voting. Tied votes eliminate nobody.</p>
@@ -1787,6 +1789,8 @@ translations.en.helpRoundDetail="At night, the werewolf attacks, the seer invest
 translations.en.helpWinTitle="Winning and losing";
 translations.en.helpWinDetail="The village wins when the werewolf is eliminated. The werewolf wins when the number of living werewolves equals or exceeds the number of other living players. The werewolf also wins if the game passes day 12.";
 translations.en.helpTimerDetail="Multiplayer: werewolf, seer and guardian turns each last exactly 10 seconds for AI and human players, even when a choice is made early or the role has been eliminated. No choice by the cutoff means skipping the action. Discussion and voting still have two minutes each. Solo: your night choices are unlimited; the other role turns take two seconds each. Ties and no votes eliminate nobody.";
+translations.en.helpSpeechTitle="Claims, clears, and accusations";
+translations.en.helpSpeechDetail="Any player can claim Seer or Guardian, even falsely. A clear (金水) is a claimed innocent inspection, while an accusation (查杀) is a claimed werewolf result. These public statements are not automatically true. Compare public ballots, claims and contradictions. Only the real Seer privately sees confirmed inspections.";
 translations.en.helpDone="Understood";
 translations.zh.helpButton="玩法与身份说明";
 translations.zh.helpClose="关闭身份说明";
@@ -1803,6 +1807,8 @@ translations.zh.helpRoundDetail="夜晚由狼人袭击、预言家查验、守�
 translations.zh.helpWinTitle="胜负条件";
 translations.zh.helpWinDetail="狼人被淘汰时，好人阵营获胜。存活狼人数不少于其他存活玩家时，狼人获胜。如果游戏超过第 12 天，狼人也获胜。";
 translations.zh.helpTimerDetail="多人游戏：狼人、预言家、守卫每个轮次均固定10秒，真人、AI、已出局身份都一样；提前提交也要等满10秒，超时未选择视为放弃行动。白天发言和投票仍分别限时2分钟。单人游戏：自己行动不限时，其他身份轮次各等待2秒。票数并列或无人投票时无人出局。";
+translations.zh.helpSpeechTitle="跳身份、金水和查杀";
+translations.zh.helpSpeechDetail="「跳身份」指公开自称某个职业，未必是真话。「金水」是有人自称预言家并报查验好人，「查杀」是声称查验到狼人。所有人都能诈身份或说谎。结合发言、公开票型和矛盾判断真假；只有真正的预言家能在夜间获得系统确认的身份。";
 translations.zh.helpDone="明白了";
 translations.ja.helpButton="遊び方と役職の説明";
 translations.ja.helpClose="役職ガイドを閉じる";
@@ -1819,6 +1825,8 @@ translations.ja.helpRoundDetail="夜は人狼の襲撃・占い師の調査・�
 translations.ja.helpWinTitle="勝利条件";
 translations.ja.helpWinDetail="人狼を追放すると村人陣営の勝利。生存中の人狼の数がほかの生存者以上になると人狼の勝利です。12日目を超えても人狼の勝利になります。";
 translations.ja.helpTimerDetail="複数人プレイ：人狼・占い師・騎士のターンはAI・人間・脱落した役職を問わず必ず各10秒間です。早めに確定しても残り時間を待ち、未選択は行動なしとなります。昼の発言と投票はそれぞれ2分制限です。ソロ：自分の選択は無制限、ほかの役職は各2秒間です。同数票や投票なしでは誰も追放されません。";
+translations.ja.helpSpeechTitle="役職CO・白判定・黒判定";
+translations.ja.helpSpeechDetail="役職COは役職を公開して名乗る行為で、嘘でも可能です。白判定は人狼ではない、黒判定は人狼だったという本人の主張です。公開発言、投票履歴、矛盾を比較しましょう。本物の占い師だけが夜に確認した役職を見られます。";
 translations.ja.helpDone="わかりました";
 translations.en.revealEyebrow="THE FINAL REVEAL";
 translations.en.revealTitle="All identities revealed";
@@ -2243,6 +2251,14 @@ var SPEECH_GROUPS={
 };
 var SPEECH_LINES={
  zh:{
+ suspectNoEvidence:"我暂时关注{name}，因为还没听到足够的公开解释。没有查验或票型证据，不能直接判定是狼人。",
+ trustNoEvidence:"目前还没有针对{name}的明确公开指控，我愿意暂时留出信任空间，但不等于确认身份。",
+ suspectRoleClaim:"{name}刚公开自称{role}，我仍怀疑其说法，因为尚缺乏可供核对的查验或票型依据。",
+ trustRoleClaim:"{name}刚自称{role}，我愿意听其后续说明，但身份宣称本身不能证明真假。",
+ suspectReaction:"{name}刚才的发言涉及{related}。我想知道这个判断基于什么，暂时不能直接采信。",
+ trustReaction:"{name}刚才提到了{related}，至少给出了可以核对的对象，我会暂时参考这条发言。",
+ suspectStatement:"{name}已经发表了意见，但理由还不够明确，我想继续追问，不能把猜测当作查杀。",
+ trustStatement:"{name}愿意公开表达看法，我会暂时听其后续解释。这只是倾向，不是金水。",
  suspect:"我暂时怀疑{name}，但这是基于发言和态度的推测，不是查杀。我希望对方解释立场。",
  trust:"我目前更愿意相信{name}，只是暂时站边，并没有查验结果能直接证明。",
  clue:"我手里没有确定的夜间查验信息。真正能分析的是公开发言、跳身份和投票记录。",
@@ -2265,6 +2281,14 @@ var SPEECH_LINES={
  defendNone:"有人怀疑我可以提出依据，我会回应。但现阶段别把没有来源的猜测说成已经查验过。"
  },
  en:{
+ suspectNoEvidence:"I'm watching {name} because we haven't heard enough to judge yet. There's no confirmed check or voting evidence.",
+ trustNoEvidence:"There is no concrete public accusation against {name} so far, so I'll give them some benefit of the doubt; their role remains unverified.",
+ suspectRoleClaim:"{name} claimed {role}. I'm skeptical until that claim is supported by a consistent report or publicly verifiable evidence.",
+ trustRoleClaim:"{name} publicly claimed {role}. I'll hear more, but a claim by itself cannot establish the truth.",
+ suspectReaction:"{name} previously mentioned {related}. I want to know the basis of that judgment before relying on it.",
+ trustReaction:"{name} mentioned {related}, giving us something concrete to examine. I'll tentatively consider that argument.",
+ suspectStatement:"{name} already spoke, but I still haven't heard a clear public reason for their position.",
+ trustStatement:"{name} has openly stated a position. I'm inclined to hear more, but this is not a verified Seer clear.",
  suspect:"I tentatively suspect {name}, based on how the conversation feels, not a confirmed inspection. I'd like them to explain their position.",
  trust:"For now I lean toward trusting {name}, but this is only a read, not a verified inspection.",
  clue:"I have no verified private information to share. Our actual clues are public statements, role claims, and voting records.",
@@ -2287,6 +2311,14 @@ var SPEECH_LINES={
  defendNone:"I'm willing to answer questions. But a suspicion without a source is not an inspection result."
  },
  ja:{
+ suspectNoEvidence:"{name}の説明はまだ少ないので様子を見ています。占いや票型による確証はありません。",
+ trustNoEvidence:"{name}への具体的な公開告発がないので、今は暫定的に信頼しますが役職は未確認です。",
+ suspectRoleClaim:"{name}は{role}とCOしましたが、公開情報での裏付けが足りないと思います。",
+ trustRoleClaim:"{name}は{role}と名乗りました。後の説明を聞きますが、CO自体は証明になりません。",
+ suspectReaction:"{name}は先ほど{related}に言及しました。その判断の根拠を確認したいです。",
+ trustReaction:"{name}は{related}に言及しました。確認できる話題なので暫定的に参考にします。",
+ suspectStatement:"{name}は発言済みですが、まだ根拠が明確ではありません。",
+ trustStatement:"{name}は意見を公開しました。引き続き聞きますが、占いによる白判定ではありません。",
  suspect:"私は今のところ{name}を疑っています。ただし発言からの推測であり、占い結果ではありません。理由を聞きたいです。",
  trust:"今は{name}を少し信じています。ただし暫定的な判断で、占いで確認したわけではありません。",
  clue:"確定した夜の情報はありません。公開発言、役職宣言、投票記録なら検討できます。",
@@ -2342,6 +2374,18 @@ function speechRecord(p,kind,target){
   var vote=lastVote(votes,target.id),voted=vote&&person(vote.targetId);
   if(voted){data.related=voted.name;data.day=vote.day}
  }
+ if(kind==="suspect"||kind==="trust"){
+  /* A cautious judgment is grounded in this person's actual prior speech,
+     or explicitly acknowledges that no public evidence exists yet. */
+  var previous=history.slice().reverse().find(function(h){return h.id===target.id});
+  if(!previous)data.kind=kind+"NoEvidence";
+  else if(roleClaim(previous.kind)){data.kind=kind+"RoleClaim";data.claim=roleClaim(previous.kind)}
+  else if(previous.targetId){
+   var related=person(previous.targetId);
+   if(related){data.kind=kind+"Reaction";data.related=related.name}
+   else data.kind=kind+"Statement";
+  }else data.kind=kind+"Statement";
+ }
  if(kind==="challengeClaim"){var c=lastClaim(history,target.id,false);if(c)data.claim=roleClaim(c.kind)}
  if(kind==="analyseVotes"){
   var last=votes[votes.length-1],first=last&&last.votes.find(function(v){return v.targetId&&v.targetId!=="__abstain__"});
@@ -2381,9 +2425,17 @@ function botSpeech(p){
  var voteTarget=people.find(function(q){return lastVote(votes,q.id)});
  var kind="suspect",target=people[Math.floor(Math.random()*people.length)],roll=Math.random();
  if(p.role==="seer"&&known&&roll<.70){kind=known.evil?"black":"gold";target=person(known.id)}
- else if(p.role==="wolf"&&!hasClaim&&roll<.16){kind="gold";target=people.find(function(q){return q.role!=="wolf"})||target}
- else if(p.role==="guard"&&!hasClaim&&roll<.11){kind="claimGuard";target=null}
- else if(p.role==="villager"&&!hasClaim&&roll<.1){kind=Math.random()<.4?"claimSeer":"claimVillager";target=null}
+ else if(p.role==="wolf"&&!hasClaim&&roll<.07){
+  kind="gold";target=people.find(function(q){return q.role!=="wolf"})||target;
+ }else if(!hasClaim&&roll<.22){
+  /* Anyone can bluff. Once they have claimed a role, avoid random
+     identity-switching across successive days. */
+  var claims={wolf:["claimSeer","claimGuard","claimVillager"],
+   seer:["claimSeer","claimVillager"],guard:["claimGuard","claimVillager","claimSeer"],
+   villager:["claimVillager","claimSeer","claimGuard"]};
+  var options=claims[p.role]||claims.villager;
+  kind=options[Math.floor(Math.random()*options.length)];target=null;
+ }
  else if(seerClaim&&roll<.42){kind=Math.random()<.5?"challengeClaim":"followSeer";target=person(seerClaim.id)}
  else if(claimant&&roll<.58){kind="challengeClaim";target=claimant}
  else if(voteTarget&&roll<.7){kind=Math.random()<.55?"suspectVote":"trustVote";target=voteTarget}
