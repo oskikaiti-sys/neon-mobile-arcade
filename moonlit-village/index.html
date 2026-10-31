@@ -2931,9 +2931,12 @@ function aiSuspicion(observer,target){
    counts and outcomes, self role, and the observer's legal Seer checks.
    Exact enumeration is capped; larger boards fall back to ordinary evidence
    scores rather than using biased partial worlds or freezing the UI. */
-/* Public silence is not certain death. A true Seer could have inspected
-   the night victim, died before speaking or chosen to stay hidden. These
-   probabilities use public survival history and public bot status only. */
+/* Public silence is not proof that the Seer has died. A Seer killed
+   before the first discussion had no chance to speak; a human may
+   independently choose to hide. An inspected night victim is already
+   publicly confirmed good, but is NOT a justification for a live bot
+   Seer to miss its first-day claim on this small board.
+   Do not inspect anyone else's hidden role when computing likelihood. */
 function aiSeerSilencePenalty(actor,history,reveals,setup){
  if(!actor||!setup||!setup.seer)return 0;
  var claims=history.filter(function(h){return h.id===actor.id&&!h.retracted&&roleClaim(h.kind)==="seer"});
@@ -2943,7 +2946,13 @@ function aiSeerSilencePenalty(actor,history,reveals,setup){
  for(var d=1;d<=Math.min(st.day,3);d++){
   if(exit&&(exit.day<d||(exit.day===d&&exit.source==="night")))continue;
   if(earliest===null)earliest=d;
-  if(d<first&&d<st.day)score+=actor.bot?-.95:-.32;
+  if(d<first&&d<st.day){
+   /* A living bot Seer on this six-seat board is now programmed to
+      claim on its first discussion even if its check target died.
+      Human Seers can still choose a different strategy. */
+   var botExpectedToClaim=actor.bot&&setup.seats<=6&&setup.seer===1;
+   score+=botExpectedToClaim?-1.75:actor.bot?-.95:-.32;
+  }
  }
  if(first>=3&&first!==Infinity&&earliest===1&&st.day>=3)score-=.65;
  return score;
@@ -3631,7 +3640,7 @@ function aiSeerSpeechPlan(p){
  var wolves=Math.max(0,setup.wolf-wolvesOut);
  var urgency=alive<=2*wolves+2;
  var ready=checks.length>=2;
- var isSmall=setup.seats<=6;
+ var isSmall=setup.seats<=6&&setup.seer===1;
  var midgame=alive<=Math.max(4,Math.floor(setup.seats*.65));
  /* Guardian presence improves expected survivability, but never proves
     they are still alive. This flag only informs the disclosure choice. */
@@ -3641,6 +3650,12 @@ function aiSeerSpeechPlan(p){
   return {kind:"gold",targetId:clear.id,reason:"strategic-clear-disclosure"};
  if(rival&&!existing)
   return {kind:"claimSeer",targetId:null,reason:"counter-seer"};
+ /* If the only inspected player was killed overnight, everyone already
+    knows their good alignment. The inspection is redundant, but the
+    living Seer should still claim under the six-seat policy; otherwise
+    the AI's random silence spoils later inferences about a dead Seer. */
+ if(!existing&&isSmall&&st.day>=1)
+  return {kind:"claimSeer",targetId:null,reason:"first-day-seer-claim-no-live-check"};
  if(!existing&&urgency&&checks.length)
   return {kind:"claimSeer",targetId:null,reason:"parity-risk-disclosure"};
  return null;
