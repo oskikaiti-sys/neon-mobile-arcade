@@ -1647,6 +1647,18 @@ body.game-active .evidence-entry{border:1px solid rgba(232,200,114,.24);
  font-size:12px;line-height:1.55;overflow-wrap:anywhere}
 body.game-active .evidence-day{display:block;color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.6px}
 body.game-active .evidence-empty{font-size:12px;color:var(--muted);padding:20px 5px;text-align:center}
+/* Night targets are upper portrait cards; the lower panel confirms only. */
+body.game-active #gameScreen>.game-actions #actions.night-confirmation{
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+ grid-auto-rows:max-content!important;overflow:visible!important;padding:2px 0 4px!important;
+}
+body.game-active #gameScreen>.game-actions #actions.night-confirmation>button{
+ min-height:52px!important;height:auto!important;max-height:none!important;
+ padding:9px!important;justify-content:center!important;
+}
+body.game-active #actions.night-confirmation>button .action-desc,
+body.game-active #actions.night-confirmation>button .action-chevron{display:none!important}
+body.game-active #actions.night-confirmation>button:disabled{opacity:.42;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -1896,6 +1908,9 @@ translations.en.debateAdmit="Acknowledge a mistake";translations.zh.debateAdmit=
 translations.en.debateAvoid="Decline to answer";translations.zh.debateAvoid="暂不回应";translations.ja.debateAvoid="回答を控える";
 translations.en.speechChooseTarget="Choose a person · {kind}";translations.zh.speechChooseTarget="选择发言对象 · {kind}";translations.ja.speechChooseTarget="対象を選ぶ · {kind}";
 translations.en.speechPickCard="Tap a resident card above to select who to {kind}.";translations.zh.speechPickCard="点击上方角色卡，选择「{kind}」的对象。";translations.ja.speechPickCard="上の人物カードから「{kind}」の対象を選んでください。";
+translations.en.nightCardPick="Tap an upper resident card to choose who to {action}.";translations.zh.nightCardPick="点击上方角色卡，选择要{action}的对象。";translations.ja.nightCardPick="上の人物カードで{action}の対象を選んでください。";
+translations.en.nightCardConfirm="Confirm {action} on {name}?";translations.zh.nightCardConfirm="确定对{name}发动「{action}」吗？";translations.ja.nightCardConfirm="{name}に「{action}」を使用しますか？";
+translations.en.nightCardHint="Select a resident card above, then confirm below.";translations.zh.nightCardHint="点击上方角色卡，再点击下方确认。";translations.ja.nightCardHint="上の人物カードを選んでから下で確定してください。";
 translations.en.speechConfirmCard="Confirm “{kind}” about {name}?";translations.zh.speechConfirmCard="确定选择{name}并发表「{kind}」吗？";translations.ja.speechConfirmCard="{name}に対して「{kind}」と発言しますか？";
 translations.en.speechPickCardHint="Tap a selectable portrait above. Nothing is sent before confirmation.";translations.zh.speechPickCardHint="点击上方可选的角色卡，确认前不会发送发言。";translations.ja.speechPickCardHint="上のカードから選択してください。確認するまで送信されません。";
 translations.en.speechMenuHelp="Choose a speaking strategy. Role claims and inspection reports can be bluffs.";translations.zh.speechMenuHelp="选择发言方向。跳身份、金水与查杀都只是个人公开宣称，可能是假话。";translations.ja.speechMenuHelp="発言内容を選びます。COや占い結果は嘘の可能性があります。";
@@ -2167,7 +2182,7 @@ function readyRole(){
  else if(conn&&conn.open)conn.send({type:"roleReady",gameNo:view.gameNo});
 }
 
-var speechGroup="",debateKind="",rpgSpeechTarget=null,rpgMenuIndex=0,rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
+var speechGroup="",debateKind="",rpgSpeechTarget=null,rpgMenuIndex=0,nightTargetId=null,nightSelectionKey="",rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
 var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
 var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 
@@ -3592,9 +3607,29 @@ function updateDebateTargetPrompt(v){
  var submit=$("actions").querySelector('[data-do="confirmChallenge"]');
  if(submit){submit.disabled=!target;submit.setAttribute("aria-disabled",target?"false":"true")}
 }
+function nightTurnEditable(v){
+ return !!v&&v.phase==="night"&&v.myAlive&&!v.submitted&&
+ ["wolf","seer","guard"].includes(v.myRole)&&NIGHT_ROLES[v.nightStage]===v.myRole;
+}
+function nightSelectablePlayers(v){
+ return nightTurnEditable(v)?v.players.filter(function(p){
+  return p.alive&&(v.myRole==="guard"||p.id!==v.me);
+ }):[];
+}
+function updateNightTargetPrompt(v){
+ if(!nightTurnEditable(v))return;
+ var ability=tr({wolf:"attack",seer:"inspect",guard:"protect"}[v.myRole]);
+ var target=nightSelectablePlayers(v).find(function(p){return p.id===nightTargetId});
+ $("actionTitle").textContent=target
+  ?tr("nightCardConfirm",{action:ability,name:displayName(target.name)})
+  :tr("nightCardPick",{action:ability});
+ $("notice").textContent=target?"":tr("nightCardHint");
+ var confirm=$("actions").querySelector('[data-do="confirmNight"]');
+ if(confirm){confirm.disabled=!target;confirm.setAttribute("aria-disabled",target?"false":"true")}
+}
 function rpgTargets(v){return debateKind&&v.phase==="debate"?eligibleDebateTargets(v):speechKind&&SPEECH_OPTIONS[speechKind]?eligibleSpeechTargets(v,speechKind):v.players.filter(function(p){return p.alive&&p.id!==v.me})}
 function rpgHighlightTargets(){
- var selected=rpgSpeechTarget;
+ var selected=view&&view.phase==="night"?nightTargetId:rpgSpeechTarget;
  $("players").querySelectorAll("[data-rpg-target]").forEach(function(tile){
   var chosen=tile.getAttribute("data-rpg-target")===selected;
   tile.classList.toggle("rpg-selected",chosen);
@@ -3614,6 +3649,10 @@ function updateSpeechTargetPrompt(v){
 }
 function rpgSelectTarget(id){
  if(!view||view.submitted)return;
+ if(nightTurnEditable(view)){
+  if(!nightSelectablePlayers(view).some(function(p){return p.id===id}))return;
+  nightTargetId=id;rpgHighlightTargets();updateNightTargetPrompt(view);playSfx("cursor");return;
+ }
  if(view.phase==="debate"&&debateKind&&view.debateStage==="challenge"){
   if(!eligibleDebateTargets(view).some(function(p){return p.id===id}))return;
   rpgSpeechTarget=id;rpgHighlightTargets();updateDebateTargetPrompt(view);playSfx("cursor");return;
@@ -3883,6 +3922,9 @@ function render(){
  $("countInfo").textContent=tr("playersCount",{humans:v.players.filter(function(p){return !p.bot}).length,total:v.players.length});
  var currentSpeaker=stageCurrent&&stageCurrent.kind==="choice"?String(stageCurrent.text).match(/^(.+?)：「/):null;
  var lastSpeaker=currentSpeaker&&currentSpeaker[1];
+ /* Each new game, night or acting role starts with no chosen target. */
+ var nightKey=nightTurnEditable(v)?v.gameNo+":"+v.day+":"+v.nightStage+":"+v.myRole:"";
+ if(nightKey!==nightSelectionKey){nightSelectionKey=nightKey;nightTargetId=null}
  var playerTiles=v.players.map(function(p,i){
   var speaking=lastSpeaker===p.name;
   var skillHit=privateNightFx&&privateNightFx.until>Date.now()&&privateNightFx.targetId===p.id;
@@ -3904,8 +3946,10 @@ function render(){
  });
  $("leftPlayers").innerHTML=playerTiles.slice(0,3).join("");
  $("rightPlayers").innerHTML=playerTiles.slice(3,6).join("");
- if(((v.phase==="talk"&&speechKind)||(v.phase==="debate"&&v.debateStage==="challenge"&&debateKind))&&v.myAlive&&!v.submitted){
-  var available=v.phase==="debate"?eligibleDebateTargets(v):eligibleSpeechTargets(v,speechKind);
+ if(nightTurnEditable(v)||(((v.phase==="talk"&&speechKind)||
+  (v.phase==="debate"&&v.debateStage==="challenge"&&debateKind))&&v.myAlive&&!v.submitted)){
+  var available=v.phase==="night"?nightSelectablePlayers(v):
+   v.phase==="debate"?eligibleDebateTargets(v):eligibleSpeechTargets(v,speechKind);
   if(!available.some(function(p){return p.id===rpgSpeechTarget}))rpgSpeechTarget=null;
   $("players").querySelectorAll(".player").forEach(function(tile,i){
    var p=v.players[i];
@@ -3941,8 +3985,9 @@ function render(){
   else if(v.submitted)notice=tr("nightSubmitted");
    else if(NIGHT_ROLES[v.nightStage]!==v.myRole)notice=tr("nightWaitYourTurn");
   else {
-   var r=tr({wolf:"attack",seer:"inspect",guard:"protect"}[v.myRole]);
-   a=v.players.filter(function(p){return p.alive&&(v.myRole==="guard"||p.id!==v.me)}).map(function(p){return modernTarget(p,r+" · "+tr("nightTarget"),"night","night")}).join("");
+   title=tr("nightCardPick",{action:tr({wolf:"attack",seer:"inspect",guard:"protect"}[v.myRole])});
+   notice=tr("nightCardHint");
+   a=modernAction(tr("confirmTarget"),"confirmNight",null,null,"confirm",tr("confirmDesc"));
   }
  }else if(v.phase==="talk"){
   title=tr("actionTalk");
@@ -4008,8 +4053,9 @@ function render(){
   else notice=tr("waitHostAgain");
  }
  $("actionTitle").textContent=title;
- $("actions").className="actions"+((v.phase==="night"||v.phase==="vote")?" targets":"")
-  +((v.phase==="talk"&&speechKind)||(v.phase==="debate"&&debateKind)?" speech-confirmation":"");
+ $("actions").className="actions"+(v.phase==="vote"?" targets":"")
+  +((v.phase==="talk"&&speechKind)||(v.phase==="debate"&&debateKind)?" speech-confirmation":"")
+  +(nightTurnEditable(v)?" night-confirmation":"");
  $("actions").innerHTML=a;
  if(v.phase==="talk"&&speechKind){rpgHighlightTargets();updateSpeechTargetPrompt(v)}
  if(v.phase==="debate"&&debateKind){rpgHighlightTargets();updateDebateTargetPrompt(v)}
@@ -4021,6 +4067,7 @@ function render(){
  $("notice").textContent=notice;
  if(v.phase==="debate"&&debateKind)updateDebateTargetPrompt(v);
  else if(v.phase==="talk"&&speechKind)updateSpeechTargetPrompt(v);
+ else if(nightTurnEditable(v))updateNightTargetPrompt(v);
  $("gameScreen").classList.toggle("action-waiting",!a);
  $("gameScreen").classList.toggle("is-lobby",v.phase==="lobby");
  notifyGameSounds(v);
@@ -4274,6 +4321,10 @@ document.addEventListener("click",function(e){
   var link=new URL(location.href);link.searchParams.set("room",room);
   navigator.clipboard.writeText(link.toString()).then(function(){$("notice").textContent=tr("copySuccess",{code:room})}).catch(function(){$("notice").textContent=tr("copyFail",{code:room})});
  }else if(action==="night")sendAction("night",target,null);
+ else if(action==="confirmNight"){
+  if(view&&nightTurnEditable(view)&&nightSelectablePlayers(view).some(function(p){return p.id===nightTargetId}))
+   sendAction("night",nightTargetId,null);
+ }
  else if(action==="vote")sendAction("vote",target,null);
  else if(action==="debatePick"){if(view&&view.phase==="debate"&&view.debateStage==="challenge"&&!view.submitted&&["reason","claim","report","vote"].includes(speech)){debateKind=speech;rpgSpeechTarget=null;rpgMenuIndex=0;render()}}
  else if(action==="backDebate"){debateKind="";rpgSpeechTarget=null;rpgMenuIndex=0;render()}
@@ -4317,6 +4368,26 @@ document.addEventListener("keydown",function(e){
   }
  }
  if(e.key==="Escape"&&!$("nightFeedbackPopup").hidden){e.preventDefault();closeNightFeedback();return;}
+ if(view&&nightTurnEditable(view)&&$("roleOverlay").hidden){
+  if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||""))return;
+  var card=e.target&&e.target.closest?e.target.closest("[data-rpg-target]"):null;
+  if(card&&(e.key==="Enter"||e.key===" ")){
+   e.preventDefault();rpgSelectTarget(card.getAttribute("data-rpg-target"));return;
+  }
+  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)){
+   e.preventDefault();var options=nightSelectablePlayers(view);if(!options.length)return;
+   var pos=options.findIndex(function(p){return p.id===nightTargetId});
+   pos=(pos+(e.key==="ArrowUp"||e.key==="ArrowLeft"?-1:1)+options.length)%options.length;
+   rpgSelectTarget(options[pos].id);return;
+  }
+  if(e.key==="Enter"&&e.target&&e.target.closest&&e.target.closest("button[data-do]"))return;
+  if(e.key==="Enter"&&nightTargetId){
+   e.preventDefault();
+   var confirm=$("actions").querySelector('[data-do="confirmNight"]:not([disabled])');
+   if(confirm)confirm.click();
+  }
+  return;
+ }
  if(!view||!["talk","debate"].includes(view.phase)||!view.myAlive||view.submitted||!$("roleOverlay").hidden)return;
  if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||""))return;
  if(speechKind||debateKind){
