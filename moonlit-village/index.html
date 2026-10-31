@@ -2688,9 +2688,14 @@ function aiSeerStoryRefuted(observer,target){
 }
 function aiPositiveTrustBasis(observer,target){
  if(!target||target.id===observer.id)return false;
- /* A wolf may deliberately build social cover, but only after someone has
-    actually spoken; no random unconditional first-day endorsements. */
- if(observer.role==="wolf")return (st.publicHistory||[]).some(function(h){return h.id===target.id});
+ /* Even a wolf's fake endorsement needs something publicly articulable.
+    A random first-day "I trust you" with zero basis looks like broken logic,
+    not intentional deception. Wolf manipulation remains possible when
+    a later public claim or confirmed event provides a plausible pretext. */
+ if(observer.role==="wolf")return st.day>1&&
+   (st.publicHistory||[]).some(function(h){
+    return h.id===target.id&&["gold","black","claimSeer","claimGuard","trustVote"].includes(h.kind);
+   });
  var known=aiObservedInspection(observer,target.id);
  if(known)return !known.evil;
  /* Matching a *publicly verified* historical report provides some basis
