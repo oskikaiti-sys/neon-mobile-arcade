@@ -2506,10 +2506,15 @@ function recordReply(id,kind){
     an unverified claim is true; it merely describes the original record. */
  var first=challenged.find(function(c){return c.kind==="report"||c.kind==="claim"||c.kind==="vote"})||challenged[0];
  var retractable=challenged.slice().reverse().map(function(ch){
+  var source=ch.evidence||{};
   return (st.publicHistory||[]).slice().reverse().find(function(statement){
-   return statement.id===id&&!statement.retracted&&
-    (ch.kind==="report"?["gold","black"].includes(statement.kind):
-     ch.kind==="claim"?!!roleClaim(statement.kind):ch.kind==="reason");
+   if(statement.id!==id||statement.retracted)return false;
+   if(ch.kind==="report")return ["gold","black"].includes(statement.kind)&&
+    statement.kind===source.report&&statement.day===source.day&&statement.targetId===source.subject;
+   if(ch.kind==="claim")return roleClaim(statement.kind)===source.role&&statement.day===source.day;
+   if(ch.kind==="reason")return statement.day===ch.day&&
+    !["pass","clue","analyseVotes","analyseClaims"].includes(statement.kind);
+   return false; // Votes are historical events, not retractable statements.
   });
  }).find(Boolean);
  if(kind==="admit"&&retractable){
@@ -4734,8 +4739,17 @@ function render(){
   }else if(v.debateStage==="reply"){
    if(v.submitted)notice=v.debateTargets.includes(v.me)?tr("debateSubmitted"):tr("debateNotTargeted");
    else if(v.debateTargets.includes(v.me)){
-    var hasStatement=(v.publicHistory||[]).some(function(h){return h.id===v.me&&!h.retracted});
-    a=["explain","counter"].concat(hasStatement?["admit"]:[]).concat(["avoid"]).map(function(kind){
+    var retractionAvailable=(v.debateChallenges||[]).some(function(ch){
+     if(ch.targetId!==v.me||!["report","claim","reason"].includes(ch.kind))return false;
+     var ev=ch.evidence||{};
+     return (v.publicHistory||[]).some(function(h){
+      if(h.id!==v.me||h.retracted)return false;
+      if(ch.kind==="report")return h.day===ev.day&&h.kind===ev.report&&h.targetId===ev.subject;
+      if(ch.kind==="claim")return h.day===ev.day&&roleClaim(h.kind)===ev.role;
+      return h.day===ch.day&&!["pass","clue","analyseVotes","analyseClaims"].includes(h.kind);
+     });
+    });
+    a=["explain","counter"].concat(retractionAvailable?["admit"]:[]).concat(["avoid"]).map(function(kind){
      var key={explain:"debateExplain",counter:"debateCounter",admit:"debateAdmit",avoid:"debateAvoid"}[kind];
      return modernAction(tr(key),"debateReply",null,kind,"clue",tr(key));
     }).join("");
