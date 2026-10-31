@@ -1656,7 +1656,13 @@ function cancelPhaseTimer(){
 function armPhaseTimer(phase){
  if(!st||!isHost)return;
  cancelPhaseTimer();
- st.phaseStartAt=Date.now();st.deadlineAt=st.phaseStartAt+CHOICE_LIMIT_MS;
+ /* Solo and one-human rooms have no decision deadline. Keep phaseStartAt
+    for public night announcements and the minimum 12-second night scene. */
+ st.phaseStartAt=Date.now();
+ if(st.players.filter(function(p){return !p.bot}).length<=1){
+  st.deadlineAt=0;return;
+ }
+ st.deadlineAt=st.phaseStartAt+CHOICE_LIMIT_MS;
  var game=st.gameNo,day=st.day,nonce=phaseNonce;
  hostPhaseTimer=setTimeout(function(){
   if(!st||st.gameNo!==game||st.day!==day||st.phase!==phase||nonce!==phaseNonce)return;
@@ -1771,6 +1777,7 @@ function snapshot(id){var me=person(id);
  return {phase:st.phase,day:st.day,gameNo:st.gameNo,
   readyCount:human.filter(function(p){return !!st.dealReady[p.id]}).length,
   readyTotal:human.length,readyMe:!!st.dealReady[id],
+  deadlineActive:!!st.deadlineAt,
   deadlineRemaining:st.deadlineAt?Math.max(0,st.deadlineAt-Date.now()):0,
   phaseElapsed:st.phaseStartAt?Math.max(0,Date.now()-st.phaseStartAt):0,
   me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
@@ -1807,6 +1814,12 @@ function makeRoom(){
    if(st.phase==="lobby"){st.players=st.players.filter(function(x){return x.id!==assigned});log(p.name+" 离开了房间。")}
    else if(st.phase!=="ended"){
     p.bot=true;p.avatar=null;p.portrait=randomPortrait(st.players.filter(function(x){return x.id!==assigned}));
+    /* A multiplayer room becomes unrestricted if only one human remains. */
+    if(st.deadlineAt&&st.players.filter(function(x){return !x.bot}).length<=1){
+     var phaseStart=st.phaseStartAt;
+     cancelPhaseTimer();
+     st.phaseStartAt=phaseStart;
+    }
     log(p.name+" 掉线，已由电脑接管。");
     if(st.phase==="deal"&&allRolesAcknowledged()){log("月亮升起，所有人闭上眼睛。","news");beginNight()}
     else stepBots();
@@ -2305,7 +2318,7 @@ function updatePhaseHud(){
  }
  if(clockSnapshot!==v){clockSnapshot=v;clockSeenAt=Date.now()}
  var elapsed=Math.max(0,Date.now()-clockSeenAt);
- var timed=["night","talk","vote"].includes(v.phase);
+ var timed=!!v.deadlineActive&&["night","talk","vote"].includes(v.phase);
  clock.hidden=!timed;
  if(timed){
   var remaining=Math.max(0,Math.ceil((Math.max(0,v.deadlineRemaining||0)-elapsed)/1000));
