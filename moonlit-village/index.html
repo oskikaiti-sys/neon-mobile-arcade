@@ -1444,6 +1444,56 @@ var roleText={wolf:"狼人 · 夜晚袭击一人",seer:"预言家 · 每晚查�
 var icons=["🧑","👩","🧔","👨","👩‍🦰","🧑‍🦳"];
 var peer=null,conn=null,isHost=false,solo=false,st=null,view=null,room="",myId="",connections=new Map(),speechKind="",busy=false;
 var mark=0, shownIdentityGame=0, previousScenePhase=null, lastSceneDay=0, pendingScene=null, sceneTimer=null, nightSerial=0;
+var hostPhaseTimer=null,phaseNonce=0;
+var CHOICE_LIMIT_MS=120000,NIGHT_MIN_MS=9000;
+function cancelPhaseTimer(){
+ phaseNonce++;
+ if(hostPhaseTimer!==null){clearTimeout(hostPhaseTimer);hostPhaseTimer=null}
+ if(st){st.deadlineAt=0;st.phaseStartAt=0}
+}
+function armPhaseTimer(phase){
+ if(!st||!isHost)return;
+ cancelPhaseTimer();
+ st.phaseStartAt=Date.now();st.deadlineAt=st.phaseStartAt+CHOICE_LIMIT_MS;
+ var game=st.gameNo,day=st.day,nonce=phaseNonce;
+ hostPhaseTimer=setTimeout(function(){
+  if(!st||st.gameNo!==game||st.day!==day||st.phase!==phase||nonce!==phaseNonce)return;
+  hostPhaseTimer=null;
+  if(phase==="night"){
+   /* An unanswered power is an abstention: do not invent a night target. */
+   st.nightResolving=true;finishNight();
+  }else if(phase==="talk"){
+   live().filter(function(p){return !st.speeches[p.id]}).forEach(function(p){speak(p.id,"pass",null)});
+   stepBots();
+  }else if(phase==="vote"){
+   live().filter(function(p){return st.votes[p.id]===undefined}).forEach(function(p){
+    st.votes[p.id]="__abstain__";log(p.name+" 弃权投票。","news");
+   });
+   stepBots();
+  }
+  broadcast();
+ },CHOICE_LIMIT_MS);
+}
+function allRolesAcknowledged(){
+ return st&&st.players.filter(function(p){return !p.bot}).every(function(p){return !!st.dealReady[p.id]});
+}
+function acknowledgeRole(id,gameNo){
+ if(!isHost||!st||st.phase!=="deal"||st.gameNo!==gameNo)return;
+ var p=person(id);
+ if(!p||p.bot||st.dealReady[id])return;
+ st.dealReady[id]=true;
+ if(allRolesAcknowledged()){
+  log("月亮升起，所有人闭上眼睛。","news");
+  beginNight();
+ }
+ broadcast();
+}
+function readyRole(){
+ if(!view||view.phase!=="deal")return;
+ if(isHost)acknowledgeRole("h",view.gameNo);
+ else if(conn&&conn.open)conn.send({type:"roleReady",gameNo:view.gameNo});
+}
+
 var rpgSpeechTarget=null,rpgMenuIndex=0,rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
 var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
 var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
@@ -1511,8 +1561,15 @@ function person(id){return st.players.find(function(p){return p.id===id})}
 function live(){return st.players.filter(function(p){return p.alive})}
 function targetList(id){return live().filter(function(p){return p.id!==id})}
 function log(t,kind){st.logs.push({text:t,kind:kind||"news"});if(st.logs.length>60)st.logs.shift()}
-function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},logs:[],winner:""};myId="h";log("村庄正在等待玩家加入。")}
-function snapshot(id){var me=person(id);return {phase:st.phase,day:st.day,gameNo:st.gameNo,me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
+function makeState(){st={phase:"lobby",day:0,gameNo:0,players:[{id:"h",name:getName(),bot:false,alive:true,role:null,avatar:selectedAvatar,portrait:previewPortrait}],votes:{},speeches:{},night:{},known:{},logs:[],winner:"",dealReady:{},phaseStartAt:0,deadlineAt:0};myId="h";log("村庄正在等待玩家加入。")}
+function snapshot(id){var me=person(id);
+ var human=st.players.filter(function(p){return !p.bot});
+ return {phase:st.phase,day:st.day,gameNo:st.gameNo,
+  readyCount:human.filter(function(p){return !!st.dealReady[p.id]}).length,
+  readyTotal:human.length,readyMe:!!st.dealReady[id],
+  deadlineRemaining:st.deadlineAt?Math.max(0,st.deadlineAt-Date.now()):0,
+  phaseStartAt:st.phaseStartAt||0,
+  me:id,room:room,solo:solo,host:id==="h",players:st.players.map(function(p){return {id:p.id,name:p.name,bot:p.bot,alive:p.alive,portrait:p.portrait,avatar:p.bot?null:(safeAvatar(p.avatar)||null),role:st.phase==="ended"?p.role:null}}),myRole:me?me.role:null,myAlive:me?me.alive:false,submitted:(st.phase==="talk"?st.speeches[id]!==undefined:st.phase==="vote"?st.votes[id]!==undefined:st.phase==="night"?!!st.night[id]:false),knowledge:st.known[id]||[],messages:st.logs.slice(-25),winner:st.winner}}
 function broadcast(){if(!st)return;view=snapshot("h");render();for(var it of connections.entries()){var id=it[0],c=it[1];if(c.open){try{c.send({type:"state",state:snapshot(id)})}catch(e){}}}}
 function makeSolo(){if(avatarPending)return;solo=true;isHost=true;room="";makeState();enter();startGame()}
 function makeRoom(){
@@ -1538,12 +1595,18 @@ function makeRoom(){
     }
     return;
    }
+   if(assigned&&m.type==="roleReady"){acknowledgeRole(assigned,m.gameNo);return}
    if(assigned&&m.type==="action")accept(assigned,m.action,m.target,m.speech);
   });
   c.on("close",function(){
    if(!assigned||!st)return;connections.delete(assigned);var p=person(assigned);if(!p)return;
    if(st.phase==="lobby"){st.players=st.players.filter(function(x){return x.id!==assigned});log(p.name+" 离开了房间。")}
-   else if(st.phase!=="ended"){p.bot=true;p.avatar=null;p.portrait=randomPortrait(st.players.filter(function(x){return x.id!==assigned}));log(p.name+" 掉线，已由电脑接管。");stepBots()}
+   else if(st.phase!=="ended"){
+    p.bot=true;p.avatar=null;p.portrait=randomPortrait(st.players.filter(function(x){return x.id!==assigned}));
+    log(p.name+" 掉线，已由电脑接管。");
+    if(st.phase==="deal"&&allRolesAcknowledged()){log("月亮升起，所有人闭上眼睛。","news");beginNight()}
+    else stepBots();
+   }
    broadcast();
   });
  });
@@ -1570,20 +1633,21 @@ function joinRoom(){
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
 function startGame(){
  if(!isHost||!st||st.phase!=="lobby")return;
+ cancelPhaseTimer();
  var used=st.players.length;for(var i=used;i<6;i++)st.players.push({id:"bot"+i,name:["雾鸦","薇拉","灰石","伊莎","松风","星砂"][i],bot:true,alive:true,role:null,avatar:null,portrait:randomPortrait(st.players)});
  st.players.forEach(function(p,i){p.seat=i+1;p.alive=true});
  var roles=shuffle(["wolf","seer","guard","villager","villager","villager"]);st.players.forEach(function(p,i){p.role=roles[i]});
- st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.logs=[];log("月亮升起，所有人闭上眼睛。","news");beginNight();broadcast()
+ st.gameNo=(st.gameNo||0)+1;st.day=1;st.known={};st.logs=[];st.phase="deal";st.dealReady={};log("请所有真人玩家翻开并确认身份牌。","news");broadcast()
 }
 function winCheck(){
  var wolves=live().filter(function(p){return p.role==="wolf"}).length;
  var good=live().length-wolves;
- if(wolves===0){st.winner="好人阵营";st.phase="ended";log("🏆 好人胜利！狼人已经出局。");return true}
- if(wolves>=good){st.winner="狼人阵营";st.phase="ended";log("🐺 狼人胜利！狼人的人数已不低于好人。");return true}
- if(st.day>12){st.winner="狼人阵营";st.phase="ended";log("月夜持续太久，狼人占据了村庄。");return true}
+ if(wolves===0){cancelPhaseTimer();st.winner="好人阵营";st.phase="ended";log("🏆 好人胜利！狼人已经出局。");return true}
+ if(wolves>=good){cancelPhaseTimer();st.winner="狼人阵营";st.phase="ended";log("🐺 狼人胜利！狼人的人数已不低于好人。");return true}
+ if(st.day>12){cancelPhaseTimer();st.winner="狼人阵营";st.phase="ended";log("月夜持续太久，狼人占据了村庄。");return true}
  return false
 }
-function beginNight(){nightSerial++;st.phase="night";st.nightResolving=false;st.night={};st.votes={};st.speeches={};log("第 "+st.day+" 夜：等待狼人、预言家和守卫行动。");stepBots()}
+function beginNight(){nightSerial++;st.phase="night";st.nightResolving=false;st.night={};st.votes={};st.speeches={};armPhaseTimer("night");log("第 "+st.day+" 夜：等待狼人、预言家和守卫行动。");stepBots()}
 function stepBots(){
  if(!st||st.phase==="ended"||st.phase==="lobby")return;
  if(st.phase==="night"){
@@ -1592,11 +1656,12 @@ function stepBots(){
   });
   if(!st.nightResolving&&live().filter(function(p){return ["wolf","seer","guard"].includes(p.role)}).every(function(p){return !!st.night[p.id]})){
    st.nightResolving=true;var serial=nightSerial;
-   setTimeout(function(){if(st&&st.phase==="night"&&st.nightResolving&&nightSerial===serial){finishNight();broadcast()}},1500);
+   var elapsed=Date.now()-(st.phaseStartAt||Date.now());
+   setTimeout(function(){if(st&&st.phase==="night"&&st.nightResolving&&nightSerial===serial){finishNight();broadcast()}},Math.max(1500,NIGHT_MIN_MS-elapsed));
   }
  }else if(st.phase==="talk"){
   live().filter(function(p){return p.bot&&!st.speeches[p.id]}).forEach(function(p){botSpeech(p)});
-  if(live().every(function(p){return !!st.speeches[p.id]})){st.phase="vote";log("所有人发言完毕，开始投票。");stepBots()}
+  if(live().every(function(p){return !!st.speeches[p.id]})){st.phase="vote";armPhaseTimer("vote");log("所有人发言完毕，开始投票。");stepBots()}
  }else if(st.phase==="vote"){
   live().filter(function(p){return p.bot&&!st.votes[p.id]}).forEach(function(p){var t=botVote(p);st.votes[p.id]=t;log(p.name+" 投票给 "+person(t).name+"。","choice")});
   if(live().every(function(p){return !!st.votes[p.id]}))finishVote();
@@ -1619,7 +1684,7 @@ function finishNight(){
  if(target&&target!==save){person(target).alive=false;log("天亮了，昨夜 "+person(target).name+" 遇袭出局。","news")}
  else log("天亮了，昨夜是平安夜。","news");
  if(winCheck())return;
- st.phase="talk";log("第 "+st.day+" 天：请选择一句公开发言。");stepBots()
+ st.phase="talk";armPhaseTimer("talk");log("第 "+st.day+" 天：请选择一句公开发言。");stepBots()
 }
 function botSpeech(p){
  var choices=targetList(p.id);if(!choices.length){st.speeches[p.id]={speech:"pass",target:null};return}
@@ -1652,6 +1717,7 @@ function botVote(p){
 }
 function finishVote(){
  var counts={};Object.keys(st.votes).forEach(function(id){var target=st.votes[id];counts[target]=(counts[target]||0)+1});
+ delete counts["__abstain__"];
  var high=Math.max.apply(null,Object.values(counts));
  var leaders=Object.keys(counts).filter(function(id){return counts[id]===high});
  if(leaders.length!==1){log("投票平局，今天无人被放逐。","news")}
@@ -1683,7 +1749,7 @@ function sendAction(action,target,speech){
 }
 function restart(){
  if(!isHost||!st||st.phase!=="ended")return;
- nightSerial++;
+ nightSerial++;cancelPhaseTimer();
  st.players=st.players.filter(function(p){return !p.bot}).map(function(p){return {id:p.id,name:p.name,bot:false,alive:true,role:null,portrait:p.portrait,avatar:safeAvatar(p.avatar)}});
  st.phase="lobby";st.day=0;st.votes={};st.speeches={};st.night={};st.known={};st.logs=[];st.winner="";log("新的村庄正在等待开局。");broadcast()
 }
@@ -2322,7 +2388,7 @@ document.addEventListener("click",function(e){
  if(clickSound)playSfx(clickSound);
  ensureMusic();
  if(action==="flipRole"){if(!$("roleOverlay").classList.contains("revealed")){$("roleOverlay").classList.add("revealed");$("roleContinue").hidden=false;$("roleCard").disabled=true;$("drawHint").textContent=tr("dealHintAfter");}}
- else if(action==="closeRole"){$("roleOverlay").hidden=true;if(pendingScene){playTimeScene(pendingScene);pendingScene=null;}else stageAdvanceQueue();}
+ else if(action==="closeRole"){$("roleOverlay").hidden=true;readyRole();if(pendingScene){playTimeScene(pendingScene);pendingScene=null;}else stageAdvanceQueue();}
  else if(action==="solo")makeSolo();
  else if(action==="create")makeRoom();
  else if(action==="join")joinRoom();
