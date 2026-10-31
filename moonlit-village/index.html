@@ -1225,7 +1225,63 @@ var mark=0, shownIdentityGame=0, previousScenePhase=null, lastSceneDay=0, pendin
 var rpgSpeechTarget=null,rpgMenuIndex=0,rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
 var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
 var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
-function report(t){$("homeNotice").textContent=t;$("notice").textContent=t}
+
+/* Translate visible logs, not the canonical multiplayer state. */
+function localizeSpeech(raw){
+ var m=raw.match(/^我怀疑 (.+)。$/);if(m)return tr("speechSuspect",{name:displayName(m[1])});
+ m=raw.match(/^我相信 (.+)。$/);if(m)return tr("speechTrust",{name:displayName(m[1])});
+ if(raw==="我掌握了一些线索。")return tr("speechClue");
+ if(raw==="我暂不表态。")return tr("speechPass");
+ return raw;
+}
+function parseSpeech(message){
+ var m=message.kind==="choice"?message.text.match(/^(.+?)：「([\s\S]*)」$/):null;
+ return m?{rawSpeaker:m[1],speaker:displayName(m[1]),text:localizeSpeech(m[2])}:null;
+}
+function localizeLog(message){
+ var value=String(message.text),m;
+ var exact={"村庄正在等待玩家加入。":"logWait","新的村庄正在等待开局。":"logNewLobby","月亮升起，所有人闭上眼睛。":"logMoon",
+ "天亮了，昨夜是平安夜。":"logSafe","所有人发言完毕，开始投票。":"logTalkDone","投票平局，今天无人被放逐。":"logTie",
+ "🏆 好人胜利！狼人已经出局。":"logGoodWin","🐺 狼人胜利！狼人的人数已不低于好人。":"logWolfWin",
+ "月夜持续太久，狼人占据了村庄。":"logLongNight"};
+ if(exact[value])return tr(exact[value]);
+ if((m=value.match(/^第 (\d+) 夜：等待狼人、预言家和守卫行动。$/)))return tr("logNight",{day:m[1]});
+ if((m=value.match(/^第 (\d+) 天：请选择一句公开发言。$/)))return tr("logDay",{day:m[1]});
+ if((m=value.match(/^天亮了，昨夜 (.+) 遇袭出局。$/)))return tr("logAttack",{name:displayName(m[1])});
+ if((m=value.match(/^投票结果：(.+) 被放逐，身份是「(狼人|好人)」。$/)))return tr("logExile",{name:displayName(m[1]),alignment:tr(m[2]==="狼人"?"roleWolfShort":"roleGoodShort")});
+ if((m=value.match(/^(.+) 投票给 (.+)。$/)))return tr("logVote",{name:displayName(m[1]),target:displayName(m[2])});
+ if((m=value.match(/^(.+) 加入了村庄。$/)))return tr("logJoin",{name:displayName(m[1])});
+ if((m=value.match(/^(.+) 离开了房间。$/)))return tr("logLeave",{name:displayName(m[1])});
+ if((m=value.match(/^(.+) 掉线，已由电脑接管。$/)))return tr("logDisconnect",{name:displayName(m[1])});
+ return value;
+}
+function localizeNotice(value){
+ var exact={"联机库未加载。请检查网络连接。":"errPeer","联机库未加载，请检查网络。":"errPeer","正在创建房间…":"errCreating",
+ "请输入六位房间码。":"errCode","正在连接房间…":"errConnecting","无法加入该房间。":"errJoin",
+ "房间已经开始或人数已满。":"errFull","无法连接房主；请核对房间码，或尝试更换网络。":"errHost",
+ "连接已断开，请重新加入。":"errActionDisconnected"};
+ if(exact[value])return tr(exact[value]);
+ var m=value.match(/^创建房间失败：(.+)。可以刷新后再试。$/);if(m)return tr("errCreate",{reason:m[1]});
+ m=value.match(/^连接失败：(.+)$/);if(m)return tr("errConnect",{reason:m[1]});
+ return value;
+}
+function updateLanguageOverlays(){
+ if(view&&view.myRole){
+  $("roleFace").textContent=roleName(view.myRole);
+  $("roleDescription").textContent=roleDescription(view.myRole);
+ }
+ $("drawHint").textContent=$("roleOverlay").classList.contains("revealed")?tr("dealHintAfter"):tr("dealHint");
+ if(stageCurrent){
+  var m=parseSpeech(stageCurrent);
+  if(m){$("speakerName").textContent=m.speaker;$("speakerLine").textContent=m.text;}
+ }
+ var night=previousScenePhase==="night";
+ $("sceneTitle").textContent=tr(night?"sceneNight":"sceneDay");
+ $("sceneSubtitle").textContent=tr(night?"sceneNightSub":"sceneDaySub");
+ $("roleOverlay").setAttribute("aria-label",tr("drawAria"));
+}
+
+function report(t){$("homeNotice").textContent=localizeNotice(t);$("notice").textContent=localizeNotice(t)}
 function getName(){return ($("myName").value.trim().slice(0,15)||"旅人")}
 function enter(){ document.body.classList.add("game-active");$("homeScreen").style.display="none";$("gameScreen").style.display="block"; render() }
 function person(id){return st.players.find(function(p){return p.id===id})}
@@ -1406,13 +1462,13 @@ function showRoleDeal(v){
   var names={wolf:"狼人",seer:"预言家",guard:"守卫",villager:"村民"};
   var symbols={wolf:"🐺",seer:"🔮",guard:"🛡️",villager:"🕯️"};
   $("roleSymbol").textContent=symbols[v.myRole]||"☾";
-  $("roleFace").textContent=names[v.myRole]||"未知身份";
-  $("roleDescription").textContent=(roleText[v.myRole]||"").split(" · ").slice(1).join(" · ");
+  $("roleFace").textContent=roleName(v.myRole);
+  $("roleDescription").textContent=roleDescription(v.myRole);
   $("roleOverlay").hidden=false;
   $("roleOverlay").classList.remove("revealed");
   $("roleContinue").hidden=true;
   $("roleCard").disabled=false;
-  $("drawHint").textContent="轻触中央的牌，揭晓只有你能看见的身份";
+  $("drawHint").textContent=tr("dealHint");
 }
 
 function playTimeScene(type){
@@ -1422,8 +1478,8 @@ function playTimeScene(type){
  el.hidden=false;
  el.className="time-scene "+(type==="night"?"nightfall":"sunrise");
  $("sceneIcon").textContent=type==="night"?"☾":"☀";
- $("sceneTitle").textContent=type==="night"?"夜幕降临":"黎明破晓";
- $("sceneSubtitle").textContent=type==="night"?"村庄陷入沉睡":"新的一天已经开始";
+ $("sceneTitle").textContent=tr(type==="night"?"sceneNight":"sceneDay");
+ $("sceneSubtitle").textContent=tr(type==="night"?"sceneNightSub":"sceneDaySub");
  /* restart animation if an earlier phase change is still playing */
  void el.offsetWidth;
  sceneTimer=setTimeout(function(){el.hidden=true;el.className="time-scene";sceneTimer=null;stageAdvanceQueue()},type==="night"?1450:1550);
@@ -1454,12 +1510,12 @@ var faceConfig={
 var missingFaces={};
 function faceMarkup(player,expression,seat,context){
  var id=player&&player.id!=null?String(player.id):"unknown";
- var name=player&&player.name!=null?String(player.name):"居民";
+ var name=player&&player.name!=null?displayName(String(player.name)):tr("roleVillager");
  var emotion=faceConfig.expressions.includes(expression)?expression:"normal";
  var src=faceConfig.basePath+encodeURIComponent(id)+"_"+emotion+".png";
  var tone=faceConfig.seatRings[Math.abs(seat||0)%faceConfig.seatRings.length];
  var role=context==="log"?"rpg-portrait":context==="target"?"action-target-face":"avatar";
- var markup='<span class="'+role+' face-frame" style="--face-ring:'+tone+'" role="img" aria-label="'+escapeHtml(name)+' 的头像">'
+ var markup='<span class="'+role+' face-frame" style="--face-ring:'+tone+'" role="img" aria-label="'+escapeHtml(tr("portrait",{name:name}))+'">'
   +'<svg class="face-silhouette" viewBox="0 0 144 144" aria-hidden="true" focusable="false"><circle cx="72" cy="48" r="25"/><path d="M22 140c2-34 19-52 50-52s48 18 50 52Z"/></svg>';
  if(!missingFaces[src])markup+='<img class="face-image" src="'+escapeHtml(src)+'" alt="" draggable="false" decoding="async">';
  return markup+'</span>';
@@ -1495,14 +1551,14 @@ function stageHighlightSpeaker(name){
 function stagePaintHistory(){
  var feed=$("feed");if(!feed)return;
  feed.innerHTML=stageHistory.map(function(m){
-  var spoken=m.kind==="choice"?String(m.text).match(/^(.+?)：「([\s\S]*)」$/):null;
+  var spoken=parseSpeech(m);
   if(spoken)return '<div class="rpg-line rpg-dialogue">'
-   +rpgPortraitMarkup(spoken[1])
-   +'<div class="rpg-line-content"><span class="rpg-nameplate">'+escapeHtml(spoken[1])+'</span>'
-   +'<span class="rpg-spoken">'+escapeHtml(spoken[2])+'</span></div></div>';
+   +rpgPortraitMarkup(spoken.rawSpeaker)
+   +'<div class="rpg-line-content"><span class="rpg-nameplate">'+escapeHtml(spoken.speaker)+'</span>'
+   +'<span class="rpg-spoken">'+escapeHtml(spoken.text)+'</span></div></div>';
   var danger=/遇袭|出局|被放逐|死亡|KO/.test(m.text);
   return '<div class="rpg-line rpg-narrator'+(danger?' is-danger':'')+'">'
-   +(danger?'<span aria-hidden="true">☾ </span>':'')+escapeHtml(m.text)+'</div>';
+   +(danger?'<span aria-hidden="true">☾ </span>':'')+escapeHtml(localizeLog(m))+'</div>';
  }).join("");
  feed.scrollTop=feed.scrollHeight;
 }
@@ -1532,8 +1588,9 @@ function stageAdvanceQueue(){
   stageCurrent=next;
   stageHighlightSpeaker(match[1]);
   $("speakerPortrait").innerHTML=rpgPortraitMarkup(match[1]);
-  $("speakerName").textContent=match[1];
-  $("speakerLine").textContent=match[2];
+  var localized=parseSpeech(next);
+  $("speakerName").textContent=localized?localized.speaker:displayName(match[1]);
+  $("speakerLine").textContent=localized?localized.text:match[2];
   $("speakerOverlay").hidden=false;
   stageTimer=setTimeout(stageFinishSpeech,Math.min(3000,Math.max(1600,1250+Array.from(match[2]).length*45)));
   return;
