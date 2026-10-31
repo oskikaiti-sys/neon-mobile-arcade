@@ -2035,6 +2035,36 @@ translations.ja.seerNotesDone="ゲームに戻る";
 translations.ja.seerNotesClose="占いの記録を閉じる";
 translations.ja.seerNotesEmpty="まだ誰も占っていません。";
 translations.ja.seerNotesNight="{night}日目の夜";
+var TALK_GUIDE={
+ zh:{identity:"公开身份与查验",doubt:"指出嫌疑",support:"表达信任",pass:"暂不表态",
+  doubtHelp:"选择对象并引用公开记录，也可以明确说明只是猜测。",
+  supportHelp:"选择对象并引用公开记录，也可以明确说明只是倾向。",
+  evidenceTitle:"公开依据",evidenceIntuition:"仅凭推测（无可核实证据）",
+  evidenceVote:"第{day}天：此人投给{target}",evidenceClaim:"第{day}天：此人跳身份",
+  evidenceReport:"第{day}天：此人公开查验报告",
+  chooseReportNight:"选择要公开的查验夜晚",nightLabel:"第{night}夜",
+  noChecks:"没有符合该报告的有效查验",bluffNight:"选择声称的查验夜晚"},
+ en:{identity:"Role and inspections",doubt:"State a suspicion",support:"Express trust",pass:"Withhold judgment",
+  doubtHelp:"Choose a player and cite a public event, or disclose that this is only a guess.",
+  supportHelp:"Choose a player and cite a public event, or disclose that this is only an impression.",
+  evidenceTitle:"Public basis",evidenceIntuition:"Just an impression (no verifiable evidence)",
+  evidenceVote:"Day {day}: this player voted for {target}",evidenceClaim:"Day {day}: this player claimed a role",
+  evidenceReport:"Day {day}: this player reported an inspection",
+  chooseReportNight:"Select the inspection night",nightLabel:"Night {night}",
+  noChecks:"No matching private inspection",bluffNight:"Select the claimed night"},
+ ja:{identity:"役職・占いを公開",doubt:"疑いを述べる",support:"信頼を表明",pass:"判断を保留",
+  doubtHelp:"対象を選び、公開記録を引用するか推測のみと伝えます。",
+  supportHelp:"対象を選び、公開記録を引用するか推測のみと伝えます。",
+  evidenceTitle:"公開根拠",evidenceIntuition:"推測のみ（検証できる証拠なし）",
+  evidenceVote:"{day}日目：この人は{target}に投票",evidenceClaim:"{day}日目：この人は役職CO",
+  evidenceReport:"{day}日目：この人は占い結果を発表",
+  chooseReportNight:"公開する占いの夜を選択",nightLabel:"第{night}夜",
+  noChecks:"該当する占い結果がありません",bluffNight:"申告する夜を選択"}
+};
+function talkLabel(key,vars){
+ var dict=TALK_GUIDE[selectedLanguage]||TALK_GUIDE.zh,value=dict[key]||key;
+ return value.replace(/\{(\w+)\}/g,function(_,k){return vars&&vars[k]!==undefined?String(vars[k]):""});
+}
 var selectedLanguage="en";
 translations.en.languageAria="Language";translations.zh.languageAria="语言";translations.ja.languageAria="言語";
 function tr(key,values){
@@ -2201,7 +2231,7 @@ function readyRole(){
  else if(conn&&conn.open)conn.send({type:"roleReady",gameNo:view.gameNo});
 }
 
-var speechGroup="",debateKind="",rpgSpeechTarget=null,rpgMenuIndex=0,nightTargetId=null,nightSelectionKey="",rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
+var speechGroup="",speechEvidenceRef=null,speechReportNight=null,debateKind="",rpgSpeechTarget=null,rpgMenuIndex=0,nightTargetId=null,nightSelectionKey="",rpgLogFingerprint="",rpgTypingTimer=null,rpgTypeComplete=null;
 var rand=function(n){var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=chars[a[i]%chars.length];return out};
 var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 
@@ -3166,13 +3196,7 @@ var SPEECH_OPTIONS={
  question:{group:"analysis",target:true},analyseVotes:{group:"analysis"},
  analyseClaims:{group:"analysis"},defend:{group:"analysis"}
 };
-var SPEECH_GROUPS={
- doubt:["suspect","suspectVote","challengeClaim"],
- support:["trust","trustVote","followSeer"],
- identity:["claimSeer","claimGuard","claimVillager"],
- report:["gold","black"],
- analysis:["question","analyseVotes","analyseClaims","defend","clue","pass"]
-};
+var SPEECH_GROUPS={identity:["claimSeer","claimGuard","claimVillager","gold","black"]};
 var SPEECH_LINES={
  zh:{
  suspectWorldClaims:"重新推演六人的身份组合后，{name}前后的身份宣称出现冲突。这里不是单凭态度猜测：如果维持那些说法，就必须让不相容的身份同时成立。我要求{name}解释。",
@@ -4149,8 +4173,75 @@ function speechUILine(type,id){
  return dict[type]&&dict[type][id]||SPEECH_UI.zh[type][id]||[id,""];
 }
 function eligibleSpeechTargets(v,kind){
- return (v.players||[]).filter(function(p){return p.alive&&p.id!==v.me&&
-  speechHasEvidence(v.publicHistory||[],v.voteHistory||[],kind,p.id)});
+ return (v.players||[]).filter(function(p){
+  if(!p.alive||p.id===v.me||!speechHasEvidence(v.publicHistory||[],v.voteHistory||[],kind,p.id))return false;
+  if(v.myRole==="seer"&&["gold","black"].includes(kind)){
+   return (v.knowledge||[]).some(function(k){return k.id===p.id&&!!k.evil===(kind==="black")});
+  }
+  return true;
+ });
+}
+function visibleCitations(v,id){
+ return (v.publicEvents||[]).filter(function(e){
+  if(e.actor!==id)return false;
+  if(e.kind==="vote")return !!e.target&&e.target!=="__abstain__";
+  return e.kind==="statement"&&e.detail&&
+   ["claimSeer","claimGuard","claimVillager","gold","black"].includes(e.detail.kind);
+ }).slice(-12).reverse();
+}
+function citationLabel(v,e){
+ if(e.kind==="vote"){
+  var q=(v.players||[]).find(function(p){return p.id===e.target});
+  return talkLabel("evidenceVote",{day:e.day,target:q?displayName(q.name):"?"});
+ }
+ return talkLabel(["gold","black"].includes(e.detail.kind)?"evidenceReport":"evidenceClaim",{day:e.day});
+}
+function reportNightOptions(v,kind,id){
+ if(v.myRole==="seer")
+  return (v.knowledge||[]).filter(function(k){return k.id===id&&!!k.evil===(kind==="black")})
+   .map(function(k){return k.night});
+ return Array.from({length:Math.max(0,v.day)},function(_,i){return i+1});
+}
+function speechDetailSelection(){
+ if(["suspect","trust"].includes(speechKind))
+  return {evidenceSeq:speechEvidenceRef==="none"?null:Number(speechEvidenceRef)};
+ if(["gold","black"].includes(speechKind))
+  return {reportNight:speechReportNight};
+ return {};
+}
+function speechDetailReady(v){
+ if(!rpgSpeechTarget)return false;
+ if(["suspect","trust"].includes(speechKind)){
+  return speechEvidenceRef==="none"||visibleCitations(v,rpgSpeechTarget).some(function(e){
+   return String(e.seq)===speechEvidenceRef;
+  });
+ }
+ if(["gold","black"].includes(speechKind))
+  return reportNightOptions(v,speechKind,rpgSpeechTarget).includes(speechReportNight);
+ return true;
+}
+function speechEvidenceMarkup(v){
+ if(!rpgSpeechTarget)return "";
+ if(["suspect","trust"].includes(speechKind)){
+  var citations=visibleCitations(v,rpgSpeechTarget);
+  var choices=[{id:"none",label:talkLabel("evidenceIntuition")}].concat(
+   citations.map(function(e){return {id:String(e.seq),label:citationLabel(v,e)}}));
+  return '<div class="speech-evidence-list" role="group" aria-label="'+escapeHtml(talkLabel("evidenceTitle"))+'">'
+   +'<p class="small">'+escapeHtml(talkLabel("evidenceTitle"))+'</p>'
+   +choices.map(function(x){return '<button type="button" class="action-card" data-do="speechEvidence" data-speech="'+escapeHtml(x.id)+'" aria-pressed="'+(speechEvidenceRef===x.id?'true':'false')+'">'
+    +'<span class="action-copy"><span class="action-name">'+escapeHtml((speechEvidenceRef===x.id?'✓ ':'')+x.label)+'</span></span></button>'}).join("")
+   +'</div>';
+ }
+ if(["gold","black"].includes(speechKind)){
+  var nights=reportNightOptions(v,speechKind,rpgSpeechTarget);
+  if(!nights.length)return '<p class="small">'+escapeHtml(talkLabel("noChecks"))+'</p>';
+  return '<div class="speech-evidence-list" role="group" aria-label="'+escapeHtml(talkLabel("chooseReportNight"))+'">'
+   +'<p class="small">'+escapeHtml(talkLabel("chooseReportNight"))+'</p>'
+   +nights.map(function(n){return '<button type="button" class="action-card" data-do="speechNight" data-speech="'+n+'" aria-pressed="'+(speechReportNight===n?'true':'false')+'">'
+    +'<span class="action-copy"><span class="action-name">'+escapeHtml((speechReportNight===n?'✓ ':'')+talkLabel("nightLabel",{night:n}))+'</span></span></button>'}).join("")
+   +'</div>';
+ }
+ return "";
 }
 function speechTargetDetail(v,kind,p){
  var votes=v.voteHistory||[],history=v.publicHistory||[];
@@ -4229,7 +4320,8 @@ function updateSpeechTargetPrompt(v){
   :tr("speechPickCard",{kind:label});
  $("notice").textContent=target?speechTargetDetail(v,speechKind,target):tr("speechPickCardHint");
  var confirm=$("actions").querySelector('[data-do="confirmTarget"]');
- if(confirm){confirm.disabled=!target;confirm.setAttribute("aria-disabled",target?"false":"true")}
+ if(confirm){var ready=!!target&&speechDetailReady(v);
+  confirm.disabled=!ready;confirm.setAttribute("aria-disabled",ready?"false":"true")}
 }
 function rpgSelectTarget(id){
  if(!view||view.submitted)return;
@@ -4242,7 +4334,8 @@ function rpgSelectTarget(id){
   rpgSpeechTarget=id;rpgHighlightTargets();updateDebateTargetPrompt(view);playSfx("cursor");return;
  }
  if(view.phase!=="talk"||!speechKind||!eligibleSpeechTargets(view,speechKind).some(function(p){return p.id===id}))return;
- rpgSpeechTarget=id;rpgHighlightTargets();updateSpeechTargetPrompt(view);playSfx("cursor");
+ if(rpgSpeechTarget!==id){speechEvidenceRef=null;speechReportNight=null}
+ rpgSpeechTarget=id;playSfx("cursor");render();
 }
 function rpgActivateMenu(){
  var menu=$("actions");
@@ -4394,12 +4487,15 @@ function renderEvidenceLedger(v){
   if(kind==="statement"){
    label=speechUILine("kinds",info.kind||"clue")[0];
    line=tr("evidenceSaid",{actor:name(item.actor),kind:label,target:item.target?" → "+name(item.target):""});
+   if(info.reportNight)line+=" · "+talkLabel("nightLabel",{night:info.reportNight});
+   if(info.evidenceSeq)line+=" · #"+info.evidenceSeq;
   }else if(kind==="challenge"){
    label=tr({reason:"debateReason",claim:"debateClaim",report:"debateReport",vote:"debateVote"}[info.kind]||"debateReason");
    line=tr("evidenceChallenge",{actor:name(item.actor),target:name(item.target),kind:label});
   }else if(kind==="reply"){
    label=tr({explain:"debateExplain",counter:"debateCounter",admit:"debateAdmit",avoid:"debateAvoid",silence:"debateAvoid"}[info.kind]||"debateExplain");
    line=tr("evidenceReply",{actor:name(item.actor),kind:label});
+   if(info.retracted)line+=" · "+tr("debateAdmit");
   }else if(kind==="vote"){
    label=tr("actionVote");line=tr("evidenceVote",{actor:name(item.actor),target:name(item.target)});
   }else if(kind==="death"){
@@ -4553,7 +4649,7 @@ function render(){
  $("myRole").innerHTML=v.myRole?'<strong>'+escapeHtml(roleName(v.myRole)+" · "+roleDescription(v.myRole))+'</strong>'+(tips?'<div class="small gold">'+escapeHtml(tips)+'</div>':''):tr("roleUnassigned");
  rpgRenderMessages(v);
  var a="",title=tr("actionDefault"),notice="";
- if(v.phase!=="talk"||v.submitted){speechGroup="";speechKind="";if(v.phase!=="debate")rpgSpeechTarget=null;}
+ if(v.phase!=="talk"||v.submitted){speechGroup="";speechKind="";speechEvidenceRef=null;speechReportNight=null;if(v.phase!=="debate")rpgSpeechTarget=null;}
  if(v.phase!=="debate"||v.submitted||v.debateStage!=="challenge")debateKind="";
  if(v.phase==="lobby"){
   title=tr("actionLobby");
@@ -4579,20 +4675,23 @@ function render(){
   else if(v.submitted)notice=tr("talkSubmitted");
   else if(speechKind&&SPEECH_OPTIONS[speechKind]&&SPEECH_OPTIONS[speechKind].target){
    title=tr("speechPickCard",{kind:speechUILine("kinds",speechKind)[0]});
-   a=modernAction(tr("confirmTarget"),"confirmTarget",null,null,"confirm",tr("confirmDesc"))
+   a=speechEvidenceMarkup(v)
+    +modernAction(tr("confirmTarget"),"confirmTarget",null,null,"confirm",tr("confirmDesc"))
     +modernAction(tr("back"),"back",null,null,"back",tr("backDesc"));
-   notice=tr("speechPickCardHint");
+   notice=rpgSpeechTarget?
+    (["suspect","trust"].includes(speechKind)?talkLabel("evidenceTitle"):
+     ["gold","black"].includes(speechKind)?talkLabel("chooseReportNight"):tr("speechPickCardHint"))
+    :tr("speechPickCardHint");
   }else if(speechGroup&&SPEECH_GROUPS[speechGroup]){
-   title=speechUILine("groups",speechGroup)[0];
+   title=talkLabel("identity");
    a=SPEECH_GROUPS[speechGroup].map(function(kind){return speechMenuCard(kind,v)}).join("");
    a+=modernAction(tr("back"),"back",null,null,"back",tr("backDesc"));
-   notice=speechUILine("groups",speechGroup)[1];
+   notice=tr("speechMenuHelp");
   }else{
-   a=Object.keys(SPEECH_GROUPS).map(function(group){
-    var line=speechUILine("groups",group);
-    var icon={doubt:"suspect",support:"trust",identity:"clue",report:"clue",analysis:"clue"}[group];
-    return modernAction(line[0],"speechGroup",null,group,icon,line[1]);
-   }).join("");
+   a=modernAction(talkLabel("identity"),"speechGroup",null,"identity","clue",tr("speechMenuHelp"))
+    +modernAction(talkLabel("doubt"),"speechStart",null,"suspect","suspect",talkLabel("doubtHelp"))
+    +modernAction(talkLabel("support"),"speechStart",null,"trust","trust",talkLabel("supportHelp"))
+    +modernAction(talkLabel("pass"),"say",null,"pass","pass",speechUILine("kinds","pass")[1]);
    notice=tr("speechMenuHelp");
   }
  }else if(v.phase==="debate"){
@@ -4919,11 +5018,18 @@ document.addEventListener("click",function(e){
  else if(action==="confirmChallenge"){if(debateKind&&rpgSpeechTarget)sendAction("challenge",rpgSpeechTarget,debateKind)}
  else if(action==="debatePass")sendAction("challenge",null,"pass");
  else if(action==="debateReply")sendAction("reply",null,speech);
- else if(action==="speechGroup"){if(SPEECH_GROUPS[speech]){speechGroup=speech;speechKind="";rpgSpeechTarget=null;rpgMenuIndex=0;render()}}
- else if(action==="pickSpeech"){if(SPEECH_OPTIONS[speech]&&SPEECH_OPTIONS[speech].target){speechKind=speech;rpgSpeechTarget=null;render()}}
+ else if(action==="speechGroup"){if(SPEECH_GROUPS[speech]){speechGroup=speech;speechKind="";rpgSpeechTarget=null;speechEvidenceRef=null;speechReportNight=null;rpgMenuIndex=0;render()}}
+ else if(action==="speechStart"){if(["suspect","trust"].includes(speech)){speechGroup="";speechKind=speech;rpgSpeechTarget=null;speechEvidenceRef=null;speechReportNight=null;rpgMenuIndex=0;render()}}
+ else if(action==="speechEvidence"){if(["suspect","trust"].includes(speechKind)&&rpgSpeechTarget&&
+  (speech==="none"||visibleCitations(view,rpgSpeechTarget).some(function(e){return String(e.seq)===speech}))){
+  speechEvidenceRef=speech;render()}}
+ else if(action==="speechNight"){var n=Number(speech);
+  if(["gold","black"].includes(speechKind)&&rpgSpeechTarget&&
+   reportNightOptions(view,speechKind,rpgSpeechTarget).includes(n)){speechReportNight=n;render()}}
+ else if(action==="pickSpeech"){if(SPEECH_OPTIONS[speech]&&SPEECH_OPTIONS[speech].target){speechKind=speech;rpgSpeechTarget=null;speechEvidenceRef=null;speechReportNight=null;render()}}
  else if(action==="selectSpeechTarget")rpgSelectTarget(target);
- else if(action==="back"){if(speechKind){speechKind="";rpgSpeechTarget=null}else speechGroup="";rpgMenuIndex=0;render()}
- else if(action==="confirmTarget"){if(rpgSpeechTarget)sendAction("speech",rpgSpeechTarget,speechKind)}
+ else if(action==="back"){if(speechKind){speechKind="";rpgSpeechTarget=null;speechEvidenceRef=null;speechReportNight=null}else speechGroup="";rpgMenuIndex=0;render()}
+ else if(action==="confirmTarget"){if(rpgSpeechTarget&&speechDetailReady(view))sendAction("speech",rpgSpeechTarget,speechKind,speechDetailSelection())}
  else if(action==="speakTarget")sendAction("speech",target,speechKind);
  else if(action==="say")sendAction("speech",null,speech);
 });
@@ -4980,7 +5086,7 @@ document.addEventListener("keydown",function(e){
  if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName||""))return;
  if(speechKind||debateKind){
   var options=rpgTargets(view);
-  if(e.key==="Escape"){e.preventDefault();playSfx("cancel");speechKind="";debateKind="";rpgSpeechTarget=null;render();return}
+  if(e.key==="Escape"){e.preventDefault();playSfx("cancel");speechKind="";debateKind="";rpgSpeechTarget=null;speechEvidenceRef=null;speechReportNight=null;render();return}
   var card=e.target&&e.target.closest?e.target.closest("[data-rpg-target]"):null;
   if(card&&(e.key==="Enter"||e.key===" ")){
    e.preventDefault();rpgSelectTarget(card.getAttribute("data-rpg-target"));return;
