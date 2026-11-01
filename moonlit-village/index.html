@@ -4005,6 +4005,29 @@ function aiWolfVoteDecision(p){
  var history=st.publicHistory||[],round=st.day,
   today=history.filter(function(h){return h.day===round&&!h.retracted});
  var previous=(st.voteHistory||[]).slice(-2),remaining=live().length;
+ /* A contested public Seer role is a defensive ballot situation, not
+    the same as taking a risky unsupported lone vote. Only public claims,
+    past disclosed votes and the wolf's own commitments are used. */
+ var ownClearIds=new Set(aiReportsBy(p.id).filter(function(h){
+  return h.kind==="gold";
+ }).map(function(h){return h.targetId}));
+ var rivals=aiClaimFor(p.id)==="seer"?aiPublicRoleClaimers("seer").filter(function(q){
+  return q.id!==p.id&&!ownClearIds.has(q.id);
+ }):[];
+ var pressureScore=function(q){
+  return (aiReportsBy(q.id).some(function(h){return h.kind==="black"&&h.targetId===p.id})?5:0)+
+   (aiReportsBy(p.id).some(function(h){return h.kind==="black"&&h.targetId===q.id})?3:0)+
+   (today.some(function(h){return h.id===q.id&&h.targetId===p.id&&
+    ["suspect","suspectVote","challengeClaim"].includes(h.kind)})?2:0);
+ };
+ rivals.sort(function(a,b){return pressureScore(b)-pressureScore(a)});
+ var duelOpponent=rivals[0]||null;
+ var blackAccusers=candidates.filter(function(q){
+  return !ownClearIds.has(q.id)&&aiReportsBy(q.id).some(function(h){
+   return h.kind==="black"&&h.targetId===p.id;
+  });
+ }).sort(function(a,b){return pressureScore(b)-pressureScore(a)});
+ var blackAccuser=blackAccusers[0]||null;
  var beingBlack=today.some(function(h){return h.kind==="black"&&h.targetId===p.id});
  var beingAccused=today.some(function(h){return h.targetId===p.id&&
   ["suspect","suspectVote","black"].includes(h.kind)});
@@ -4030,6 +4053,8 @@ function aiWolfVoteDecision(p){
   if(beingBlack&&today.some(function(h){return h.id===q.id&&h.kind==="black"&&h.targetId===p.id}))
    score+=1.1; // defensive counter-push is risky but sometimes worthwhile
   if(claim==="seer")score+=.24; // potential threat, not automatic proof
+  if(duelOpponent&&q.id===duelOpponent.id)score+=4.2;
+  if(blackAccuser&&q.id===blackAccuser.id)score+=3.1;
   if(plan&&plan.targetId===q.id&&["suspect","black"].includes(plan.kind))score+=.38;
   if(aiReportsBy(p.id).some(function(h){return h.kind==="gold"&&h.targetId===q.id}))score-=4;
   return {q:q,score:score,backing:endorsements.size+Math.min(1,pastSupport),
@@ -4055,10 +4080,20 @@ function aiWolfVoteDecision(p){
  if(beingBlack)chance+=.24;
  if(risk)chance+=.40; // at parity, a successful lone vote can win
  if(remaining===4)chance+=.11;
+ /* In a Seer duel, abstaining risks an unopposed single-ballot exile.
+    A countervote may secure a tie, but does not guarantee survival. */
+ if(duelOpponent&&best.q.id===duelOpponent.id){
+  var rivalBlack=aiReportsBy(duelOpponent.id).some(function(h){
+   return h.kind==="black"&&h.targetId===p.id;
+  });
+  chance=Math.max(chance,rivalBlack?.975:remaining<=3?.965:.91);
+ }else if(blackAccuser&&best.q.id===blackAccuser.id){
+  chance=Math.max(chance,remaining<=3?.965:.93);
+ }
  var temperament=aiState(p).temperament;
  if(temperament==="opportunist")chance+=.08;
  if(temperament==="cautious")chance-=.05;
- chance=Math.max(.04,Math.min(.94,chance));
+ chance=Math.max(.04,Math.min(.985,chance));
  return Math.random()<chance?best.q.id:"__abstain__";
 }
 function botVote(p){
