@@ -81,3 +81,11 @@
  .crew-panel .crew-list{min-height:0}
  .crew-panel .mobile-chooser{display:none}
 }
+
+/* Ensure the 44px info hitbox sits entirely inside its blue 48px title bar. */
+@media(max-width:770px) and (orientation:portrait){
+ .crew-panel{gap:0}
+ .crew-panel .panel-head{height:48px;min-height:48px;flex:0 0 48px}
+ .crew-panel .mobile-info{width:44px;min-width:44px;min-height:44px;height:44px}
+ .crew-panel .mobile-chooser{grid-template-rows:44px minmax(44px,1fr)}
+}
