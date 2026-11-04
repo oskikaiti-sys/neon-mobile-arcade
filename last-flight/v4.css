@@ -124,3 +124,21 @@ main{height:calc(100dvh - 57px);max-height:calc(100dvh - 57px);overflow:hidden}
  .crew-card-row .crew-card{padding-right:48px}
 }
 @media(prefers-reduced-motion:reduce){.cockpit.crashing{animation:none}}
+
+/* Readability/accessibility finishing rules. */
+.modal .close,.modal button,.radio-header button,.radio-header .close-log{min-width:44px;min-height:44px}
+.masthead .brand small,.modal-eyebrow,.picker-note{font-size:12px}
+.radio-header,.radio-header button,.radio-log,.log-line{font-size:12px}
+.radio-header button{padding:6px 9px}
+.result-details{position:sticky;bottom:0;z-index:2;background:#fcf9e9}
+@media(max-width:770px) and (orientation:portrait){
+ .cockpit .scene-topline,.cockpit .flight-no,.cockpit .phase{font-size:12px;line-height:1.1}
+ .cockpit .phase,.cockpit .flight-no{max-width:49%;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .cockpit .windscreen-badge,.cockpit .warning small{font-size:12px}
+ .cockpit .instrument-chip span,.cockpit .instrument-chip small{font-size:12px}
+ .crew-panel .mini-copy strong{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.13;max-height:27px;overflow:hidden}
+ .crew-panel .mini-copy small{font-size:12px}
+ .inline-result-card .result-details{flex-shrink:0}
+ .radio-header button{min-height:44px}
+ .radio-actions #archiveBtn{display:none}
+}
