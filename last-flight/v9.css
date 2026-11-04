@@ -69,8 +69,8 @@
  .is-flying .cockpit{grid-area:cockpit;min-height:0;height:100%;max-height:none;flex:none}
  .is-flying .cockpit .pilot-figures{inset:0 12px}
  .is-flying .cockpit .cockpit-figure{
-   height:clamp(72px,20vw,88px);width:clamp(72px,20vw,88px);
-   bottom:17%;aspect-ratio:1/1;max-height:none;max-width:none;
+   height:clamp(70px,18vw,82px);width:clamp(70px,18vw,82px);
+   bottom:22%;aspect-ratio:1/1;max-height:none;max-width:none;
  }
  .is-flying .cockpit .cockpit-figure>div{width:100%;height:100%;aspect-ratio:1/1}
  .is-flying .cockpit .cockpit-deck{height:21%}
@@ -107,7 +107,7 @@
 }
 @media(max-width:770px) and (orientation:portrait) and (max-height:700px){
  .is-flying .play-layout{
-   grid-template-rows:112px minmax(0,1fr) 62px;
+   grid-template-rows:120px minmax(0,1fr) 62px;
    padding-bottom:calc(7px + env(safe-area-inset-bottom));gap:6px;
  }
  .is-flying .crew-panel{height:62px;max-height:62px}
@@ -128,4 +128,8 @@
 }
 @media(prefers-reduced-motion:reduce){
  .decision-option,.pressure-fill{transition:none}
+}
+
+@media(max-width:770px) and (orientation:portrait) and (max-height:700px){
+ .is-flying .cockpit .cockpit-figure{width:64px;height:64px;bottom:22%}
 }
