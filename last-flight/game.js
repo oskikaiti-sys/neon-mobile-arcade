@@ -255,8 +255,6 @@ function refreshFlightPressure(){
 }
 function clearFlightPresentation(){
  if(pressureTicker!==null){clearInterval(pressureTicker);pressureTicker=null;}
- $("flightDecisions").hidden=true;
- document.body.classList.remove("flight-decision-mode");
 }
 function startFlightPresentation(situation){
  clearFlightPresentation();
@@ -266,14 +264,39 @@ function startFlightPresentation(situation){
  $("pressureTrack").classList.remove("warn","critical");
  $("pressureTrack").setAttribute("aria-valuenow","100");
  $("pressureTime").textContent="13.5秒";
- $("flightDecisions").hidden=false;
- document.body.classList.add("flight-decision-mode");
  paintFlightChoices();
  refreshFlightPressure();
  pressureTicker=setInterval(refreshFlightPressure,180);
 }
 
 let selected={captain:"sully",fo:"skiles"},running=false,flightCount=0,activeToken=0,sound=true,context=null,warningIssued=false;
+// Stage is the sole source of truth for visibility; running is still used by the original flight simulator.
+let gamePhase="idle"; // idle | playing | ended
+const flightTimers=new Set();
+const activeOscillators=new Set();
+function stopFlightEffects(){
+ for(const id of flightTimers)clearTimeout(id);
+ flightTimers.clear();
+ clearFlightPresentation();
+ for(const osc of activeOscillators){try{osc.stop()}catch(_){}}
+ activeOscillators.clear();
+ if("speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}
+}
+function renderStage(){
+ const idle=gamePhase==="idle",playing=gamePhase==="playing",ended=gamePhase==="ended";
+ document.body.classList.toggle("is-flying",playing);
+ document.body.classList.toggle("has-result",ended);
+ document.body.classList.toggle("flight-decision-mode",playing);
+ $("crewDossier").hidden=!idle;
+ $("flightDecisions").hidden=!playing;
+ $("inlineResult").hidden=!ended;
+ $("phase").hidden=ended;
+ $("scenarioBadge").hidden=true;
+ const btn=$("startBtn");
+ btn.disabled=playing;
+ btn.textContent=idle?"✈ 开始飞行":playing?"✈ 飞行进行中":"✈ 再次飞行";
+}
+
 function avatar(p,large=false){
  const s=p.skin,h=p.hair,e=p.eye;
  // Visual-only individual portrait parameters; not historical likeness claims.
@@ -358,6 +381,7 @@ function render(){
   if(chooser)chooser.setAttribute("aria-label","当前"+(side==="captain"?"机长":"副驾驶")+pilot.cn+"，历史职务"+historic.role+"，点击更换");
  }
  renderCrewDossier(a,b);
+ renderStage();
  queueStandbyOverflow();
 }
 let pickerSide="captain";
@@ -457,13 +481,15 @@ function systemTone(freq,duration=.15,volume=.11,wave="sine"){
  osc.type=wave;osc.frequency.setValueAtTime(freq,now);gain.gain.setValueAtTime(.0001,now);
  gain.gain.exponentialRampToValueAtTime(volume,now+.018);
  gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
- osc.connect(gain).connect(context.destination);osc.start(now);osc.stop(now+duration+.03);
+ osc.connect(gain).connect(context.destination);activeOscillators.add(osc);
+ osc.onended=()=>activeOscillators.delete(osc);
+ osc.start(now);osc.stop(now+duration+.03);
  }catch(_){}
 }
 function announcePullUp(){
  if(warningIssued)return; warningIssued=true;
  if(!sound)return;
- [0,220,480,740].forEach((ms,i)=>setTimeout(()=>{if(running){systemTone(i%2?820:650,.16,.17,"square");}},ms));
+ [0,220,480,740].forEach((ms,i)=>callLater(activeToken,()=>{if(running)systemTone(i%2?820:650,.16,.17,"square");},ms));
  if("speechSynthesis" in window){
  try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance("Pull up! Pull up!");u.lang="en-US";u.rate=1.13;u.pitch=.72;u.volume=1;window.speechSynthesis.speak(u);}catch(_){}
  }
@@ -484,19 +510,24 @@ function updatePanel({alt=0,spd=0,vsi=0,phase="巡航",storm=false,alert=false,f
  $('horizonLine').style.transform="rotate("+tilt+"deg)";
  $('ground').style.transform="scale("+terrainScale+")";
 }
-function callLater(token,fn,delay){setTimeout(()=>{if(token===activeToken)fn()},delay);}
+function callLater(token,fn,delay){
+ const timer=setTimeout(()=>{
+  flightTimers.delete(timer);
+  if(token===activeToken)fn();
+ },delay);
+ flightTimers.add(timer);
+}
 function startFlight(){
- if(running)return;
+ if(gamePhase!=="idle"||running)return;
+ // A fresh run always starts from a completely cleared idle presentation.
+ resetToIdle();
  const a=BY_ID[selected.captain],b=BY_ID[selected.fo];
  flightCount++;const result=simulate(a,b,pickCase(a,b,flightCount),flightCount);
  const c=result.case;
  activeToken++;const token=activeToken;
- running=true;warningIssued=false;runStarted=Date.now();
- document.body.classList.add("is-flying");queueStandbyOverflow();
+ running=true;warningIssued=false;runStarted=Date.now();gamePhase="playing";
+ render(); // the same render path owns all stage visibility
  startFlightPresentation(result.scenario);
- $('startBtn').disabled=true;$('startBtn').textContent="✈ 飞行进行中";
- $('cockpit').classList.remove("impact","crashing");$('warning').hidden=true;$('phase').hidden=false;$('scenarioBadge').hidden=false;
- $('inlineResult').hidden=true;$("realEventDetails").classList.remove("is-open");$("resultExpand").setAttribute("aria-expanded","false");document.body.classList.remove("has-result");
  $('radioLog').innerHTML="";
  $('radioPanel').classList.remove("is-open");$('logBtn').setAttribute("aria-expanded","false");
  $('scenarioBadge').textContent="模拟航班 · 飞行准备";
@@ -531,8 +562,10 @@ function finish(token,a,b,r){
  $('scenarioBadge').hidden=true;$('phase').hidden=true;
  log(r.outcome==="crash"?"本局结局：坠毁。":r.outcome==="divert"?"本局结局：紧急迫降／备降。":"本局结局：安全到达。",r.outcome==="crash"?"alert":"good");
  narrate("旁白 · 终章",r.outcome==="crash"?"窗外只剩一片寂静。":r.outcome==="divert"?"长久的紧绷之后，终于能松一口气。":"这趟航班，终于平安落幕。",r.outcome==="crash"?"alert":"good");
- running=false;clearFlightPresentation();document.body.classList.remove("is-flying");queueStandbyOverflow();$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
- showResult(a,b,r);
+ running=false;clearFlightPresentation();
+ showResult(a,b,r); // populates result data, never changes stage visibility
+ gamePhase="ended";
+ render();
 }
 function showResult(a,b,r){
  // This function only formats the existing outcome. It never modifies selection, event, score or outcome.
@@ -551,10 +584,6 @@ function showResult(a,b,r){
  $("inlineSources").innerHTML=[...new Set([a.source,b.source])].map(k=>sourceCard(SOURCES[k])).join("");
  $("inlineDisclaimer").textContent=a.source===b.source?"本局是虚构模拟，不是对真实航班的重演，也不能预测飞行员行为。":"两者不是同一航班，结果不代表真实人物的必然选择。";
  $("realEventDetails").classList.remove("is-open");$("resultExpand").setAttribute("aria-expanded","false");
- $("inlineResult").hidden=false;
- queueStandbyOverflow();
- $("resultOverlay").hidden=true;
- document.body.classList.add("has-result");
 }
 function sourceCard(s){return '<div class="reference"><strong>'+escapeHtml(s.title)+'</strong><span>'+escapeHtml(s.summary)+'</span><a target="_blank" rel="noopener noreferrer" href="'+s.url+'">查看调查资料 ↗</a></div>';}
 function showArchive(){
