@@ -402,8 +402,8 @@ function showResult(a,b,r){
  const historyPilot=a.source===historySource?a:b.source===historySource?b:a;
  $("inlineHistory").textContent=PERSON_HISTORY[historyPilot.id]||SHORT_HISTORY[historySource]||SOURCES[historySource].summary;
  const sceneName={birds:"鸟击",fuel:"燃油异常",hydraulic:"操纵失灵",engine:"发动机故障",window:"风挡破损",unsafe:"机组安全冲突",weather:"暴雨进近",normal:"常规进近"}[r.scenario]||"航班事件";
- $("inlineSimulation").textContent="这次"+a.cn+"任机长，"+b.cn+"任副驾驶。"+sceneName+"后，"+
-   (r.outcome==="crash"?"模拟航班发生事故。":r.outcome==="divert"?"机组完成紧急着陆。":"机组完成了本次飞行。");
+ $("inlineSimulation").textContent=a.cn+"和"+b.cn+"遭遇"+sceneName+"，"+
+   (r.outcome==="crash"?"模拟航班发生事故。":r.outcome==="divert"?"机组紧急着陆。":"完成了本次飞行。");
  $("inlineCompare").textContent=b.id==="haynes"?ROLE_NOTE:
    "两人历史上："+(ROLE_SUMMARY[a.id]||a.hint)+"；"+(ROLE_SUMMARY[b.id]||b.hint)+"。";
  $("inlineSources").innerHTML=[...new Set([a.source,b.source])].map(k=>sourceCard(SOURCES[k])).join("");
