@@ -158,3 +158,9 @@ main{height:calc(100dvh - 57px);max-height:calc(100dvh - 57px);overflow:hidden}
 @media(max-width:770px) and (orientation:portrait){
  .crew-panel .mini-copy small{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;max-height:29px;line-height:1.15;overflow:hidden;text-overflow:clip}
 }
+
+@media(max-width:770px) and (orientation:portrait){
+ .has-result .play-layout{grid-template-rows:30dvh minmax(0,1fr) clamp(126px,16.8dvh,158px)}
+ .has-result .inline-result-card .result-history{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex-shrink:0}
+ .has-result .inline-result-card .result-compare{flex-shrink:0}
+}
