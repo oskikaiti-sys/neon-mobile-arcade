@@ -21,7 +21,7 @@
   </div>
   <section class="play-layout" aria-label="游戏">
     <aside class="crew-panel captain" id="captainPanel">
-      <div class="panel-head"><div><span class="panel-num">01</span><h2>机长 <span>CAPTAIN</span></h2></div><span class="panel-icon">★</span></div>
+      <div class="panel-head"><div><span class="panel-num">01</span><h2>机长 <span>CAPTAIN</span></h2></div><span class="panel-icon">★</span></div><button class="mobile-info" data-info-current="captain" type="button" aria-label="查看当前机长经历">i</button>
       <p class="panel-tip">点击选择机长 · 可跨越真实历史职务重组</p>
       <div class="mobile-chooser" data-picker="captain">
         <button type="button" class="crew-step" data-side="captain" data-shift="-1" aria-label="上一个机长">‹</button>
@@ -40,6 +40,10 @@
           <div class="window-line one"></div><div class="window-line two"></div>
           <div class="warning" id="warning" aria-live="assertive" hidden><span>⚠ PULL UP!</span><small>TERRAIN · TERRAIN</small></div>
           <div class="windscreen-badge" id="scenarioBadge">等待航班启动</div>
+        </div>
+        <div class="story-bubble" id="storyBubble" aria-live="polite" aria-atomic="true">
+          <span class="story-speaker" id="storySpeaker">塔台 · FLIGHT CONTROL</span>
+          <span class="story-line" id="storyText">选择机长与副驾驶，准备开始一次架空航班。</span>
         </div>
         <div class="overhead"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <div class="cockpit-deck">
@@ -66,7 +70,7 @@
       <p class="footnote">仅为教育用途的架空组合实验。卡通头像是原创示意，并非真实肖像；模拟行动不代表这些人在其他航班上必然如此行事。</p>
     </section>
     <aside class="crew-panel first-officer" id="firstOfficerPanel">
-      <div class="panel-head"><div><span class="panel-num">02</span><h2>副驾驶 <span>FIRST OFFICER</span></h2></div><span class="panel-icon">✦</span></div>
+      <div class="panel-head"><div><span class="panel-num">02</span><h2>副驾驶 <span>FIRST OFFICER</span></h2></div><span class="panel-icon">✦</span></div><button class="mobile-info" data-info-current="fo" type="button" aria-label="查看当前副驾驶经历">i</button>
       <p class="panel-tip">点击选择副驾驶 · 不能重复选择同一人</p>
       <div class="mobile-chooser" data-picker="fo">
         <button type="button" class="crew-step" data-side="fo" data-shift="-1" aria-label="上一个副驾驶">‹</button>
@@ -89,6 +93,14 @@
     <div class="modal-eyebrow">CHOOSE YOUR CREW</div><h2 id="pickerTitle">选择飞行员</h2>
     <p class="picker-note">选择历史事件人物。更换飞行员不等于预测其在其他航班上的真实行为。</p>
     <div class="picker-grid" id="pickerItems"></div>
+  </section>
+</div>
+<div class="modal-backdrop" id="pilotInfoOverlay" hidden>
+  <section class="modal pilot-info-modal" role="dialog" aria-modal="true" aria-labelledby="pilotInfoTitle">
+    <button class="close" type="button" id="closePilotInfo" aria-label="关闭人物档案">×</button>
+    <div class="modal-eyebrow">PILOT FILE · 历史人物</div>
+    <h2 id="pilotInfoTitle">人物档案</h2>
+    <div id="pilotInfoBody"></div>
   </section>
 </div>
 <div class="modal-backdrop" id="resultOverlay" hidden>
