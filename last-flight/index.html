@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="v3.css">
 <link rel="stylesheet" href="v4.css">
+<link rel="stylesheet" href="v5.css">
 </head>
 <body>
 <div class="masthead">
@@ -23,14 +24,15 @@
   </div>
   <section class="play-layout" aria-label="游戏">
     <aside class="crew-panel captain" id="captainPanel">
-      <div class="panel-head"><div><span class="panel-num">01</span><h2>机长 <span>CAPTAIN</span></h2></div><span class="panel-icon">★</span></div><button class="mobile-info" data-info-current="captain" type="button" aria-label="查看当前机长经历">i</button>
+      <div class="panel-head"><div><span class="panel-num">01</span><h2>机长 <span>CAPTAIN</span></h2></div><button class="mobile-info" data-info-current="captain" type="button" aria-label="查看当前机长经历">i</button></div>
       <p class="panel-tip">点击选择机长 · 可跨越真实历史职务重组</p>
       <div class="mobile-chooser" data-picker="captain">
         <button type="button" class="crew-step" data-side="captain" data-shift="-1" aria-label="上一个机长">‹</button>
-        <button type="button" class="crew-current" data-side="captain" aria-haspopup="dialog" aria-label="选择机长">
-          <span class="mini-portrait" id="captainMiniPortrait"></span><span class="mini-copy"><strong id="captainMiniName">—</strong><small id="captainMiniFlight">点击更换</small></span>
+        <button type="button" class="crew-current portrait-picker" data-side="captain" aria-haspopup="dialog" aria-label="选择机长">
+          <span class="mini-portrait" id="captainMiniPortrait"></span>
         </button>
         <button type="button" class="crew-step" data-side="captain" data-shift="1" aria-label="下一个机长">›</button>
+        <button type="button" class="crew-current crew-caption" data-side="captain" aria-haspopup="dialog" aria-label="点击名字选择机长"><span class="mini-copy"><strong id="captainMiniName">—</strong><small id="captainMiniFlight">点击更换</small></span></button>
       </div>
       <div id="captainList" class="crew-list" role="group" aria-label="机长候选人"></div>
     </aside>
@@ -65,13 +67,17 @@
           <span class="story-line" id="storyText">选择机长与副驾驶，准备开始一次架空航班。</span>
         </div>
         <section class="inline-result-card" id="inlineResult" aria-live="polite" hidden>
-          <div class="result-head"><strong id="inlineResultTitle">飞行结果</strong><span id="inlineResultOutcome">—</span></div>
-          <p class="result-history" id="inlineHistory"></p>
-          <p class="result-compare" id="inlineCompare"></p>
+          <div class="result-head"><strong id="inlineResultTitle">终章</strong><span id="inlineResultOutcome">—</span></div>
+          <section class="result-segment result-real"><h3>真实事件</h3><p id="inlineHistory"></p></section>
           <details class="result-details" id="realEventDetails">
             <summary>了解真实事件</summary>
-            <div id="inlineSources" class="inline-sources"></div>
+            <div class="result-more">
+              <section class="result-segment"><h3>本次模拟</h3><p id="inlineSimulation"></p></section>
+              <section class="result-segment"><h3>历史处置</h3><p id="inlineCompare"></p></section>
+              <div class="inline-sources" id="inlineSources"></div>
+            </div>
           </details>
+          <p class="result-disclaimer" id="inlineDisclaimer">两者不是同一航班，结果不代表真实人物的必然选择。</p>
         </section>
       </section>
       <div class="dashboard">
@@ -86,14 +92,15 @@
       <p class="footnote">仅为教育用途的架空组合实验。卡通头像是原创示意，并非真实肖像；模拟行动不代表这些人在其他航班上必然如此行事。</p>
     </section>
     <aside class="crew-panel first-officer" id="firstOfficerPanel">
-      <div class="panel-head"><div><span class="panel-num">02</span><h2>副驾驶 <span>FIRST OFFICER</span></h2></div><span class="panel-icon">✦</span></div><button class="mobile-info" data-info-current="fo" type="button" aria-label="查看当前副驾驶经历">i</button>
+      <div class="panel-head"><div><span class="panel-num">02</span><h2>副驾驶 <span>FIRST OFFICER</span></h2></div><button class="mobile-info" data-info-current="fo" type="button" aria-label="查看当前副驾驶经历">i</button></div>
       <p class="panel-tip">点击选择副驾驶 · 不能重复选择同一人</p>
       <div class="mobile-chooser" data-picker="fo">
         <button type="button" class="crew-step" data-side="fo" data-shift="-1" aria-label="上一个副驾驶">‹</button>
-        <button type="button" class="crew-current" data-side="fo" aria-haspopup="dialog" aria-label="选择副驾驶">
-          <span class="mini-portrait" id="foMiniPortrait"></span><span class="mini-copy"><strong id="foMiniName">—</strong><small id="foMiniFlight">点击更换</small></span>
+        <button type="button" class="crew-current portrait-picker" data-side="fo" aria-haspopup="dialog" aria-label="选择副驾驶">
+          <span class="mini-portrait" id="foMiniPortrait"></span>
         </button>
         <button type="button" class="crew-step" data-side="fo" data-shift="1" aria-label="下一个副驾驶">›</button>
+        <button type="button" class="crew-current crew-caption" data-side="fo" aria-haspopup="dialog" aria-label="点击名字选择副驾驶"><span class="mini-copy"><strong id="foMiniName">—</strong><small id="foMiniFlight">点击更换</small></span></button>
       </div>
       <div id="foList" class="crew-list" role="group" aria-label="副驾驶候选人"></div>
     </aside>
