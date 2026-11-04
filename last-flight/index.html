@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="v6.css">
 <link rel="stylesheet" href="v7.css">
 <link rel="stylesheet" href="v8.css">
+<link rel="stylesheet" href="v9.css">
 </head>
 <body>
 <div class="masthead">
@@ -88,6 +89,22 @@
             <span>搭配提示</span>
             <strong class="pairing-pill" id="pairingTag" aria-live="polite">真实搭档</strong>
           </div>
+        </section>
+        <section class="flight-decisions" id="flightDecisions" aria-labelledby="flightDecisionsTitle" hidden>
+          <div class="decision-header">
+            <h2 id="flightDecisionsTitle">驾驶舱决策</h2>
+            <span class="decision-counter" id="decisionCounter" aria-live="polite">1 / 5</span>
+          </div>
+          <p class="decision-consequence" id="decisionConsequence" aria-live="polite" hidden></p>
+          <div class="pressure-summary">
+            <span>剩余模拟时间</span>
+            <strong id="pressureTime">13.5秒</strong>
+          </div>
+          <div class="pressure-track" id="pressureTrack" role="progressbar" aria-label="剩余模拟飞行时间" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+            <div class="pressure-fill" id="pressureFill"></div>
+          </div>
+          <div class="decision-actions" id="decisionActions" role="group" aria-label="当前可选行动"></div>
+          <p class="decision-caveat">剧情选择用于记录机组处置，不改变本局预设结局。</p>
         </section>
         <section class="inline-result-card" id="inlineResult" aria-live="polite" hidden>
           <div class="result-head" hidden aria-hidden="true"><strong id="inlineResultTitle">终章</strong><span id="inlineResultOutcome">—</span></div>
