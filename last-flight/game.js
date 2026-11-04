@@ -60,6 +60,20 @@ const HISTORICAL_ACTION={
  lubitz:"调查认定卢比茨故意导致9525航班撞山，机上人员全部遇难。",
  records:"雷科德斯是UA232当班副驾驶，与机长及其他人员共同处置危机。"
 };
+/* Short captions keep both selected people's documented roles visible. */
+const ROLE_SUMMARY={
+ sully:"萨伦伯格机长选择河面迫降",
+ skiles:"斯凯尔斯副驾驶协助检查",
+ haynes:"海恩斯机长组织应急迫降",
+ fitch:"菲奇是乘客培训机长，主动协助",
+ shults:"舒尔茨机长驾驶飞机备降费城",
+ piche:"皮谢机长操纵滑翔着陆",
+ dejager:"德雅格副驾驶配合机长",
+ atchison:"艾奇逊副驾驶接管飞行",
+ lubitz:"调查认定卢比茨故意导致事故",
+ records:"雷科德斯副驾驶协助处置"
+};
+
 const ROLE_NOTE="本次模拟让他担任副驾驶，历史上他是UA 232的机长。";
 function uiHistoricalText(p,side){
  return (HISTORICAL_ACTION[p.id]||p.hint)+(side==="fo"&&p.id==="haynes"?" "+ROLE_NOTE:"");
@@ -390,7 +404,8 @@ function showResult(a,b,r){
  const sceneName={birds:"鸟击",fuel:"燃油异常",hydraulic:"操纵失灵",engine:"发动机故障",window:"风挡破损",unsafe:"机组安全冲突",weather:"暴雨进近",normal:"常规进近"}[r.scenario]||"航班事件";
  $("inlineSimulation").textContent="这次"+a.cn+"任机长，"+b.cn+"任副驾驶。"+sceneName+"后，"+
    (r.outcome==="crash"?"模拟航班发生事故。":r.outcome==="divert"?"机组完成紧急着陆。":"机组完成了本次飞行。");
- $("inlineCompare").textContent=b.id==="haynes"?ROLE_NOTE:uiHistoricalText(a,"captain");
+ $("inlineCompare").textContent=b.id==="haynes"?ROLE_NOTE:
+   "两人历史上："+(ROLE_SUMMARY[a.id]||a.hint)+"；"+(ROLE_SUMMARY[b.id]||b.hint)+"。";
  $("inlineSources").innerHTML=[...new Set([a.source,b.source])].map(k=>sourceCard(SOURCES[k])).join("");
  $("inlineDisclaimer").textContent=a.source===b.source?"本局是虚构模拟，不是对真实航班的重演，也不能预测飞行员行为。":"两者不是同一航班，结果不代表真实人物的必然选择。";
  $("realEventDetails").classList.remove("is-open");$("resultExpand").setAttribute("aria-expanded","false");
