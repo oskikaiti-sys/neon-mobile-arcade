@@ -17,13 +17,13 @@ const PILOTS = [
  {id:"sully",name:"Chesley Sullenberger",cn:"萨伦伯格",flight:"US Airways 1549 · 2009",brief:"双发失去推力 · 哈德逊河迫降",source:"1549",strength:4,team:3,action:"迅速评估备降选项，优先保持飞机可控，并寻找可用的迫降地点。",hint:"历史行动：在双发推力丧失后选择哈德逊河迫降。",skin:"#e7b99b",hair:"#c6d0d4",eye:"#385d73",style:1},
  {id:"skiles",name:"Jeffrey Skiles",cn:"杰弗里·斯凯尔斯",flight:"US Airways 1549 · 2009",brief:"协助发动机处置与检查程序",source:"1549",strength:3,team:4,action:"协助判断发动机状态，执行检查与沟通工作。",hint:"历史行动：配合机长执行紧急程序。",skin:"#e9bc9f",hair:"#674f45",eye:"#334862",style:2},
  {id:"haynes",name:"Alfred C. Haynes",cn:"阿尔弗雷德·海恩斯",flight:"United 232 · 1989",brief:"严重液压失效 · 协同保持控制",source:"232",strength:4,team:4,action:"组织机组持续沟通，在严重操纵受限时尽力维持飞行。",hint:"历史行动：在液压失效中组织机组合作，最终尝试迫降。",skin:"#d8a285",hair:"#b5b5ba",eye:"#384e67",style:0},
- {id:"fitch",name:"Dennis Fitch",cn:"丹尼斯·菲奇",flight:"United 232 · 1989",brief:"机上飞行教员 · 协助应急控制",source:"232",strength:4,team:4,action:"主动提供协助，并配合其他机组人员寻找有限的控制方案。",hint:"历史行动：作为机上教员加入并协助处理液压失效；原本并非该航班副驾驶。",skin:"#deb195",hair:"#8e8580",eye:"#3c5268",style:3},
+ {id:"fitch",name:"Dennis Fitch",cn:"丹尼斯·菲奇",flight:"United 232 · 1989",brief:"乘客机长／DC-10培训机长 · 协助者",source:"232",strength:4,team:4,action:"主动提供协助，并配合其他机组人员寻找有限的控制方案。",hint:"历史行动：作为搭乘本班机的培训机长自愿协助；当班副驾驶是 William R. Records。",skin:"#deb195",hair:"#8e8580",eye:"#3c5268",style:3},
  {id:"shults",name:"Tammie Jo Shults",cn:"塔米·乔·舒尔茨",flight:"Southwest 1380 · 2018",brief:"发动机故障与失压 · 紧急备降",source:"1380",strength:4,team:4,action:"与副驾驶配合判断异常，联系管制并协调尽快备降。",hint:"历史行动：发动机故障及机舱失压后成功备降费城。",skin:"#ecc4a3",hair:"#655447",eye:"#496276",style:4},
  {id:"piche",name:"Robert Piché",cn:"罗伯特·皮谢",flight:"Air Transat 236 · 2001",brief:"燃油耗尽 · 双发停转滑翔着陆",source:"236",strength:3,team:3,action:"在失去动力的极端情况下寻求滑翔至机场的机会。",hint:"历史行动：与副驾驶一起完成无动力着陆；调查也指出机组处置问题。",skin:"#e6bb9b",hair:"#403d40",eye:"#46536d",style:0},
  {id:"dejager",name:"Dirk de Jager",cn:"德克·德雅格",flight:"Air Transat 236 · 2001",brief:"协助失去动力后的备降",source:"236",strength:3,team:3,action:"协助监视系统与航路，配合机长完成紧急备降。",hint:"历史行动：作为副驾驶参与了Air Transat 236无动力着陆。",skin:"#e5ba98",hair:"#89634c",eye:"#46506a",style:2},
  {id:"atchison",name:"Alastair Atchison",cn:"阿拉斯泰尔·艾奇逊",flight:"British Airways 5390 · 1990",brief:"风挡失效 · 接管飞机安全降落",source:"5390",strength:4,team:4,action:"在另一名机组成员失去正常操纵能力时接管飞行，并协调支援。",hint:"历史行动：风挡失效后操纵飞机成功降落。",skin:"#e3b998",hair:"#544c43",eye:"#495873",style:3},
  {id:"lubitz",name:"Andreas Lubitz",cn:"安德烈亚斯·卢比茨",flight:"Germanwings 9525 · 2015",brief:"BEA认定故意导致撞山",source:"9525",strength:0,team:-3,action:"出现与飞行安全相冲突的危险行为；架空机组能否识别并制止，取决于本局模拟规则。",hint:"历史结论：BEA认定他故意造成9525航班撞山。模拟不复现具体伤害方法。",skin:"#dfb097",hair:"#78503c",eye:"#3b526c",style:2,unsafe:true},
- {id:"zaharie",name:"Zaharie Ahmad Shah",cn:"扎哈里",flight:"Malaysia Airlines 370 · 2014",brief:"原因未定 · 不模拟未知的动机",source:"mh370",strength:3,team:3,action:"按照一般机组程序保持监控。MH370关键阶段的个人具体操作无法证实，因此不予模拟。",hint:"调查边界：MH370原因未明，不能把失踪等同于机长蓄意造成。",skin:"#bd8c69",hair:"#262a32",eye:"#303f56",style:1,unknown:true}
+ {id:"records",name:"William R. Records",cn:"威廉·雷科德斯",flight:"United 232 · 1989",brief:"当班副驾驶 · 液压失效应急处置",source:"232",strength:4,team:4,action:"与机长及协助人员持续交叉检查，在操纵受限时合作完成应急程序。",hint:"历史行动：当班副驾驶，参与联合航空232航班液压失效后的集体应对。",skin:"#d6a48a",hair:"#58483c",eye:"#42506d",style:1}
 ];
 const BY_ID=Object.fromEntries(PILOTS.map(p=>[p.id,p]));
 const CASES={
@@ -43,13 +43,13 @@ const BIOS={
  sully:"2009年1月15日，他担任全美航空1549航班机长。飞机起飞不久遭鸟击，双发几乎失去推力。机组选择在哈德逊河迫降，机上155人全部生还。",
  skiles:"2009年全美航空1549航班的副驾驶。鸟击发生后，他协助执行紧急检查程序，与机长共同处置失去推力的紧急情况。",
  haynes:"1989年联合航空232航班机长。飞机尾部发动机故障引发严重液压系统失效，他与其他机组人员竭力保持控制，并尝试在苏城紧急着陆；飞机坠毁，但多数乘员幸存。",
- fitch:"1989年联合航空232航班上恰好搭乘的一名飞行教员。事故中他主动进入驾驶舱协助机组，在操纵系统严重受限时提供重要帮助。他不是该航班原本安排的副驾驶。",
+ fitch:"1989年联合航空232航班上的乘客机长、DC-10培训机长。事故中他主动进入驾驶舱协助机组处理严重液压故障。当时的当班副驾驶是威廉·雷科德斯，而非菲奇。",
  shults:"2018年西南航空1380航班机长。飞机一台发动机故障并发生客舱失压，机组协调紧急下降和备降，最终在费城落地；事件造成一名乘客遇难。",
  piche:"2001年越洋航空236航班机长。飞机发生燃油泄漏并最终双发失去动力，机组将飞机滑翔至亚速尔群岛机场降落。调查也记录了维护与机组处置方面的复杂因素。",
  dejager:"2001年越洋航空236航班副驾驶。他与机长在客机失去发动机动力后参与了滑翔与紧急着陆。调查涉及燃油系统及机组应对等多方面因素。",
  atchison:"1990年英国航空5390航班副驾驶。飞行中驾驶舱风挡失效，机长失去正常操纵能力，他接管飞行并在其他人员协助下安全降落。",
  lubitz:"2015年德国之翼9525航班副驾驶。法国BEA的事故调查认定，他故意导致飞机撞山。游戏将该历史调查结论与虚构的跨时代角色组合严格区分。",
- zaharie:"2014年马来西亚航空MH370航班机长。飞机失踪原因仍未确定；调查没有证实机长具体意图。游戏不会据此把他设定为蓄意造成事故的人。"
+ records:"1989年联合航空232航班的当班副驾驶。飞机发生灾难性的液压系统失效后，他与机长阿尔弗雷德·海恩斯、飞行工程师和自愿协助的培训机长丹尼斯·菲奇共同处置紧急情况。飞机最终在苏城坠毁，但多数乘员生还。"
 };
 const PLOTS={
  birds:{intro:"起飞后的城市还在窗下缓缓缩小。忽然，挡风玻璃前出现一群飞鸟。",twist:"连续的撞击与剧烈震动！发动机推力几乎同时消失，原本熟悉的噪音瞬间变得不对劲。",stakes:"高度正一寸寸减少。返回机场还是寻找另一片可控的着陆区域？"},
@@ -66,23 +66,22 @@ function narrate(who,line,tone=""){
  $("storyText").textContent=line;
  $("storyBubble").className="story-bubble"+(tone?" "+tone:"");
 }
-function showPilotInfo(id){
+function showPilotInfo(id,anchor){
  const p=BY_ID[id];if(!p)return;
- const source=SOURCES[p.source];
+ const box=$("pilotInfoOverlay");
  $("pilotInfoTitle").textContent=p.cn+" · "+p.name;
- $("pilotInfoBody").innerHTML='<div class="pilot-info-header"><div class="pilot-info-avatar">'+avatar(p)+'</div><div><div class="pilot-info-name">'+escapeHtml(p.cn)+'</div><div class="pilot-info-flight">'+escapeHtml(p.name)+'</div><div class="pilot-info-flight">'+escapeHtml(p.flight)+'</div></div></div>'+
- '<div class="pilot-info-section"><strong>那次航班发生了什么？</strong>'+escapeHtml(BIOS[p.id])+'</div>'+
- '<div class="pilot-info-section"><strong>历史行动线索</strong>'+escapeHtml(p.hint)+'</div>'+
- '<div class="pilot-info-section"><strong>调查资料</strong><a href="'+source.url+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(source.title)+' ↗</a></div>'+
- '<p class="pilot-info-note">人物卡是游戏内的简化资料。模拟剧情为虚构，不代表此人在另一架飞机上必然作出的选择。</p>';
- $("pilotInfoOverlay").hidden=false;$("closePilotInfo").focus();
+ $("pilotInfoBody").innerHTML='<span class="popover-flight">'+escapeHtml(p.flight)+'</span><p class="popover-summary">'+escapeHtml(BIOS[p.id])+'</p>';
+ box.hidden=false;
+ const rect=anchor&&typeof anchor.getBoundingClientRect==="function"?anchor.getBoundingClientRect():null;
+ const vw=window.innerWidth||document.documentElement.clientWidth||390;
+ const vh=window.innerHeight||document.documentElement.clientHeight||750;
+ const w=Math.min(288,vw-20),h=Math.min(205,vh*.34);
+ const left=rect?Math.min(Math.max(10,rect.left+rect.width/2-w/2),vw-w-10):Math.max(10,(vw-w)/2);
+ let top=rect?(rect.bottom+10+h>vh-10?rect.top-h-10:rect.bottom+10):Math.max(10,(vh-h)/2);
+ top=Math.max(10,Math.min(top,vh-h-10));
+ box.style.left=Math.round(left)+"px";box.style.top=Math.round(top)+"px";
 }
-function closePilotInfo(){
- $("pilotInfoOverlay").hidden=true;
- const fallback=document.querySelector('.mobile-info[data-info-current="captain"]')||document.getElementById("startBtn");
- if(fallback)fallback.focus();
-}
-
+function closePilotInfo(){$("pilotInfoOverlay").hidden=true;}
 let selected={captain:"sully",fo:"skiles"},running=false,flightCount=0,activeToken=0,sound=true,context=null,warningIssued=false;
 function avatar(p,large=false){
  const s=p.skin,h=p.hair,e=p.eye;
@@ -100,8 +99,7 @@ function avatar(p,large=false){
  const mouth=p.unsafe?'<path d="M62 116Q78 111 96 114" stroke="'+line+'" stroke-width="3.5" stroke-linecap="round" fill="none"/>':
  '<path d="M62 109Q78 126 98 109" stroke="'+line+'" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 164" preserveAspectRatio="xMidYMax meet" role="img" aria-label="原创美式二维卡通人物示意 '+escapeHtml(p.name)+'">'+
- '<rect x="0" y="0" width="150" height="164" rx="10" fill="'+bg+'"/>'+
- '<path d="M0 125L44 91L150 32V164H0Z" fill="#ffffff42"/>'+
+ (large?'':'<rect x="0" y="0" width="150" height="164" rx="10" fill="'+bg+'"/><path d="M0 125L44 91L150 32V164H0Z" fill="#ffffff42"/>')+
  '<circle cx="77" cy="65" r="63" fill="#fff8d3" stroke="'+line+'" stroke-width="3" opacity=".9"/>'+
  '<path d="M6 164Q7 121 43 118L107 118Q144 125 145 164Z" fill="#fcf6df" stroke="'+line+'" stroke-width="6" stroke-linejoin="round"/>'+
  '<path d="M26 157L39 117L59 117L62 164H20Z" fill="#254a73" stroke="'+line+'" stroke-width="4"/>'+
@@ -140,7 +138,7 @@ function render(){
  for(const [side,pilot] of [["captain",a],["fo",b]]){
   $(side+"MiniPortrait").innerHTML=avatar(pilot);
   $(side+"MiniName").textContent=pilot.cn;
-  $(side+"MiniFlight").textContent=pilot.flight;
+  $(side+"MiniFlight").textContent=pilot.flight.replace("US Airways ","US ").replace("United ","UA ").replace("Southwest ","WN ").replace("Air Transat ","TS ").replace("British Airways ","BA ").replace("Germanwings ","4U ");
   const chooser=document.querySelector('.crew-current[data-side="'+side+'"]');
   if(chooser)chooser.setAttribute("aria-label","当前"+(side==="captain"?"机长":"副驾驶")+pilot.cn+"，点击更换");
  }
@@ -174,9 +172,10 @@ function closePicker(){
 }
 document.addEventListener("click",e=>{
  const info=e.target.closest(".pilot-info-btn");
- if(info){showPilotInfo(info.dataset.info);return;}
+ if(info){showPilotInfo(info.dataset.info,info);return;}
  const current=e.target.closest(".mobile-info");
- if(current){showPilotInfo(selected[current.dataset.infoCurrent]);return;}
+ if(current){showPilotInfo(selected[current.dataset.infoCurrent],current);return;}
+ if(!$("pilotInfoOverlay").hidden&&!e.target.closest("#pilotInfoOverlay"))closePilotInfo();
  const btn=e.target.closest(".crew-card");
  if(btn){setPilot(btn.dataset.side,btn.dataset.id);return;}
  const step=e.target.closest(".crew-step");
