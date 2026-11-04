@@ -35,7 +35,7 @@
 /* A round portrait is independent of the stretched cockpit figure container. */
 .cockpit .pilot-figures{inset:0 12px;overflow:visible}
 .cockpit .cockpit-figure{
-  position:absolute;bottom:18%;height:clamp(96px,26vw,120px);min-height:0;
+  position:absolute;bottom:19%;height:clamp(96px,26vw,120px);min-height:0;
   width:clamp(96px,26vw,120px);max-width:none;min-width:0;display:block;overflow:visible;
 }
 .cockpit .cockpit-figure.left{left:0}
@@ -100,7 +100,7 @@
  .cockpit .pilot-figures{inset:0 12px}
  .cockpit .cockpit-figure{
    height:clamp(96px,26vw,120px);width:clamp(96px,26vw,120px);
-   bottom:18%;min-height:0;max-width:none;
+   bottom:19%;min-height:0;max-width:none;
  }
  .cockpit .cockpit-figure>div{
    height:100%;width:100%;max-height:none;max-width:none;aspect-ratio:1/1;
@@ -131,7 +131,7 @@
  .cockpit .cockpit-figure{
    width:clamp(90px,25.6vw,108px);
    height:clamp(90px,25.6vw,108px);
-   bottom:17%;
+   bottom:19%;
  }
  .dashboard{height:calc(64px + env(safe-area-inset-bottom))}
 }
