@@ -142,3 +142,15 @@ main{height:calc(100dvh - 57px);max-height:calc(100dvh - 57px);overflow:hidden}
  .radio-header button{min-height:44px}
  .radio-actions #archiveBtn{display:none}
 }
+
+/* Historical sources are intentionally deferred to the final result card. */
+.radio-actions #archiveBtn{display:none!important}
+/* Compact ending presentation keeps the result and expandable source control visible. */
+.has-result .story-stage .story-bubble{padding:6px 10px;gap:2px;flex-shrink:0}
+.has-result .story-stage .story-line{line-height:1.4}
+.has-result .inline-result-card{scroll-padding-bottom:48px}
+@media(max-width:770px) and (orientation:portrait){
+ .has-result .story-stage .story-bubble{padding:5px 9px}
+ .has-result .story-stage .story-line{font-size:16px;line-height:1.4}
+ .has-result .result-details{box-shadow:0 -1px 0 #b0bec3}
+}
