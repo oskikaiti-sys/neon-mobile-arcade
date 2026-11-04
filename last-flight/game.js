@@ -83,6 +83,33 @@ function miniFlight(flight){
  return match?match[1]+"航班 · "+match[2]:flight;
 }
 
+
+/* Display-only history metadata, separate from the game scoring and scenario model. */
+const CREW_PROFILE={
+ sully:{flight:"US 1549",role:"机长",note:"两台发动机失去动力后，决定在哈德逊河迫降。"},
+ skiles:{flight:"US 1549",role:"副驾驶",note:"协助执行紧急检查，和机长完成河面迫降。"},
+ haynes:{flight:"UA 232",role:"机长",note:"飞机几乎失去控制时，组织机组共同应对。"},
+ fitch:{flight:"UA 232",role:"乘客培训机长",note:"作为乘客自愿加入机组，协助应对操纵失灵。"},
+ shults:{flight:"WN 1380",role:"机长",note:"发动机故障、客舱失压后，驾驶飞机备降费城。"},
+ piche:{flight:"TS 236",role:"机长",note:"两台发动机停转后，驾驶飞机滑翔降落。"},
+ dejager:{flight:"TS 236",role:"副驾驶",note:"协助检查飞行状态，配合机长滑翔着陆。"},
+ atchison:{flight:"BA 5390",role:"副驾驶",note:"驾驶舱风挡脱落后，接手操纵并安全降落。"},
+ lubitz:{flight:"4U 9525",role:"副驾驶",note:"官方调查认定他故意造成了航班坠毁。"},
+ records:{flight:"UA 232",role:"副驾驶",note:"飞机操纵困难时，协助机长和其他人员处置。"}
+};
+function renderCrewDossier(a,b){
+ for(const [side,pilot] of [["Captain",a],["Fo",b]]){
+  const history=CREW_PROFILE[pilot.id];
+  $("dossier"+side+"Name").textContent=pilot.cn;
+  $("dossier"+side+"Flight").textContent=history.flight+" · "+pilot.flight.split(" · ")[1]+" · "+history.role;
+  $("dossier"+side+"Action").textContent=history.note;
+ }
+ const sameEvent=a.source===b.source;
+ $("pairingTag").textContent=sameEvent?"真实搭档":"跨时空组合";
+ $("pairingTag").setAttribute("aria-label",sameEvent?"两人参加过同一真实航空事件，并不一定是历史上的机长与副驾驶":"两人来自不同的真实航空事件");
+ $("pairingTag").classList.toggle("cross-era",!sameEvent);
+}
+
 const BY_ID=Object.fromEntries(PILOTS.map(p=>[p.id,p]));
 const CASES={
  birds:{title:"鸟击 · 两台发动机失去动力",severe:5,step:"模拟事件：起飞后遭遇鸟群，两台发动机推力骤降。",why:"鸟击造成双发推力不足时，需要在有限时间内评估迫降区域。哈德逊河事件有真实历史依据，但当前机组及条件是虚构的。",tip:"现实科普：两台发动机同时失去动力，飞机仍能短时间滑翔，并不会马上直线坠下。"},
@@ -217,10 +244,12 @@ function render(){
  for(const [side,pilot] of [["captain",a],["fo",b]]){
   $(side+"MiniPortrait").innerHTML=avatar(pilot);
   $(side+"MiniName").textContent=pilot.cn;
-  $(side+"MiniFlight").textContent=miniFlight(pilot.flight);
+  const historic=CREW_PROFILE[pilot.id];
+  $(side+"MiniFlight").textContent=historic.flight+" · "+historic.role;
   const chooser=document.querySelector('.crew-current[data-side="'+side+'"]');
-  if(chooser)chooser.setAttribute("aria-label","当前"+(side==="captain"?"机长":"副驾驶")+pilot.cn+"，点击更换");
+  if(chooser)chooser.setAttribute("aria-label","当前"+(side==="captain"?"机长":"副驾驶")+pilot.cn+"，历史职务"+historic.role+"，点击更换");
  }
+ renderCrewDossier(a,b);
 }
 let pickerSide="captain";
 function setPilot(side,id){
@@ -352,6 +381,7 @@ function startFlight(){
  const c=result.case;
  activeToken++;const token=activeToken;
  running=true;warningIssued=false;runStarted=Date.now();
+ document.body.classList.add("is-flying");
  $('startBtn').disabled=true;$('startBtn').textContent="✈ 飞行进行中";
  $('cockpit').classList.remove("impact","crashing");$('warning').hidden=true;$('phase').hidden=false;$('scenarioBadge').hidden=false;
  $('inlineResult').hidden=true;$("realEventDetails").classList.remove("is-open");$("resultExpand").setAttribute("aria-expanded","false");document.body.classList.remove("has-result");
@@ -389,7 +419,7 @@ function finish(token,a,b,r){
  $('scenarioBadge').hidden=true;$('phase').hidden=true;
  log(r.outcome==="crash"?"本局结局：坠毁。":r.outcome==="divert"?"本局结局：紧急迫降／备降。":"本局结局：安全到达。",r.outcome==="crash"?"alert":"good");
  narrate("旁白 · 终章",r.outcome==="crash"?"窗外只剩一片寂静。":r.outcome==="divert"?"长久的紧绷之后，终于能松一口气。":"这趟航班，终于平安落幕。",r.outcome==="crash"?"alert":"good");
- running=false;$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
+ running=false;document.body.classList.remove("is-flying");$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
  showResult(a,b,r);
 }
 function showResult(a,b,r){
@@ -421,11 +451,11 @@ function showArchive(){
 }
 function closeResult(){$('resultOverlay').hidden=true;$('startBtn').focus();}
 function resetView(){
- activeToken++;running=false;warningIssued=false;if("speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}
+ activeToken++;running=false;warningIssued=false;document.body.classList.remove("is-flying");if("speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}
  $('resultOverlay').hidden=true;$('pickerOverlay').hidden=true;$('inlineResult').hidden=true;document.body.classList.remove("has-result");$('warning').hidden=true;$('cockpit').classList.remove("crashing","impact");
  $('startBtn').disabled=false;$('startBtn').textContent="✈ 开始飞行";
  $('radioLog').innerHTML='';log("请选择机组并开始飞行。","muted");
- $('scenarioBadge').hidden=false;$('phase').hidden=false;$('scenarioBadge').textContent="等待航班启动";updatePanel({phase:"机组待命 · STANDBY",alt:0,spd:0});
+ $('scenarioBadge').hidden=true;$('phase').hidden=false;$('scenarioBadge').textContent="";updatePanel({phase:"待命",alt:0,spd:0});
  $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";narrate("塔台 · FLIGHT CONTROL","选择机长与副驾驶，准备开始一次架空航班。");render();
 }
 $('logBtn').addEventListener("click",()=>{
