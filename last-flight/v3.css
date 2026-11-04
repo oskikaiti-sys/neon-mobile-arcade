@@ -1,0 +1,64 @@
+/* Last Flight v3: mobile-first comic cockpit + info UI */
+.cockpit .glass{inset:0 0 23%;clip-path:polygon(2% 8%,98% 8%,100% 100%,0 100%)}
+.cockpit .cockpit-deck{height:27%;padding:5px 22% 8px;border-top-width:7px;gap:1.5%}
+.cockpit .screen,.cockpit .engine-bank{height:77%;border-width:3px}
+.cockpit .screen{width:28%;padding:4px}.cockpit .engine-bank{width:25%;padding:3px}
+.cockpit .screen-label{font-size:7px}.cockpit .screen-readout{font-size:8px}
+.cockpit .throttle{height:23%;width:8%;left:46%}
+.cockpit .cockpit-figure{bottom:25%;height:51%;width:30%}
+.cockpit .cockpit-figure.left{left:1%}.cockpit .cockpit-figure.right{right:1%}
+.cockpit .cockpit-figure>div{width:100%;height:100%;min-height:0}
+.cockpit .cockpit-figure svg{width:100%;height:100%;filter:drop-shadow(3px 4px 0 #15314a)}
+.cockpit .seat-name{bottom:2%;font-size:10px}
+.cockpit .windscreen-badge{bottom:7%;font-size:9px;padding:3px 6px;max-width:70%;overflow:hidden;text-overflow:ellipsis}
+.cockpit .story-bubble{position:absolute;z-index:11;top:29%;left:27%;right:27%;min-height:62px;max-height:42%;overflow:hidden;display:flex;flex-direction:column;gap:5px;padding:10px 11px;background:#fff2c1;box-shadow:4px 4px #17314e;border:3px solid #142c48;border-radius:11px;color:#152943}
+.cockpit .story-speaker{font-size:10px;letter-spacing:.6px;font-weight:1000;color:#25699c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cockpit .story-line{font-size:clamp(11px,1.05vw,14px);font-weight:850;line-height:1.42;overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.cockpit .story-bubble.alert{background:#ffe1af;border-color:#a93b35}.cockpit .story-bubble.alert .story-speaker{color:#ad2d31}
+.cockpit .story-bubble.good{background:#ddf8ce;border-color:#2b7348}.cockpit .story-bubble.good .story-speaker{color:#2e7343}
+.cockpit .warning{top:12%;z-index:12}
+.crew-card-row{position:relative;min-width:0;flex:0 0 auto}
+.crew-card-row .crew-card{width:100%;padding-right:34px;min-width:0}
+.pilot-info-btn,.mobile-info{width:27px;height:27px;display:flex;align-items:center;justify-content:center;background:#71caff;color:#12304c;font-family:Georgia,serif;font-size:18px;font-style:italic;font-weight:1000;border:3px solid #162d4b;border-radius:50%;box-shadow:2px 2px #1c3c5a;touch-action:manipulation}
+.pilot-info-btn{position:absolute;z-index:2;right:9px;top:50%;transform:translateY(-50%)}
+.pilot-info-btn:hover,.mobile-info:hover{background:#ffe17c}
+.pilot-info-btn:active{transform:translate(2px,calc(-50% + 2px));box-shadow:none}
+.mobile-info{display:none}
+.pilot-info-modal{max-width:580px}
+.pilot-info-header{display:flex;align-items:center;gap:14px;margin:12px 0}
+.pilot-info-avatar{height:92px;width:84px;flex:0 0 84px;overflow:hidden;border:3px solid #142c48;border-radius:12px;background:#92c7e9}
+.pilot-info-avatar svg{height:100%;width:100%}.pilot-info-name{font-weight:1000;font-size:18px;color:#132c48}
+.pilot-info-flight{font-size:12px;font-weight:800;color:#3d5b78;line-height:1.55;margin-top:3px}
+.pilot-info-section{border:2px solid #244968;background:#fffdf1;padding:12px;border-radius:12px;color:#1f3c55;font-size:13px;line-height:1.75;margin:12px 0}
+.pilot-info-section strong{display:block;color:#1e567f}.pilot-info-section a{color:#135f9d;font-weight:850}
+.pilot-info-note{font-size:11px;color:#596e80;line-height:1.65}
+@media(max-width:770px) and (orientation:portrait){
+ .cockpit .glass{inset:0 0 21%}.cockpit .cockpit-deck{height:25%;padding:4px 22% 8px;border-top-width:6px}
+ .cockpit .screen,.cockpit .engine-bank{height:75%;border-width:2px}
+ .cockpit .cockpit-figure{height:52%;width:35%;bottom:26%}
+ .cockpit .cockpit-figure.left{left:-2%}.cockpit .cockpit-figure.right{right:-2%}
+ .cockpit .seat-name{font-size:8px;bottom:1%}
+ .cockpit .story-bubble{top:27%;left:28%;right:28%;padding:7px 6px;gap:3px;min-height:68px;max-height:43%;border-width:2px;box-shadow:2px 2px #18324b}
+ .cockpit .story-speaker{font-size:8px;letter-spacing:0}
+ .cockpit .story-line{font-size:clamp(9px,2.75vw,12px);line-height:1.25}
+ .cockpit .windscreen-badge{bottom:4%;font-size:8px;padding:3px 5px}
+ .cockpit .warning{top:9%;padding:4px 7px}.cockpit .warning span{font-size:20px}
+ .crew-panel{position:relative}.mobile-info{position:absolute;display:flex;right:7px;top:6px;width:27px;height:27px;z-index:3;border-width:2px}
+ .crew-panel .panel-head{padding-right:34px}
+ .picker-grid .crew-card-row .crew-card{min-height:67px;padding-right:38px}
+ .picker-grid .pilot-info-btn{right:7px}
+ .pilot-info-modal{max-height:calc(100dvh - 24px)}
+}
+@media(max-width:770px) and (orientation:portrait) and (max-height:650px){
+ .cockpit .story-bubble{min-height:52px;max-height:39%;top:30%}.cockpit .story-line{font-size:10px;line-height:1.2}
+ .cockpit .cockpit-figure{height:49%;bottom:26%}
+}
+@media(orientation:landscape) and (max-width:1100px){
+ .cockpit .cockpit-deck{height:26%;padding:3px 21% 6px}
+ .cockpit .cockpit-figure{height:53%;bottom:26%;width:30%}
+ .cockpit .story-bubble{top:27%;left:28%;right:28%;padding:4px 7px;min-height:40px;max-height:40%;gap:2px;border-width:2px;box-shadow:2px 2px #1b324b}
+ .cockpit .story-speaker{font-size:8px}.cockpit .story-line{font-size:clamp(9px,1.7vw,12px);line-height:1.25}
+ .cockpit .windscreen-badge{bottom:4%;font-size:7px;padding:2px 4px}
+ .crew-card-row .crew-card{padding-right:28px}
+ .pilot-info-btn{width:24px;height:24px;font-size:15px;border-width:2px;right:4px}
+}
