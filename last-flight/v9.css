@@ -133,3 +133,16 @@
 @media(max-width:770px) and (orientation:portrait) and (max-height:700px){
  .is-flying .cockpit .cockpit-figure{width:64px;height:64px;bottom:22%}
 }
+
+
+/* One stage at a time: [hidden] must beat earlier flex layouts, including
+   .inline-result-card { display:flex } from the accumulated stylesheets. */
+#crewDossier[hidden],
+#flightDecisions[hidden],
+#inlineResult[hidden],
+#scenarioBadge[hidden],
+#phase[hidden],
+#warning[hidden],
+#decisionConsequence[hidden]{
+ display:none!important;
+}
