@@ -179,6 +179,100 @@ function showPilotInfo(id,anchor){
  box.style.left=Math.round(left)+"px";box.style.top=Math.round(top)+"px";
 }
 function closePilotInfo(){$("pilotInfoOverlay").hidden=true;}
+
+/* FLIGHT PRESENTATION ONLY.
+ * These optional player acknowledgements never feed pickCase, simulate,
+ * scenario timing, crew statistics, or finish(). The flight remains automatic.
+ */
+const DISPLAY_STEPS=[
+ {name:"出发检查",choices:["核对当前高度","检查航路信息","联系塔台"]},
+ {name:"异常识别",choices:["检查仪表告警","确认可用系统","呼叫机组协助"]},
+ {name:"机组协作",choices:["分配机组任务","复查应急程序","通报客舱情况"]},
+ {name:"备降评估",choices:["请求备降许可","评估附近机场","核对剩余高度"]},
+ {name:"最后进近",choices:["完成着陆检查","确认速度姿态","提醒机组准备"]}
+];
+const SITUATION_CHOICES={
+ birds:["检查两台发动机","确认滑翔高度","寻找迫降区域"],
+ fuel:["核对燃油读数","检查发动机状态","寻找最近机场"],
+ hydraulic:["检查液压系统","核对操纵响应","请求机组支援"],
+ engine:["检查发动机参数","执行下降检查","联系备降机场"],
+ window:["确认风挡情况","检查驾驶舱状态","请求紧急支援"],
+ unsafe:["核对安全程序","提醒另一位机组成员","请求安全支援"],
+ weather:["查看气象雷达","核对进近条件","准备复飞方案"],
+ normal:["核对飞行计划","检查下降高度","确认进近程序"]
+};
+const FLIGHT_SCENE_LINES={
+ birds:["刚起飞，前方突然出现鸟群。","撞击后，两台发动机动力骤降。","没有足够高度，机组正在寻找安全区域。"],
+ fuel:["巡航中，燃油警告突然亮起。","两台发动机先后停转。","机组必须判断还能滑翔多远。"],
+ hydraulic:["机身传来巨响，警告灯接连亮起。","液压系统失效，操纵变得困难。","机组需要协作，尽量保持飞机可控。"],
+ engine:["飞机开始下降，客舱还很平静。","发动机故障，客舱失压警报响起。","机组正评估紧急下降和备降机场。"],
+ window:["航班原本平稳，机组准备进近。","驾驶舱风挡突然失效，气流涌入。","一位飞行员必须立即接管操纵。"],
+ unsafe:["一次平常的飞行出现异常气氛。","机组出现了违反安全职责的行动。","另一位飞行员必须识别并应对风险。"],
+ weather:["目的地云层加厚，机场灯光隐约可见。","暴雨降临，能见度快速下降。","继续进近还是复飞？机组必须选择。"],
+ normal:["航班平稳，机组完成巡航检查。","塔台下达新的进近指令。","机组正核对航向、高度和着陆程序。"]
+};
+let decisionIndex=0,decisionSituation="normal",pressureTicker=null,uiFlightStart=0,decisionLocked=false;
+function flightOptionConsequence(label){
+ if(label.includes("塔台")||label.includes("联系")||label.includes("请求"))return "通讯请求已记录，机组继续核对方案。";
+ if(label.includes("机场")||label.includes("迫降")||label.includes("航路"))return "相关位置已核对，机组继续评估距离。";
+ if(label.includes("机组")||label.includes("客舱"))return "协作步骤已记录，机组保持沟通。";
+ if(label.includes("高度")||label.includes("速度")||label.includes("姿态"))return "飞行参数已核对，进近风险仍需监控。";
+ return "检查行动已记录，当前飞行继续推进。";
+}
+function paintFlightChoices(){
+ const stage=Math.min(decisionIndex,4);
+ $("decisionCounter").textContent=(stage+1)+" / 5";
+ const options=stage===1?(SITUATION_CHOICES[decisionSituation]||DISPLAY_STEPS[stage].choices):DISPLAY_STEPS[stage].choices;
+ $("decisionActions").innerHTML=options.map((label,index)=>
+ '<button type="button" class="decision-option" data-choice="'+index+'" '+(decisionLocked?'disabled':'')+' aria-label="记录处置行动：'+escapeHtml(label)+'">'+escapeHtml(label)+'</button>').join("");
+ if(decisionLocked)$("decisionCounter").textContent="5 / 5 · 已记录";
+}
+function recordFlightChoice(index){
+ if(!running||decisionLocked||!Number.isInteger(index))return;
+ const stage=Math.min(decisionIndex,4);
+ const options=stage===1?(SITUATION_CHOICES[decisionSituation]||DISPLAY_STEPS[stage].choices):DISPLAY_STEPS[stage].choices;
+ if(index<0||index>=options.length)return;
+ const label=options[index];
+ $("decisionConsequence").hidden=false;
+ $("decisionConsequence").textContent="上一步后果："+flightOptionConsequence(label);
+ log("剧情选择："+label+"（不影响预设结局）","muted");
+ if(decisionIndex<4)decisionIndex++;
+ else decisionLocked=true;
+ paintFlightChoices();
+ const panel=$("flightDecisions");
+ if(panel)panel.scrollTop=0;
+}
+function refreshFlightPressure(){
+ if(!running||$("flightDecisions").hidden)return;
+ const left=Math.max(0,13450-(Date.now()-uiFlightStart));
+ const percent=Math.max(0,Math.min(100,left/13450*100));
+ $("pressureTime").textContent=(left/1000).toFixed(1)+"秒";
+ $("pressureFill").style.width=percent.toFixed(2)+"%";
+ const track=$("pressureTrack");
+ track.setAttribute("aria-valuenow",String(Math.round(percent)));
+ track.classList.toggle("warn",percent<65&&percent>=30);
+ track.classList.toggle("critical",percent<30);
+}
+function clearFlightPresentation(){
+ if(pressureTicker!==null){clearInterval(pressureTicker);pressureTicker=null;}
+ $("flightDecisions").hidden=true;
+ document.body.classList.remove("flight-decision-mode");
+}
+function startFlightPresentation(situation){
+ clearFlightPresentation();
+ decisionSituation=situation;decisionIndex=0;decisionLocked=false;uiFlightStart=Date.now();
+ $("decisionConsequence").textContent="";$("decisionConsequence").hidden=true;
+ $("pressureFill").style.width="100%";
+ $("pressureTrack").classList.remove("warn","critical");
+ $("pressureTrack").setAttribute("aria-valuenow","100");
+ $("pressureTime").textContent="13.5秒";
+ $("flightDecisions").hidden=false;
+ document.body.classList.add("flight-decision-mode");
+ paintFlightChoices();
+ refreshFlightPressure();
+ pressureTicker=setInterval(refreshFlightPressure,180);
+}
+
 let selected={captain:"sully",fo:"skiles"},running=false,flightCount=0,activeToken=0,sound=true,context=null,warningIssued=false;
 function avatar(p,large=false){
  const s=p.skin,h=p.hair,e=p.eye;
@@ -255,6 +349,8 @@ function render(){
  $('seatCaptain').textContent=a.cn;$('seatFirstOfficer').textContent=b.cn;
  for(const [side,pilot] of [["captain",a],["fo",b]]){
   $(side+"MiniPortrait").innerHTML=avatar(pilot);
+  $(side+"FlightAvatar").innerHTML=avatar(pilot);
+  $(side+"FlightName").textContent=pilot.cn;
   $(side+"MiniName").textContent=pilot.cn;
   const historic=CREW_PROFILE[pilot.id];
   $(side+"MiniFlight").textContent=historic.flight+" · "+historic.role;
@@ -292,6 +388,8 @@ function closePicker(){
  if(button)button.focus();
 }
 document.addEventListener("click",e=>{
+ const choice=e.target.closest(".decision-option");
+ if(choice){recordFlightChoice(Number(choice.dataset.choice));return;}
  const info=e.target.closest(".pilot-info-btn");
  if(info){showPilotInfo(info.dataset.info,info);return;}
  const current=e.target.closest(".mobile-info");
@@ -395,6 +493,7 @@ function startFlight(){
  activeToken++;const token=activeToken;
  running=true;warningIssued=false;runStarted=Date.now();
  document.body.classList.add("is-flying");queueStandbyOverflow();
+ startFlightPresentation(result.scenario);
  $('startBtn').disabled=true;$('startBtn').textContent="✈ 飞行进行中";
  $('cockpit').classList.remove("impact","crashing");$('warning').hidden=true;$('phase').hidden=false;$('scenarioBadge').hidden=false;
  $('inlineResult').hidden=true;$("realEventDetails").classList.remove("is-open");$("resultExpand").setAttribute("aria-expanded","false");document.body.classList.remove("has-result");
@@ -432,7 +531,7 @@ function finish(token,a,b,r){
  $('scenarioBadge').hidden=true;$('phase').hidden=true;
  log(r.outcome==="crash"?"本局结局：坠毁。":r.outcome==="divert"?"本局结局：紧急迫降／备降。":"本局结局：安全到达。",r.outcome==="crash"?"alert":"good");
  narrate("旁白 · 终章",r.outcome==="crash"?"窗外只剩一片寂静。":r.outcome==="divert"?"长久的紧绷之后，终于能松一口气。":"这趟航班，终于平安落幕。",r.outcome==="crash"?"alert":"good");
- running=false;document.body.classList.remove("is-flying");queueStandbyOverflow();$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
+ running=false;clearFlightPresentation();document.body.classList.remove("is-flying");queueStandbyOverflow();$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
  showResult(a,b,r);
 }
 function showResult(a,b,r){
@@ -465,7 +564,7 @@ function showArchive(){
 }
 function closeResult(){$('resultOverlay').hidden=true;$('startBtn').focus();}
 function resetView(){
- activeToken++;running=false;warningIssued=false;document.body.classList.remove("is-flying");if("speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}
+ activeToken++;running=false;warningIssued=false;clearFlightPresentation();document.body.classList.remove("is-flying");if("speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}
  $('resultOverlay').hidden=true;$('pickerOverlay').hidden=true;$('inlineResult').hidden=true;document.body.classList.remove("has-result");$('warning').hidden=true;$('cockpit').classList.remove("crashing","impact");
  $('startBtn').disabled=false;$('startBtn').textContent="✈ 开始飞行";
  $('radioLog').innerHTML='';log("请选择机组并开始飞行。","muted");
