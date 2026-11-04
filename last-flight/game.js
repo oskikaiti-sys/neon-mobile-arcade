@@ -27,12 +27,12 @@ const PILOTS = [
 ];
 /* Display-only microcopy. These summaries never enter flight outcome calculations. */
 const SHORT_HISTORY={
- "1549":"2009年，飞机刚起飞就撞上鸟群，两台发动机同时失去动力。机组在哈德逊河迫降，155人全部生还。",
- "232":"1989年，UA232的一台发动机严重损坏，飞机几乎失去控制。机组努力迫降，飞机坠毁，但多数人幸存。",
- "1380":"2018年，西南航空1380航班发动机故障，客舱突然失压。机组备降费城，一名乘客不幸遇难。",
- "236":"2001年，越洋航空236航班漏油，两台发动机先后停转。机组把飞机滑翔到亚速尔群岛，成功降落。",
- "5390":"1990年，英国航空5390航班的驾驶舱风挡突然脱落，机长无法继续操纵。副驾驶接手，最终安全降落。",
- "9525":"2015年，德国之翼9525航班在阿尔卑斯山区坠毁。官方调查认定副驾驶故意造成事故。"
+ "1549":"2009年，鸟群撞击让两台发动机同时失去动力。机组在哈德逊河迫降，155人全部生还。",
+ "232":"1989年，UA232发动机严重损坏，飞机很难控制。机组尝试迫降，飞机坠毁，多数人幸存。",
+ "1380":"2018年，西南航空1380航班发动机损坏、客舱失压。飞机备降费城，一名乘客遇难。",
+ "236":"2001年，越洋航空236航班漏油，两台发动机停转。机组滑翔至机场，成功降落。",
+ "5390":"1990年，英国航空5390航班风挡脱落，机长无法操纵。副驾驶接手，成功降落。",
+ "9525":"2015年，德国之翼9525航班坠毁。官方调查认定副驾驶故意导致了事故。"
 };
 const HISTORICAL_ACTION={
  sully:"萨伦伯格决定在哈德逊河降落，和副驾驶协作救回全机人员。",
@@ -369,12 +369,12 @@ function showResult(a,b,r){
  $("inlineResultTitle").textContent="终章";
  $("inlineResultOutcome").textContent=outcome;
  $("inlineHistory").textContent=SHORT_HISTORY[historySource]||SOURCES[historySource].summary;
- $("inlineSimulation").textContent=
-   "这次"+a.cn+"担任机长，"+b.cn+"担任副驾驶。遇到"+r.case.title+"，最终"+(r.outcome==="crash"?"坠毁。":r.outcome==="divert"?"紧急着陆。":"平安抵达。");
- $("inlineCompare").textContent=uiHistoricalText(a,"captain")+(a.source===b.source?" ":" 另一位机组成员："+uiHistoricalText(b,"fo"))+
-   (b.id==="haynes"&&a.source===b.source?" "+ROLE_NOTE:"");
+ const sceneName={birds:"鸟击",fuel:"燃油异常",hydraulic:"操纵失灵",engine:"发动机故障",window:"风挡破损",unsafe:"机组安全冲突",weather:"暴雨进近",normal:"常规进近"}[r.scenario]||"航班事件";
+ $("inlineSimulation").textContent="这次"+a.cn+"任机长，"+b.cn+"任副驾驶。"+sceneName+"后，"+
+   (r.outcome==="crash"?"飞机坠毁。":r.outcome==="divert"?"飞机紧急着陆。":"飞机平安抵达。");
+ $("inlineCompare").textContent=b.id==="haynes"?ROLE_NOTE:uiHistoricalText(a,"captain");
  $("inlineSources").innerHTML=[...new Set([a.source,b.source])].map(k=>sourceCard(SOURCES[k])).join("");
- $("inlineDisclaimer").textContent="两者不是同一航班，结果不代表真实人物的必然选择。";
+ $("inlineDisclaimer").textContent=a.source===b.source?"本局是虚构模拟，不是对真实航班的重演，也不能预测飞行员行为。":"两者不是同一航班，结果不代表真实人物的必然选择。";
  $("realEventDetails").open=false;
  $("inlineResult").hidden=false;
  $("resultOverlay").hidden=true;
