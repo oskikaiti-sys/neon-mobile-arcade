@@ -112,12 +112,17 @@ function simulate(a,b,scenario,iteration){
  const jitter=(hash(a.id+":"+b.id+":"+scenario+":"+iteration)%5)-2;
  const scenarioRisk=c.severe;
  const safetyConflict=a.unsafe||b.unsafe;
- let score=crew+pairing+jitter-scenarioRisk-(safetyConflict?2:0);
+ // The hypothetical non-unsafe crewmate can sometimes interrupt the unsafe event.
+ // This is a GAMEPLAY counterweight, not a forecast of any named person's behavior.
+ const responder=safetyConflict?(a.unsafe?b:a):null;
+ const safeguard=responder?responder.strength*1.5+Math.max(0,responder.team)*1.2:0;
+ let score=crew+pairing+jitter+ safeguard-scenarioRisk-(safetyConflict?2:0);
  if(scenario==="normal")score+=2;
  let outcome=score<=1?"crash":score<=5.4?"divert":"safe";
  if(scenario==="hydraulic"&&outcome==="safe")outcome="divert";
  if(scenario==="fuel"&&outcome==="safe")outcome="divert";
  if(scenario==="birds"&&outcome==="safe")outcome="divert";
+ if(scenario==="engine"&&outcome==="safe")outcome="divert";
  if(scenario==="window"&&outcome==="safe")outcome="divert";
  if(scenario==="unsafe"&&outcome==="safe")outcome="divert";
  return {scenario,outcome,score,crew,pairing,jitter,case:c,safetyConflict};
