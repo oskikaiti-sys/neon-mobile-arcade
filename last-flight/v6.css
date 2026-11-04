@@ -1,0 +1,96 @@
+/* Last Flight v6: natural-height result summary, accessible animated details,
+   compact top tags, and larger character-first crew selection. */
+.story-stage .inline-result-card,.has-result .story-stage .inline-result-card{
+  flex:0 0 auto;height:auto;block-size:auto;min-height:0;max-height:none;
+  align-self:stretch;overflow:visible;position:relative;order:initial;
+  gap:4px;padding:9px 11px;background:#fcf9e9;
+}
+.story-stage{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;align-items:stretch}
+.story-stage .story-bubble{flex:0 0 auto}
+.inline-result-card .result-head[hidden]{display:none!important}
+.inline-result-card .result-real{flex:0 0 auto;gap:3px}
+.inline-result-card .result-real h3,.inline-result-card .result-segment h3{font-size:12px;line-height:1.3}
+.inline-result-card .result-segment p{font-size:14px;line-height:1.5;display:block;overflow:visible!important;max-height:none!important;white-space:normal}
+.inline-result-card .result-details,.has-result .inline-result-card .result-details{position:static;order:2;display:block;flex:0 0 auto;min-height:0;box-shadow:none;border-top:1px dashed #b3bab5}
+.inline-result-card .result-toggle{
+  display:flex;justify-content:flex-start;align-items:center;min-height:44px;min-width:44px;
+  width:100%;padding:7px 0;border:0;background:transparent;box-shadow:none;
+  color:#125d96;font-size:14px;font-weight:950;text-align:left;line-height:1.35;
+}
+.inline-result-card .result-toggle .when-open{display:none}
+.inline-result-card .result-details.is-open .when-open{display:inline}
+.inline-result-card .result-details.is-open .when-closed{display:none}
+.inline-result-card .result-more{display:flex;flex-direction:column;gap:10px;min-height:0;
+  padding:0;max-height:0;overflow:hidden;opacity:0;visibility:hidden;
+  transition:max-height .24s ease,opacity .20s ease,visibility .24s;box-sizing:border-box}
+.inline-result-card .result-details:not(.is-open) .result-more{max-height:0!important;padding:0!important;visibility:hidden;overflow:hidden}
+.inline-result-card .result-details.is-open .result-more{max-height:780px;visibility:visible;opacity:1;padding:6px 0 2px}
+.inline-result-card .result-disclaimer,.has-result .inline-result-card .result-disclaimer{
+ order:3;position:static;margin:0;padding:4px 0 0;min-height:0;flex:0 0 auto;
+ border-top:1px solid #d7d7ce;color:#737d86;font-size:12px;line-height:1.4;
+}
+.cockpit .scene-topline{z-index:9}
+.cockpit .flight-no,.cockpit .phase{
+ max-width:none;min-width:0;width:auto;white-space:nowrap;overflow:visible;
+ text-overflow:clip;font-size:11px;line-height:1.15;padding:4px 7px;
+}
+.cockpit .scene-topline .phase[hidden]{display:none!important}
+.cockpit .windscreen-badge[hidden]{display:none!important}
+.cockpit .pilot-figures{inset:0 12px}
+.crew-panel .crew-step{position:relative;isolation:isolate;box-shadow:none;border:0;background:transparent;color:#16314b}
+.crew-panel .crew-step::before{content:"";position:absolute;z-index:-1;inset:4px;
+  background:#f8cf55;border:2px solid #142e48;border-radius:9px;box-shadow:2px 2px #263e56}
+.crew-panel .crew-step:active::before{box-shadow:none;transform:translate(1px,1px)}
+.dashboard{background:#fff1c7;border-top:4px solid #173352;box-shadow:0 -4px 12px #0000001f}
+@media(max-width:770px) and (orientation:portrait){
+  .play-layout{grid-template-rows:clamp(108px,21dvh,200px) minmax(0,1fr) 194px;
+    gap:7px;padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+  .has-result .play-layout{grid-template-rows:clamp(108px,20dvh,194px) minmax(0,1fr) 194px}
+  .story-stage,.has-result .story-stage{overflow-y:auto;scrollbar-width:thin}
+  .story-stage .inline-result-card,.has-result .story-stage .inline-result-card{
+     flex:0 0 auto;height:auto;max-height:none;overflow:visible;
+     margin-bottom:2px;padding:8px 10px;box-shadow:none;gap:3px}
+  .story-stage .story-bubble,.has-result .story-stage .story-bubble{flex:0 0 auto;max-height:none;overflow:visible}
+  .story-stage .result-toggle{font-size:14px;min-height:44px}
+  .story-stage .result-disclaimer{color:#747d84;font-size:12px;line-height:1.35}
+  .cockpit .scene-topline{top:5px;left:7px;right:7px}
+  .cockpit .scene-topline .flight-no,.cockpit .scene-topline .phase{
+    font-size:11px;line-height:1.1;max-width:none;overflow:visible;
+    text-overflow:clip;white-space:nowrap;padding:3px 6px;
+  }
+  .crew-panel{height:100%;min-height:0;gap:0}
+  .crew-panel .panel-head{height:48px;min-height:48px;flex:0 0 48px}
+  .crew-panel .mobile-chooser{grid-template-columns:44px minmax(0,1fr) 44px;
+    grid-template-rows:76px minmax(46px,1fr);column-gap:0;row-gap:4px;
+    height:auto;min-height:0;flex:1;padding:3px 0 0}
+  .crew-panel .portrait-picker{height:76px;min-height:76px;max-height:76px;grid-row:1}
+  .crew-panel .mini-portrait{width:74px;height:74px;min-height:74px;max-height:74px;flex:0 0 74px;border:3px solid #143651}
+  .crew-panel .mini-portrait svg{width:100%;height:100%;transform:scale(1.18) translateY(6%)}
+  .crew-panel .crew-step{height:44px;min-height:44px;width:44px;min-width:44px;max-width:44px;
+    padding:0;font-size:22px;line-height:1;align-self:center;z-index:1}
+  .crew-panel .crew-caption{grid-row:2;grid-column:1/-1;min-height:46px;max-height:none;
+    justify-content:flex-start;overflow:visible;padding:0 2px}
+  .crew-panel .mini-copy strong{font-size:14px;line-height:1.13;max-height:none;
+    white-space:normal;display:block;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+  .crew-panel .mini-copy small{font-size:12px;line-height:1.1;white-space:normal;
+    max-height:none;overflow:visible;display:block;text-overflow:clip}
+  .dashboard{bottom:0;height:calc(68px + env(safe-area-inset-bottom));background:#fff1c7;
+    box-shadow:0 -4px 12px #0000001f}
+}
+@media(max-width:770px) and (orientation:portrait) and (max-height:700px){
+  .play-layout{grid-template-rows:clamp(105px,18.5dvh,126px) minmax(0,1fr) 191px;
+    padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+  .has-result .play-layout{grid-template-rows:clamp(105px,18dvh,122px) minmax(0,1fr) 191px}
+  .crew-panel .mobile-chooser{grid-template-rows:74px minmax(44px,1fr);row-gap:3px}
+  .crew-panel .portrait-picker{min-height:74px;height:74px}
+  .crew-panel .mini-portrait{width:72px;height:72px;min-height:72px;max-height:72px;flex-basis:72px}
+  .crew-panel .crew-caption{min-height:44px}
+  .dashboard{height:calc(64px + env(safe-area-inset-bottom))}
+}
+@media(orientation:landscape) and (max-width:1100px){
+  .story-stage{overflow-y:auto}
+  .crew-panel .crew-step{min-width:44px;min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ .inline-result-card .result-more{transition:none}
+}
