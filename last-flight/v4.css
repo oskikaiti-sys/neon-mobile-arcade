@@ -164,3 +164,5 @@ main{height:calc(100dvh - 57px);max-height:calc(100dvh - 57px);overflow:hidden}
  .has-result .inline-result-card .result-history{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex-shrink:0}
  .has-result .inline-result-card .result-compare{flex-shrink:0}
 }
+
+.inline-sources .reference a,.archive-row a{display:flex;align-items:center;min-height:44px;min-width:44px;padding:6px 2px;font-size:12px}
