@@ -86,16 +86,16 @@ function miniFlight(flight){
 
 /* Display-only history metadata, separate from the game scoring and scenario model. */
 const CREW_PROFILE={
- sully:{flight:"US 1549",role:"机长",note:"两台发动机失去动力后，决定在哈德逊河迫降。"},
- skiles:{flight:"US 1549",role:"副驾驶",note:"协助执行紧急检查，和机长完成河面迫降。"},
- haynes:{flight:"UA 232",role:"机长",note:"飞机几乎失去控制时，组织机组共同应对。"},
- fitch:{flight:"UA 232",role:"乘客培训机长",note:"作为乘客自愿加入机组，协助应对操纵失灵。"},
- shults:{flight:"WN 1380",role:"机长",note:"发动机故障、客舱失压后，驾驶飞机备降费城。"},
- piche:{flight:"TS 236",role:"机长",note:"两台发动机停转后，驾驶飞机滑翔降落。"},
- dejager:{flight:"TS 236",role:"副驾驶",note:"协助检查飞行状态，配合机长滑翔着陆。"},
- atchison:{flight:"BA 5390",role:"副驾驶",note:"驾驶舱风挡脱落后，接手操纵并安全降落。"},
- lubitz:{flight:"4U 9525",role:"副驾驶",note:"官方调查认定他故意造成了航班坠毁。"},
- records:{flight:"UA 232",role:"副驾驶",note:"飞机操纵困难时，协助机长和其他人员处置。"}
+ sully:{flight:"US 1549",role:"机长",note:"两台发动机停转后，选择河面迫降。"},
+ skiles:{flight:"US 1549",role:"副驾驶",note:"协助紧急检查，完成河面迫降。"},
+ haynes:{flight:"UA 232",role:"机长",note:"飞机难以控制时，组织机组应对。"},
+ fitch:{flight:"UA 232",role:"乘客培训机长",note:"作为乘客，主动加入机组协助。"},
+ shults:{flight:"WN 1380",role:"机长",note:"发动机故障后，驾驶飞机备降。"},
+ piche:{flight:"TS 236",role:"机长",note:"两台发动机停转后，滑翔着陆。"},
+ dejager:{flight:"TS 236",role:"副驾驶",note:"协助机长完成滑翔着陆。"},
+ atchison:{flight:"BA 5390",role:"副驾驶",note:"风挡脱落后，接管飞机并着陆。"},
+ lubitz:{flight:"4U 9525",role:"副驾驶",note:"调查认定他故意造成航班坠毁。"},
+ records:{flight:"UA 232",role:"副驾驶",note:"协助机长处理严重操纵故障。"}
 };
 function renderCrewDossier(a,b){
  for(const [side,pilot] of [["Captain",a],["Fo",b]]){
@@ -456,7 +456,7 @@ function resetView(){
  $('startBtn').disabled=false;$('startBtn').textContent="✈ 开始飞行";
  $('radioLog').innerHTML='';log("请选择机组并开始飞行。","muted");
  $('scenarioBadge').hidden=true;$('phase').hidden=false;$('scenarioBadge').textContent="";updatePanel({phase:"待命",alt:0,spd:0});
- $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";narrate("塔台 · FLIGHT CONTROL","选择机长与副驾驶，准备开始一次架空航班。");render();
+ $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";narrate("塔台","选好机组，点击开始飞行。");render();
 }
 $('logBtn').addEventListener("click",()=>{
  const open=!$('radioPanel').classList.contains("is-open");
