@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="v3.css">
 <link rel="stylesheet" href="v4.css">
 <link rel="stylesheet" href="v5.css">
+<link rel="stylesheet" href="v6.css">
 </head>
 <body>
 <div class="masthead">
@@ -38,12 +39,12 @@
     </aside>
     <section class="center" aria-label="驾驶舱场景">
       <div class="cockpit" id="cockpit">
-        <div class="scene-topline"><span class="flight-no">✈ FLIGHT NX-001</span><span id="phase" class="phase">机组待命 · STANDBY</span></div>
+        <div class="scene-topline"><span class="flight-no">NX-001</span><span id="phase" class="phase">机组待命 · STANDBY</span></div>
         <div class="glass">
           <div id="sky" class="sky"><div class="sun"></div><div class="cloud cloud-one"></div><div class="cloud cloud-two"></div><div id="ground" class="terrain"><svg viewBox="0 0 700 145" preserveAspectRatio="none" aria-hidden="true"><path d="M0 106 L62 75 L100 88 L158 50 L202 79 L263 27 L318 70 L375 41 L432 84 L490 30 L556 91 L620 50 L700 88 L700 145 L0 145Z" fill="#7293a4"/><path d="M0 126 L72 91 L140 117 L206 82 L285 114 L357 75 L420 107 L512 81 L605 120 L700 94 L700 145 L0 145Z" fill="#4b7985"/></svg></div></div>
           <div class="window-line one"></div><div class="window-line two"></div>
           <div class="warning" id="warning" aria-live="assertive" hidden><span>⚠ PULL UP!</span><small>TERRAIN · TERRAIN</small></div>
-          <div class="windscreen-badge" id="scenarioBadge">等待航班启动</div>
+          <div class="windscreen-badge" id="scenarioBadge" aria-hidden="true">等待航班启动</div>
         </div>
         
         <div class="overhead"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
@@ -67,10 +68,10 @@
           <span class="story-line" id="storyText">选择机长与副驾驶，准备开始一次架空航班。</span>
         </div>
         <section class="inline-result-card" id="inlineResult" aria-live="polite" hidden>
-          <div class="result-head"><strong id="inlineResultTitle">终章</strong><span id="inlineResultOutcome">—</span></div>
+          <div class="result-head" hidden aria-hidden="true"><strong id="inlineResultTitle">终章</strong><span id="inlineResultOutcome">—</span></div>
           <section class="result-segment result-real"><h3>真实事件</h3><p id="inlineHistory"></p></section>
           <details class="result-details" id="realEventDetails">
-            <summary>了解真实事件</summary>
+            <summary><span class="when-closed">查看本次模拟与历史对比 +</span><span class="when-open">收起 −</span></summary>
             <div class="result-more">
               <section class="result-segment"><h3>本次模拟</h3><p id="inlineSimulation"></p></section>
               <section class="result-segment"><h3>历史处置</h3><p id="inlineCompare"></p></section>
