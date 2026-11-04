@@ -38,26 +38,42 @@ const CASES={
 };
 let selected={captain:"sully",fo:"skiles"},running=false,flightCount=0,activeToken=0,sound=true,context=null,warningIssued=false;
 function avatar(p,large=false){
-  const s=p.skin, h=p.hair, e=p.eye,style=p.style;
-  let hair=style===1?'<path d="M34 58Q38 21 72 22Q112 21 119 62L107 54Q93 45 79 42Q54 53 39 63Z" fill="'+h+'"/>':
-    style===4?'<path d="M28 79Q29 18 74 24Q119 18 123 80L116 122L97 103L109 62Q88 42 49 58L45 119Z" fill="'+h+'"/>':
-    style===0?'<path d="M30 64Q35 24 70 23Q112 19 118 62Q90 44 70 44Q46 51 37 64Z" fill="'+h+'"/>':
-    style===3?'<path d="M34 60Q40 24 70 26Q118 22 121 62Q100 45 77 45L49 57Z" fill="'+h+'"/>':
-    '<path d="M32 67Q26 30 63 25Q105 18 121 54L113 64L96 43L76 52L55 47L37 70Z" fill="'+h+'"/>';
-  return '<svg viewBox="0 0 150 164" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="原创卡通飞行员示意头像 '+escapeHtml(p.name)+'">'+
-  '<rect width="150" height="164" rx="11" fill="#7eb6d4"/><path d="M0 116L23 102L61 97L89 101L121 110L150 120V164H0Z" fill="#345372"/>'+
-  '<path d="M19 164Q24 116 53 109L96 109Q125 119 131 164Z" fill="#f5f6f1"/>'+
-  '<path d="M62 100L58 121L73 134L88 121L85 99Z" fill="'+s+'"/><path d="M70 126L78 126L84 151L77 164L69 151Z" fill="#2c405a"/>'+
-  '<ellipse cx="75" cy="78" rx="42" ry="52" fill="'+s+'" stroke="#2e3640" stroke-width="2"/>'+
-  hair+
-  '<path d="M45 72Q55 67 66 71M84 71Q96 67 106 72" stroke="'+h+'" stroke-width="4" stroke-linecap="round" fill="none"/>'+
-  '<ellipse cx="58" cy="79" rx="3.7" ry="4.5" fill="'+e+'"/><ellipse cx="95" cy="79" rx="3.7" ry="4.5" fill="'+e+'"/>'+
-  '<path d="M76 81L72 97Q77 101 83 97" stroke="#946b57" stroke-width="2" fill="none"/>'+
-  '<path d="M62 110Q77 119 91 109" stroke="#89574e" stroke-width="2.3" fill="none" stroke-linecap="round"/>'+
-  '<path d="M18 151L43 137L66 145M132 151L105 137L85 145" fill="none" stroke="#b4c1c7" stroke-width="2"/>'+
-  '<path d="M19 134L44 132M108 132L131 134" stroke="#e0b653" stroke-width="6"/>'+
-  (large?'<path d="M3 164Q0 120 20 113L47 110L39 164Z" fill="#273d54"/><path d="M147 164Q153 125 132 115L104 108L113 164Z" fill="#273d54"/>':'')+
-  '</svg>';
+ const s=p.skin,h=p.hair,e=p.eye;
+ const line="#142640",bg=p.unsafe?"#ef9c99":p.unknown?"#e0b881":"#77c4e8";
+ const hairs=[
+  '<path d="M30 58Q28 19 73 19Q122 20 123 57L110 51Q87 35 69 42L38 61Z" fill="'+h+'"/>',
+  '<path d="M30 61Q29 26 67 22Q116 13 123 59L110 51L105 41Q91 40 79 43Q62 48 45 56L37 69Z" fill="'+h+'"/>',
+  '<path d="M29 63Q26 27 57 23Q80 11 111 28L123 47L112 57L102 43L80 47L63 41L44 58Z" fill="'+h+'"/>',
+  '<path d="M31 63Q28 32 56 25L77 22Q108 17 119 51L117 65Q102 49 93 47L70 52L48 48L36 68Z" fill="'+h+'"/>',
+  '<path d="M29 63Q25 22 66 20Q100 18 119 48L119 123L106 116L105 61Q85 45 67 51L42 60L41 126L28 121Z" fill="'+h+'"/>'
+ ];
+ const f=p.style===4?'<path d="M107 65Q116 91 108 118" stroke="'+h+'" stroke-width="8" stroke-linecap="round" fill="none"/>':'';
+ const eyebrow=p.unsafe?'<path d="M48 68L64 75M90 75L105 68" stroke="'+line+'" stroke-width="5" stroke-linecap="round"/>':
+ '<path d="M47 70Q57 65 65 69M90 69Q101 65 108 70" stroke="'+line+'" stroke-width="4.5" stroke-linecap="round" fill="none"/>';
+ const mouth=p.unsafe?'<path d="M62 116Q78 111 96 114" stroke="'+line+'" stroke-width="3.5" stroke-linecap="round" fill="none"/>':
+ '<path d="M62 109Q78 126 98 109" stroke="'+line+'" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 164" role="img" aria-label="原创美式二维卡通人物示意 '+escapeHtml(p.name)+'">'+
+ '<rect x="0" y="0" width="150" height="164" rx="10" fill="'+bg+'"/>'+
+ '<path d="M0 125L44 91L150 32V164H0Z" fill="#ffffff42"/>'+
+ '<circle cx="77" cy="65" r="63" fill="#fff8d3" stroke="'+line+'" stroke-width="3" opacity=".9"/>'+
+ '<path d="M6 164Q7 121 43 118L107 118Q144 125 145 164Z" fill="#fcf6df" stroke="'+line+'" stroke-width="6" stroke-linejoin="round"/>'+
+ '<path d="M26 157L39 117L59 117L62 164H20Z" fill="#254a73" stroke="'+line+'" stroke-width="4"/>'+
+ '<path d="M127 157L114 117L94 117L91 164H132Z" fill="#254a73" stroke="'+line+'" stroke-width="4"/>'+
+ '<path d="M57 106L57 121L76 135L94 121L93 106" fill="'+s+'" stroke="'+line+'" stroke-width="4" stroke-linejoin="round"/>'+
+ '<path d="M70 131L82 131L87 164H64Z" fill="#ea665a" stroke="'+line+'" stroke-width="3"/>'+
+ '<path d="M40 78Q27 69 29 84Q32 100 41 100M111 78Q128 68 125 85Q124 100 111 101" fill="'+s+'" stroke="'+line+'" stroke-width="4"/>'+
+ '<path d="M37 75Q37 32 76 30Q114 27 115 77L112 99Q108 124 75 126Q43 125 39 98Z" fill="'+s+'" stroke="'+line+'" stroke-width="5"/>'+
+ hairs[p.style] + f+
+ eyebrow+
+ '<path d="M49 84Q58 79 67 85M86 85Q97 80 105 84" stroke="#fffdfa" stroke-width="12" stroke-linecap="round" fill="none"/>'+
+ '<ellipse cx="58" cy="85" rx="4" ry="6" fill="'+e+'"/><ellipse cx="97" cy="85" rx="4" ry="6" fill="'+e+'"/>'+
+ '<path d="M77 84L73 99L84 100" stroke="#8f685b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'+
+ mouth+
+ '<path d="M19 135L46 126M105 126L132 135" stroke="#eabf52" stroke-width="8"/>'+
+ '<path d="M22 135L44 128M107 128L129 135" stroke="'+line+'" stroke-width="2"/>'+
+ '<path d="M14 150L40 147M110 147L137 150" stroke="#ffffff" stroke-width="2" opacity=".7"/>'+
+ (large?'<path d="M0 164L13 123Q1 130 0 144Z" fill="#173451" stroke="'+line+'" stroke-width="4"/>':'')+
+ '</svg>';
 }
 function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function card(p,side){
@@ -72,14 +88,48 @@ function render(){
  $('captainName').textContent=a.name; $('foName').textContent=b.name;
  $('bigCaptain').innerHTML=avatar(a,true);$('bigFirstOfficer').innerHTML=avatar(b,true);
  $('seatCaptain').textContent=a.cn;$('seatFirstOfficer').textContent=b.cn;
+ for(const [side,pilot] of [["captain",a],["fo",b]]){
+  $(side+"MiniPortrait").innerHTML=avatar(pilot);
+  $(side+"MiniName").textContent=pilot.cn;
+  $(side+"MiniFlight").textContent=pilot.flight;
+  const chooser=document.querySelector('.crew-current[data-side="'+side+'"]');
+  if(chooser)chooser.setAttribute("aria-label","当前"+(side==="captain"?"机长":"副驾驶")+pilot.cn+"，点击更换");
+ }
+}
+let pickerSide="captain";
+function setPilot(side,id){
+ if(running||!["captain","fo"].includes(side)||!BY_ID[id]||selected[side==="captain"?"fo":"captain"]===id)return;
+ selected[side]=id;render();
+ $('pickerOverlay').hidden=true;
+ log("机组变更："+BY_ID[selected.captain].cn+" / "+BY_ID[selected.fo].cn,"muted");
+}
+function stepPilot(side,delta){
+ if(running)return;
+ const i=PILOTS.findIndex(p=>p.id===selected[side]);
+ for(let n=1;n<=PILOTS.length;n++){
+   const candidate=PILOTS[(i+delta*n+PILOTS.length*10)%PILOTS.length];
+   if(candidate.id!==selected[side==="captain"?"fo":"captain"]){setPilot(side,candidate.id);return;}
+ }
+}
+function openPicker(side){
+ if(running)return;
+ pickerSide=side;
+ $('pickerTitle').textContent="选择"+(side==="captain"?"机长 CAPTAIN":"副驾驶 FIRST OFFICER");
+ $('pickerItems').innerHTML=PILOTS.map(p=>card(p,side)).join("");
+ $('pickerOverlay').hidden=false;$('closePicker').focus();
+}
+function closePicker(){
+ $('pickerOverlay').hidden=true;
+ const button=document.querySelector('.crew-current[data-side="'+pickerSide+'"]');
+ if(button)button.focus();
 }
 document.addEventListener("click",e=>{
  const btn=e.target.closest(".crew-card");
- if(!btn||running)return;
- const side=btn.dataset.side,id=btn.dataset.id;
- if(!BY_ID[id]||Object.entries(selected).some(([key,v])=>key!==side&&v===id))return;
- selected[side]=id; render();
- log("机组变更："+BY_ID[selected.captain].cn+" / "+BY_ID[selected.fo].cn,"muted");
+ if(btn){setPilot(btn.dataset.side,btn.dataset.id);return;}
+ const step=e.target.closest(".crew-step");
+ if(step){stepPilot(step.dataset.side,Number(step.dataset.shift));return;}
+ const picker=e.target.closest(".crew-current");
+ if(picker){openPicker(picker.dataset.side);return;}
 });
 function log(text,type=""){
  const el=document.createElement("div");el.className="log-line "+type;el.textContent="["+stamp()+"] "+text;
@@ -174,6 +224,7 @@ function startFlight(){
  $('startBtn').disabled=true;$('startBtn').innerHTML="飞行进行中 <span>FLIGHT IN PROGRESS</span>";
  $('cockpit').classList.remove("impact","crashing");$('warning').hidden=true;
  $('radioLog').innerHTML="";
+ $('radioPanel').classList.remove("is-open");$('logBtn').setAttribute("aria-expanded","false");
  $('scenarioBadge').textContent="模拟航班 · 飞行准备";
  // Unlock audio / speech in the real click gesture for browsers that require interaction.
  if(sound){systemTone(520,.08,.12);if("speechSynthesis" in window){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;window.speechSynthesis.speak(u);}catch(_){}}}
@@ -232,20 +283,32 @@ function showArchive(){
 function closeResult(){$('resultOverlay').hidden=true;$('startBtn').focus();}
 function resetView(){
  activeToken++;running=false;warningIssued=false;if("speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}
- $('resultOverlay').hidden=true;$('warning').hidden=true;$('cockpit').classList.remove("crashing","impact");
+ $('resultOverlay').hidden=true;$('pickerOverlay').hidden=true;$('warning').hidden=true;$('cockpit').classList.remove("crashing","impact");
  $('startBtn').disabled=false;$('startBtn').innerHTML="✈ 开始飞行 <span>START FLIGHT</span>";
  $('radioLog').innerHTML='';log("请选择机组并开始飞行。","muted");
  $('scenarioBadge').textContent="等待航班启动";updatePanel({phase:"机组待命 · STANDBY",alt:0,spd:0});
  $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";render();
 }
+$('logBtn').addEventListener("click",()=>{
+ const open=!$('radioPanel').classList.contains("is-open");
+ $('radioPanel').classList.toggle("is-open",open);
+ $('logBtn').setAttribute("aria-expanded",String(open));
+});
+$('closeLog').addEventListener("click",()=>{
+ $('radioPanel').classList.remove("is-open");
+ $('logBtn').setAttribute("aria-expanded","false");
+ $('logBtn').focus();
+});
+$('closePicker').addEventListener("click",closePicker);
 $('startBtn').addEventListener("click",startFlight);
 $('soundBtn').addEventListener("click",()=>{sound=!sound;$('soundBtn').textContent=sound?"♫ 音效开":"♫ 静音";$('soundBtn').setAttribute("aria-pressed",String(sound));if(!sound&&"speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}});
 $('archiveBtn').addEventListener("click",showArchive);
 $('closeArchive').addEventListener("click",()=>{$('archiveOverlay').hidden=true;$('archiveBtn').focus();});
 $('closeModal').addEventListener("click",closeResult);
 $('againBtn').addEventListener("click",()=>{$('resultOverlay').hidden=true;startFlight();});
-$('changeBtn').addEventListener("click",()=>{resetView();$('captainPanel').scrollIntoView({behavior:"smooth",block:"start"});});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$('archiveOverlay').hidden){$('archiveOverlay').hidden=true;$('archiveBtn').focus();}else if(!$('resultOverlay').hidden)closeResult();}});
+$('changeBtn').addEventListener("click",()=>{resetView();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("pickerOverlay").hidden){closePicker();return;}if($("radioPanel").classList.contains("is-open")){$("radioPanel").classList.remove("is-open");$("logBtn").setAttribute("aria-expanded","false");return;}if(!$('archiveOverlay').hidden){$('archiveOverlay').hidden=true;$('archiveBtn').focus();}else if(!$('resultOverlay').hidden)closeResult();}});
+$('pickerOverlay').addEventListener("click",e=>{if(e.target===$('pickerOverlay'))closePicker();});
 for(const id of ["resultOverlay","archiveOverlay"]){$(id).addEventListener("click",e=>{if(e.target===$(id)){if(id==="resultOverlay")closeResult();else{$(id).hidden=true;$('archiveBtn').focus();}}});}
 render();
 $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";
