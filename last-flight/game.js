@@ -34,6 +34,20 @@ const SHORT_HISTORY={
  "5390":"1990年，英国航空5390航班风挡脱落，机长无法操纵。副驾驶接手，成功降落。",
  "9525":"2015年，德国之翼9525航班坠毁。官方调查认定副驾驶故意导致了事故。"
 };
+/* Concise, role-specific historical text for the ending UI only. */
+const PERSON_HISTORY={
+ sully:"2009年，1549航班两台发动机失去动力。萨伦伯格机长在哈德逊河迫降，155人全部生还。",
+ skiles:"2009年，1549航班两台发动机失去动力。斯凯尔斯副驾驶协助检查，机组在哈德逊河迫降，全员生还。",
+ haynes:"1989年，UA232发动机严重受损，飞机难以控制。海恩斯机长组织迫降，多数乘员幸存。",
+ fitch:"1989年，UA232难以控制。作为乘客的培训机长菲奇主动协助机组，多数乘员幸存。",
+ shults:"2018年，1380航班发动机损坏、客舱失压。舒尔茨机长备降费城，一名乘客遇难，其余人员获救。",
+ piche:"2001年，236航班漏油，两台发动机停转。皮谢机长操纵飞机滑翔着陆，机上人员全部生还。",
+ dejager:"2001年，236航班两台发动机停转。副驾驶德雅格协助机长滑翔降落，机上人员全部生还。",
+ atchison:"1990年，5390航班驾驶舱风挡脱落，机长无法操纵。副驾驶艾奇逊接手，最终安全降落。",
+ lubitz:"2015年，德国之翼9525航班坠毁。法国调查机构认定副驾驶卢比茨故意导致了事故。",
+ records:"1989年，UA232发动机严重受损。副驾驶雷科德斯协助机组处置，飞机坠毁，多数人幸存。"
+};
+
 const HISTORICAL_ACTION={
  sully:"萨伦伯格决定在哈德逊河降落，和副驾驶协作救回全机人员。",
  skiles:"斯凯尔斯协助检查发动机状态，配合机长完成哈德逊河迫降。",
@@ -129,7 +143,7 @@ function avatar(p,large=false){
   records:{face:45,chin:126,glasses:true,freckles:false,mustache:false}
  }[p.id]||{face:41,chin:125,glasses:false,freckles:false,mustache:false};
  const fLeft=76-individual.face,fRight=76+individual.face;
- const faceContour='M'+fLeft+' 75 Q'+fLeft+' 31 76 30 Q'+fRight+' 29 '+fRight+' 75 L'+(fRight-3)+' 99 Q76 '+individual.chin+' '+(fLeft+3)+' 99Z';
+ const faceContour='M'+fLeft+' 75 Q'+fLeft+' 31 76 30 Q'+fRight+' 29 '+fRight+' 75 L'+(fRight-2)+' 99 Q'+(fRight-4)+' '+(individual.chin-5)+' 76 '+(individual.chin+4)+' Q'+(fLeft+4)+' '+(individual.chin-5)+' '+(fLeft+2)+' 99Z';
  const glasses=individual.glasses?'<path d="M44 79Q56 75 69 79L70 93Q59 100 47 92Z M84 79Q96 75 107 79L108 93Q97 100 85 92Z M70 82Q77 77 84 82" fill="#c8edfb33" stroke="#20344b" stroke-width="3.3" stroke-linejoin="round"/>':'';
  const freckles=individual.freckles?'<circle cx="46" cy="100" r="2" fill="#b27e71"/><circle cx="52" cy="103" r="1.6" fill="#b27e71"/><circle cx="102" cy="100" r="2" fill="#b27e71"/>':'';
  const facialHair=individual.mustache?'<path d="M64 106Q71 101 76 107Q84 101 91 106" stroke="'+h+'" stroke-width="3.6" stroke-linecap="round" fill="none"/>':'';
@@ -141,7 +155,9 @@ function avatar(p,large=false){
   '<path d="M31 63Q28 32 56 25L77 22Q108 17 119 51L117 65Q102 49 93 47L70 52L48 48L36 68Z" fill="'+h+'"/>',
   '<path d="M29 63Q25 22 66 20Q100 18 119 48L119 123L106 116L105 61Q85 45 67 51L42 60L41 126L28 121Z" fill="'+h+'"/>'
  ];
- const f=p.style===4?'<path d="M107 65Q116 91 108 118" stroke="'+h+'" stroke-width="8" stroke-linecap="round" fill="none"/>':'';
+ // Long hair has a back layer behind the face; a short top fringe never covers the eyes.
+ const hairBack=p.style===4?'<path d="M28 73Q22 25 62 18Q112 14 123 62L128 133Q121 144 109 134L107 78Q94 48 76 47Q55 48 43 76L43 131Q31 143 25 130Z" fill="'+h+'" stroke="'+line+'" stroke-width="3"/>':'';
+ const hairFront=p.style===4?'<path d="M32 69Q37 30 65 30Q100 23 113 61L107 67Q91 47 76 50Q54 55 42 73Z" fill="'+h+'"/>':hairs[p.style];
  const eyebrow=p.unsafe?'<path d="M48 68L64 75M90 75L105 68" stroke="'+line+'" stroke-width="5" stroke-linecap="round"/>':
  '<path d="M47 70Q57 65 65 69M90 69Q101 65 108 70" stroke="'+line+'" stroke-width="4.5" stroke-linecap="round" fill="none"/>';
  const mouth=p.unsafe?'<path d="M62 116Q78 111 96 114" stroke="'+line+'" stroke-width="3.5" stroke-linecap="round" fill="none"/>':
@@ -155,11 +171,12 @@ function avatar(p,large=false){
  '<path d="M57 106L57 121L76 135L94 121L93 106" fill="'+s+'" stroke="'+line+'" stroke-width="4" stroke-linejoin="round"/>'+
  '<path d="M70 131L82 131L87 164H64Z" fill="#ea665a" stroke="'+line+'" stroke-width="3"/>'+
  '<path d="M40 78Q27 69 29 84Q32 100 41 100M111 78Q128 68 125 85Q124 100 111 101" fill="'+s+'" stroke="'+line+'" stroke-width="4"/>'+
+ hairBack+
  '<path d="'+faceContour+'" fill="'+s+'" stroke="'+line+'" stroke-width="5"/>'+
- hairs[p.style] + f+
+ hairFront+
  eyebrow+
  '<path d="M49 84Q58 79 67 85M86 85Q97 80 105 84" stroke="#fffdfa" stroke-width="12" stroke-linecap="round" fill="none"/>'+
- '<ellipse cx="58" cy="85" rx="4" ry="6" fill="'+e+'"/><ellipse cx="97" cy="85" rx="4" ry="6" fill="'+e+'"/>'+glasses+freckles+
+ '<ellipse cx="58" cy="85" rx="5" ry="6" fill="'+e+'" stroke="'+line+'" stroke-width="1.2"/><circle cx="59" cy="83" r="1.6" fill="#fff"/><ellipse cx="97" cy="85" rx="5" ry="6" fill="'+e+'" stroke="'+line+'" stroke-width="1.2"/><circle cx="98" cy="83" r="1.6" fill="#fff"/>'+glasses+freckles+
  '<path d="M77 84L73 99L84 100" stroke="#8f685b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'+
  mouth+facialHair+
  '<path d="M19 135L46 126M105 126L132 135" stroke="#eabf52" stroke-width="8"/>'+
@@ -298,7 +315,7 @@ function announcePullUp(){
  }
 }
 function updatePanel({alt=0,spd=0,vsi=0,phase="巡航",storm=false,alert=false,failedEngines=0,tilt=0,terrainScale=1}){
- $('phase').textContent=phase;
+ $('phase').textContent=phase.includes("警告")||phase.includes("WARNING")?"地形警告":phase.includes("待命")?"待命":phase.includes("起飞")?"起飞":phase.includes("巡航")?"巡航":phase.includes("事件")?"突发状况":phase.includes("处置")?"应急处置":phase.includes("进近")?"进近":phase.includes("着陆")?"着陆":phase.includes("安全抵达")?"安全抵达":phase.includes("航班中止")?"航班中止":"飞行中";
  $('speed').textContent=String(Math.max(0,Math.round(spd))).padStart(3,"0");
  $('altitude').textContent=String(Math.max(0,Math.round(alt))).padStart(5,"0");
  $('metricAltitude').textContent=Math.round(alt).toLocaleString()+" ft";
@@ -322,7 +339,7 @@ function startFlight(){
  activeToken++;const token=activeToken;
  running=true;warningIssued=false;runStarted=Date.now();
  $('startBtn').disabled=true;$('startBtn').textContent="✈ 飞行进行中";
- $('cockpit').classList.remove("impact","crashing");$('warning').hidden=true;
+ $('cockpit').classList.remove("impact","crashing");$('warning').hidden=true;$('phase').hidden=false;$('scenarioBadge').hidden=false;
  $('inlineResult').hidden=true;$('realEventDetails').open=false;document.body.classList.remove("has-result");
  $('radioLog').innerHTML="";
  $('radioPanel').classList.remove("is-open");$('logBtn').setAttribute("aria-expanded","false");
@@ -355,7 +372,7 @@ function finish(token,a,b,r){
  $('cockpit').classList.remove("crashing");$('warning').hidden=true;
  updatePanel({phase:r.outcome==="crash"?"航班中止 · ACCIDENT":r.outcome==="safe"?"安全抵达 · ARRIVED":"紧急着陆 · LANDED",alt:0,spd:0,terrainScale:1.8});
  $('metricStatus').textContent=r.outcome==="crash"?"ACCIDENT":r.outcome==="divert"?"DIVERTED":"ARRIVED";
- $('scenarioBadge').textContent=r.outcome==="crash"?"架空事故 · 飞行结束":"模拟完成 · 航班结束";
+ $('scenarioBadge').hidden=true;$('phase').hidden=true;
  log(r.outcome==="crash"?"本局结局：坠毁。":r.outcome==="divert"?"本局结局：紧急迫降／备降。":"本局结局：安全到达。",r.outcome==="crash"?"alert":"good");
  narrate("旁白 · 终章",r.outcome==="crash"?"窗外只剩一片寂静。":r.outcome==="divert"?"长久的紧绷之后，终于能松一口气。":"这趟航班，终于平安落幕。",r.outcome==="crash"?"alert":"good");
  running=false;$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
@@ -368,10 +385,11 @@ function showResult(a,b,r){
  const historySource=[a.source,b.source].includes(caseSource)?caseSource:a.source;
  $("inlineResultTitle").textContent="终章";
  $("inlineResultOutcome").textContent=outcome;
- $("inlineHistory").textContent=SHORT_HISTORY[historySource]||SOURCES[historySource].summary;
+ const historyPilot=a.source===historySource?a:b.source===historySource?b:a;
+ $("inlineHistory").textContent=PERSON_HISTORY[historyPilot.id]||SHORT_HISTORY[historySource]||SOURCES[historySource].summary;
  const sceneName={birds:"鸟击",fuel:"燃油异常",hydraulic:"操纵失灵",engine:"发动机故障",window:"风挡破损",unsafe:"机组安全冲突",weather:"暴雨进近",normal:"常规进近"}[r.scenario]||"航班事件";
  $("inlineSimulation").textContent="这次"+a.cn+"任机长，"+b.cn+"任副驾驶。"+sceneName+"后，"+
-   (r.outcome==="crash"?"飞机坠毁。":r.outcome==="divert"?"飞机紧急着陆。":"飞机平安抵达。");
+   (r.outcome==="crash"?"模拟航班发生事故。":r.outcome==="divert"?"机组完成紧急着陆。":"机组完成了本次飞行。");
  $("inlineCompare").textContent=b.id==="haynes"?ROLE_NOTE:uiHistoricalText(a,"captain");
  $("inlineSources").innerHTML=[...new Set([a.source,b.source])].map(k=>sourceCard(SOURCES[k])).join("");
  $("inlineDisclaimer").textContent=a.source===b.source?"本局是虚构模拟，不是对真实航班的重演，也不能预测飞行员行为。":"两者不是同一航班，结果不代表真实人物的必然选择。";
@@ -392,7 +410,7 @@ function resetView(){
  $('resultOverlay').hidden=true;$('pickerOverlay').hidden=true;$('inlineResult').hidden=true;document.body.classList.remove("has-result");$('warning').hidden=true;$('cockpit').classList.remove("crashing","impact");
  $('startBtn').disabled=false;$('startBtn').textContent="✈ 开始飞行";
  $('radioLog').innerHTML='';log("请选择机组并开始飞行。","muted");
- $('scenarioBadge').textContent="等待航班启动";updatePanel({phase:"机组待命 · STANDBY",alt:0,spd:0});
+ $('scenarioBadge').hidden=false;$('phase').hidden=false;$('scenarioBadge').textContent="等待航班启动";updatePanel({phase:"机组待命 · STANDBY",alt:0,spd:0});
  $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";narrate("塔台 · FLIGHT CONTROL","选择机长与副驾驶，准备开始一次架空航班。");render();
 }
 $('logBtn').addEventListener("click",()=>{
