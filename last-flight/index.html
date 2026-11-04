@@ -29,6 +29,7 @@
   <section class="play-layout" aria-label="游戏">
     <aside class="crew-panel captain" id="captainPanel">
       <div class="panel-head"><div><span class="panel-num">01</span><h2>机长 <span>CAPTAIN</span></h2></div><button class="mobile-info" data-info-current="captain" type="button" aria-label="查看当前机长经历">i</button></div>
+      <div class="flight-crew-compact" aria-label="飞行中机长"><span id="captainFlightAvatar" class="flight-crew-avatar" aria-hidden="true"></span><span class="flight-crew-copy"><small>机长</small><strong id="captainFlightName">—</strong></span></div>
       <p class="panel-tip">点击选择机长 · 可跨越真实历史职务重组</p>
       <div class="mobile-chooser" data-picker="captain">
         <button type="button" class="crew-step" data-side="captain" data-shift="-1" aria-label="上一个机长">‹</button>
@@ -135,6 +136,7 @@
     </section>
     <aside class="crew-panel first-officer" id="firstOfficerPanel">
       <div class="panel-head"><div><span class="panel-num">02</span><h2>副驾驶 <span>FIRST OFFICER</span></h2></div><button class="mobile-info" data-info-current="fo" type="button" aria-label="查看当前副驾驶经历">i</button></div>
+      <div class="flight-crew-compact" aria-label="飞行中副驾驶"><span id="foFlightAvatar" class="flight-crew-avatar" aria-hidden="true"></span><span class="flight-crew-copy"><small>副驾驶</small><strong id="foFlightName">—</strong></span></div>
       <p class="panel-tip">点击选择副驾驶 · 不能重复选择同一人</p>
       <div class="mobile-chooser" data-picker="fo">
         <button type="button" class="crew-step" data-side="fo" data-shift="-1" aria-label="上一个副驾驶">‹</button>
