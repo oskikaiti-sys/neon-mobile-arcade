@@ -86,22 +86,34 @@ function miniFlight(flight){
 
 /* Display-only history metadata, separate from the game scoring and scenario model. */
 const CREW_PROFILE={
- sully:{flight:"US 1549",role:"机长",note:"两台发动机停转后，选择河面迫降。"},
- skiles:{flight:"US 1549",role:"副驾驶",note:"协助紧急检查，完成河面迫降。"},
- haynes:{flight:"UA 232",role:"机长",note:"飞机难以控制时，组织机组应对。"},
- fitch:{flight:"UA 232",role:"乘客培训机长",note:"作为乘客，主动加入机组协助。"},
- shults:{flight:"WN 1380",role:"机长",note:"发动机故障后，驾驶飞机备降。"},
- piche:{flight:"TS 236",role:"机长",note:"两台发动机停转后，滑翔着陆。"},
- dejager:{flight:"TS 236",role:"副驾驶",note:"协助机长完成滑翔着陆。"},
- atchison:{flight:"BA 5390",role:"副驾驶",note:"风挡脱落后，接管飞机并着陆。"},
- lubitz:{flight:"4U 9525",role:"副驾驶",note:"调查认定他故意造成航班坠毁。"},
- records:{flight:"UA 232",role:"副驾驶",note:"协助机长处理严重操纵故障。"}
+ sully:{flight:"US 1549",role:"机长",note:"发动机停转，选择河面迫降。"},
+ skiles:{flight:"US 1549",role:"副驾驶",note:"协助检查，完成河面迫降。"},
+ haynes:{flight:"UA 232",role:"机长",note:"飞机失控时，组织机组应对。"},
+ fitch:{flight:"UA 232",role:"乘客培训机长",note:"主动加入机组协助处置。"},
+ shults:{flight:"WN 1380",role:"机长",note:"发动机故障后，驾驶备降。"},
+ piche:{flight:"TS 236",role:"机长",note:"发动机停转，滑翔迫降。"},
+ dejager:{flight:"TS 236",role:"副驾驶",note:"协助机长，滑翔着陆。"},
+ atchison:{flight:"BA 5390",role:"副驾驶",note:"风挡脱落，接管飞机着陆。"},
+ lubitz:{flight:"4U 9525",role:"副驾驶",note:"调查认定其故意导致坠毁。"},
+ records:{flight:"UA 232",role:"副驾驶",note:"协助机长，应对操纵故障。"}
 };
+/* UI-only overflow cue for the scrollable middle region. */
+function refreshStandbyOverflow(){
+ const el=document.querySelector(".story-stage");
+ if(!el)return;
+ const moreBelow=el.scrollHeight>el.clientHeight+3 &&
+   el.scrollTop+el.clientHeight<el.scrollHeight-3;
+ el.classList.toggle("has-more-below",moreBelow);
+}
+function queueStandbyOverflow(){
+ if(typeof window.requestAnimationFrame==="function"){
+  window.requestAnimationFrame(refreshStandbyOverflow);
+ }else refreshStandbyOverflow();
+}
 function renderCrewDossier(a,b){
  for(const [side,pilot] of [["Captain",a],["Fo",b]]){
   const history=CREW_PROFILE[pilot.id];
   $("dossier"+side+"Name").textContent=pilot.cn;
-  $("dossier"+side+"Flight").textContent=history.flight+" · "+pilot.flight.split(" · ")[1]+" · "+history.role;
   $("dossier"+side+"Action").textContent=history.note;
  }
  const sameEvent=a.source===b.source;
@@ -250,6 +262,7 @@ function render(){
   if(chooser)chooser.setAttribute("aria-label","当前"+(side==="captain"?"机长":"副驾驶")+pilot.cn+"，历史职务"+historic.role+"，点击更换");
  }
  renderCrewDossier(a,b);
+ queueStandbyOverflow();
 }
 let pickerSide="captain";
 function setPilot(side,id){
@@ -381,7 +394,7 @@ function startFlight(){
  const c=result.case;
  activeToken++;const token=activeToken;
  running=true;warningIssued=false;runStarted=Date.now();
- document.body.classList.add("is-flying");
+ document.body.classList.add("is-flying");queueStandbyOverflow();
  $('startBtn').disabled=true;$('startBtn').textContent="✈ 飞行进行中";
  $('cockpit').classList.remove("impact","crashing");$('warning').hidden=true;$('phase').hidden=false;$('scenarioBadge').hidden=false;
  $('inlineResult').hidden=true;$("realEventDetails").classList.remove("is-open");$("resultExpand").setAttribute("aria-expanded","false");document.body.classList.remove("has-result");
@@ -419,7 +432,7 @@ function finish(token,a,b,r){
  $('scenarioBadge').hidden=true;$('phase').hidden=true;
  log(r.outcome==="crash"?"本局结局：坠毁。":r.outcome==="divert"?"本局结局：紧急迫降／备降。":"本局结局：安全到达。",r.outcome==="crash"?"alert":"good");
  narrate("旁白 · 终章",r.outcome==="crash"?"窗外只剩一片寂静。":r.outcome==="divert"?"长久的紧绷之后，终于能松一口气。":"这趟航班，终于平安落幕。",r.outcome==="crash"?"alert":"good");
- running=false;document.body.classList.remove("is-flying");$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
+ running=false;document.body.classList.remove("is-flying");queueStandbyOverflow();$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
  showResult(a,b,r);
 }
 function showResult(a,b,r){
@@ -440,6 +453,7 @@ function showResult(a,b,r){
  $("inlineDisclaimer").textContent=a.source===b.source?"本局是虚构模拟，不是对真实航班的重演，也不能预测飞行员行为。":"两者不是同一航班，结果不代表真实人物的必然选择。";
  $("realEventDetails").classList.remove("is-open");$("resultExpand").setAttribute("aria-expanded","false");
  $("inlineResult").hidden=false;
+ queueStandbyOverflow();
  $("resultOverlay").hidden=true;
  document.body.classList.add("has-result");
 }
@@ -456,7 +470,7 @@ function resetView(){
  $('startBtn').disabled=false;$('startBtn').textContent="✈ 开始飞行";
  $('radioLog').innerHTML='';log("请选择机组并开始飞行。","muted");
  $('scenarioBadge').hidden=true;$('phase').hidden=false;$('scenarioBadge').textContent="";updatePanel({phase:"待命",alt:0,spd:0});
- $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";narrate("塔台","选好机组，点击开始飞行。");render();
+ $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";narrate("塔台：","选好机组，点击开始飞行。");render();
 }
 $('logBtn').addEventListener("click",()=>{
  const open=!$('radioPanel').classList.contains("is-open");
@@ -472,6 +486,9 @@ $("resultExpand").addEventListener("click",()=>{
  const expanded=$("realEventDetails").classList.toggle("is-open");
  $("resultExpand").setAttribute("aria-expanded",String(expanded));
 });
+const standbyScroll=document.querySelector(".story-stage");
+if(standbyScroll)standbyScroll.addEventListener("scroll",refreshStandbyOverflow,{passive:true});
+if(typeof window.addEventListener==="function")window.addEventListener("resize",queueStandbyOverflow);
 $('closePicker').addEventListener("click",closePicker);
 $('startBtn').addEventListener("click",startFlight);
 $('soundBtn').addEventListener("click",()=>{sound=!sound;$('soundBtn').textContent=sound?"♫ 音效开":"♫ 静音";$('soundBtn').setAttribute("aria-pressed",String(sound));if(!sound&&"speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}});
