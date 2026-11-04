@@ -14,20 +14,50 @@ const SOURCES = {
   mh370:{title:"马来西亚交通部 · MH370",url:"https://www.mot.gov.my/en/aviation/reports/archived-report/mh370",summary:"2014年MH370失踪。调查未能确定真正原因，也无法证实机长个人的具体意图与操作；本游戏不对此做行为归因。"}
 };
 const PILOTS = [
- {id:"sully",name:"Chesley Sullenberger",cn:"萨伦伯格",flight:"US Airways 1549 · 2009",brief:"双发失去推力 · 哈德逊河迫降",source:"1549",strength:4,team:3,action:"迅速评估备降选项，优先保持飞机可控，并寻找可用的迫降地点。",hint:"历史行动：在双发推力丧失后选择哈德逊河迫降。",skin:"#e7b99b",hair:"#c6d0d4",eye:"#385d73",style:1},
+ {id:"sully",name:"Chesley Sullenberger",cn:"萨伦伯格",flight:"US Airways 1549 · 2009",brief:"两台发动机失去动力 · 哈德逊河迫降",source:"1549",strength:4,team:3,action:"迅速评估备降选项，优先保持飞机可控，并寻找可用的迫降地点。",hint:"两台发动机同时失去动力后，他选择在哈德逊河迫降。",skin:"#e7b99b",hair:"#c6d0d4",eye:"#385d73",style:1},
  {id:"skiles",name:"Jeffrey Skiles",cn:"杰弗里·斯凯尔斯",flight:"US Airways 1549 · 2009",brief:"协助发动机处置与检查程序",source:"1549",strength:3,team:4,action:"协助判断发动机状态，执行检查与沟通工作。",hint:"历史行动：配合机长执行紧急程序。",skin:"#e9bc9f",hair:"#674f45",eye:"#334862",style:2},
  {id:"haynes",name:"Alfred C. Haynes",cn:"阿尔弗雷德·海恩斯",flight:"United 232 · 1989",brief:"严重液压失效 · 协同保持控制",source:"232",strength:4,team:4,action:"组织机组持续沟通，在严重操纵受限时尽力维持飞行。",hint:"历史行动：在液压失效中组织机组合作，最终尝试迫降。",skin:"#d8a285",hair:"#b5b5ba",eye:"#384e67",style:0},
  {id:"fitch",name:"Dennis Fitch",cn:"丹尼斯·菲奇",flight:"United 232 · 1989",brief:"乘客机长／DC-10培训机长 · 协助者",source:"232",strength:4,team:4,action:"主动提供协助，并配合其他机组人员寻找有限的控制方案。",hint:"历史行动：作为搭乘本班机的培训机长自愿协助；当班副驾驶是 William R. Records。",skin:"#deb195",hair:"#8e8580",eye:"#3c5268",style:3},
  {id:"shults",name:"Tammie Jo Shults",cn:"塔米·乔·舒尔茨",flight:"Southwest 1380 · 2018",brief:"发动机故障与失压 · 紧急备降",source:"1380",strength:4,team:4,action:"与副驾驶配合判断异常，联系管制并协调尽快备降。",hint:"历史行动：发动机故障及机舱失压后成功备降费城。",skin:"#ecc4a3",hair:"#655447",eye:"#496276",style:4},
- {id:"piche",name:"Robert Piché",cn:"罗伯特·皮谢",flight:"Air Transat 236 · 2001",brief:"燃油耗尽 · 双发停转滑翔着陆",source:"236",strength:3,team:3,action:"在失去动力的极端情况下寻求滑翔至机场的机会。",hint:"历史行动：与副驾驶一起完成无动力着陆；调查也指出机组处置问题。",skin:"#e6bb9b",hair:"#403d40",eye:"#46536d",style:0},
+ {id:"piche",name:"Robert Piché",cn:"罗伯特·皮谢",flight:"Air Transat 236 · 2001",brief:"燃油耗尽 · 两台发动机停转后着陆",source:"236",strength:3,team:3,action:"在失去动力的极端情况下寻求滑翔至机场的机会。",hint:"历史行动：与副驾驶一起完成无动力着陆；调查也指出机组处置问题。",skin:"#e6bb9b",hair:"#403d40",eye:"#46536d",style:0},
  {id:"dejager",name:"Dirk de Jager",cn:"德克·德雅格",flight:"Air Transat 236 · 2001",brief:"协助失去动力后的备降",source:"236",strength:3,team:3,action:"协助监视系统与航路，配合机长完成紧急备降。",hint:"历史行动：作为副驾驶参与了Air Transat 236无动力着陆。",skin:"#e5ba98",hair:"#89634c",eye:"#46506a",style:2},
  {id:"atchison",name:"Alastair Atchison",cn:"阿拉斯泰尔·艾奇逊",flight:"British Airways 5390 · 1990",brief:"风挡失效 · 接管飞机安全降落",source:"5390",strength:4,team:4,action:"在另一名机组成员失去正常操纵能力时接管飞行，并协调支援。",hint:"历史行动：风挡失效后操纵飞机成功降落。",skin:"#e3b998",hair:"#544c43",eye:"#495873",style:3},
  {id:"lubitz",name:"Andreas Lubitz",cn:"安德烈亚斯·卢比茨",flight:"Germanwings 9525 · 2015",brief:"BEA认定故意导致撞山",source:"9525",strength:0,team:-3,action:"出现与飞行安全相冲突的危险行为；架空机组能否识别并制止，取决于本局模拟规则。",hint:"历史结论：BEA认定他故意造成9525航班撞山。模拟不复现具体伤害方法。",skin:"#dfb097",hair:"#78503c",eye:"#3b526c",style:2,unsafe:true},
  {id:"records",name:"William R. Records",cn:"威廉·雷科德斯",flight:"United 232 · 1989",brief:"当班副驾驶 · 液压失效应急处置",source:"232",strength:4,team:4,action:"与机长及协助人员持续交叉检查，在操纵受限时合作完成应急程序。",hint:"历史行动：当班副驾驶，参与联合航空232航班液压失效后的集体应对。",skin:"#d6a48a",hair:"#58483c",eye:"#42506d",style:1}
 ];
+/* Display-only microcopy. These summaries never enter flight outcome calculations. */
+const SHORT_HISTORY={
+ "1549":"2009年，飞机刚起飞就撞上鸟群，两台发动机同时失去动力。机组在哈德逊河迫降，155人全部生还。",
+ "232":"1989年，UA232的一台发动机严重损坏，飞机几乎失去控制。机组努力迫降，飞机坠毁，但多数人幸存。",
+ "1380":"2018年，西南航空1380航班发动机故障，客舱突然失压。机组备降费城，一名乘客不幸遇难。",
+ "236":"2001年，越洋航空236航班漏油，两台发动机先后停转。机组把飞机滑翔到亚速尔群岛，成功降落。",
+ "5390":"1990年，英国航空5390航班的驾驶舱风挡突然脱落，机长无法继续操纵。副驾驶接手，最终安全降落。",
+ "9525":"2015年，德国之翼9525航班在阿尔卑斯山区坠毁。官方调查认定副驾驶故意造成事故。"
+};
+const HISTORICAL_ACTION={
+ sully:"萨伦伯格决定在哈德逊河降落，和副驾驶协作救回全机人员。",
+ skiles:"斯凯尔斯协助检查发动机状态，配合机长完成哈德逊河迫降。",
+ haynes:"海恩斯是UA232的机长，组织机组尽力控制受损飞机。",
+ fitch:"菲奇是搭乘UA232的培训机长，自愿进驾驶舱协助，并非当班副驾驶。",
+ shults:"舒尔茨与副驾驶协调下降和备降，最终在费城着陆。",
+ piche:"皮谢与副驾驶在飞机没了发动机动力后，滑翔降落在亚速尔群岛。",
+ dejager:"德雅格担任副驾驶，配合机长完成无动力着陆。",
+ atchison:"艾奇逊在驾驶舱风挡脱落后接管操纵，最终安全着陆。",
+ lubitz:"调查认定卢比茨故意导致9525航班撞山，机上人员全部遇难。",
+ records:"雷科德斯是UA232当班副驾驶，与机长及其他人员共同处置危机。"
+};
+const ROLE_NOTE="本次模拟让他担任副驾驶，历史上他是UA 232的机长。";
+function uiHistoricalText(p,side){
+ return (HISTORICAL_ACTION[p.id]||p.hint)+(side==="fo"&&p.id==="haynes"?" "+ROLE_NOTE:"");
+}
+function miniFlight(flight){
+ const match=flight.match(/(?:^|\s)(\d{2,4})\s*·\s*(\d{4})$/);
+ return match?match[1]+"航班 · "+match[2]:flight;
+}
+
 const BY_ID=Object.fromEntries(PILOTS.map(p=>[p.id,p]));
 const CASES={
- birds:{title:"鸟击 · 双发推力下降",severe:5,step:"模拟事件：起飞后遭遇鸟群，两台发动机推力骤降。",why:"鸟击造成双发推力不足时，需要在有限时间内评估迫降区域。哈德逊河事件有真实历史依据，但当前机组及条件是虚构的。",tip:"现实科普：双发失去推力不等于飞机立刻垂直下坠；飞机仍能短时间滑翔。"},
+ birds:{title:"鸟击 · 两台发动机失去动力",severe:5,step:"模拟事件：起飞后遭遇鸟群，两台发动机推力骤降。",why:"鸟击造成双发推力不足时，需要在有限时间内评估迫降区域。哈德逊河事件有真实历史依据，但当前机组及条件是虚构的。",tip:"现实科普：两台发动机同时失去动力，飞机仍能短时间滑翔，并不会马上直线坠下。"},
  fuel:{title:"燃油系统异常",severe:5,step:"模拟事件：燃油状态异常，两台发动机先后失去动力。",why:"失去发动机推力时，飞机仍具备一定滑翔能力，但能否抵达机场受高度、距离和天气影响。",tip:"现实科普：Air Transat 236最终安全着陆，然而调查指出不止一个导致事件升级的因素。"},
  hydraulic:{title:"飞行控制受限",severe:6,step:"模拟事件：严重机械故障，多个液压系统失效。",why:"液压系统故障可能大幅削弱大型客机操纵能力。United 232的机组曾在控制严重受限时持续努力。",tip:"现实科普：联合航空232航班最终坠毁，但多数乘员生还，不能简单将其归入『飞行员失败』。"},
  engine:{title:"发动机故障 · 机舱失压",severe:4,step:"模拟事件：一台发动机故障，同时出现客舱失压。",why:"紧急下降和寻找合适备降机场属于机组需要协同完成的任务。",tip:"现实科普：发动机失效并不一定意味着无法继续飞行，关键还取决于其他系统状态。"},
@@ -40,7 +70,7 @@ const CASES={
 /* The historical summaries describe documented events, not general character traits.
    Scenario scripts below are explicitly fictional; no invented pilot quotes. */
 const BIOS={
- sully:"2009年1月15日，他担任全美航空1549航班机长。飞机起飞不久遭鸟击，双发几乎失去推力。机组选择在哈德逊河迫降，机上155人全部生还。",
+ sully:"2009年1月15日，他担任全美航空1549航班机长。飞机起飞不久撞上鸟群，两台发动机几乎同时失去动力。机组选择在哈德逊河迫降，机上155人全部生还。",
  skiles:"2009年全美航空1549航班的副驾驶。鸟击发生后，他协助执行紧急检查程序，与机长共同处置失去推力的紧急情况。",
  haynes:"1989年联合航空232航班机长。飞机尾部发动机故障引发严重液压系统失效，他与其他机组人员竭力保持控制，并尝试在苏城紧急着陆；飞机坠毁，但多数乘员幸存。",
  fitch:"1989年联合航空232航班上的乘客机长、DC-10培训机长。事故中他主动进入驾驶舱协助机组处理严重液压故障。当时的当班副驾驶是威廉·雷科德斯，而非菲奇。",
@@ -70,7 +100,7 @@ function showPilotInfo(id,anchor){
  const p=BY_ID[id];if(!p)return;
  const box=$("pilotInfoOverlay");
  $("pilotInfoTitle").textContent=p.cn+" · "+p.name;
- $("pilotInfoBody").innerHTML='<span class="popover-flight">'+escapeHtml(p.flight)+'</span><p class="popover-summary">'+escapeHtml(BIOS[p.id])+'</p>';
+ $("pilotInfoBody").innerHTML='<span class="popover-flight">'+escapeHtml(p.flight)+'</span><p class="popover-summary">'+escapeHtml(BIOS[p.id]+(selected.fo===p.id&&p.id==="haynes"?" "+ROLE_NOTE:""))+'</p>';
  box.hidden=false;
  const rect=anchor&&typeof anchor.getBoundingClientRect==="function"?anchor.getBoundingClientRect():null;
  const vw=window.innerWidth||document.documentElement.clientWidth||390;
@@ -85,6 +115,24 @@ function closePilotInfo(){$("pilotInfoOverlay").hidden=true;}
 let selected={captain:"sully",fo:"skiles"},running=false,flightCount=0,activeToken=0,sound=true,context=null,warningIssued=false;
 function avatar(p,large=false){
  const s=p.skin,h=p.hair,e=p.eye;
+ // Visual-only individual portrait parameters; not historical likeness claims.
+ const individual={
+  sully:{face:39,chin:120,glasses:true,freckles:false,mustache:false},
+  skiles:{face:43,chin:127,glasses:false,freckles:true,mustache:false},
+  haynes:{face:45,chin:129,glasses:true,freckles:false,mustache:false},
+  fitch:{face:38,chin:118,glasses:false,freckles:false,mustache:true},
+  shults:{face:40,chin:125,glasses:false,freckles:true,mustache:false},
+  piche:{face:44,chin:128,glasses:false,freckles:false,mustache:true},
+  dejager:{face:41,chin:123,glasses:true,freckles:false,mustache:false},
+  atchison:{face:38,chin:124,glasses:false,freckles:false,mustache:false},
+  lubitz:{face:40,chin:121,glasses:false,freckles:false,mustache:false},
+  records:{face:45,chin:126,glasses:true,freckles:false,mustache:false}
+ }[p.id]||{face:41,chin:125,glasses:false,freckles:false,mustache:false};
+ const fLeft=76-individual.face,fRight=76+individual.face;
+ const faceContour='M'+fLeft+' 75 Q'+fLeft+' 31 76 30 Q'+fRight+' 29 '+fRight+' 75 L'+(fRight-3)+' 99 Q76 '+individual.chin+' '+(fLeft+3)+' 99Z';
+ const glasses=individual.glasses?'<path d="M44 79Q56 75 69 79L70 93Q59 100 47 92Z M84 79Q96 75 107 79L108 93Q97 100 85 92Z M70 82Q77 77 84 82" fill="#c8edfb33" stroke="#20344b" stroke-width="3.3" stroke-linejoin="round"/>':'';
+ const freckles=individual.freckles?'<circle cx="46" cy="100" r="2" fill="#b27e71"/><circle cx="52" cy="103" r="1.6" fill="#b27e71"/><circle cx="102" cy="100" r="2" fill="#b27e71"/>':'';
+ const facialHair=individual.mustache?'<path d="M64 106Q71 101 76 107Q84 101 91 106" stroke="'+h+'" stroke-width="3.6" stroke-linecap="round" fill="none"/>':'';
  const line="#142640",bg=p.unsafe?"#ef9c99":p.unknown?"#e0b881":"#77c4e8";
  const hairs=[
   '<path d="M30 58Q28 19 73 19Q122 20 123 57L110 51Q87 35 69 42L38 61Z" fill="'+h+'"/>',
@@ -107,13 +155,13 @@ function avatar(p,large=false){
  '<path d="M57 106L57 121L76 135L94 121L93 106" fill="'+s+'" stroke="'+line+'" stroke-width="4" stroke-linejoin="round"/>'+
  '<path d="M70 131L82 131L87 164H64Z" fill="#ea665a" stroke="'+line+'" stroke-width="3"/>'+
  '<path d="M40 78Q27 69 29 84Q32 100 41 100M111 78Q128 68 125 85Q124 100 111 101" fill="'+s+'" stroke="'+line+'" stroke-width="4"/>'+
- '<path d="M37 75Q37 32 76 30Q114 27 115 77L112 99Q108 124 75 126Q43 125 39 98Z" fill="'+s+'" stroke="'+line+'" stroke-width="5"/>'+
+ '<path d="'+faceContour+'" fill="'+s+'" stroke="'+line+'" stroke-width="5"/>'+
  hairs[p.style] + f+
  eyebrow+
  '<path d="M49 84Q58 79 67 85M86 85Q97 80 105 84" stroke="#fffdfa" stroke-width="12" stroke-linecap="round" fill="none"/>'+
- '<ellipse cx="58" cy="85" rx="4" ry="6" fill="'+e+'"/><ellipse cx="97" cy="85" rx="4" ry="6" fill="'+e+'"/>'+
+ '<ellipse cx="58" cy="85" rx="4" ry="6" fill="'+e+'"/><ellipse cx="97" cy="85" rx="4" ry="6" fill="'+e+'"/>'+glasses+freckles+
  '<path d="M77 84L73 99L84 100" stroke="#8f685b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'+
- mouth+
+ mouth+facialHair+
  '<path d="M19 135L46 126M105 126L132 135" stroke="#eabf52" stroke-width="8"/>'+
  '<path d="M22 135L44 128M107 128L129 135" stroke="'+line+'" stroke-width="2"/>'+
  '<path d="M14 150L40 147M110 147L137 150" stroke="#ffffff" stroke-width="2" opacity=".7"/>'+
@@ -138,7 +186,7 @@ function render(){
  for(const [side,pilot] of [["captain",a],["fo",b]]){
   $(side+"MiniPortrait").innerHTML=avatar(pilot);
   $(side+"MiniName").textContent=pilot.cn;
-  $(side+"MiniFlight").textContent=pilot.flight.replace("US Airways ","US ").replace("United ","UA ").replace("Southwest ","WN ").replace("Air Transat ","TS ").replace("British Airways ","BA ").replace("Germanwings ","4U ");
+  $(side+"MiniFlight").textContent=miniFlight(pilot.flight);
   const chooser=document.querySelector('.crew-current[data-side="'+side+'"]');
   if(chooser)chooser.setAttribute("aria-label","当前"+(side==="captain"?"机长":"副驾驶")+pilot.cn+"，点击更换");
  }
@@ -309,34 +357,27 @@ function finish(token,a,b,r){
  $('metricStatus').textContent=r.outcome==="crash"?"ACCIDENT":r.outcome==="divert"?"DIVERTED":"ARRIVED";
  $('scenarioBadge').textContent=r.outcome==="crash"?"架空事故 · 飞行结束":"模拟完成 · 航班结束";
  log(r.outcome==="crash"?"本局结局：坠毁。":r.outcome==="divert"?"本局结局：紧急迫降／备降。":"本局结局：安全到达。",r.outcome==="crash"?"alert":"good");
- narrate("旁白 · 终章",r.outcome==="crash"?"模拟航班在事故中结束。最后几分钟的决策将在调查页重现。":r.outcome==="divert"?"飞机完成了非计划着陆。机组努力让这场危机有了不同的结尾。":"飞机平安抵达。再困难的局面，也可能被稳健的协作化解。",r.outcome==="crash"?"alert":"good");
+ narrate("旁白 · 终章",r.outcome==="crash"?"窗外只剩一片寂静。":r.outcome==="divert"?"长久的紧绷之后，终于能松一口气。":"这趟航班，终于平安落幕。",r.outcome==="crash"?"alert":"good");
  running=false;$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
  showResult(a,b,r);
 }
 function showResult(a,b,r){
- const dict={crash:["坠毁 · CRASH","⚠","该虚构机组未能完成安全着陆。"],divert:["紧急迫降 · EMERGENCY LANDING","◇","飞机在异常情况下完成非正常着陆／备降。"],safe:["安全到达 · SAFE ARRIVAL","✈","飞机成功完成了本次模拟飞行。"]};
- const [title,icon,sub]=dict[r.outcome];
- $('resultTitle').textContent=title;$('resultEmblem').textContent=icon;$('resultSubtitle').textContent=sub+" 本局事件："+r.case.title;
- $('resultFactors').innerHTML='<div class="factor-row"><span>本局机长 / 副驾驶</span><strong>'+escapeHtml(a.cn+" / "+b.cn)+'</strong></div>'+
- '<div class="factor-row"><span>场景</span><strong>'+escapeHtml(r.case.title)+'</strong></div>'+
- '<div class="factor-row"><span>模拟评分（仅游戏）</span><strong>'+r.score.toFixed(1)+'</strong></div>'+
- '<div class="factor-row"><span>机组历史对应事件</span><strong>'+escapeHtml(a.flight.split(" · ")[0]+" / "+b.flight.split(" · ")[0])+'</strong></div>';
- $('resultExplain').textContent=r.case.why+" "+r.case.tip+
- " 本局按虚构规则合成了两名人物的历史行动原型、机组协作、事件严重程度及一项固定场景变化。分数不是飞行员能力测评，不是实际事故概率。"+
- ((a.unknown||b.unknown)?" MH370原因未明，相关人物在该事件中的未知行为不参与危险性评分。":"")+
- ((a.unsafe||b.unsafe)?" 德国之翼的官方调查结论不等于此人参与其他假想航班时的必然结局。":"");
- const keys=[...new Set([a.source,b.source])];
- $('references').innerHTML=keys.map(k=>sourceCard(SOURCES[k])).join("");
+ // This function only formats the existing outcome. It never modifies selection, event, score or outcome.
  const outcome={crash:"坠毁",divert:"紧急迫降",safe:"安全到达"}[r.outcome];
- $('inlineResultTitle').textContent="终章 · "+outcome;
- $('inlineResultOutcome').textContent=outcome;
- const sourceA=SOURCES[a.source],sourceB=SOURCES[b.source];
- $('inlineHistory').textContent=a.source===b.source?sourceA.summary:sourceA.summary+" 副驾驶的历史事件："+sourceB.summary;
- $('inlineCompare').textContent="本次模拟："+a.action+" 历史处置："+a.hint+" 两者不是同一航班，结果不代表真实人物的必然选择。";
- $('inlineSources').innerHTML=[...new Set([a.source,b.source])].map(k=>sourceCard(SOURCES[k])).join("");
- $('realEventDetails').open=false;
- $('inlineResult').hidden=false;
- $('resultOverlay').hidden=true;
+ const caseSource={birds:"1549",fuel:"236",hydraulic:"232",engine:"1380",window:"5390",unsafe:"9525"}[r.scenario];
+ const historySource=[a.source,b.source].includes(caseSource)?caseSource:a.source;
+ $("inlineResultTitle").textContent="终章";
+ $("inlineResultOutcome").textContent=outcome;
+ $("inlineHistory").textContent=SHORT_HISTORY[historySource]||SOURCES[historySource].summary;
+ $("inlineSimulation").textContent=
+   "这次"+a.cn+"担任机长，"+b.cn+"担任副驾驶。遇到"+r.case.title+"，最终"+(r.outcome==="crash"?"坠毁。":r.outcome==="divert"?"紧急着陆。":"平安抵达。");
+ $("inlineCompare").textContent=uiHistoricalText(a,"captain")+(a.source===b.source?" ":" 另一位机组成员："+uiHistoricalText(b,"fo"))+
+   (b.id==="haynes"&&a.source===b.source?" "+ROLE_NOTE:"");
+ $("inlineSources").innerHTML=[...new Set([a.source,b.source])].map(k=>sourceCard(SOURCES[k])).join("");
+ $("inlineDisclaimer").textContent="两者不是同一航班，结果不代表真实人物的必然选择。";
+ $("realEventDetails").open=false;
+ $("inlineResult").hidden=false;
+ $("resultOverlay").hidden=true;
  document.body.classList.add("has-result");
 }
 function sourceCard(s){return '<div class="reference"><strong>'+escapeHtml(s.title)+'</strong><span>'+escapeHtml(s.summary)+'</span><a target="_blank" rel="noopener noreferrer" href="'+s.url+'">查看调查资料 ↗</a></div>';}
