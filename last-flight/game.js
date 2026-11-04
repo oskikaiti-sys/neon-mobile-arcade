@@ -559,7 +559,6 @@ function finish(token,a,b,r){
  $('cockpit').classList.remove("crashing");$('warning').hidden=true;
  updatePanel({phase:r.outcome==="crash"?"航班中止 · ACCIDENT":r.outcome==="safe"?"安全抵达 · ARRIVED":"紧急着陆 · LANDED",alt:0,spd:0,terrainScale:1.8});
  $('metricStatus').textContent=r.outcome==="crash"?"ACCIDENT":r.outcome==="divert"?"DIVERTED":"ARRIVED";
- $('scenarioBadge').hidden=true;$('phase').hidden=true;
  log(r.outcome==="crash"?"本局结局：坠毁。":r.outcome==="divert"?"本局结局：紧急迫降／备降。":"本局结局：安全到达。",r.outcome==="crash"?"alert":"good");
  narrate("旁白 · 终章",r.outcome==="crash"?"窗外只剩一片寂静。":r.outcome==="divert"?"长久的紧绷之后，终于能松一口气。":"这趟航班，终于平安落幕。",r.outcome==="crash"?"alert":"good");
  running=false;clearFlightPresentation();
@@ -651,7 +650,12 @@ $("resultExpand").addEventListener("click",()=>{
 });
 const standbyScroll=document.querySelector(".story-stage");
 if(standbyScroll)standbyScroll.addEventListener("scroll",refreshStandbyOverflow,{passive:true});
-if(typeof window.addEventListener==="function")window.addEventListener("resize",queueStandbyOverflow);
+if(typeof window.addEventListener==="function"){
+ window.addEventListener("resize",queueStandbyOverflow);
+ // Avoid restoring a half-finished flight from mobile back/forward cache.
+ window.addEventListener("pagehide",resetToIdle);
+ window.addEventListener("pageshow",e=>{if(e.persisted)resetToIdle();});
+}
 $('closePicker').addEventListener("click",closePicker);
 $('startBtn').addEventListener("click",()=>{
  if(gamePhase==="ended")resetToIdle();
