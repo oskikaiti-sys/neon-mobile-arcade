@@ -1,0 +1,126 @@
+/* LAST FLIGHT v4 — portrait-first cockpit / narrative / crew / sticky action.
+ * This stylesheet only changes presentation and access to existing controls.
+ */
+:root{--lf-ink:#152b49;--lf-navy:#193c62;--lf-cream:#fff0c6;--lf-green:#3ed685}
+html,body{height:100%;height:100dvh;max-height:100dvh;overflow:hidden;overscroll-behavior:none}
+button,a,summary{touch-action:manipulation}
+.masthead .back{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;font-size:19px;text-decoration:none}
+.masthead .brand strong{font-size:18px;letter-spacing:.1px}.masthead .brand small{font-size:10px}
+.masthead .header-btn{min-height:44px;min-width:44px;font-size:12px}
+main{height:calc(100dvh - 57px);max-height:calc(100dvh - 57px);overflow:hidden}
+.play-layout{min-height:0}
+.center{min-height:0;display:flex;flex-direction:column;gap:7px}
+.cockpit{flex:0 0 auto;height:clamp(160px,31.5dvh,330px);min-height:0}
+.cockpit .pilot-figures{inset:0 12px;overflow:hidden}
+.cockpit .cockpit-figure{bottom:26%;height:55%;width:30%;max-width:170px}
+.cockpit .cockpit-figure.left{left:0}.cockpit .cockpit-figure.right{right:0}
+.cockpit .cockpit-figure>div{aspect-ratio:1/1;min-height:0;height:auto;width:min(100%,152px);max-height:100%;border-radius:50%;overflow:hidden;background:#ffe6a9;border:4px solid #17344e;box-shadow:3px 3px 0 #102942;display:flex;align-items:center;justify-content:center}
+.cockpit .cockpit-figure svg{width:100%;height:100%;max-width:100%;display:block;filter:none}
+.cockpit .seat-name{display:none!important}
+.cockpit .cockpit-deck{height:21%;padding:0 12% 2px;background:#355877;border-top:6px solid var(--lf-ink);justify-content:center}
+.instrument-strip{display:flex;justify-content:center;align-items:center;gap:clamp(4px,1.4vw,15px);height:100%;width:min(100%,450px)}
+.instrument-chip{display:flex;align-items:center;justify-content:center;gap:5px;flex:1;min-width:0;padding:5px 7px;height:75%;border:3px solid #0c2136;border-radius:9px;background:#10283d;color:#a5f0ff;font-family:ui-monospace,monospace;font-size:12px;white-space:nowrap;box-shadow:2px 2px 0 #203746}
+.instrument-chip span{color:#b0e9ea;font-weight:800}.instrument-chip strong{font-size:clamp(12px,1.2vw,17px);color:#fff4a8;min-width:0;font-variant-numeric:tabular-nums}.instrument-chip small{color:#8fd6b6;font-size:10px}
+.instrument-chip .failure{color:#fb626b}
+.cockpit .windscreen-badge{font-size:10px;bottom:10%}
+.story-stage{display:flex;flex-direction:column;flex:1;min-height:0;gap:7px;overflow:hidden}
+.story-stage .story-bubble{position:static;left:auto;right:auto;top:auto;z-index:auto;min-height:0;max-height:none;flex:0 0 auto;padding:11px 13px;border:3px solid var(--lf-ink);border-radius:13px;box-shadow:3px 3px 0 #213e5d;background:#fff1c7;color:#1b314e;display:flex;flex-direction:column;gap:4px}
+.story-stage .story-speaker{color:#376c9d;font-size:12px;line-height:1.3;letter-spacing:.2px;font-weight:950}
+.story-stage .story-line{color:#1b314b;font-size:17px;line-height:1.5;font-weight:700;overflow:visible;scrollbar-width:auto}
+.story-stage .story-bubble.alert{background:#ffe6b4;border-color:#be5146}
+.story-stage .story-bubble.good{background:#e2f8d5;border-color:#438765}
+.inline-result-card{display:flex;flex-direction:column;gap:5px;min-height:0;overflow-y:auto;padding:10px 12px;border:3px solid var(--lf-ink);border-radius:12px;background:#fcf9e9;color:#203a56;box-shadow:2px 2px 0 #243e61;scrollbar-width:thin}
+.result-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#132e49;font-weight:950;font-size:15px}
+#inlineResultOutcome{font-size:12px;padding:2px 7px;border:2px solid #2c5779;border-radius:6px;white-space:nowrap}
+.inline-result-card p{margin:0;color:#31495f;font-size:12px;line-height:1.4}
+.inline-result-card .result-history{font-weight:720}
+.inline-result-card .result-compare{border-top:1px dashed #90a3a7;padding-top:5px}
+.result-details{border-top:1px solid #b0bec3;flex:0 0 auto}
+.result-details summary{list-style:none;min-height:44px;display:flex;align-items:center;justify-content:space-between;color:#135f9d;font-size:13px;font-weight:950;cursor:pointer}
+.result-details summary:after{content:"＋";font-size:20px}.result-details[open] summary:after{content:"－"}
+.inline-sources{padding-bottom:6px}.inline-sources .reference{font-size:12px;padding:7px;margin-bottom:6px}
+.inline-sources .reference span{display:none}
+.dashboard .start-btn{min-height:48px;font-size:18px}
+.dashboard .start-btn span{display:none}
+.crew-card-row .pilot-info-btn{min-height:44px;min-width:44px;width:44px;height:44px;right:2px;border-radius:50%;font-size:19px}
+.crew-card-row .crew-card{padding-right:49px;min-height:65px}
+.pilot-popover{position:fixed;z-index:140;width:min(288px,calc(100vw - 20px));max-height:min(220px,38dvh);overflow-y:auto;padding:14px 38px 12px 13px;background:#fff4ca;border:3px solid var(--lf-ink);border-radius:13px;color:#172e4b;box-shadow:4px 5px 0 #1b3651}
+.pilot-popover strong{display:block;font-size:15px;line-height:1.35;padding-right:2px}
+.pilot-popover .popover-flight{display:block;font-size:12px;line-height:1.4;color:#40627f;font-weight:850;margin:3px 0}
+.pilot-popover .popover-summary{font-size:13px;line-height:1.45;margin:4px 0 0;color:#27415e}
+.pilot-popover .close-popover{position:absolute;top:3px;right:3px;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#27415b;font-size:24px;font-weight:800}
+.pilot-popover:before{content:"";position:absolute;left:18px;top:0;height:5px;width:38px;background:#70c8f1}
+@media(max-width:770px) and (orientation:portrait){
+ .masthead{height:52px;padding:0 7px;gap:2px}
+ .masthead .back{width:44px;min-width:44px;height:44px;padding:0;font-size:22px}
+ .masthead .brand{gap:4px;margin-right:auto}.masthead .brand-icon{font-size:19px}
+ .masthead .brand strong{font-size:17px}.masthead .brand small{font-size:9px}
+ .masthead .header-actions{gap:4px}.masthead .header-btn{width:auto;min-width:44px;min-height:44px;height:44px;padding:3px 6px;font-size:12px}
+ main{height:calc(100dvh - 52px);max-height:calc(100dvh - 52px);padding:5px 6px 0;overflow:hidden}
+ .intro{display:none}
+ .play-layout{display:grid;height:100%;min-height:0;width:100%;gap:7px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:32dvh minmax(0,1fr) clamp(139px,18dvh,169px);grid-template-areas:"cockpit cockpit" "story story" "captain first";padding-bottom:calc(72px + env(safe-area-inset-bottom));align-items:stretch;box-sizing:border-box}
+ .center{display:contents}
+ .cockpit{grid-area:cockpit;height:100%;min-height:0;max-height:none;flex:none;border-width:4px;box-shadow:2px 2px 0 #1c3754}
+ .cockpit .pilot-figures{inset:0 12px}
+ .cockpit .cockpit-figure{bottom:25%;height:57%;width:36%;max-width:160px}
+ .cockpit .cockpit-figure.left{left:0}.cockpit .cockpit-figure.right{right:0}
+ .cockpit .cockpit-figure>div{width:min(100%,120px);border-width:3px}
+ .cockpit .cockpit-deck{height:19%;padding:0 8% 1px;border-top-width:5px}
+ .cockpit .instrument-strip{width:100%;gap:5px}
+ .cockpit .instrument-chip{height:75%;padding:2px 4px;border-width:2px;gap:4px;border-radius:6px}
+ .cockpit .instrument-chip span{font-size:10px}.cockpit .instrument-chip strong{font-size:12px}.cockpit .instrument-chip small{font-size:9px}
+ .cockpit .scene-topline{top:5px;left:5px;right:5px}
+ .cockpit .windscreen-badge{bottom:7%;font-size:9px;padding:3px 5px}
+ .cockpit .warning{top:21%}
+ .story-stage{grid-area:story;display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;padding:1px 2px 1px 0}
+ .story-stage .story-bubble{padding:9px 12px;gap:4px;border-width:3px;max-height:100%;flex:0 1 auto;overflow-y:auto;box-shadow:2px 2px 0 #284663}
+ .story-stage .story-speaker{font-size:12px;line-height:1.25}
+ .story-stage .story-line{font-size:16px;line-height:1.5;overflow:visible}
+ .inline-result-card{border-width:2px;flex:1 1 auto;min-height:0;gap:3px;padding:6px 9px;box-shadow:none}
+ .inline-result-card p{font-size:12px;line-height:1.32}
+ .inline-result-card .result-head{font-size:13px}
+ .captain{grid-area:captain}.first-officer{grid-area:first}
+ .crew-panel{height:100%;padding:4px;position:relative;overflow:visible;border-width:3px;box-shadow:2px 2px #24435f}
+ .crew-panel .panel-head{height:25px;min-height:25px;padding:2px 44px 2px 5px;border-width:2px}
+ .crew-panel .panel-head h2{font-size:12px}.crew-panel .panel-head h2 span{font-size:8px;display:none}
+ .crew-panel .mobile-info{width:44px;height:44px;min-width:44px;min-height:44px;right:2px;top:1px;border:2px solid var(--lf-ink);z-index:5}
+ .crew-panel .panel-tip,.crew-panel .crew-list{display:none}
+ .crew-panel .mobile-chooser{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;grid-template-rows:minmax(0,1fr);gap:2px;align-items:center;height:calc(100% - 28px);padding-top:2px}
+ .crew-panel .crew-step{height:44px;min-height:44px;width:44px;min-width:44px;padding:0;font-size:26px;border-width:2px}
+ .crew-panel .crew-current{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px;min-height:76px;height:100%;max-height:100%;padding:1px 0;min-width:0;overflow:hidden}
+ .crew-panel .mini-portrait{height:clamp(38px,5.3dvh,52px);width:clamp(38px,5.3dvh,52px);aspect-ratio:1;min-height:38px;flex-shrink:0;border-width:3px;max-height:none;background:#ffe6aa}
+ .crew-panel .mini-portrait svg{transform:scale(1.5) translateY(8%)}
+ .crew-panel .mini-copy{width:100%;max-width:100%;display:block}
+ .crew-panel .mini-copy strong{font-size:12px;display:block;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .crew-panel .mini-copy small{font-size:12px;display:block;line-height:1.2;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#46546b}
+ .dashboard{position:fixed!important;z-index:25;bottom:0;left:0;right:0;width:100%;height:calc(68px + env(safe-area-inset-bottom));margin:0;padding:7px max(10px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));border-radius:13px 13px 0 0;border:3px solid var(--lf-ink);background:#fff1c7;box-shadow:0 -3px 0 #324f6e}
+ .dashboard .selected-names,.dashboard .metrics{display:none}
+ .dashboard .start-btn{height:50px;min-height:50px;margin:0;font-size:19px;border-width:3px}
+ .radio-panel{position:fixed;z-index:35}
+ .pilot-popover{max-height:min(190px,32dvh);width:min(278px,calc(100vw - 20px))}
+ .picker-grid .crew-card-row{min-height:66px}
+ .picker-grid .crew-card-row .crew-card{min-height:66px;padding-right:50px}
+ .picker-grid .pilot-info-btn{width:44px;height:44px;right:2px}
+ .picker-grid .crew-card .portrait{height:50px;min-width:44px;width:44px}
+}
+@media(max-width:770px) and (orientation:portrait) and (max-height:700px){
+ .play-layout{grid-template-rows:31.5dvh minmax(0,1fr) 139px;padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+ .dashboard{height:calc(64px + env(safe-area-inset-bottom));padding-top:5px;padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+ .dashboard .start-btn{min-height:48px;height:48px}
+ .crew-panel .mini-portrait{height:38px;width:38px}
+ .crew-panel .mobile-chooser{padding-top:0}
+ .story-stage .story-bubble{padding:7px 10px}
+ .story-stage .story-line{font-size:16px;line-height:1.5}
+}
+@media(orientation:landscape) and (max-width:1100px){
+ .center{display:flex}.cockpit{flex:1 1 auto;min-height:0;height:auto}
+ .cockpit .cockpit-deck{height:21%;padding:0 9%}
+ .cockpit .pilot-figures{inset:0 12px}
+ .cockpit .cockpit-figure{height:56%;bottom:25%;width:31%}
+ .cockpit .instrument-chip{gap:3px;padding:1px 2px;font-size:10px}
+ .cockpit .instrument-chip strong{font-size:10px}
+ .story-stage{display:none}
+ .pilot-info-btn{width:44px;min-width:44px;height:44px;right:0}
+ .crew-card-row .crew-card{padding-right:48px}
+}
+@media(prefers-reduced-motion:reduce){.cockpit.crashing{animation:none}}
