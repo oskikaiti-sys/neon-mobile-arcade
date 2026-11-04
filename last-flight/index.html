@@ -12,7 +12,7 @@
 <div class="masthead">
   <a class="back" href="../" aria-label="返回 Neon Arcade">← <span>NEON ARCADE</span></a>
   <div class="brand"><span class="brand-icon">✈</span><div><strong>LAST FLIGHT</strong><small>机组实验室 · AVIATION HISTORY LAB</small></div></div>
-  <button id="soundBtn" class="header-btn" type="button" aria-pressed="true">♫ 音效开</button>
+  <div class="header-actions"><button id="logBtn" class="header-btn log-toggle" type="button" aria-controls="radioPanel" aria-expanded="false">☷ 记录</button><button id="soundBtn" class="header-btn" type="button" aria-pressed="true">♫ 音效开</button></div>
 </div>
 <main>
   <div class="intro">
@@ -23,6 +23,13 @@
     <aside class="crew-panel captain" id="captainPanel">
       <div class="panel-head"><div><span class="panel-num">01</span><h2>机长 <span>CAPTAIN</span></h2></div><span class="panel-icon">★</span></div>
       <p class="panel-tip">点击选择机长 · 可跨越真实历史职务重组</p>
+      <div class="mobile-chooser" data-picker="captain">
+        <button type="button" class="crew-step" data-side="captain" data-shift="-1" aria-label="上一个机长">‹</button>
+        <button type="button" class="crew-current" data-side="captain" aria-haspopup="dialog" aria-label="选择机长">
+          <span class="mini-portrait" id="captainMiniPortrait"></span><span class="mini-copy"><strong id="captainMiniName">—</strong><small id="captainMiniFlight">点击更换</small></span>
+        </button>
+        <button type="button" class="crew-step" data-side="captain" data-shift="1" aria-label="下一个机长">›</button>
+      </div>
       <div id="captainList" class="crew-list" role="group" aria-label="机长候选人"></div>
     </aside>
     <section class="center" aria-label="驾驶舱场景">
@@ -52,8 +59,8 @@
         <button id="startBtn" class="start-btn" type="button">✈ 开始飞行 <span>START FLIGHT</span></button>
         <div class="metrics"><span>ALTITUDE <strong id="metricAltitude">—</strong></span><span>AIRSPEED <strong id="metricSpeed">—</strong></span><span>STATUS <strong id="metricStatus">READY</strong></span></div>
       </div>
-      <section class="radio-panel" aria-label="飞行事件记录">
-        <div class="radio-header"><span><i class="live-dot"></i> COCKPIT RADIO · 飞行动态</span><button id="archiveBtn" type="button">历史档案 ↗</button></div>
+      <section class="radio-panel" id="radioPanel" aria-label="飞行事件记录">
+        <div class="radio-header"><span><i class="live-dot"></i> COCKPIT RADIO · 飞行动态</span><span class="radio-actions"><button id="archiveBtn" type="button">历史档案 ↗</button><button id="closeLog" class="close-log" type="button" aria-label="关闭飞行记录">✕</button></span></div>
         <div class="radio-log" id="radioLog" role="log" aria-live="polite"><div class="log-line muted">[00:00] 航班待命。请选择机长与副驾驶。</div></div>
       </section>
       <p class="footnote">仅为教育用途的架空组合实验。卡通头像是原创示意，并非真实肖像；模拟行动不代表这些人在其他航班上必然如此行事。</p>
@@ -61,6 +68,13 @@
     <aside class="crew-panel first-officer" id="firstOfficerPanel">
       <div class="panel-head"><div><span class="panel-num">02</span><h2>副驾驶 <span>FIRST OFFICER</span></h2></div><span class="panel-icon">✦</span></div>
       <p class="panel-tip">点击选择副驾驶 · 不能重复选择同一人</p>
+      <div class="mobile-chooser" data-picker="fo">
+        <button type="button" class="crew-step" data-side="fo" data-shift="-1" aria-label="上一个副驾驶">‹</button>
+        <button type="button" class="crew-current" data-side="fo" aria-haspopup="dialog" aria-label="选择副驾驶">
+          <span class="mini-portrait" id="foMiniPortrait"></span><span class="mini-copy"><strong id="foMiniName">—</strong><small id="foMiniFlight">点击更换</small></span>
+        </button>
+        <button type="button" class="crew-step" data-side="fo" data-shift="1" aria-label="下一个副驾驶">›</button>
+      </div>
       <div id="foList" class="crew-list" role="group" aria-label="副驾驶候选人"></div>
     </aside>
   </section>
@@ -69,6 +83,14 @@
     <div class="outcome-legend"><span class="legend safe">● 安全到达</span><span class="legend divert">● 紧急迫降</span><span class="legend crash">● 坠毁</span></div>
   </section>
 </main>
+<div class="modal-backdrop" id="pickerOverlay" hidden>
+  <section class="modal picker-modal" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+    <button class="close" type="button" id="closePicker" aria-label="关闭机组选择">×</button>
+    <div class="modal-eyebrow">CHOOSE YOUR CREW</div><h2 id="pickerTitle">选择飞行员</h2>
+    <p class="picker-note">选择历史事件人物。更换飞行员不等于预测其在其他航班上的真实行为。</p>
+    <div class="picker-grid" id="pickerItems"></div>
+  </section>
+</div>
 <div class="modal-backdrop" id="resultOverlay" hidden>
   <section class="modal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
     <button class="close" type="button" id="closeModal" aria-label="关闭">×</button>
