@@ -592,14 +592,49 @@ function showArchive(){
  $('closeArchive').focus();
 }
 function closeResult(){$('resultOverlay').hidden=true;$('startBtn').focus();}
-function resetView(){
- activeToken++;running=false;warningIssued=false;clearFlightPresentation();document.body.classList.remove("is-flying");if("speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}
- $('resultOverlay').hidden=true;$('pickerOverlay').hidden=true;$('inlineResult').hidden=true;document.body.classList.remove("has-result");$('warning').hidden=true;$('cockpit').classList.remove("crashing","impact");
- $('startBtn').disabled=false;$('startBtn').textContent="✈ 开始飞行";
- $('radioLog').innerHTML='';log("请选择机组并开始飞行。","muted");
- $('scenarioBadge').hidden=true;$('phase').hidden=false;$('scenarioBadge').textContent="";updatePanel({phase:"待命",alt:0,spd:0});
- $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";narrate("塔台：","选好机组，点击开始飞行。");render();
+function resetToIdle(){
+ // Invalidate and cancel callbacks before touching the DOM. Retain 'selected'
+ // and 'flightCount' so game selection and outcome sequencing are unchanged.
+ activeToken++;running=false;warningIssued=false;runStarted=0;
+ stopFlightEffects();
+ gamePhase="idle";
+ decisionIndex=0;decisionSituation="normal";decisionLocked=false;uiFlightStart=0;
+ $("decisionCounter").textContent="0 / 5";
+ $("decisionActions").innerHTML="";
+ $("decisionConsequence").textContent="";$("decisionConsequence").hidden=true;
+ $("pressureTime").textContent="0.0秒";
+ $("pressureFill").style.width="0%";
+ $("pressureTrack").setAttribute("aria-valuenow","0");
+ $("pressureTrack").classList.remove("warn","critical");
+ $("realEventDetails").classList.remove("is-open");
+ $("resultExpand").setAttribute("aria-expanded","false");
+ $("inlineHistory").textContent="";
+ $("inlineSimulation").textContent="";
+ $("inlineCompare").textContent="";
+ $("inlineSources").innerHTML="";
+ $("inlineResultTitle").textContent="";
+ $("inlineResultOutcome").textContent="";
+ $("inlineDisclaimer").textContent="";
+ $("resultOverlay").hidden=true;$("pickerOverlay").hidden=true;
+ $("pilotInfoOverlay").hidden=true;$("archiveOverlay").hidden=true;
+ $("radioPanel").classList.remove("is-open");
+ $("logBtn").setAttribute("aria-expanded","false");
+ $("radioLog").innerHTML="";
+ log("请选择机组并开始飞行。","muted");
+ $("warning").hidden=true;
+ $("cockpit").classList.remove("crashing","impact");
+ $("scenarioBadge").textContent="";
+ updatePanel({phase:"待命",alt:0,spd:0,vsi:0,storm:false,alert:false,failedEngines:0,tilt:0,terrainScale:1});
+ $("metricAltitude").textContent="—";
+ $("metricSpeed").textContent="—";
+ $("metricStatus").textContent="READY";
+ $("metricStatus").style.color="";
+ narrate("塔台：","选好机组，点击开始飞行。");
+ const stage=document.querySelector(".story-stage");
+ if(stage){stage.scrollTop=0;stage.classList.remove("has-more-below");}
+ render();
 }
+function resetView(){resetToIdle();}
 $('logBtn').addEventListener("click",()=>{
  const open=!$('radioPanel').classList.contains("is-open");
  $('radioPanel').classList.toggle("is-open",open);
@@ -618,18 +653,20 @@ const standbyScroll=document.querySelector(".story-stage");
 if(standbyScroll)standbyScroll.addEventListener("scroll",refreshStandbyOverflow,{passive:true});
 if(typeof window.addEventListener==="function")window.addEventListener("resize",queueStandbyOverflow);
 $('closePicker').addEventListener("click",closePicker);
-$('startBtn').addEventListener("click",startFlight);
+$('startBtn').addEventListener("click",()=>{
+ if(gamePhase==="ended")resetToIdle();
+ else if(gamePhase==="idle")startFlight();
+});
 $('soundBtn').addEventListener("click",()=>{sound=!sound;$('soundBtn').textContent=sound?"♫ 音效开":"♫ 静音";$('soundBtn').setAttribute("aria-pressed",String(sound));if(!sound&&"speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}});
 $('archiveBtn').addEventListener("click",showArchive);
 $('closePilotInfo').addEventListener("click",closePilotInfo);
 $('pilotInfoOverlay').addEventListener("click",e=>{if(e.target===$('pilotInfoOverlay'))closePilotInfo();});
 $('closeArchive').addEventListener("click",()=>{$('archiveOverlay').hidden=true;$('archiveBtn').focus();});
 $('closeModal').addEventListener("click",closeResult);
-$('againBtn').addEventListener("click",()=>{$('resultOverlay').hidden=true;startFlight();});
-$('changeBtn').addEventListener("click",()=>{resetView();});
+$('againBtn').addEventListener("click",resetToIdle);
+$('changeBtn').addEventListener("click",resetToIdle);
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("pilotInfoOverlay").hidden){closePilotInfo();return;}if(!$("pickerOverlay").hidden){closePicker();return;}if($("radioPanel").classList.contains("is-open")){$("radioPanel").classList.remove("is-open");$("logBtn").setAttribute("aria-expanded","false");return;}if(!$('archiveOverlay').hidden){$('archiveOverlay').hidden=true;$('archiveBtn').focus();}else if(!$('resultOverlay').hidden)closeResult();}});
 $('pickerOverlay').addEventListener("click",e=>{if(e.target===$('pickerOverlay'))closePicker();});
 for(const id of ["resultOverlay","archiveOverlay"]){$(id).addEventListener("click",e=>{if(e.target===$(id)){if(id==="resultOverlay")closeResult();else{$(id).hidden=true;$('archiveBtn').focus();}}});}
-render();
-$('metricAltitude').textContent="—";$('metricSpeed').textContent="—";
+resetToIdle();
 })();
