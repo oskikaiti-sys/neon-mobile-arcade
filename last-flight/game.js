@@ -90,7 +90,7 @@ const CREW_PROFILE={
  skiles:{flight:"US 1549",role:"副驾驶",note:"协助检查，完成河面迫降。"},
  haynes:{flight:"UA 232",role:"机长",note:"飞机失控时，组织机组应对。"},
  fitch:{flight:"UA 232",role:"乘客培训机长",note:"主动加入机组协助处置。"},
- shults:{flight:"WN 1380",role:"机长",note:"发动机故障后，驾驶备降。"},
+ shults:{flight:"WN 1380",role:"机长",note:"发动机损坏后，驾机备降。"},
  piche:{flight:"TS 236",role:"机长",note:"发动机停转，滑翔迫降。"},
  dejager:{flight:"TS 236",role:"副驾驶",note:"协助机长，滑翔着陆。"},
  atchison:{flight:"BA 5390",role:"副驾驶",note:"风挡脱落，接管飞机着陆。"},
