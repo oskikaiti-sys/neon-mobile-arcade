@@ -70,14 +70,16 @@
         <section class="inline-result-card" id="inlineResult" aria-live="polite" hidden>
           <div class="result-head" hidden aria-hidden="true"><strong id="inlineResultTitle">终章</strong><span id="inlineResultOutcome">—</span></div>
           <section class="result-segment result-real"><h3>真实事件</h3><p id="inlineHistory"></p></section>
-          <details class="result-details" id="realEventDetails">
-            <summary><span class="when-closed">查看本次模拟与历史对比 +</span><span class="when-open">收起 −</span></summary>
-            <div class="result-more">
+          <div class="result-details" id="realEventDetails">
+            <button class="result-toggle" id="resultExpand" type="button" aria-expanded="false" aria-controls="resultMore">
+              <span class="when-closed">查看本次模拟与历史对比 +</span><span class="when-open">收起 −</span>
+            </button>
+            <div class="result-more" id="resultMore">
               <section class="result-segment"><h3>本次模拟</h3><p id="inlineSimulation"></p></section>
               <section class="result-segment"><h3>历史处置</h3><p id="inlineCompare"></p></section>
               <div class="inline-sources" id="inlineSources"></div>
             </div>
-          </details>
+          </div>
           <p class="result-disclaimer" id="inlineDisclaimer">两者不是同一航班，结果不代表真实人物的必然选择。</p>
         </section>
       </section>
