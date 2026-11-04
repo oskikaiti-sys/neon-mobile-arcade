@@ -8,11 +8,12 @@
 <title>LAST FLIGHT · NEON ARCADE</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="v3.css">
+<link rel="stylesheet" href="v4.css">
 </head>
 <body>
 <div class="masthead">
   <a class="back" href="../" aria-label="返回 Neon Arcade">← <span>NEON ARCADE</span></a>
-  <div class="brand"><span class="brand-icon">✈</span><div><strong>LAST FLIGHT</strong><small>机组实验室 · AVIATION HISTORY LAB</small></div></div>
+  <div class="brand"><span class="brand-icon">✈</span><div><strong>梦幻机组</strong><small>LAST FLIGHT</small></div></div>
   <div class="header-actions"><button id="logBtn" class="header-btn log-toggle" type="button" aria-controls="radioPanel" aria-expanded="false">☷ 记录</button><button id="soundBtn" class="header-btn" type="button" aria-pressed="true">♫ 音效开</button></div>
 </div>
 <main>
@@ -42,26 +43,40 @@
           <div class="warning" id="warning" aria-live="assertive" hidden><span>⚠ PULL UP!</span><small>TERRAIN · TERRAIN</small></div>
           <div class="windscreen-badge" id="scenarioBadge">等待航班启动</div>
         </div>
+        
+        <div class="overhead"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="cockpit-deck" role="group" aria-label="简化飞机状态栏">
+          <div class="instrument-strip">
+            <div class="instrument-chip"><span>SPD</span><strong id="speed">000</strong><small>KT</small></div>
+            <div class="instrument-chip"><span>ALT</span><strong id="altitude">00000</strong><small>FT</small></div>
+            <div class="instrument-chip engines"><span>ENG</span><strong><span id="eng1">●</span> <span id="eng2">●</span></strong><small>STATUS</small></div>
+          </div>
+          <span id="vsi" hidden>VS +0000</span><span id="horizonLine" hidden></span>
+        </div>
+        <div class="pilot-figures">
+          <div class="cockpit-figure left"><div id="bigCaptain"></div><span class="seat-name" id="seatCaptain" hidden></span></div>
+          <div class="cockpit-figure right"><div id="bigFirstOfficer"></div><span class="seat-name" id="seatFirstOfficer" hidden></span></div>
+        </div>
+        <div class="film-grain"></div>
+      </div>
+      <section class="story-stage" aria-label="航班旁白与结果">
         <div class="story-bubble" id="storyBubble" aria-live="polite" aria-atomic="true">
           <span class="story-speaker" id="storySpeaker">塔台 · FLIGHT CONTROL</span>
           <span class="story-line" id="storyText">选择机长与副驾驶，准备开始一次架空航班。</span>
         </div>
-        <div class="overhead"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="cockpit-deck">
-          <div class="screen flight-display"><div class="screen-label">PFD</div><div class="horizon"><div id="horizonLine" class="horizon-line"><span></span></div><i class="horizon-reticle">⌖</i></div><div class="screen-readout">SPD <strong id="speed">000</strong></div></div>
-          <div class="screen nav-display"><div class="screen-label">NAV / SYSTEM</div><div class="radar"><i></i><i></i><i></i><b>✈</b></div><div class="screen-readout">ALT <strong id="altitude">00000</strong> FT</div></div>
-          <div class="engine-bank"><div>ENG 1 <span id="eng1">●</span></div><div>ENG 2 <span id="eng2">●</span></div><div id="vsi">VS +0000</div><div class="light-grid"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-          <div class="throttle"><i></i><i></i><b></b></div>
-        </div>
-        <div class="pilot-figures">
-          <div class="cockpit-figure left"><div id="bigCaptain"></div><span class="seat-name" id="seatCaptain">机长</span></div>
-          <div class="cockpit-figure right"><div id="bigFirstOfficer"></div><span class="seat-name" id="seatFirstOfficer">副驾驶</span></div>
-        </div>
-        <div class="film-grain"></div>
-      </div>
+        <section class="inline-result-card" id="inlineResult" aria-live="polite" hidden>
+          <div class="result-head"><strong id="inlineResultTitle">飞行结果</strong><span id="inlineResultOutcome">—</span></div>
+          <p class="result-history" id="inlineHistory"></p>
+          <p class="result-compare" id="inlineCompare"></p>
+          <details class="result-details" id="realEventDetails">
+            <summary>了解真实事件</summary>
+            <div id="inlineSources" class="inline-sources"></div>
+          </details>
+        </section>
+      </section>
       <div class="dashboard">
         <div class="selected-names"><div><small>CAPTAIN</small><strong id="captainName">—</strong></div><span class="crew-divider">×</span><div><small>FIRST OFFICER</small><strong id="foName">—</strong></div></div>
-        <button id="startBtn" class="start-btn" type="button">✈ 开始飞行 <span>START FLIGHT</span></button>
+        <button id="startBtn" class="start-btn" type="button">✈ 开始飞行</button>
         <div class="metrics"><span>ALTITUDE <strong id="metricAltitude">—</strong></span><span>AIRSPEED <strong id="metricSpeed">—</strong></span><span>STATUS <strong id="metricStatus">READY</strong></span></div>
       </div>
       <section class="radio-panel" id="radioPanel" aria-label="飞行事件记录">
@@ -96,13 +111,10 @@
     <div class="picker-grid" id="pickerItems"></div>
   </section>
 </div>
-<div class="modal-backdrop" id="pilotInfoOverlay" hidden>
-  <section class="modal pilot-info-modal" role="dialog" aria-modal="true" aria-labelledby="pilotInfoTitle">
-    <button class="close" type="button" id="closePilotInfo" aria-label="关闭人物档案">×</button>
-    <div class="modal-eyebrow">PILOT FILE · 历史人物</div>
-    <h2 id="pilotInfoTitle">人物档案</h2>
-    <div id="pilotInfoBody"></div>
-  </section>
+<div class="pilot-popover" id="pilotInfoOverlay" role="dialog" aria-modal="false" aria-labelledby="pilotInfoTitle" hidden>
+  <button class="close-popover" id="closePilotInfo" type="button" aria-label="关闭简介">×</button>
+  <strong id="pilotInfoTitle">飞行员</strong>
+  <div id="pilotInfoBody"></div>
 </div>
 <div class="modal-backdrop" id="resultOverlay" hidden>
   <section class="modal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
