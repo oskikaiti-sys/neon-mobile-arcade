@@ -23,7 +23,7 @@ const PILOTS = [
  {id:"dejager",name:"Dirk de Jager",cn:"德克·德雅格",flight:"Air Transat 236 · 2001",brief:"协助失去动力后的备降",source:"236",strength:3,team:3,action:"协助监视系统与航路，配合机长完成紧急备降。",hint:"历史行动：作为副驾驶参与了Air Transat 236无动力着陆。",skin:"#e5ba98",hair:"#89634c",eye:"#46506a",style:2},
  {id:"atchison",name:"Alastair Atchison",cn:"阿拉斯泰尔·艾奇逊",flight:"British Airways 5390 · 1990",brief:"风挡失效 · 接管飞机安全降落",source:"5390",strength:4,team:4,action:"在另一名机组成员失去正常操纵能力时接管飞行，并协调支援。",hint:"历史行动：风挡失效后操纵飞机成功降落。",skin:"#e3b998",hair:"#544c43",eye:"#495873",style:3},
  {id:"lubitz",name:"Andreas Lubitz",cn:"安德烈亚斯·卢比茨",flight:"Germanwings 9525 · 2015",brief:"BEA认定故意导致撞山",source:"9525",strength:0,team:-3,action:"出现与飞行安全相冲突的危险行为；架空机组能否识别并制止，取决于本局模拟规则。",hint:"历史结论：BEA认定他故意造成9525航班撞山。模拟不复现具体伤害方法。",skin:"#dfb097",hair:"#78503c",eye:"#3b526c",style:2,unsafe:true},
- {id:"zaharie",name:"Zaharie Ahmad Shah",cn:"扎哈里",flight:"Malaysia Airlines 370 · 2014",brief:"原因未定 · 不模拟未知的动机",source:"mh370",strength:2,team:2,action:"按照一般机组程序保持监控。MH370关键阶段的个人具体操作无法证实，因此不予模拟。",hint:"调查边界：MH370原因未明，不能把失踪等同于机长蓄意造成。",skin:"#bd8c69",hair:"#262a32",eye:"#303f56",style:1,unknown:true}
+ {id:"zaharie",name:"Zaharie Ahmad Shah",cn:"扎哈里",flight:"Malaysia Airlines 370 · 2014",brief:"原因未定 · 不模拟未知的动机",source:"mh370",strength:3,team:3,action:"按照一般机组程序保持监控。MH370关键阶段的个人具体操作无法证实，因此不予模拟。",hint:"调查边界：MH370原因未明，不能把失踪等同于机长蓄意造成。",skin:"#bd8c69",hair:"#262a32",eye:"#303f56",style:1,unknown:true}
 ];
 const BY_ID=Object.fromEntries(PILOTS.map(p=>[p.id,p]));
 const CASES={
