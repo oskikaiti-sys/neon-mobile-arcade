@@ -340,7 +340,7 @@ function startFlight(){
  running=true;warningIssued=false;runStarted=Date.now();
  $('startBtn').disabled=true;$('startBtn').textContent="✈ 飞行进行中";
  $('cockpit').classList.remove("impact","crashing");$('warning').hidden=true;$('phase').hidden=false;$('scenarioBadge').hidden=false;
- $('inlineResult').hidden=true;$('realEventDetails').open=false;document.body.classList.remove("has-result");
+ $('inlineResult').hidden=true;$("realEventDetails").classList.remove("is-open");$("resultExpand").setAttribute("aria-expanded","false");document.body.classList.remove("has-result");
  $('radioLog').innerHTML="";
  $('radioPanel').classList.remove("is-open");$('logBtn').setAttribute("aria-expanded","false");
  $('scenarioBadge').textContent="模拟航班 · 飞行准备";
@@ -393,7 +393,7 @@ function showResult(a,b,r){
  $("inlineCompare").textContent=b.id==="haynes"?ROLE_NOTE:uiHistoricalText(a,"captain");
  $("inlineSources").innerHTML=[...new Set([a.source,b.source])].map(k=>sourceCard(SOURCES[k])).join("");
  $("inlineDisclaimer").textContent=a.source===b.source?"本局是虚构模拟，不是对真实航班的重演，也不能预测飞行员行为。":"两者不是同一航班，结果不代表真实人物的必然选择。";
- $("realEventDetails").open=false;
+ $("realEventDetails").classList.remove("is-open");$("resultExpand").setAttribute("aria-expanded","false");
  $("inlineResult").hidden=false;
  $("resultOverlay").hidden=true;
  document.body.classList.add("has-result");
@@ -422,6 +422,10 @@ $('closeLog').addEventListener("click",()=>{
  $('radioPanel').classList.remove("is-open");
  $('logBtn').setAttribute("aria-expanded","false");
  $('logBtn').focus();
+});
+$("resultExpand").addEventListener("click",()=>{
+ const expanded=$("realEventDetails").classList.toggle("is-open");
+ $("resultExpand").setAttribute("aria-expanded",String(expanded));
 });
 $('closePicker').addEventListener("click",closePicker);
 $('startBtn').addEventListener("click",startFlight);
