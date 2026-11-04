@@ -1,0 +1,83 @@
+/* LAST FLIGHT v5 — terminal reading hierarchy and portrait-size controls.
+   Overrides only previous UI styling; no effect on score, scenarios or outcomes. */
+.inline-result-card{display:flex;flex-direction:column;gap:7px;padding:10px 12px;overflow-y:auto;min-height:0;overscroll-behavior:contain}
+.inline-result-card .result-head{flex:0 0 auto;font-size:15px;line-height:1.25;gap:8px}
+.inline-result-card .result-segment{display:flex;flex-direction:column;gap:3px;flex:0 0 auto}
+.inline-result-card .result-segment h3{font-size:12px;line-height:1.25;margin:0;color:#235f8c;font-weight:1000;letter-spacing:.6px}
+.inline-result-card .result-segment p{font-size:14px;line-height:1.5;color:#263c53;font-weight:600;margin:0;overflow-wrap:anywhere}
+.inline-result-card .result-real p{font-weight:750}
+.inline-result-card .result-details{position:static;bottom:auto;order:2;border-top:1px dashed #a2b1b6;flex:0 0 auto}
+.inline-result-card .result-details summary{font-size:14px;line-height:1.3;min-height:44px;display:flex;align-items:center;justify-content:space-between;padding:3px 0;color:#175c91}
+.inline-result-card .result-more{display:flex;flex-direction:column;gap:12px;padding:7px 0 2px}
+.inline-result-card .result-disclaimer{order:3;flex:0 0 auto;position:relative;bottom:auto;border-top:1px solid #d4d3c8;padding-top:5px;color:#6c7884;font-size:12px;line-height:1.4;font-weight:400;margin:0}
+.inline-result-card .inline-sources{padding-bottom:0}
+.inline-result-card .inline-sources .reference{font-size:12px}
+.has-result .story-stage .story-bubble{flex:0 0 auto;min-height:0}
+.has-result .story-stage .story-speaker{font-size:12px}
+.has-result .story-stage .story-line{font-size:16px;line-height:1.5}
+.cockpit .pilot-figures{inset:0 12px}
+.cockpit .cockpit-figure{width:30%;max-width:180px}
+.cockpit .scene-topline{top:4px;left:8px;right:8px}
+.cockpit .flight-no,.cockpit .phase{font-size:10px;line-height:1.1;padding:3px 5px;max-width:25%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:770px) and (orientation:portrait){
+ main{height:calc(100dvh - 52px);max-height:calc(100dvh - 52px)}
+ .play-layout{grid-template-rows:27dvh minmax(0,1fr) clamp(152px,18dvh,172px);gap:7px;padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+ .has-result .play-layout{grid-template-rows:25.5dvh minmax(0,1fr) clamp(152px,18dvh,172px)}
+ .cockpit .scene-topline{top:2px;left:6px;right:6px;font-size:10px}
+ .cockpit .flight-no,.cockpit .phase{font-size:10px;line-height:1.1;padding:3px 4px;max-width:26%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .cockpit .overhead{height:30px}
+ .cockpit .pilot-figures{inset:0 12px}
+ .cockpit .cockpit-figure.left{left:0}
+ .cockpit .cockpit-figure.right{right:0}
+ .cockpit .cockpit-figure{height:59%;bottom:22%;width:36%;max-width:155px}
+ .story-stage{gap:6px;overflow:hidden}
+ .story-stage .story-bubble{flex:0 0 auto;padding:7px 10px}
+ .story-stage .story-line{font-size:16px;line-height:1.5}
+ .has-result .story-stage .story-bubble{display:block;padding:6px 10px}
+ .has-result .story-stage .story-speaker{display:none}
+ .has-result .story-stage .story-line{font-size:16px;line-height:1.5}
+ .inline-result-card{gap:4px;padding:7px 10px;flex:1 1 auto;min-height:0;overflow-y:auto}
+ .inline-result-card .result-head{font-size:14px;line-height:1.2}
+ .inline-result-card .result-segment{gap:2px}
+ .inline-result-card .result-segment h3{font-size:12px}
+ .inline-result-card .result-segment p{font-size:14px;line-height:1.5;display:block;overflow:visible;max-height:none;-webkit-line-clamp:unset}
+ .inline-result-card .result-details{position:static;flex:0 0 auto;box-shadow:none}
+ .inline-result-card .result-disclaimer{font-size:12px;line-height:1.3;padding-top:4px}
+ .crew-panel{overflow:hidden;display:flex;flex-direction:column;gap:4px;padding:4px}
+ .crew-panel .panel-head{position:relative;display:flex;justify-content:space-between;align-items:center;flex:0 0 46px;width:100%;min-height:46px;height:46px;padding:0 1px 0 7px;overflow:hidden;border-width:2px;gap:4px}
+ .crew-panel .panel-head>div{min-width:0;flex:1}
+ .crew-panel .panel-head h2{font-size:14px;line-height:1.1;white-space:nowrap}
+ .crew-panel .panel-head .panel-num,.crew-panel .panel-head h2 span{display:none}
+ .crew-panel .mobile-info{position:static;display:flex;flex:0 0 44px;margin:0;min-width:44px;min-height:44px;width:44px;height:44px;max-height:44px;transform:none;border:2px solid #182c47;border-radius:9px;box-shadow:none;background:#8cd7fc;color:#143152;font-size:20px;font-weight:1000}
+ .crew-panel .mobile-chooser{display:grid;flex:1;min-height:0;height:auto;padding:0 2px;grid-template-columns:44px minmax(0,1fr) 44px;grid-template-rows:44px minmax(41px,1fr);column-gap:8px;row-gap:8px;align-items:center}
+ .crew-panel .crew-step{height:44px;min-height:44px;width:44px;min-width:44px;max-width:44px;align-self:center;font-size:23px;border-radius:10px;border-width:2px;padding:0;line-height:1}
+ .crew-panel .portrait-picker{grid-column:2;grid-row:1;min-height:44px;height:44px;max-height:44px;overflow:visible}
+ .crew-panel .mini-portrait{height:44px;width:44px;min-height:44px;max-height:44px;margin:0;border-width:3px;border-radius:50%}
+ .crew-panel .crew-step[data-shift="-1"]{grid-column:1;grid-row:1}
+ .crew-panel .crew-step[data-shift="1"]{grid-column:3;grid-row:1}
+ .crew-panel .crew-caption{grid-column:1/-1;grid-row:2;min-height:44px;max-height:100%;height:100%;overflow:visible;justify-content:flex-start;padding:0 2px;gap:0}
+ .crew-panel .crew-caption .mini-copy{width:100%;display:flex;flex-direction:column;align-items:center;gap:2px}
+ .crew-panel .mini-copy strong{font-size:14px;line-height:1.15;min-height:16px;max-height:none;white-space:normal;overflow:visible;text-overflow:clip;display:block;text-align:center;overflow-wrap:anywhere}
+ .crew-panel .mini-copy small{font-size:12px;line-height:1.1;max-height:none;overflow:visible;display:block;white-space:normal;text-align:center;text-overflow:clip;overflow-wrap:anywhere}
+ .dashboard{height:calc(68px + env(safe-area-inset-bottom));padding:6px max(10px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom));border-top:4px solid #173352;box-shadow:0 -7px 13px #10264444}
+ .dashboard .start-btn{min-height:48px;height:48px;font-size:18px}
+}
+@media(max-width:770px) and (orientation:portrait) and (max-height:700px){
+ .play-layout{grid-template-rows:27dvh minmax(0,1fr) 152px;padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+ .has-result .play-layout{grid-template-rows:25.5dvh minmax(0,1fr) 152px}
+ .crew-panel .panel-head{height:46px;min-height:46px;flex-basis:46px}
+ .crew-panel .mobile-chooser{row-gap:6px;grid-template-rows:44px minmax(41px,1fr)}
+ .crew-panel .mini-copy strong{font-size:14px}
+ .crew-panel .mini-copy small{font-size:12px}
+ .has-result .story-stage .story-bubble{padding:5px 9px}
+ .dashboard{height:calc(64px + env(safe-area-inset-bottom));padding-top:5px;padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+}
+@media(orientation:landscape) and (max-width:1100px){
+ .inline-result-card .result-segment p{font-size:14px;line-height:1.5}
+ .crew-panel .panel-head .mobile-info{position:static;display:flex;width:44px;height:44px;flex:0 0 44px;min-width:44px;min-height:44px}
+ .crew-panel .panel-head{min-height:46px;display:flex;align-items:center;padding:2px}
+ .crew-panel .panel-head>div{flex:1}
+ .crew-panel .panel-head .panel-icon{display:none}
+ .crew-panel .crew-list{min-height:0}
+ .crew-panel .mobile-chooser{display:none}
+}
