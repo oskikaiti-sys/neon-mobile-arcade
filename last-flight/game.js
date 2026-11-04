@@ -36,6 +36,53 @@ const CASES={
  weather:{title:"恶劣天气进近",severe:3,step:"模拟事件：目的地附近出现强降雨和低能见度。",why:"复杂天气下，需要评估是否复飞或备降，以及机组能否保持清晰沟通。",tip:"现实科普：复飞并不是失败，而是一项正常、重要的安全选择。"},
  normal:{title:"常规航班",severe:1,step:"模拟事件：航路平稳，进行标准进近准备。",why:"常规飞行中仍然需要检查程序、职责分工和有效沟通。",tip:"现实科普：PF负责操纵，PM负责监控；机长与副驾驶可以交换这两个分工。"}
 };
+
+/* The historical summaries describe documented events, not general character traits.
+   Scenario scripts below are explicitly fictional; no invented pilot quotes. */
+const BIOS={
+ sully:"2009年1月15日，他担任全美航空1549航班机长。飞机起飞不久遭鸟击，双发几乎失去推力。机组选择在哈德逊河迫降，机上155人全部生还。",
+ skiles:"2009年全美航空1549航班的副驾驶。鸟击发生后，他协助执行紧急检查程序，与机长共同处置失去推力的紧急情况。",
+ haynes:"1989年联合航空232航班机长。飞机尾部发动机故障引发严重液压系统失效，他与其他机组人员竭力保持控制，并尝试在苏城紧急着陆；飞机坠毁，但多数乘员幸存。",
+ fitch:"1989年联合航空232航班上恰好搭乘的一名飞行教员。事故中他主动进入驾驶舱协助机组，在操纵系统严重受限时提供重要帮助。他不是该航班原本安排的副驾驶。",
+ shults:"2018年西南航空1380航班机长。飞机一台发动机故障并发生客舱失压，机组协调紧急下降和备降，最终在费城落地；事件造成一名乘客遇难。",
+ piche:"2001年越洋航空236航班机长。飞机发生燃油泄漏并最终双发失去动力，机组将飞机滑翔至亚速尔群岛机场降落。调查也记录了维护与机组处置方面的复杂因素。",
+ dejager:"2001年越洋航空236航班副驾驶。他与机长在客机失去发动机动力后参与了滑翔与紧急着陆。调查涉及燃油系统及机组应对等多方面因素。",
+ atchison:"1990年英国航空5390航班副驾驶。飞行中驾驶舱风挡失效，机长失去正常操纵能力，他接管飞行并在其他人员协助下安全降落。",
+ lubitz:"2015年德国之翼9525航班副驾驶。法国BEA的事故调查认定，他故意导致飞机撞山。游戏将该历史调查结论与虚构的跨时代角色组合严格区分。",
+ zaharie:"2014年马来西亚航空MH370航班机长。飞机失踪原因仍未确定；调查没有证实机长具体意图。游戏不会据此把他设定为蓄意造成事故的人。"
+};
+const PLOTS={
+ birds:{intro:"起飞后的城市还在窗下缓缓缩小。忽然，挡风玻璃前出现一群飞鸟。",twist:"连续的撞击与剧烈震动！发动机推力几乎同时消失，原本熟悉的噪音瞬间变得不对劲。",stakes:"高度正一寸寸减少。返回机场还是寻找另一片可控的着陆区域？"},
+ fuel:{intro:"漫长的巡航进入深夜，驾驶舱里只有仪表柔和的光。",twist:"燃油警告接连响起，发动机状态急剧恶化。最糟糕的情况出现了：推力正在消失。",stakes:"没有发动机推力也不意味着立刻坠落，但留给判断航程和高度的余地越来越小。"},
+ hydraulic:{intro:"一声沉闷巨响打破平静，飞机猛地抖动，机组下意识看向警告灯。",twist:"多个液压系统先后告警，常规操纵不再听使唤；每一次修正都变得困难。",stakes:"这次不是寻找完美着陆，而是想办法在几乎无法正常操纵的情况下接近地面。"},
+ engine:{intro:"旅客正准备迎接目的地。驾驶舱的下降简令刚刚完成。",twist:"引擎发出异常震动，随即响起失压告警！机组必须同时处理多个问题。",stakes:"航路、客舱、发动机和备降机场，每个决定都在和时间赛跑。"},
+ window:{intro:"高空阳光照在仪表板上，飞行看似平常。",twist:"突然一声巨响！风挡异常失效，气流和噪音瞬间冲进驾驶舱。",stakes:"一名飞行员暂时无法正常操纵，另一人必须稳住飞机并协调救援。"},
+ unsafe:{intro:"航班开始时一切如常，但驾驶舱里的气氛逐渐变得微妙。",twist:"一名机组成员出现与安全职责冲突的危险行为。另一人必须尽快识别异常并作出反应。",stakes:"这是一段虚构的机组冲突剧情。危险来自协作和安全屏障失效，不对应真实历史中的具体实施步骤。"},
+ weather:{intro:"目的地机场的灯光终于出现，云层却比预报中更厚。",twist:"雨幕扑向挡风玻璃，能见度骤降，跑道灯忽隐忽现。",stakes:"继续进近还是复飞？有时候最重要的判断，是承认此刻不适合着陆。"},
+ normal:{intro:"客舱安静，天气晴好，机组完成了又一项例行检查。",twist:"接近目的地时，塔台给出新的进近指令。两名飞行员开始交叉核对高度与航向。",stakes:"没有惊天动地的事故，但一次平稳飞行仍然依赖扎实的程序与配合。"}
+};
+function narrate(who,line,tone=""){
+ $("storySpeaker").textContent=who;
+ $("storyText").textContent=line;
+ $("storyBubble").className="story-bubble"+(tone?" "+tone:"");
+}
+function showPilotInfo(id){
+ const p=BY_ID[id];if(!p)return;
+ const source=SOURCES[p.source];
+ $("pilotInfoTitle").textContent=p.cn+" · "+p.name;
+ $("pilotInfoBody").innerHTML='<div class="pilot-info-header"><div class="pilot-info-avatar">'+avatar(p)+'</div><div><div class="pilot-info-name">'+escapeHtml(p.cn)+'</div><div class="pilot-info-flight">'+escapeHtml(p.name)+'</div><div class="pilot-info-flight">'+escapeHtml(p.flight)+'</div></div></div>'+
+ '<div class="pilot-info-section"><strong>那次航班发生了什么？</strong>'+escapeHtml(BIOS[p.id])+'</div>'+
+ '<div class="pilot-info-section"><strong>历史行动线索</strong>'+escapeHtml(p.hint)+'</div>'+
+ '<div class="pilot-info-section"><strong>调查资料</strong><a href="'+source.url+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(source.title)+' ↗</a></div>'+
+ '<p class="pilot-info-note">人物卡是游戏内的简化资料。模拟剧情为虚构，不代表此人在另一架飞机上必然作出的选择。</p>';
+ $("pilotInfoOverlay").hidden=false;$("closePilotInfo").focus();
+}
+function closePilotInfo(){
+ $("pilotInfoOverlay").hidden=true;
+ const fallback=document.querySelector('[data-info-current="'+selected.captain+'"]');
+ if(fallback)fallback.focus();
+}
+
 let selected={captain:"sully",fo:"skiles"},running=false,flightCount=0,activeToken=0,sound=true,context=null,warningIssued=false;
 function avatar(p,large=false){
  const s=p.skin,h=p.hair,e=p.eye;
@@ -78,8 +125,10 @@ function avatar(p,large=false){
 function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function card(p,side){
  const current=selected[side]===p.id,blocked=selected[side==="captain"?"fo":"captain"]===p.id;
- return '<button class="crew-card '+(current?'selected ':'')+(p.unknown?'unresolved':'')+'" type="button" data-side="'+side+'" data-id="'+p.id+'" aria-pressed="'+current+'" '+(blocked?'disabled aria-label="另一席位已选择此人"':'')+'>'+
- '<span class="portrait">'+avatar(p)+'</span><span class="person-main"><span class="person-name">'+escapeHtml(p.name)+'</span><span class="event">'+escapeHtml(p.flight)+'</span><span class="detail">'+escapeHtml(p.brief)+'</span></span>'+(current?'<span class="picked" aria-hidden="true">✓</span>':'')+'</button>';
+ // Adjacent buttons rather than invalid nested buttons: both actions stay tappable.
+ return '<div class="crew-card-row"><button class="crew-card '+(current?'selected ':'')+(p.unknown?'unresolved':'')+'" type="button" data-side="'+side+'" data-id="'+p.id+'" aria-pressed="'+current+'" '+(blocked?'disabled aria-label="另一席位已选择此人"':'')+'>'+
+ '<span class="portrait">'+avatar(p)+'</span><span class="person-main"><span class="person-name">'+escapeHtml(p.name)+'</span><span class="event">'+escapeHtml(p.flight)+'</span><span class="detail">'+escapeHtml(p.brief)+'</span></span>'+(current?'<span class="picked" aria-hidden="true">✓</span>':'')+'</button>'+
+ '<button class="pilot-info-btn" type="button" data-info="'+p.id+'" aria-label="查看'+escapeHtml(p.cn)+'经历">i</button></div>';
 }
 function render(){
  $('captainList').innerHTML=PILOTS.map(p=>card(p,"captain")).join("");
@@ -124,6 +173,10 @@ function closePicker(){
  if(button)button.focus();
 }
 document.addEventListener("click",e=>{
+ const info=e.target.closest(".pilot-info-btn");
+ if(info){showPilotInfo(info.dataset.info);return;}
+ const current=e.target.closest(".mobile-info");
+ if(current){showPilotInfo(selected[current.dataset.infoCurrent]);return;}
  const btn=e.target.closest(".crew-card");
  if(btn){setPilot(btn.dataset.side,btn.dataset.id);return;}
  const step=e.target.closest(".crew-step");
@@ -230,17 +283,19 @@ function startFlight(){
  if(sound){systemTone(520,.08,.12);if("speechSynthesis" in window){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;window.speechSynthesis.speak(u);}catch(_){}}}
  log("虚构机组成立："+a.cn+"（机长）与"+b.cn+"（副驾驶）。");
  log("提示：模拟结果不代表真实人物在其他航班上的行为。","muted");
+ const plot=PLOTS[result.scenario];
+ narrate("旁白 · NX-001","一段不可能的历史组合开始了。两位飞行员正准备将飞机带离地面。");
  updatePanel({phase:"推出 / 起飞准备",alt:0,spd:0});
  const sequence=[
- [850,()=>{log("起飞，保持爬升。");updatePanel({phase:"起飞 · TAKEOFF",alt:1600,spd:180,vsi:1900});systemTone(700,.1);}],
- [2250,()=>{log("爬升至巡航高度，仪表显示正常。");updatePanel({phase:"巡航 · CRUISE",alt:24000,spd:310,vsi:0});$('scenarioBadge').textContent="航班开始 · 自动模拟";}],
- [3850,()=>{log(c.step,"alert");$('scenarioBadge').textContent=c.title;updatePanel({phase:"事件 · "+c.title,alt:18000,spd:290,vsi:-650,storm:result.scenario==="weather",failedEngines:result.scenario==="fuel"||result.scenario==="birds"?2:result.scenario==="engine"?1:0,tilt:result.scenario==="hydraulic"?9:2});systemTone(500,.2,.1,"triangle");}],
- [5650,()=>{log("机长 "+a.cn+"："+a.action, a.unsafe?"alert":"");}],
- [7050,()=>{log("副驾驶 "+b.cn+"："+b.action,b.unsafe?"alert":"");}],
- [8400,()=>{if(result.safetyConflict)log("机组出现危险行为与安全职责冲突。后续为架空互动结果。","alert");else if(a.unknown||b.unknown)log("MH370相关人物的未知行为未参与风险推断。","muted");else log("机组协调完成初步检查，准备下一阶段。","good");
+ [850,()=>{log("起飞，保持爬升。");narrate("塔台 · TAKEOFF","跑道尽头越来越近。两位飞行员完成最后检查，飞机离地，爬升开始。","good");updatePanel({phase:"起飞 · TAKEOFF",alt:1600,spd:180,vsi:1900});systemTone(700,.1);}],
+ [2250,()=>{log("爬升至巡航高度，仪表显示正常。");narrate("旁白 · CRUISE",plot.intro);updatePanel({phase:"巡航 · CRUISE",alt:24000,spd:310,vsi:0});$('scenarioBadge').textContent="航班开始 · 自动模拟";}],
+ [3850,()=>{log(c.step,"alert");narrate("驾驶舱 · 突发事件",plot.twist,"alert");$('scenarioBadge').textContent=c.title;updatePanel({phase:"事件 · "+c.title,alt:18000,spd:290,vsi:-650,storm:result.scenario==="weather",failedEngines:result.scenario==="fuel"||result.scenario==="birds"?2:result.scenario==="engine"?1:0,tilt:result.scenario==="hydraulic"?9:2});systemTone(500,.2,.1,"triangle");}],
+ [5650,()=>{log("机长 "+a.cn+"："+a.action, a.unsafe?"alert":"");narrate("机长 · "+a.cn,a.action,a.unsafe?"alert":"");}],
+ [7050,()=>{log("副驾驶 "+b.cn+"："+b.action,b.unsafe?"alert":"");narrate("副驾驶 · "+b.cn,b.action,b.unsafe?"alert":"");}],
+ [8400,()=>{narrate("旁白 · 关键抉择",plot.stakes,"alert");log(plot.stakes,"alert");if(result.safetyConflict)log("机组出现危险行为与安全职责冲突。后续为架空互动结果。","alert");else if(a.unknown||b.unknown)log("MH370相关人物的未知行为未参与风险推断。","muted");else log("机组协调完成初步检查，准备下一阶段。","good");
  updatePanel({phase:"处置 · EMERGENCY RESPONSE",alt:6500,spd:230,vsi:-1500,storm:["weather","hydraulic"].includes(result.scenario),failedEngines:["birds","fuel"].includes(result.scenario)?2:result.scenario==="engine"?1:0,tilt:result.outcome==="crash"?16:4,terrainScale:1.15});}],
- [10050,()=>{if(result.outcome==="safe")log("飞机接近目标机场，状态逐步稳定。","good");else if(result.outcome==="divert")log("机组采取备降／迫降方案，接近预定着陆区。","alert");else log("机组未能恢复稳定飞行，接近地面。","alert");updatePanel({phase:"最后进近 · FINAL APPROACH",alt:result.outcome==="crash"?850:1800,spd:result.outcome==="crash"?245:175,vsi:result.outcome==="crash"?-4500:-700,storm:result.scenario==="weather",failedEngines:["birds","fuel"].includes(result.scenario)?2:result.scenario==="engine"?1:0,tilt:result.outcome==="crash"?24:2,terrainScale:1.45});}],
- [11550,()=>{if(result.outcome==="crash"){log("⚠ 地形接近警告：PULL UP! PULL UP!","alert");$('warning').hidden=false;$('cockpit').classList.add("crashing");announcePullUp();updatePanel({phase:"⚠ TERRAIN WARNING",alt:120,spd:260,vsi:-5600,alert:true,terrainScale:2.5,tilt:30,storm:true,failedEngines:["birds","fuel"].includes(result.scenario)?2:0});}else{log("即将接地，完成最后检查。","good");updatePanel({phase:"着陆 · LANDING",alt:120,spd:result.outcome==="safe"?135:150,vsi:-300,terrainScale:1.75});}}],
+ [10050,()=>{narrate("最后进近 · FINAL APPROACH",result.outcome==="safe"?"地平线渐渐稳定，目的地就在前方。此刻最重要的是把最后的检查做完。":result.outcome==="divert"?"地面越来越近，机组准备执行不同于原计划的紧急着陆。":"高度持续降低，警告越来越密集。机组正面对最后的严峻挑战。",result.outcome==="crash"?"alert":"");if(result.outcome==="safe")log("飞机接近目标机场，状态逐步稳定。","good");else if(result.outcome==="divert")log("机组采取备降／迫降方案，接近预定着陆区。","alert");else log("机组未能恢复稳定飞行，接近地面。","alert");updatePanel({phase:"最后进近 · FINAL APPROACH",alt:result.outcome==="crash"?850:1800,spd:result.outcome==="crash"?245:175,vsi:result.outcome==="crash"?-4500:-700,storm:result.scenario==="weather",failedEngines:["birds","fuel"].includes(result.scenario)?2:result.scenario==="engine"?1:0,tilt:result.outcome==="crash"?24:2,terrainScale:1.45});}],
+ [11550,()=>{if(result.outcome==="crash"){log("⚠ 地形接近警告：PULL UP! PULL UP!","alert");narrate("系统警报 · TERRAIN","PULL UP! 地形迅速逼近，飞机仍未恢复稳定！","alert");$('warning').hidden=false;$('cockpit').classList.add("crashing");announcePullUp();updatePanel({phase:"⚠ TERRAIN WARNING",alt:120,spd:260,vsi:-5600,alert:true,terrainScale:2.5,tilt:30,storm:true,failedEngines:["birds","fuel"].includes(result.scenario)?2:0});}else{log("即将接地，完成最后检查。","good");narrate("机组 · LANDING","最后几秒。速度、姿态、跑道……一切决定都将在接地时接受检验。","good");updatePanel({phase:"着陆 · LANDING",alt:120,spd:result.outcome==="safe"?135:150,vsi:-300,terrainScale:1.75});}}],
  [13450,()=>finish(token,a,b,result)]
  ];
  for(const [delay,fn] of sequence)callLater(token,fn,delay);
@@ -254,6 +309,7 @@ function finish(token,a,b,r){
  $('metricStatus').textContent=r.outcome==="crash"?"ACCIDENT":r.outcome==="divert"?"DIVERTED":"ARRIVED";
  $('scenarioBadge').textContent=r.outcome==="crash"?"架空事故 · 飞行结束":"模拟完成 · 航班结束";
  log(r.outcome==="crash"?"本局结局：坠毁。":r.outcome==="divert"?"本局结局：紧急迫降／备降。":"本局结局：安全到达。",r.outcome==="crash"?"alert":"good");
+ narrate("旁白 · 终章",r.outcome==="crash"?"模拟航班在事故中结束。最后几分钟的决策将在调查页重现。":r.outcome==="divert"?"飞机完成了非计划着陆。机组努力让这场危机有了不同的结尾。":"飞机平安抵达。再困难的局面，也可能被稳健的协作化解。",r.outcome==="crash"?"alert":"good");
  running=false;$('startBtn').disabled=false;$('startBtn').innerHTML="✈ 再次飞行 <span>START ANOTHER FLIGHT</span>";
  showResult(a,b,r);
 }
@@ -287,7 +343,7 @@ function resetView(){
  $('startBtn').disabled=false;$('startBtn').innerHTML="✈ 开始飞行 <span>START FLIGHT</span>";
  $('radioLog').innerHTML='';log("请选择机组并开始飞行。","muted");
  $('scenarioBadge').textContent="等待航班启动";updatePanel({phase:"机组待命 · STANDBY",alt:0,spd:0});
- $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";render();
+ $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";narrate("塔台 · FLIGHT CONTROL","选择机长与副驾驶，准备开始一次架空航班。");render();
 }
 $('logBtn').addEventListener("click",()=>{
  const open=!$('radioPanel').classList.contains("is-open");
@@ -303,11 +359,13 @@ $('closePicker').addEventListener("click",closePicker);
 $('startBtn').addEventListener("click",startFlight);
 $('soundBtn').addEventListener("click",()=>{sound=!sound;$('soundBtn').textContent=sound?"♫ 音效开":"♫ 静音";$('soundBtn').setAttribute("aria-pressed",String(sound));if(!sound&&"speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}});
 $('archiveBtn').addEventListener("click",showArchive);
+$('closePilotInfo').addEventListener("click",closePilotInfo);
+$('pilotInfoOverlay').addEventListener("click",e=>{if(e.target===$('pilotInfoOverlay'))closePilotInfo();});
 $('closeArchive').addEventListener("click",()=>{$('archiveOverlay').hidden=true;$('archiveBtn').focus();});
 $('closeModal').addEventListener("click",closeResult);
 $('againBtn').addEventListener("click",()=>{$('resultOverlay').hidden=true;startFlight();});
 $('changeBtn').addEventListener("click",()=>{resetView();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("pickerOverlay").hidden){closePicker();return;}if($("radioPanel").classList.contains("is-open")){$("radioPanel").classList.remove("is-open");$("logBtn").setAttribute("aria-expanded","false");return;}if(!$('archiveOverlay').hidden){$('archiveOverlay').hidden=true;$('archiveBtn').focus();}else if(!$('resultOverlay').hidden)closeResult();}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("pilotInfoOverlay").hidden){closePilotInfo();return;}if(!$("pickerOverlay").hidden){closePicker();return;}if($("radioPanel").classList.contains("is-open")){$("radioPanel").classList.remove("is-open");$("logBtn").setAttribute("aria-expanded","false");return;}if(!$('archiveOverlay').hidden){$('archiveOverlay').hidden=true;$('archiveBtn').focus();}else if(!$('resultOverlay').hidden)closeResult();}});
 $('pickerOverlay').addEventListener("click",e=>{if(e.target===$('pickerOverlay'))closePicker();});
 for(const id of ["resultOverlay","archiveOverlay"]){$(id).addEventListener("click",e=>{if(e.target===$(id)){if(id==="resultOverlay")closeResult();else{$(id).hidden=true;$('archiveBtn').focus();}}});}
 render();
