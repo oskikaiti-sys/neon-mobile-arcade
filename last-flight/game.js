@@ -273,8 +273,9 @@ function startFlight(){
  const c=result.case;
  activeToken++;const token=activeToken;
  running=true;warningIssued=false;runStarted=Date.now();
- $('startBtn').disabled=true;$('startBtn').innerHTML="飞行进行中 <span>FLIGHT IN PROGRESS</span>";
+ $('startBtn').disabled=true;$('startBtn').textContent="✈ 飞行进行中";
  $('cockpit').classList.remove("impact","crashing");$('warning').hidden=true;
+ $('inlineResult').hidden=true;$('realEventDetails').open=false;document.body.classList.remove("has-result");
  $('radioLog').innerHTML="";
  $('radioPanel').classList.remove("is-open");$('logBtn').setAttribute("aria-expanded","false");
  $('scenarioBadge').textContent="模拟航班 · 飞行准备";
@@ -309,7 +310,7 @@ function finish(token,a,b,r){
  $('scenarioBadge').textContent=r.outcome==="crash"?"架空事故 · 飞行结束":"模拟完成 · 航班结束";
  log(r.outcome==="crash"?"本局结局：坠毁。":r.outcome==="divert"?"本局结局：紧急迫降／备降。":"本局结局：安全到达。",r.outcome==="crash"?"alert":"good");
  narrate("旁白 · 终章",r.outcome==="crash"?"模拟航班在事故中结束。最后几分钟的决策将在调查页重现。":r.outcome==="divert"?"飞机完成了非计划着陆。机组努力让这场危机有了不同的结尾。":"飞机平安抵达。再困难的局面，也可能被稳健的协作化解。",r.outcome==="crash"?"alert":"good");
- running=false;$('startBtn').disabled=false;$('startBtn').innerHTML="✈ 再次飞行 <span>START ANOTHER FLIGHT</span>";
+ running=false;$('startBtn').disabled=false;$('startBtn').textContent="✈ 再次飞行";
  showResult(a,b,r);
 }
 function showResult(a,b,r){
@@ -326,8 +327,17 @@ function showResult(a,b,r){
  ((a.unsafe||b.unsafe)?" 德国之翼的官方调查结论不等于此人参与其他假想航班时的必然结局。":"");
  const keys=[...new Set([a.source,b.source])];
  $('references').innerHTML=keys.map(k=>sourceCard(SOURCES[k])).join("");
- $('resultOverlay').hidden=false;
- $('closeModal').focus();
+ const outcome={crash:"坠毁",divert:"紧急迫降",safe:"安全到达"}[r.outcome];
+ $('inlineResultTitle').textContent="终章 · "+outcome;
+ $('inlineResultOutcome').textContent=outcome;
+ const sourceA=SOURCES[a.source],sourceB=SOURCES[b.source];
+ $('inlineHistory').textContent=a.source===b.source?sourceA.summary:sourceA.summary+" 副驾驶的历史事件："+sourceB.summary;
+ $('inlineCompare').textContent="本次模拟："+a.action+" 历史处置："+a.hint+" 两者不是同一航班，结果不代表真实人物的必然选择。";
+ $('inlineSources').innerHTML=[...new Set([a.source,b.source])].map(k=>sourceCard(SOURCES[k])).join("");
+ $('realEventDetails').open=false;
+ $('inlineResult').hidden=false;
+ $('resultOverlay').hidden=true;
+ document.body.classList.add("has-result");
 }
 function sourceCard(s){return '<div class="reference"><strong>'+escapeHtml(s.title)+'</strong><span>'+escapeHtml(s.summary)+'</span><a target="_blank" rel="noopener noreferrer" href="'+s.url+'">查看调查资料 ↗</a></div>';}
 function showArchive(){
@@ -338,8 +348,8 @@ function showArchive(){
 function closeResult(){$('resultOverlay').hidden=true;$('startBtn').focus();}
 function resetView(){
  activeToken++;running=false;warningIssued=false;if("speechSynthesis" in window)try{window.speechSynthesis.cancel()}catch(_){}
- $('resultOverlay').hidden=true;$('pickerOverlay').hidden=true;$('warning').hidden=true;$('cockpit').classList.remove("crashing","impact");
- $('startBtn').disabled=false;$('startBtn').innerHTML="✈ 开始飞行 <span>START FLIGHT</span>";
+ $('resultOverlay').hidden=true;$('pickerOverlay').hidden=true;$('inlineResult').hidden=true;document.body.classList.remove("has-result");$('warning').hidden=true;$('cockpit').classList.remove("crashing","impact");
+ $('startBtn').disabled=false;$('startBtn').textContent="✈ 开始飞行";
  $('radioLog').innerHTML='';log("请选择机组并开始飞行。","muted");
  $('scenarioBadge').textContent="等待航班启动";updatePanel({phase:"机组待命 · STANDBY",alt:0,spd:0});
  $('metricAltitude').textContent="—";$('metricSpeed').textContent="—";$('metricStatus').textContent="READY";narrate("塔台 · FLIGHT CONTROL","选择机长与副驾驶，准备开始一次架空航班。");render();
