@@ -52,7 +52,7 @@ function avatar(p,large=false){
  '<path d="M47 70Q57 65 65 69M90 69Q101 65 108 70" stroke="'+line+'" stroke-width="4.5" stroke-linecap="round" fill="none"/>';
  const mouth=p.unsafe?'<path d="M62 116Q78 111 96 114" stroke="'+line+'" stroke-width="3.5" stroke-linecap="round" fill="none"/>':
  '<path d="M62 109Q78 126 98 109" stroke="'+line+'" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 164" role="img" aria-label="原创美式二维卡通人物示意 '+escapeHtml(p.name)+'">'+
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 164" preserveAspectRatio="xMidYMax meet" role="img" aria-label="原创美式二维卡通人物示意 '+escapeHtml(p.name)+'">'+
  '<rect x="0" y="0" width="150" height="164" rx="10" fill="'+bg+'"/>'+
  '<path d="M0 125L44 91L150 32V164H0Z" fill="#ffffff42"/>'+
  '<circle cx="77" cy="65" r="63" fill="#fff8d3" stroke="'+line+'" stroke-width="3" opacity=".9"/>'+
