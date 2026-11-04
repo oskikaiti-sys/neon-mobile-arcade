@@ -79,7 +79,7 @@ function showPilotInfo(id){
 }
 function closePilotInfo(){
  $("pilotInfoOverlay").hidden=true;
- const fallback=document.querySelector('[data-info-current="'+selected.captain+'"]');
+ const fallback=document.querySelector('.mobile-info[data-info-current="captain"]')||document.getElementById("startBtn");
  if(fallback)fallback.focus();
 }
 
