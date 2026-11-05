@@ -1,0 +1,59 @@
+/* Last Flight v12 — generated PNG pilot portraits, hosted in this repository.
+   One 5-by-2 transparent atlas: each frame is 320×320. The atlas is sampled
+   without distortion by the same renderer in every interactive game view. */
+.pilot-art{
+ display:block;position:relative;box-sizing:border-box;
+ width:100%;height:100%;min-width:0;min-height:0;
+ aspect-ratio:1 / 1;
+ background-image:url("assets/pilot-portraits.png");
+ background-repeat:no-repeat;
+ background-size:500% 200%;
+ background-color:transparent;
+ image-rendering:auto;
+ transform:none!important;filter:none!important;
+ overflow:visible;
+}
+.cockpit .cockpit-figure{
+ aspect-ratio:1 / 1!important;
+ height:auto!important;
+}
+.cockpit .cockpit-figure>div{
+ display:flex!important;align-items:flex-end;justify-content:center;
+ border:0!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important;
+ width:100%;height:100%;overflow:visible!important;
+}
+.cockpit .pilot-art{
+ flex:0 0 auto;width:100%;height:100%;aspect-ratio:1;
+ background-color:transparent;
+ filter:drop-shadow(2px 3px 0 #152d4d)!important;
+}
+.cockpit .pilot-figures{z-index:5;pointer-events:none;}
+.cockpit .cockpit-deck{z-index:8;}
+/* Individual character selections show the same authored art as the cockpit. */
+.crew-panel .mini-portrait,
+.crew-panel .crew-card .portrait,
+.picker-grid .crew-card .portrait,
+.flight-crew-avatar{
+ position:relative;overflow:hidden;
+ border-radius:50%;background:#fff3d7;
+}
+.crew-panel .mini-portrait .pilot-art,
+.crew-panel .crew-card .portrait .pilot-art,
+.picker-grid .crew-card .portrait .pilot-art,
+.flight-crew-avatar .pilot-art{
+ width:100%;height:100%;aspect-ratio:1;transform:none!important;filter:none!important;
+}
+.crew-panel .mini-portrait{border:0;box-shadow:none}
+.crew-panel .mini-portrait .pilot-art{background-color:transparent}
+.flight-crew-avatar{background:#fff1cf}
+.flight-crew-avatar .pilot-art{background-color:transparent}
+@media(max-width:770px) and (orientation:portrait){
+ .cockpit .cockpit-figure{height:auto!important;aspect-ratio:1 / 1!important}
+ .cockpit .cockpit-figure>div{aspect-ratio:1 / 1}
+ .crew-panel .mini-portrait{border:0;border-radius:50%;overflow:hidden}
+ .crew-panel .mini-portrait .pilot-art{aspect-ratio:1}
+}
+@media(max-width:770px) and (orientation:portrait) and (max-height:700px){
+ .cockpit .cockpit-figure{height:auto!important}
+}
