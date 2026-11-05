@@ -57,7 +57,10 @@
           <div class="windscreen-badge" id="scenarioBadge" aria-hidden="true" hidden></div>
         </div>
         
-        <img class="comic-cockpit-frame" src="cockpit-frame.svg" alt="" aria-hidden="true" draggable="false">
+        <picture class="comic-frame-wrap" aria-hidden="true">
+          <source media="(max-width:770px) and (orientation:portrait)" srcset="cockpit-frame-tall.svg">
+          <img class="comic-cockpit-frame" src="cockpit-frame.svg" alt="" aria-hidden="true" draggable="false">
+        </picture>
         <div class="overhead"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <div class="cockpit-deck" role="group" aria-label="简化飞机状态栏">
           <div class="instrument-strip">
