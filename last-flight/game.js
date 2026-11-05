@@ -297,9 +297,17 @@ function renderStage(){
  btn.textContent=idle?"✈ 开始飞行":playing?"✈ 飞行进行中":"✈ 再次飞行";
 }
 
+const PILOT_SPRITES={
+ sully:[0,0],skiles:[1,0],haynes:[2,0],fitch:[3,0],shults:[4,0],
+ piche:[0,1],dejager:[1,1],atchison:[2,1],lubitz:[3,1],records:[4,1]
+};
 function avatar(p,large=false){
- // Shared vector character art; only presentation data changes here.
- return window.LastFlightArt.avatar(p,large);
+ // Ten original generated PNG portraits live in one lightweight GitHub asset.
+ // The CSS sprite selects a cell; no expression or face parts are synthesized.
+ const cell=PILOT_SPRITES[p.id]||[0,0];
+ return '<span class="pilot-art'+(large?' pilot-art--large':'')+
+  '" role="img" aria-label="'+escapeHtml(p.cn)+'的卡通人物立绘" '+
+  'style="background-position:'+cell[0]*25+'% '+cell[1]*100+'%"></span>';
 }
 function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function card(p,side){
