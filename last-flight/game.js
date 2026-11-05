@@ -298,62 +298,8 @@ function renderStage(){
 }
 
 function avatar(p,large=false){
- const s=p.skin,h=p.hair,e=p.eye;
- // Visual-only individual portrait parameters; not historical likeness claims.
- const individual={
-  sully:{face:39,chin:120,glasses:true,freckles:false,mustache:false},
-  skiles:{face:43,chin:127,glasses:false,freckles:true,mustache:false},
-  haynes:{face:45,chin:129,glasses:true,freckles:false,mustache:false},
-  fitch:{face:38,chin:118,glasses:false,freckles:false,mustache:true},
-  shults:{face:40,chin:125,glasses:false,freckles:true,mustache:false},
-  piche:{face:44,chin:128,glasses:false,freckles:false,mustache:true},
-  dejager:{face:41,chin:123,glasses:true,freckles:false,mustache:false},
-  atchison:{face:38,chin:124,glasses:false,freckles:false,mustache:false},
-  lubitz:{face:40,chin:121,glasses:false,freckles:false,mustache:false},
-  records:{face:45,chin:126,glasses:true,freckles:false,mustache:false}
- }[p.id]||{face:41,chin:125,glasses:false,freckles:false,mustache:false};
- const fLeft=76-individual.face,fRight=76+individual.face;
- const faceContour='M'+fLeft+' 75 Q'+fLeft+' 31 76 30 Q'+fRight+' 29 '+fRight+' 75 L'+(fRight-2)+' 99 Q'+(fRight-4)+' '+(individual.chin-5)+' 76 '+(individual.chin+4)+' Q'+(fLeft+4)+' '+(individual.chin-5)+' '+(fLeft+2)+' 99Z';
- const glasses=individual.glasses?'<path d="M44 79Q56 75 69 79L70 93Q59 100 47 92Z M84 79Q96 75 107 79L108 93Q97 100 85 92Z M70 82Q77 77 84 82" fill="#c8edfb33" stroke="#20344b" stroke-width="3.3" stroke-linejoin="round"/>':'';
- const freckles=individual.freckles?'<circle cx="46" cy="100" r="2" fill="#b27e71"/><circle cx="52" cy="103" r="1.6" fill="#b27e71"/><circle cx="102" cy="100" r="2" fill="#b27e71"/>':'';
- const facialHair=individual.mustache?'<path d="M64 106Q71 101 76 107Q84 101 91 106" stroke="'+h+'" stroke-width="3.6" stroke-linecap="round" fill="none"/>':'';
- const line="#142640",bg=p.unsafe?"#ef9c99":p.unknown?"#e0b881":"#77c4e8";
- const hairs=[
-  '<path d="M30 58Q28 19 73 19Q122 20 123 57L110 51Q87 35 69 42L38 61Z" fill="'+h+'"/>',
-  '<path d="M30 61Q29 26 67 22Q116 13 123 59L110 51L105 41Q91 40 79 43Q62 48 45 56L37 69Z" fill="'+h+'"/>',
-  '<path d="M29 63Q26 27 57 23Q80 11 111 28L123 47L112 57L102 43L80 47L63 41L44 58Z" fill="'+h+'"/>',
-  '<path d="M31 63Q28 32 56 25L77 22Q108 17 119 51L117 65Q102 49 93 47L70 52L48 48L36 68Z" fill="'+h+'"/>',
-  '<path d="M29 63Q25 22 66 20Q100 18 119 48L119 123L106 116L105 61Q85 45 67 51L42 60L41 126L28 121Z" fill="'+h+'"/>'
- ];
- // Long hair has a back layer behind the face; a short top fringe never covers the eyes.
- const hairBack=p.style===4?'<path d="M28 73Q22 25 62 18Q112 14 123 62L128 133Q121 144 109 134L107 78Q94 48 76 47Q55 48 43 76L43 131Q31 143 25 130Z" fill="'+h+'" stroke="'+line+'" stroke-width="3"/>':'';
- const hairFront=p.style===4?'<path d="M32 69Q37 30 65 30Q100 23 113 61L107 67Q91 47 76 50Q54 55 42 73Z" fill="'+h+'"/>':hairs[p.style];
- const eyebrow=p.unsafe?'<path d="M48 68L64 75M90 75L105 68" stroke="'+line+'" stroke-width="5" stroke-linecap="round"/>':
- '<path d="M47 70Q57 65 65 69M90 69Q101 65 108 70" stroke="'+line+'" stroke-width="4.5" stroke-linecap="round" fill="none"/>';
- const mouth=p.unsafe?'<path d="M62 116Q78 111 96 114" stroke="'+line+'" stroke-width="3.5" stroke-linecap="round" fill="none"/>':
- '<path d="M62 109Q78 126 98 109" stroke="'+line+'" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 164" preserveAspectRatio="xMidYMax meet" role="img" aria-label="原创美式二维卡通人物示意 '+escapeHtml(p.name)+'">'+
- (large?'':'<rect x="0" y="0" width="150" height="164" rx="10" fill="'+bg+'"/><path d="M0 125L44 91L150 32V164H0Z" fill="#ffffff42"/>')+
- '<circle cx="77" cy="65" r="63" fill="#fff8d3" stroke="'+line+'" stroke-width="3" opacity=".9"/>'+
- '<path d="M6 164Q7 121 43 118L107 118Q144 125 145 164Z" fill="#fcf6df" stroke="'+line+'" stroke-width="6" stroke-linejoin="round"/>'+
- '<path d="M26 157L39 117L59 117L62 164H20Z" fill="#254a73" stroke="'+line+'" stroke-width="4"/>'+
- '<path d="M127 157L114 117L94 117L91 164H132Z" fill="#254a73" stroke="'+line+'" stroke-width="4"/>'+
- '<path d="M57 106L57 121L76 135L94 121L93 106" fill="'+s+'" stroke="'+line+'" stroke-width="4" stroke-linejoin="round"/>'+
- '<path d="M70 131L82 131L87 164H64Z" fill="#ea665a" stroke="'+line+'" stroke-width="3"/>'+
- '<path d="M40 78Q27 69 29 84Q32 100 41 100M111 78Q128 68 125 85Q124 100 111 101" fill="'+s+'" stroke="'+line+'" stroke-width="4"/>'+
- hairBack+
- '<path d="'+faceContour+'" fill="'+s+'" stroke="'+line+'" stroke-width="5"/>'+
- hairFront+
- eyebrow+
- '<path d="M49 84Q58 79 67 85M86 85Q97 80 105 84" stroke="#fffdfa" stroke-width="12" stroke-linecap="round" fill="none"/>'+
- '<ellipse cx="58" cy="85" rx="5" ry="6" fill="'+e+'" stroke="'+line+'" stroke-width="1.2"/><circle cx="59" cy="83" r="1.6" fill="#fff"/><ellipse cx="97" cy="85" rx="5" ry="6" fill="'+e+'" stroke="'+line+'" stroke-width="1.2"/><circle cx="98" cy="83" r="1.6" fill="#fff"/>'+glasses+freckles+
- '<path d="M77 84L73 99L84 100" stroke="#8f685b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'+
- mouth+facialHair+
- '<path d="M19 135L46 126M105 126L132 135" stroke="#eabf52" stroke-width="8"/>'+
- '<path d="M22 135L44 128M107 128L129 135" stroke="'+line+'" stroke-width="2"/>'+
- '<path d="M14 150L40 147M110 147L137 150" stroke="#ffffff" stroke-width="2" opacity=".7"/>'+
- (large?'<path d="M0 164L13 123Q1 130 0 144Z" fill="#173451" stroke="'+line+'" stroke-width="4"/>':'')+
- '</svg>';
+ // Shared vector character art; only presentation data changes here.
+ return window.LastFlightArt.avatar(p,large);
 }
 function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function card(p,side){
