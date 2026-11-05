@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 260" preserveAspectRatio="none" aria-hidden="true">
+ <g stroke="#102942" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Exaggerated inked windshield pillars -->
+  <path d="M0 0H103L179 119L162 129L69 19H0Z" fill="#456f9d" stroke-width="8"/>
+  <path d="M700 0H599L521 119L540 129L634 19H700Z" fill="#456f9d" stroke-width="8"/>
+  <path d="M0 0H700V19Q350 39 0 19Z" fill="#223f71" stroke-width="8"/>
+  <path d="M40 23L119 105" fill="none" stroke="#799fc6" stroke-width="8"/>
+  <path d="M659 23L584 107" fill="none" stroke="#799fc6" stroke-width="8"/>
+  <!-- Flat cartoon roof console -->
+  <path d="M210 0H490L475 58Q350 74 225 58Z" fill="#243e66" stroke-width="8"/>
+  <path d="M231 7H470L461 48Q350 58 241 48Z" fill="#3c628f" stroke-width="4"/>
+  <g fill="#ffc94b" stroke-width="3">
+   <rect x="256" y="18" width="26" height="14" rx="4"/>
+   <rect x="292" y="18" width="26" height="14" rx="4"/>
+   <rect x="330" y="18" width="26" height="14" rx="4"/>
+   <rect x="368" y="18" width="26" height="14" rx="4"/>
+   <rect x="406" y="18" width="26" height="14" rx="4"/>
+  </g>
+  <path d="M269 45H430" stroke="#8eb9d8" stroke-width="4"/>
+  <!-- Side consoles and cockpit shelter -->
+  <path d="M0 170Q34 152 76 164L112 236L0 260Z" fill="#1b3558" stroke-width="8"/>
+  <path d="M700 170Q666 152 624 164L590 236L700 260Z" fill="#1b3558" stroke-width="8"/>
+  <path d="M0 193Q42 181 85 208" fill="none" stroke="#6489ae" stroke-width="7"/>
+  <path d="M700 193Q658 181 615 208" fill="none" stroke="#6489ae" stroke-width="7"/>
+  <!-- Central panel parapet; animated status chips sit on top separately -->
+  <path d="M193 210Q351 188 507 210L546 260H150Z" fill="#314e78" stroke-width="7"/>
+  <path d="M204 211Q351 191 497 211" fill="none" stroke="#7895b7" stroke-width="6"/>
+  <g fill="#ffc94b" stroke-width="3">
+   <rect x="220" y="221" width="17" height="12" rx="2"/>
+   <rect x="248" y="221" width="17" height="12" rx="2"/>
+   <rect x="436" y="221" width="17" height="12" rx="2"/>
+   <rect x="464" y="221" width="17" height="12" rx="2"/>
+  </g>
+ </g>
+</svg>
