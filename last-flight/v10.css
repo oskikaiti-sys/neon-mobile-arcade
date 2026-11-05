@@ -1,0 +1,274 @@
+/* LAST FLIGHT — graphic-novel cartoon visual system.
+   Flat fills, chunky ink outlines and character-centric cockpit.
+   Visual only: no changes to UI states, flight timings or simulator rules. */
+:root{
+ --comic-ink:#092344;
+ --comic-navy:#123b6b;
+ --comic-blue:#245992;
+ --comic-sky:#85d2fa;
+ --comic-cream:#fff0be;
+ --comic-paper:#fff8dd;
+ --comic-yellow:#ffd24a;
+ --comic-green:#38c85f;
+}
+body{background:#173b68;color:var(--comic-ink)}
+body:before{background:repeating-linear-gradient(150deg,#77bce818 0 17px,transparent 17px 42px)}
+.masthead{
+ background:#123660;border-bottom:4px solid #092440;
+ box-shadow:0 4px 0 #f8c852;
+}
+.masthead .brand strong{
+ font-weight:1000;color:#fff2ca;
+ text-shadow:2px 2px 0 #081c37;
+}
+.masthead .brand-icon{color:#ffd14a}
+.masthead .back,.masthead .header-btn{
+ background:#fff1c0;color:#102c4e;border:3px solid #091e39;
+ border-radius:11px;box-shadow:3px 3px 0 #081e3b;font-weight:1000;
+}
+.masthead .back{color:#122f58}
+.masthead .header-btn:active,.masthead .back:active{
+ box-shadow:0 0 0 transparent;transform:translate(2px,2px);
+}
+/* Rounded thick-line cards and game buttons, not glossy website controls. */
+.crew-panel{
+ background:#fff1c9;
+ border:4px solid #102d4f;border-radius:17px;
+ box-shadow:4px 5px 0 #0b2547;color:#193755;
+}
+.crew-panel .panel-head{
+ background:#1b4c85;border:3px solid #0e2b4b;
+ border-radius:11px;color:#fff4d6;box-shadow:0 3px 0 #0f2a4e;
+}
+.crew-panel .panel-head h2{color:#fff2c3;text-shadow:2px 2px 0 #072548}
+.crew-panel .panel-head h2 span{color:#f8d14e}
+.crew-panel .mobile-info{color:#ffefbd}
+.crew-panel .mobile-info::before{border-color:#fff1be}
+.crew-panel .mini-portrait{
+ background:#ffdf88;
+ border:3px solid #0f3459;
+ border-radius:50%;overflow:hidden;
+ box-shadow:inset 0 0 0 2px #fff2c0,2px 2px 0 #133251;
+}
+.crew-panel .mini-portrait svg{
+ width:100%;height:100%;display:block;
+ transform:scale(1.12) translateY(3%);filter:none;
+}
+.crew-panel .mini-copy strong{color:#11325b;font-weight:1000}
+.crew-panel .mini-copy small{color:#345579;font-weight:900}
+.crew-panel .crew-step{color:#112f54;font-weight:1000}
+.crew-panel .crew-step::before{
+ background:#ffdc77;border:3px solid #102c4c;border-radius:11px;
+ box-shadow:2px 3px 0 #143c66;
+}
+.crew-panel .crew-card-row .crew-card{
+ background:#fff8df;border:3px solid #102b4d;
+ border-radius:12px;box-shadow:2px 3px 0 #729cbb;
+}
+.crew-panel .crew-card.selected{background:#ffe393;box-shadow:2px 3px 0 #e0a755}
+.crew-card .portrait,.picker-grid .crew-card .portrait{
+ border:2px solid #112e52;border-radius:50%;
+ background:#ffdf87;overflow:hidden;
+}
+.crew-card .portrait svg{display:block;width:100%;height:100%;transform:scale(1.12) translateY(3%)}
+/* The actual cockpit portraits are half-body drawings, NOT framed avatar circles. */
+.cockpit{
+ isolation:isolate;background:#75caf6;
+ border:5px solid #0b274b;border-radius:17px;
+ box-shadow:4px 5px 0 #153758,inset 0 0 0 3px #e5f4ff;
+}
+.cockpit .glass{
+ inset:0 0 16% 0;clip-path:none;
+ background:#8dd3fc;
+}
+.cockpit .sky{
+ background:#8cd2fa;transition:background .35s ease;
+}
+.cockpit .sky.storm{background:#788faa}
+.cockpit .sky.danger{background:#c998a2}
+.cockpit .sun{
+ background:#ffec83;border:3px solid #1d4a6f;
+ box-shadow:none;width:46px;height:46px;
+}
+.cockpit .cloud{
+ background:#f7fcff;box-shadow:27px -12px 0 #f7fcff,61px 2px 0 -6px #f7fcff;
+}
+.cockpit .window-line,.cockpit .overhead{display:none!important}
+.comic-cockpit-frame{
+ position:absolute;inset:0;width:100%;height:100%;z-index:3;
+ display:block;object-fit:fill;pointer-events:none;
+}
+.cockpit .pilot-figures{
+ position:absolute;z-index:5;inset:0 10px;overflow:hidden;
+ pointer-events:none;
+}
+.cockpit .cockpit-figure{
+ position:absolute;z-index:5;display:block;
+ width:clamp(122px,26vw,198px);
+ height:clamp(150px,30vw,230px);
+ min-width:0;min-height:0;max-width:none;max-height:none;
+ bottom:-15px;aspect-ratio:auto;overflow:visible;
+}
+.cockpit .cockpit-figure.left{left:-4px}
+.cockpit .cockpit-figure.right{right:-4px}
+.cockpit .cockpit-figure>div{
+ position:relative;display:block;
+ width:100%;height:100%;max-width:none;max-height:none;
+ aspect-ratio:auto!important;min-height:0;
+ border:0!important;border-radius:0!important;
+ box-shadow:none!important;background:transparent!important;
+ overflow:visible!important;
+}
+.cockpit .cockpit-figure svg{
+ display:block;width:100%;height:100%;aspect-ratio:auto;
+ max-width:none;max-height:none;
+ object-fit:contain;object-position:50% 100%;
+ transform:none!important;filter:drop-shadow(3px 2px 0 #132e50);
+ overflow:visible;
+}
+.cockpit .seat-name{display:none!important}
+.cockpit .film-grain{display:none!important}
+.cockpit .cockpit-deck{
+ z-index:7;
+ height:22%;padding:2px 12% 5px;
+ background:#1a355b;
+ border-top:6px solid #0b2747;
+ box-shadow:0 -5px 0 #698cb4,inset 0 4px 0 #385a83;
+}
+.cockpit .instrument-strip{
+ width:min(100%,490px);gap:clamp(4px,1vw,14px);
+ align-items:center;position:relative;z-index:8;
+}
+.cockpit .instrument-chip{
+ background:#0b263f;color:#f6e59b;
+ border:3px solid #0a2139;border-radius:8px;
+ box-shadow:2px 2px 0 #52749a;
+ min-height:0;height:78%;
+}
+.cockpit .instrument-chip strong{color:#ffdf65}
+.cockpit .instrument-chip span{color:#a7eeea}
+.cockpit .instrument-chip.engines strong span{color:#57e69b}
+.cockpit .instrument-chip.engines strong .failure{color:#ff7370}
+.cockpit .flight-no,.cockpit .phase{
+ background:#ffedb9;color:#143658;
+ border:3px solid #102f50;border-radius:10px;
+ box-shadow:2px 2px 0 #133553;text-shadow:none;
+ font-weight:1000;
+}
+.cockpit .warning{
+ background:#f25d65;border:4px solid #12314d;
+ color:#fff3cb;box-shadow:3px 4px 0 #123553;
+}
+/* The crew briefing reads like comic-book mission notes. */
+.story-stage .story-bubble{
+ background:#fff1c3;border:3px solid #102e52;
+ border-radius:14px;box-shadow:3px 3px 0 #102e52;
+}
+.story-stage .story-speaker{
+ color:#1c5f9e;font-weight:1000;
+}
+.story-stage .story-line{color:#13365c;font-weight:900}
+.story-stage .crew-dossier{
+ background:#fff0c6;border:3px solid #102d4b;border-radius:14px;
+ box-shadow:3px 4px 0 #14365c;
+}
+.crew-dossier .dossier-person{
+ background:#fff9e6;border:3px solid #25517b;border-radius:10px;
+}
+.crew-dossier .dossier-title-row h2{color:#153d6d}
+.crew-dossier .pairing-pill{
+ background:#9cddab;border:3px solid #1a6c48;
+ color:#175737;box-shadow:1px 2px 0 #1b513e;
+}
+.crew-dossier .pairing-pill.cross-era{
+ background:#c9e9ff;border-color:#225b8b;color:#215786;
+}
+.dashboard{
+ background:#fff0c0!important;
+ border:4px solid #0b294d;
+ box-shadow:0 -4px 12px #071c3630;
+}
+.dashboard .start-btn,.modal-actions .start-btn{
+ background:#35c85e!important;
+ color:#082f22!important;
+ border:4px solid #12334a!important;
+ border-radius:17px!important;
+ box-shadow:0 5px 0 #14633c,0 8px 0 #0b294c!important;
+ font-weight:1000;text-shadow:1px 1px 0 #ffffff70;
+}
+.dashboard .start-btn:hover,.modal-actions .start-btn:hover{background:#58da75!important}
+.dashboard .start-btn:active,.modal-actions .start-btn:active{
+ transform:translateY(4px)!important;
+ box-shadow:0 1px 0 #14633c!important;
+}
+.flight-decisions,.inline-result-card{
+ background:#fff1c8;color:#102f4c;
+ border:3px solid #113352;box-shadow:3px 4px 0 #163f65;
+}
+.flight-decisions .decision-option{
+ background:#fff9df;border:3px solid #112c4f;
+ color:#173654;border-radius:12px;box-shadow:0 4px 0 #18395c;
+}
+.flight-decisions .decision-option:hover:not(:disabled){background:#ffe59b}
+.flight-crew-avatar{
+ background:#ffdf89;border:3px solid #163c67;
+ box-shadow:1px 2px 0 #102d4b;
+}
+.flight-crew-avatar svg{transform:scale(1.12) translateY(2%)}
+.pilot-popover{background:#fff1c9;border:3px solid #133755}
+.modal{background:#fff2ce;border:4px solid #112e4b;box-shadow:5px 6px 0 #102946}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #f8d449;outline-offset:3px}
+@media(max-width:770px) and (orientation:portrait){
+ .masthead .brand strong{font-weight:1000}
+ .masthead .back,.masthead .header-btn{
+  min-height:44px;min-width:44px;border-width:2px;
+  border-radius:9px;box-shadow:2px 2px 0 #061e3d;
+ }
+ .cockpit{border-width:4px;border-radius:12px}
+ .cockpit .pilot-figures{inset:0 8px;z-index:5}
+ .cockpit .cockpit-figure{
+  width:clamp(118px,36vw,157px);
+  height:clamp(118px,36vw,157px);
+  bottom:-12px;min-height:0;max-height:none;max-width:none;
+ }
+ .cockpit .cockpit-figure.left{left:-4px}
+ .cockpit .cockpit-figure.right{right:-4px}
+ .cockpit .cockpit-figure>div{width:100%;height:100%;border:0;border-radius:0;background:transparent}
+ .cockpit .cockpit-figure svg{width:100%;height:100%;transform:none!important;filter:drop-shadow(2px 2px 0 #132e52)}
+ .cockpit .cockpit-deck{height:20%;padding:1px 9% 3px;border-top-width:5px}
+ .cockpit .instrument-chip{border-width:2px;border-radius:5px;box-shadow:1px 1px 0 #658eb3;padding:1px 3px}
+ .cockpit .sun{width:35px;height:35px;top:17%;left:70%}
+ .cockpit .scene-topline{top:2px;left:5px;right:5px}
+ .cockpit .flight-no,.cockpit .phase{font-size:11px;line-height:1.1;padding:3px 6px;border-width:2px}
+ .crew-panel{border-width:3px;border-radius:13px;box-shadow:2px 3px 0 #113453}
+ .crew-panel .panel-head{background:#1b4c84;border-width:2px;box-shadow:none}
+ .crew-panel .mini-portrait{background:#ffe093;box-shadow:1px 1px 0 #123a5b}
+ .crew-panel .mini-portrait svg{transform:scale(1.12) translateY(2%)}
+ .dashboard{border-width:3px;border-radius:13px 13px 0 0}
+ .dashboard .start-btn{border-width:3px!important;box-shadow:0 4px 0 #14633c!important}
+ .story-stage .crew-dossier{border-width:3px;box-shadow:2px 2px 0 #14365c}
+ .crew-dossier .dossier-person{border-width:2px}
+}
+@media(max-width:770px) and (orientation:portrait) and (max-height:700px){
+ .cockpit .cockpit-figure{width:120px;height:120px;bottom:-10px}
+ .cockpit .cockpit-deck{height:23%}
+ .cockpit .flight-no,.cockpit .phase{font-size:10px;padding:2px 5px}
+}
+@media(max-width:770px) and (orientation:portrait){
+ /* Compressed story cockpit: preserve the crew's heads while keeping instruments legible. */
+ .is-flying .cockpit .cockpit-figure{
+  width:clamp(94px,27vw,116px);height:clamp(94px,27vw,116px);bottom:-10px;
+ }
+ .is-flying .cockpit .cockpit-deck{z-index:7}
+}
+@media(max-width:770px) and (orientation:portrait) and (max-height:700px){
+ .is-flying .cockpit .cockpit-figure{width:94px;height:94px;bottom:-10px}
+}
+@media(orientation:landscape) and (max-width:1100px){
+ .cockpit .cockpit-figure{width:clamp(110px,22vw,154px);height:clamp(110px,22vw,154px);bottom:-13px}
+ .cockpit .cockpit-figure>div{border:0;border-radius:0;background:transparent}
+ .cockpit .cockpit-deck{z-index:7}
+}
+@media(prefers-reduced-motion:reduce){
+ .dashboard .start-btn,.modal-actions .start-btn{transition:none}
+}
