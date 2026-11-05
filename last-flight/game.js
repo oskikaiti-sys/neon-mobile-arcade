@@ -306,7 +306,7 @@ function avatar(p,large=false){
  // The CSS sprite selects a cell; no expression or face parts are synthesized.
  const cell=PILOT_SPRITES[p.id]||[0,0];
  return '<span class="pilot-art'+(large?' pilot-art--large':'')+
-  '" role="img" aria-label="'+escapeHtml(p.cn)+'的卡通人物立绘" '+
+  '" role="img" aria-label="'+escapeHtml(p.cn)+'的插画人物形象" '+
   'style="background-position:'+cell[0]*25+'% '+cell[1]*100+'%"></span>';
 }
 function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
