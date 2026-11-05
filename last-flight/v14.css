@@ -111,3 +111,24 @@
     bottom:clamp(10px,2vw,32px);
   }
 }
+
+/* Keep the frame art in one stacking layer. A <picture> source swaps in a
+   purpose-drawn vertical windshield without stretching the landscape SVG. */
+.cockpit .comic-frame-wrap{
+ position:absolute;
+ inset:0;
+ display:block;
+ z-index:3;
+ overflow:hidden;
+ pointer-events:none;
+}
+.cockpit .comic-frame-wrap .comic-cockpit-frame{
+ display:block;
+ position:absolute;
+ inset:0;
+ z-index:auto;
+ width:100%;
+ height:100%;
+ object-fit:fill;
+ pointer-events:none;
+}
