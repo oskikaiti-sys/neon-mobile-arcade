@@ -1,0 +1,113 @@
+/* LAST FLIGHT v14 — rebalance idle and ending screens around the cockpit.
+ * Phase-specific layout only. The playing/decision grid remains unchanged.
+ * More space is moved from the empty narrative row into the windshield;
+ * portrait sprites become full-bust illustrations instead of cropped heads.
+ */
+@media (max-width:770px) and (orientation:portrait){
+  /* Reserve a practical reading region, then give remaining height to the scene.
+     430x932: ~355px idle / ~365px ended for cockpit, ~228px for prose.
+     Shorter screens scroll inside the middle region, never behind the crew bar. */
+  body:not(.is-flying):not(.has-result) .play-layout{
+    grid-template-rows:clamp(190px,calc(100dvh - 535px),355px) minmax(0,1fr) 192px;
+    gap:8px;
+    padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  }
+  body.has-result:not(.is-flying) .play-layout{
+    grid-template-rows:clamp(200px,calc(100dvh - 510px),365px) minmax(0,1fr) 178px;
+    gap:8px;
+    padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  }
+  body:not(.is-flying) .story-stage{
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    justify-content:flex-start;
+    gap:7px;
+    scroll-padding-bottom:10px;
+  }
+  body.has-result:not(.is-flying) .story-stage .story-bubble,
+  body.has-result:not(.is-flying) .story-stage .inline-result-card,
+  body:not(.is-flying):not(.has-result) .story-stage .story-bubble,
+  body:not(.is-flying):not(.has-result) .story-stage .crew-dossier{
+    flex:0 0 auto;
+  }
+  /* Taller view with a thinner fixed-height dashboard reveals upper torso.
+     Previously the 20%-height dashboard grew with the viewport and buried
+     the pilots' shoulders. */
+  body:not(.is-flying) .cockpit .cockpit-deck{
+    height:clamp(46px,6dvh,54px);
+    min-height:46px;
+    padding:1px 8% 3px;
+    border-top-width:2px;
+  }
+  body:not(.is-flying) .cockpit .instrument-strip{
+    height:100%;
+    align-items:center;
+  }
+  body:not(.is-flying) .cockpit .instrument-chip{
+    height:80%;
+    min-height:31px;
+  }
+  body:not(.is-flying) .cockpit .pilot-figures{
+    inset:0 16px;
+    overflow:hidden;
+  }
+  body:not(.is-flying) .cockpit .cockpit-figure{
+    width:clamp(148px,43vw,195px);
+    height:auto!important;
+    aspect-ratio:1/1!important;
+    bottom:clamp(18px,3.7dvh,34px);
+    max-width:none;
+    max-height:none;
+  }
+  body:not(.is-flying) .cockpit .cockpit-figure.left{left:7px}
+  body:not(.is-flying) .cockpit .cockpit-figure.right{right:7px}
+  body:not(.is-flying) .cockpit .cockpit-figure>div,
+  body:not(.is-flying) .cockpit .pilot-art{
+    width:100%;
+    height:100%;
+    aspect-ratio:1/1;
+  }
+  /* Existing SVG/PDF-style scene elements remain behind the sprites.
+     Keep the small status labels clear of both pilots. */
+  body:not(.is-flying) .cockpit .scene-topline{
+    top:6px;
+    left:7px;
+    right:7px;
+  }
+}
+@media (max-width:770px) and (orientation:portrait) and (max-height:700px){
+  body:not(.is-flying):not(.has-result) .play-layout{
+    grid-template-rows:188px minmax(0,1fr) 177px;
+    gap:6px;
+    padding-bottom:calc(80px + env(safe-area-inset-bottom));
+  }
+  body.has-result:not(.is-flying) .play-layout{
+    grid-template-rows:198px minmax(0,1fr) 178px;
+    gap:6px;
+    padding-bottom:calc(80px + env(safe-area-inset-bottom));
+  }
+  body:not(.is-flying) .cockpit .cockpit-figure{
+    width:clamp(137px,39vw,154px);
+    bottom:16px;
+  }
+  body:not(.is-flying) .cockpit .cockpit-deck{
+    height:46px;
+    min-height:46px;
+  }
+}
+/* Larger viewports: a full-bust portrait also benefits from a lower console.
+   Keep the desktop multi-column layout and gameplay unchanged. */
+@media (min-width:771px){
+  body:not(.is-flying) .cockpit .cockpit-deck{
+    height:clamp(56px,8%,78px);
+  }
+  body:not(.is-flying) .cockpit .cockpit-figure{
+    width:clamp(150px,24vw,215px);
+    height:auto!important;
+    aspect-ratio:1/1!important;
+    bottom:clamp(10px,2vw,32px);
+  }
+}
